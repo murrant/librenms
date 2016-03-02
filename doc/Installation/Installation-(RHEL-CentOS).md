@@ -284,7 +284,10 @@ First, create and chown the `rrd` directory and create the `logs` directory
     semanage fcontext -a -t httpd_sys_rw_content_t '/opt/librenms/logs(/.*)?'
     restorecon -RFvv /opt/librenms/logs/
 ```
-
+Set selinux to allow httpd to send e-mail for alerts
+```bash
+    setsebool -P httpd_can_sendmail=1
+```    
 Start the web-server:
 
 **CentOS 6**
