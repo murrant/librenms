@@ -2,7 +2,7 @@
 /**
  * powerdns-recursor.php
  *
- * -Description-
+ * Graphs for PowerDNS Recursor
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
  * @copyright  2016 Tony Murray
  * @author     Tony Murray <murraytony@gmail.com>
  */
+
+global $config;
 
 $graphs = array(
     'powerdns-recursor_answers' => 'Answers',
