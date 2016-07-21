@@ -39,9 +39,9 @@ if ($agent_data['app'][$name]) {
     $data = file_get_contents('http://' . $device['hostname'] . ':8082/servers/localhost/statistics', false, $context);
 }
 
-$stats = json_decode($data);
+if (!empty($data)) {
+    d_echo($data);
 
-if (!empty($stats)) {
     $rrd_keys = array(
         'all-outqueries' => 'COUNTER',
         'answers-slow' => 'COUNTER',
@@ -103,15 +103,25 @@ if (!empty($stats)) {
         'user-msec' => 'COUNTER',
     );
 
-    // only the stats we store in rrd
-    $fields = array_intersect_key($stats, $rrd_keys);
-
-    $rrd_name = array('app', 'powerdns', 'recursor', $app_id);
-    $rrd_def = array();
-    foreach ($rrd_keys as $statname => $type) {
-        $rrd_def[] = 'DS:' . substr($statname, 0, 19) . ':' . $type . ":600:0:U ";
+    //decode and flatten the data
+    $stats = array();
+    foreach(json_decode($data, true) as $stat) {
+        $stats[$stat['name']] = $stat['value'];
     }
 
+    // only the stats we store in rrd
+    $fields = array();
+    $rrd_def = array();
+    foreach($rrd_keys as $key => $value) {
+        if(isset($stats[$key])) {
+            $fields[$key] = $stats[$key];
+        } else {
+            $fields[$key] = 'U';
+        }
+        $rrd_def[] = 'DS:' . substr($key, 0, 19) . ':' . $value . ":600:0:U ";
+    }
+
+    $rrd_name = array('app', 'powerdns', 'recursor', $app_id);
     $tags = compact('name', 'app_id', 'rrd_name', 'rrd_def');
     data_update($device, 'app', $tags, $fields);
 }

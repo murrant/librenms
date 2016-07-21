@@ -33,6 +33,10 @@ $graphs['nginx']     = array(
     'req',
 );
 
+$graphs['powerdns-recursor']     = array(
+    'answers',
+);
+
 $graphs['rrdcached'] = array(
     'queue_length',
     'events',
