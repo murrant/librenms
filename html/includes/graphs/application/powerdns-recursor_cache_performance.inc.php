@@ -25,43 +25,39 @@
 include 'powerdns-recursor.inc.php';
 require 'includes/graphs/common.inc.php';
 
-$scale_min    = 0;
-$colours      = 'mixed';
-$nototal      = 0;
-$unit_text    = 'Packets/sec';
-
-$array        = array(
-    'cache-hits' => array(
-        'descr'  => 'Query Cache Hits',
-        'colour' => '297159',
-    ),
-    'cache-misses'  => array(
-        'descr'  => 'Query Cache Misses',
-        'colour' => '73AC61',
-    ),
-    'packetcache-hits' => array(
-        'descr'  => 'Packet Query Cache Hits',
-        'colour' => 'BC7049',
-    ),
-    'packetcache-misses'  => array(
-        'descr'  => 'Packet Query Cache Misses',
-        'colour' => 'C98F45',
-    ),
-);
-
-$i = 0;
+$scale_min = 0;
+$colours = 'mixed';
+$nototal = 0;
+$unit_text = 'Packets/sec';
 
 if (is_file($rrd_filename)) {
-    foreach ($array as $ds => $vars) {
-        $rrd_list[$i]['filename'] = $rrd_filename;
-        $rrd_list[$i]['descr']    = $vars['descr'];
-        $rrd_list[$i]['ds']       = $ds;
-        $rrd_list[$i]['colour']   = $vars['colour'];
-        $i++;
-    }
+    $rrd_list = array(
+        array(
+            'filename' => $rrd_filename,
+            'ds' => 'cache-hits',
+            'descr' => 'Query Cache Hits',
+            'colour' => '297159',
+        ),
+        array(
+            'filename' => $rrd_filename,
+            'ds' => 'cache-misses',
+            'descr' => 'Query Cache Misses',
+            'colour' => '73AC61',
+            'invert' => true,
+        ),
+        array(
+            'filename' => $rrd_filename,
+            'ds' => 'packetcache-hits',
+            'descr' => 'Packet Query Cache Hits',
+            'colour' => 'BC7049',
+        ),
+        array(
+            'filename' => $rrd_filename,
+            'ds' => 'packetcache-misses',
+            'descr' => 'Packet Query Cache Misses',
+            'colour' => 'C98F45',
+            'invert' => true,
+        )
+    );
 }
-else {
-    echo "file missing: $file";
-}
-
-require 'includes/graphs/generic_multi_simplex_seperated.inc.php';
+require 'includes/graphs/generic_multi_line.inc.php';
