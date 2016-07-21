@@ -33,19 +33,19 @@ $unit_text    = 'Packets/sec';
 $array        = array(
     'cache-hits' => array(
         'descr'  => 'Query Cache Hits',
-        'colour' => '750F7DFF',
+        'colour' => '297159',
     ),
     'cache-misses'  => array(
         'descr'  => 'Query Cache Misses',
-        'colour' => '00FF00FF',
+        'colour' => '73AC61',
     ),
     'packetcache-hits' => array(
         'descr'  => 'Packet Query Cache Hits',
-        'colour' => '15DF7DFF',
+        'colour' => 'BC7049',
     ),
     'packetcache-misses'  => array(
         'descr'  => 'Packet Query Cache Misses',
-        'colour' => '040FF0FF',
+        'colour' => 'C98F45',
     ),
 );
 
@@ -64,4 +64,4 @@ else {
     echo "file missing: $file";
 }
 
-require 'includes/graphs/generic_multi_line.inc.php';
+require 'includes/graphs/generic_multi_simplex_seperated.inc.php';
