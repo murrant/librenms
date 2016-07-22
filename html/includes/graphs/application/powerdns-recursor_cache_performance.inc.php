@@ -43,7 +43,6 @@ if (is_file($rrd_filename)) {
             'ds' => 'cache-misses',
             'descr' => 'Query Cache Misses',
             'colour' => '73AC61',
-            'invert' => true,
         ),
         array(
             'filename' => $rrd_filename,
@@ -56,7 +55,6 @@ if (is_file($rrd_filename)) {
             'ds' => 'packetcache-misses',
             'descr' => 'Packet Query Cache Misses',
             'colour' => 'C98F45',
-            'invert' => true,
         )
     );
 }
