@@ -26,9 +26,11 @@
 global $config;
 
 $graphs = array(
-    'powerdns-recursor_answers' => 'Answer Performance',
+    'powerdns-recursor_questions' => 'Questions',
+    'powerdns-recursor_answers' => 'Answers',
     'powerdns-recursor_cache_performance' => 'Cache Performance',
     'powerdns-recursor_cache_size' => 'Cache Size',
+    'powerdns-recursor_outqueries' => 'Outbound Queries',
 );
 
 foreach ($graphs as $key => $text) {

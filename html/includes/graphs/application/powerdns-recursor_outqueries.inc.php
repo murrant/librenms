@@ -1,6 +1,6 @@
 <?php
 /**
- * powerdns-recursor_cache_performance.inc.php
+ * powerdns-recursor_outqueries.inc.php
  *
  * -Description-
  *
@@ -22,39 +22,42 @@
  * @copyright  2016 Tony Murray
  * @author     Tony Murray <murraytony@gmail.com>
  */
+
 include 'powerdns-recursor.inc.php';
 
 $colours = 'mixed';
-$unit_text = 'Packets/sec';
+$unit_text = 'Queries/sec';
 
 if (is_file($rrd_filename)) {
     $rrd_list = array(
         array(
             'filename' => $rrd_filename,
-            'ds' => 'cache-hits',
-            'descr' => 'Query Cache Hits',
-            'colour' => '297159',
+            'ds' => 'all-outqueries',
+            'descr' => 'Total',
             'area' => true,
         ),
         array(
             'filename' => $rrd_filename,
-            'ds' => 'cache-misses',
-            'descr' => 'Query Cache Misses',
-            'colour' => '73AC61',
+            'ds' => 'ipv6-outqueries',
+            'descr' => 'IPv6',
             'area' => true,
         ),
         array(
             'filename' => $rrd_filename,
-            'ds' => 'packetcache-hits',
-            'descr' => 'Packet Cache Hits',
-            'colour' => 'BC7049',
+            'ds' => 'tcp-outqueries',
+            'descr' => 'TCP',
             'area' => true,
         ),
         array(
             'filename' => $rrd_filename,
-            'ds' => 'packetcache-misses',
-            'descr' => 'Packet Cache Misses',
-            'colour' => 'C98F45',
+            'ds' => 'throttled-out',
+            'descr' => 'Throttled',
+            'area' => true,
+        ),
+        array(
+            'filename' => $rrd_filename,
+            'ds' => 'outgoing-timeouts',
+            'descr' => 'Timeouts',
             'area' => true,
         )
     );
