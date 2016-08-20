@@ -24,8 +24,11 @@
  * @package LibreNMS
  * @subpackage Cache
  */
+namespace LibreNMS;
 
-class ObjCache implements ArrayAccess {
+use ArrayAccess;
+
+class ObjectCache implements ArrayAccess {
 
     private $data = array();
 
@@ -33,9 +36,8 @@ class ObjCache implements ArrayAccess {
 
 
     /**
-     * Initialize ObjCache
+     * Initialize ObjectCache
      * @param string $obj Name of Object
-     * @return void
      */
     public function __construct($obj) {
         global $config;
