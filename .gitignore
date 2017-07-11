@@ -12,6 +12,7 @@
 
 # Others #
 ##########
+*.pyc
 *.swp
 Thumbs.db
 config.php
