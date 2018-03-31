@@ -107,9 +107,9 @@ class Lock:
         :param expiration: int in seconds
         """
         if (
-            (name not in self._locks)                                              # lock doesn't exist
-            or (allow_owner_relock and self._locks.get(name, [None])[0] == owner)  # owner has permission
-            or time() > self._locks[name][1]                                       # lock has expired
+            (name not in self._locks) or                                          # lock doesn't exist
+            (allow_owner_relock and self._locks.get(name, [None])[0] == owner) or  # owner has permission
+            time() > self._locks[name][1]                                          # lock has expired
         ):
             self._locks[name] = (owner, expiration + time())
             return self._locks[name][0] == owner

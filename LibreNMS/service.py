@@ -176,8 +176,8 @@ class Service:
 
         info("LibreNMS Service: {} started!".format(self.config.unique_name))
         info("Poller group {}. Using Python {} and {} locks and queues"
-              .format('0 (default)' if self.config.group == 0 else self.config.group, python_version(),
-                      'redis' if isinstance(self._lm, LibreNMS.RedisLock) else 'internal'))
+             .format('0 (default)' if self.config.group == 0 else self.config.group, python_version(),
+                     'redis' if isinstance(self._lm, LibreNMS.RedisLock) else 'internal'))
         info("Maintenance tasks will be run every {}".format(timedelta(seconds=self.config.update_frequency)))
 
         # Main dispatcher loop
@@ -437,7 +437,7 @@ class Service:
         Stop then recreate this entire process by re-calling the original script.
         Has the effect of reloading the python files from disk.
         """
-        if sys.version_info < (3,4,0):
+        if sys.version_info < (3, 4, 0):
             warning("Skipping restart as running under an incompatible interpreter")
             warning("Please restart manually")
             return
