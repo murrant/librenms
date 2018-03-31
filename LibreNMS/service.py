@@ -119,6 +119,14 @@ class ServiceConfig:
         # set convenient debug variable
         self.debug = logging.getLogger().isEnabledFor(logging.DEBUG)
 
+        if not self.debug and self.log_level:
+            try:
+                logging.getLogger().setLevel(self.log_level)
+            except ValueError:
+                error("Unknown log level {}, must be one of 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'".format(self.log_level))
+                logging.getLogger().setLevel(logging.INFO)
+
+
     def _get_config_data(self):
         config_cmd = ['/usr/bin/env', 'php', '{}/config_to_json.php'.format(self.BASE_DIR), '2>&1']
         try:
