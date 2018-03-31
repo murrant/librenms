@@ -174,8 +174,8 @@ class Service:
 
         self.daily_timer.start()
 
-        print("LibreNMS Service: {} started!".format(self.config.unique_name))
-        print("Poller group {}. Using Python {} and {} locks and queues"
+        info("LibreNMS Service: {} started!".format(self.config.unique_name))
+        info("Poller group {}. Using Python {} and {} locks and queues"
               .format('0 (default)' if self.config.group == 0 else self.config.group, python_version(),
                       'redis' if isinstance(self._lm, LibreNMS.RedisLock) else 'internal'))
         info("Maintenance tasks will be run every {}".format(timedelta(seconds=self.config.update_frequency)))
@@ -422,8 +422,7 @@ class Service:
         except ImportError:
             if self.config.distributed:
                 critical("ERROR: Redis connection required for distributed polling")
-                print("Please install redis-py")
-                print("Either through your os software repository or 'pip install redis'")
+                critical("Please install redis-py, either through your os software repository or from PyPI")
                 exit(2)
         except Exception as e:
             if self.config.distributed:
@@ -443,7 +442,7 @@ class Service:
             warning("Please restart manually")
             return
 
-        print('Restarting service... ')
+        info('Restarting service... ')
         self._stop_managers_and_wait()
         self._lm.unlock('dispatch.master', self.config.unique_name)
 
@@ -456,7 +455,7 @@ class Service:
         :param _unused:
         :param _:
         """
-        print('Shutting down, waiting for running jobs to complete...')
+        info('Shutting down, waiting for running jobs to complete...')
 
         self.stop_dispatch_timers()
         self._lm.unlock('dispatch.master', self.config.unique_name)
@@ -466,7 +465,7 @@ class Service:
         self._stop_managers_and_wait()
 
         # try to release master lock
-        print('Shutdown complete')
+        info('Shutdown complete')
         sys.exit(0)
 
     def start_dispatch_timers(self):

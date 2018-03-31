@@ -1,5 +1,5 @@
 import threading
-from logging import critical, info
+from logging import critical, info, debug
 from time import time
 
 from .service import Service, ServiceConfig
@@ -33,8 +33,8 @@ class DB:
         try:
             import MySQLdb
         except ImportError:
-            print("ERROR: missing a mysql python module")
-            print("Install either 'PyMySQL' or 'mysqlclient' from your OS software repository or from PyPI")
+            critical("ERROR: missing a mysql python module")
+            critical("Install either 'PyMySQL' or 'mysqlclient' from your OS software repository or from PyPI")
             raise
 
         try:
@@ -134,7 +134,7 @@ class Lock:
         return False
 
     def print_locks(self):
-        print(self._locks)
+        debug(self._locks)
 
 
 class ThreadingLock(Lock):
