@@ -438,6 +438,11 @@ class Service:
         Stop then recreate this entire process by re-calling the original script.
         Has the effect of reloading the python files from disk.
         """
+        if sys.version_info < (3,4,0):
+            warning("Skipping restart as running under an incompatible interpreter")
+            warning("Please restart manually")
+            return
+
         print('Restarting service... ')
         self._stop_managers_and_wait()
         self._lm.unlock('dispatch.master', self.config.unique_name)
