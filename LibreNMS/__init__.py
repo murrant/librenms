@@ -1,5 +1,5 @@
 import threading
-from logging import critical
+from logging import critical, info
 from time import time
 
 from .service import Service, ServiceConfig
@@ -24,10 +24,17 @@ class DB:
 
     def connect(self):
         try:
+            import pymysql
+            pymysql.install_as_MySQLdb()
+            info("Using pure python SQL client")
+        except ImportError:
+            info("Using other SQL client")
+
+        try:
             import MySQLdb
-        except:
-            print("ERROR: missing the mysql python module:")
-            print("Either through your os software repository or 'pip install mysqlclient'")
+        except ImportError:
+            print("ERROR: missing a mysql python module")
+            print("Install either 'PyMySQL' or 'mysqlclient' from your OS software repository or from PyPI")
             raise
 
         try:
