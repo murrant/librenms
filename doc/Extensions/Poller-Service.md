@@ -86,3 +86,36 @@ A systemd unit file is provided - the sysv and upstart init scripts could also b
 
 ### systemd
 A systemd unit file can be found in `misc/librenms.service`. To install run `cp /opt/librenms/misc/librenms.service /etc/systemd/system/librenms.service && systemctl enable --now librenms.service`
+
+## OS-Specific Instructions
+
+### RHEL/CentOS
+To get the poller service running under python3.4+ on RHEL-derivatives with minimal fuss, you can use the software collections build:
+
+First, enable SCL's on your system:
+
+#### CentOS 7
+```
+# yum install centos-release-scl
+```
+
+#### RHEL 7
+```
+# subscription-manager repos --enable rhel-server-rhscl-7-rpms
+```
+
+Then install and configure the runtime and service:
+
+```
+# yum install rh-python36 epel-release
+# yum install redis
+# vi /opt/librenms/config.php
+# vi /etc/redis.conf
+# systemctl enable --now redis.service
+# scl enable rh-python36 bash
+# pip install pymysql redis
+# cp /opt/librenms/misc/librenms.service.scl /etc/systemd/system/librenms.service
+# systemctl enable --now librenms.service
+```
+
+If you want to use another version of python 3, change `rh-python36` in the unit file and the commands above to match the name of the replacement scl.
