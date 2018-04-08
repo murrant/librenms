@@ -12,6 +12,7 @@
 
 # Others #
 ##########
+__pycache__
 *.pyc
 *.swp
 Thumbs.db
