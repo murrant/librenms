@@ -1,3 +1,4 @@
+import random
 import threading
 import traceback
 from logging import debug, info, error, critical
@@ -48,10 +49,13 @@ class QueueManager:
     def _service_worker(self, work_func, queue_id):
         while not self._stop_event.is_set():
             try:
-                # cannot break blocking request with redis-py, so timeout :(
-                device_id = self.get_queue(queue_id).get(True, 3)
-                if device_id:  # None returned by redis after timeout when empty
-                    work_func(device_id)
+                for queue in random.sample(queue_id, len(queue_id)):
+                    # cannot break blocking request with redis-py, so timeout :(
+                    device_id = self.get_queue(queue).get(True, 3)
+
+                    if device_id:  # None returned by redis after timeout when empty
+                        info("Worker attached to queues: {} removed job from queue {}".format(queue_id, queue))
+                        work_func(device_id, queue)
             except Empty:
                 pass  # ignore empty queue exception from subprocess.Queue
             except CalledProcessError as e:
@@ -115,24 +119,25 @@ class QueueManager:
         return getattr(self.config, self.type)
 
     def get_queue(self, group=0):
-        try:
-            return self._queues[group]
-        except KeyError:
-            with self._queue_create_lock:
-                if group not in self._queues:
-                    self._queues[group] = self._create_queue(self.type, group)
-                return self._queues[group]
+        name = self.queue_name(self.type, group)
 
-    def _create_queue(self, name, group=0):
+        if name not in self._queues.keys():
+            with self._queue_create_lock:
+                if name not in self._queues.keys():
+                    self._queues[name] = self._create_queue(self.type, group)
+
+        return self._queues[name]
+
+    def _create_queue(self, type, group=0):
         """
         Create a queue (not thread safe)
         :param name:
         :param group:
         :return:
         """
-        debug("Creating queue {}:{}".format(name, group))
+        debug("Creating queue {}".format(self.queue_name(type, group)))
         try:
-            return LibreNMS.RedisQueue(name,
+            return LibreNMS.RedisQueue(self.queue_name(type, group),
                                        namespace='librenms.queue',
                                        host=self.config.redis_host,
                                        port=self.config.redis_port,
@@ -152,6 +157,10 @@ class QueueManager:
                 exit(2)
 
         return Queue()
+
+    @staticmethod
+    def queue_name(type, group):
+        return "{}:{}".format(type, group)
 
 
 class TimedQueueManager(QueueManager):
