@@ -274,8 +274,28 @@ if ($device['adsl_count'] > '0') {
 }//end if
 
 if ($config['enable_ports_poe']) {
-    $port_stats = snmpwalk_cache_oid($device, 'pethPsePortEntry', $port_stats, 'POWER-ETHERNET-MIB');
-    $port_stats = snmpwalk_cache_oid($device, 'cpeExtPsePortEntry', $port_stats, 'CISCO-POWER-ETHERNET-EXT-MIB');
+    // Code by OS device
+
+    if ($device['os'] == 'ios') {
+        echo 'cpeExtPsePortEntry';
+        $port_stats_poe = snmpwalk_cache_oid($device, 'cpeExtPsePortEntry', array(), 'CISCO-POWER-ETHERNET-EXT-MIB');
+        $port_ent_to_if = snmpwalk_cache_oid($device, 'portIfIndex', array(), 'CISCO-STACK-MIB');
+
+        foreach ($port_stats_poe as $p_index => $p_stats) {
+            //We replace the ENTITY EntIndex by the IfIndex using the portIfIndex table (stored in $port_ent_to_if).
+            //Result is merged into $port_stats
+            if ($port_ent_to_if[$p_index] && $port_ent_to_if[$p_index]['portIfIndex'] && $port_stats[$port_ent_to_if[$p_index]['portIfIndex']]) {
+                $port_stats[$port_ent_to_if[$p_index]['portIfIndex']]=$port_stats[$port_ent_to_if[$p_index]['portIfIndex']]+$p_stats;
+            }
+        }
+    } elseif ($device['os'] == 'vrp') {
+        echo 'HwPoePortEntry' ;
+        $port_stats = snmpwalk_cache_oid($device, 'HwPoePortEntry', $port_stats, 'HUAWEI-POE-MIB');
+    } else {
+        //Any other device, generic polling
+        $port_stats = snmpwalk_cache_oid($device, 'pethPsePortEntry', $port_stats, 'POWER-ETHERNET-MIB');
+        $port_stats = snmpwalk_cache_oid($device, 'cpeExtPsePortEntry', $port_stats, 'CISCO-POWER-ETHERNET-EXT-MIB');
+    }
 }
 
 if ($device['os_group'] == 'cisco' && $device['os'] != 'asa') {
@@ -760,7 +780,8 @@ foreach ($ports as $port) {
 
         $port_descr_type = $port['port_descr_type'];
         $ifName = $port['ifName'];
-        $tags = compact('ifName', 'port_descr_type', 'rrd_name', 'rrd_def');
+        $ifAlias = $port['ifAlias'];
+        $tags = compact('ifName', 'ifAlias', 'port_descr_type', 'rrd_name', 'rrd_def');
         rrdtool_data_update($device, 'ports', $tags, $fields);
 
         $fields['ifInUcastPkts_rate'] = $port['ifInUcastPkts_rate'];
@@ -770,6 +791,7 @@ foreach ($ports as $port) {
         $fields['ifInOctets_rate'] = $port['ifInOctets_rate'];
         $fields['ifOutOctets_rate'] = $port['ifOutOctets_rate'];
 
+        prometheus_push($device, 'ports', rrd_array_filter($tags), $fields);
         influx_update($device, 'ports', rrd_array_filter($tags), $fields);
         graphite_update($device, 'ports|' . $ifName, $tags, $fields);
         opentsdb_update($device, 'port', array('ifName' => $this_port['ifName'], 'ifIndex' => getPortRrdName($port_id)), $fields);
