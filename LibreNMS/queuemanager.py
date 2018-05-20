@@ -131,16 +131,16 @@ class QueueManager:
 
         return self._queues[name]
 
-    def _create_queue(self, type, group=0):
+    def _create_queue(self, queue_type, group=0):
         """
         Create a queue (not thread safe)
         :param name:
         :param group:
         :return:
         """
-        debug("Creating queue {}".format(self.queue_name(type, group)))
+        debug("Creating queue {}".format(self.queue_name(queue_type, group)))
         try:
-            return LibreNMS.RedisQueue(self.queue_name(type, group),
+            return LibreNMS.RedisQueue(self.queue_name(queue_type, group),
                                        namespace='librenms.queue',
                                        host=self.config.redis_host,
                                        port=self.config.redis_port,
@@ -162,8 +162,8 @@ class QueueManager:
         return Queue()
 
     @staticmethod
-    def queue_name(type, group):
-        if type and group:
+    def queue_name(queue_type, group):
+        if queue_type and type(group) == int:
             return "{}:{}".format(type, group)
         else:
             raise ValueError("Refusing to create improperly scoped queue - parameters were invalid or not set")
