@@ -55,7 +55,7 @@ class QueueManager:
 
                     if device_id:  # None returned by redis after timeout when empty
                         info("Worker attached to queues: {} removed job from queue {}".format(queue_id, queue))
-                        work_func(device_id, queue)
+                        work_func(device_id)
             except Empty:
                 pass  # ignore empty queue exception from subprocess.Queue
             except CalledProcessError as e:
