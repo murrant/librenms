@@ -182,13 +182,13 @@ class ServiceConfig:
         self.redis_host = config.get('redis_host', ServiceConfig.redis_host)
         self.redis_db = config.get('redis_db', ServiceConfig.redis_db)
         self.redis_pass = config.get('redis_pass', ServiceConfig.redis_pass)
-        self.redis_port = config.get('redis_port', ServiceConfig.redis_port)
+        self.redis_port = int(config.get('redis_port', ServiceConfig.redis_port))
         self.redis_socket = config.get('redis_socket', ServiceConfig.redis_socket)
 
         self.db_host = config.get('db_host', ServiceConfig.db_host)
         self.db_name = config.get('db_name', ServiceConfig.db_name)
         self.db_pass = config.get('db_pass', ServiceConfig.db_pass)
-        self.db_port = config.get('db_port', ServiceConfig.db_port)
+        self.db_port = int(config.get('db_port', ServiceConfig.db_port))
         self.db_socket = config.get('db_socket', ServiceConfig.db_socket)
         self.db_user = config.get('db_user', ServiceConfig.db_user)
 
@@ -342,7 +342,7 @@ class Service:
                 self.unlock_discovery(device_id)
 
     # ------------ Alerting ------------
-    def poll_alerting(self, _=None, group=None):
+    def poll_alerting(self, _=None):
         try:
             info("Checking alerts")
             self.call_script('alerts.php')
@@ -371,7 +371,7 @@ class Service:
     def dispatch_poll_billing(self):
         self.billing_manager.post_work('poll')
 
-    def poll_billing(self, run_type, group=None):
+    def poll_billing(self, run_type):
         if run_type == 'poll':
             info("Polling billing")
             self.call_script('poll-billing.php')
@@ -394,6 +394,8 @@ class Service:
                           .format(device_id, elapsed))
 
     def poll_device(self, device_id):
+        debug("Connections: {}".format(len(self._db._db)))
+
         if self.lock_polling(device_id):
             info('Polling device {}'.format(device_id))
 
