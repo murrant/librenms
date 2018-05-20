@@ -160,7 +160,10 @@ class QueueManager:
 
     @staticmethod
     def queue_name(type, group):
-        return "{}:{}".format(type, group)
+        if type and group:
+            return "{}:{}".format(type, group)
+        else:
+            raise ValueError("Refusing to create improperly scoped queue - parameters were invalid or not set")
 
 
 class TimedQueueManager(QueueManager):
