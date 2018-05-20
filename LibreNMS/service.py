@@ -253,7 +253,7 @@ class Service:
         self.stats_timer = LibreNMS.RecurringTimer(self.config.poller.frequency, self.log_performance_stats)
         self.is_master = False
 
-        self.performance_stats = {'poll': PerformanceCounter(), 'discover': PerformanceCounter(), 'service': PerformanceCounter()}
+        self.performance_stats = {'poller': PerformanceCounter(), 'discovery': PerformanceCounter(), 'services': PerformanceCounter()}
 
     def start(self):
         if self.config.single_instance:
@@ -330,7 +330,7 @@ class Service:
                     info("Discovering device {}".format(device_id))
                     self.call_script('discovery.php', ('-h', device_id))
                     info('Discovery complete {}'.format(device_id))
-                    self.report_execution_time(t.delta(), 'discover')
+                    self.report_execution_time(t.delta(), 'discovery')
             except subprocess.CalledProcessError as e:
                 if e.returncode == 5:
                     info("Device {} is down, cannot discover, waiting {}s for retry"
@@ -362,7 +362,7 @@ class Service:
         with TimeitContext.start() as t:
             info("Checking services on device {}".format(device_id))
             self.call_script('check-services.php', ('-h', device_id))
-            self.report_execution_time(t.delta(), 'service')
+            self.report_execution_time(t.delta(), 'services')
 
     # ------------ Billing ------------
     def dispatch_calculate_billing(self):
@@ -402,7 +402,7 @@ class Service:
             try:
                 with TimeitContext.start() as t:
                     self.call_script('poller.php', ('-h', device_id))
-                    self.report_execution_time(t.delta(), 'poll')
+                    self.report_execution_time(t.delta(), 'poller')
             except subprocess.CalledProcessError as e:
                 if e.returncode == 6:
                     warning('Polling device {} unreachable, waiting {}s for retry'.format(device_id, self.config.down_retry))
@@ -634,10 +634,29 @@ class Service:
 
     def log_performance_stats(self):
         info("Counting up time spent polling")
-        time, jobs = self.performance_stats['poll'].reset()
 
-        self._db.fetch('INSERT INTO pollers(poller_name, last_polled, devices, time_taken) '
-                       'values("{0}", NOW(), "{1}", "{2}") '
-                       'ON DUPLICATE KEY UPDATE '
-                       'last_polled=values(last_polled), devices=values(devices), time_taken=values(time_taken);'
-                       .format(self.config.name, jobs, time))
+        # Report on the poller instance as a whole
+        self._db.fetch('INSERT INTO poller_cluster(poller_name, poller_version, poller_groups, last_report, master) '
+                       'values("{0}", "{1}", "{2}", NOW(), {3}) '
+                       'ON DUPLICATE KEY UPDATE poller_version="{1}", poller_groups="{2}", last_report=NOW(), master={3}; '
+                       .format(self.config.name, "librenms-service", ','.join(str(g) for g in self.config.group), 1 if self.is_master else 0))
+
+        # Find our ID
+        self._db.fetch('SELECT id INTO @parent_poller_id FROM poller_cluster WHERE poller_name="{0}"; '.format(self.config.name))
+
+        for worker_type, counter in self.performance_stats.items():
+            worker_seconds, devices = counter.reset()
+
+            # Record the queue state
+            for group in self.config.group:
+                self._db.fetch('INSERT INTO poller_cluster_stats(parent_poller, poller_type, poller_group, depth, devices, worker_seconds, workers, frequency) '
+                               'values(@parent_poller_id, "{0}", {1}, {2}, {3}, {4}) '
+                               'ON DUPLICATE KEY UPDATE devices={1}, worker_seconds={2}, workers={3}, interval={4}; '
+                               .format(worker_type,
+                                       group,
+                                       getattr(self, ''.join([worker_type, '_manager'])).get_queue(group).qsize(),
+                                       devices,
+                                       worker_seconds,
+                                       getattr(self.config, worker_type).workers,
+                                       getattr(self.config, worker_type).frequency)
+                               )
