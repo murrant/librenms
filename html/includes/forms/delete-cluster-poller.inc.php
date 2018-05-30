@@ -33,7 +33,7 @@ if (!Auth::user()->hasGlobalAdmin()) {
         $status = array('status' =>1, 'message' => 'No poller has been selected');
     } else {
         $poller_name = dbFetchCell('SELECT `poller_name` FROM `pollers` WHERE `id`=?', array($id));
-        if (dbDelete('poller_cluster', 'id=?', array($id)) && dbDelete('poller_cluster_stats', 'parent_id=?', array($id))) {
+        if (dbDelete('poller_cluster', 'id=?', array($id)) && dbDelete('poller_cluster_stats', 'parent_poller=?', array($id))) {
             $status = array('status' => 0, 'message' => "Poller: <i>$poller_name ($id), has been deleted.</i>");
         } else {
             $status = array('status' => 1, 'message' => "Poller: <i>$poller_name ($id), has NOT been deleted.</i>");

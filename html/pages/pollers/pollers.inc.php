@@ -50,7 +50,7 @@ foreach (dbFetchRows($query) as $poller) {
     $actions = "";
     if (Auth::user()->hasGlobalAdmin() && $old > ($step * 2)) {
         // missed 2 polls show delete button
-        $actions .= "<button type='button' class='btn btn-danger btn-sm' aria-label='Delete' data-toggle='modal' data-target='#confirm-delete' data-id='{$poller['id']}' name='delete-cluster-poller'><i class='fa fa-trash' aria-hidden='true'></i></button>";
+        $actions .= "<button type='button' class='btn btn-danger btn-sm' aria-label='Delete' data-toggle='modal' data-target='#confirm-delete' data-id='{$poller['id']}' data-pollertype='delete-poller' name='delete-poller'><i class='fa fa-trash' aria-hidden='true'></i></button>";
     }
 
     echo '
@@ -105,7 +105,7 @@ foreach (dbFetchRows($query) as $poller) {
     $actions = "";
     if (Auth::user()->hasGlobalAdmin() && $old > ($step * 2)) {
         // missed 2 polls show delete button
-        $actions .= "<button type='button' class='btn btn-danger btn-sm' aria-label='Delete' data-toggle='modal' data-target='#confirm-delete' data-id='{$poller['id']}' name='delete-poller'><i class='fa fa-trash' aria-hidden='true'></i></button>";
+        $actions .= "<button type='button' class='btn btn-danger btn-sm' aria-label='Delete' data-toggle='modal' data-target='#confirm-delete' data-id='{$poller['id']}' data-pollertype='delete-cluster-poller' name='delete-cluster-poller'><i class='fa fa-trash' aria-hidden='true'></i></button>";
     }
 
     $stat_query = 'SELECT * FROM `poller_cluster_stats` WHERE `parent_poller`=' . $poller['id'] . ';';
