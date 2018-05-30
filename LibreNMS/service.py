@@ -364,6 +364,7 @@ class Service:
                 with TimeitContext.start() as t:
                     info("Checking services on device {}".format(device_id))
                     self.call_script('check-services.php', ('-h', device_id))
+                    info('Services complete {}'.format(device_id))
                     self.report_execution_time(t.delta(), 'services')
             except subprocess.CalledProcessError as e:
                 if e.returncode == 5:

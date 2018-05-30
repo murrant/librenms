@@ -81,7 +81,7 @@ class QueueManager:
         """
         workers = self.get_poller_config().workers
         groups = self.config.group if hasattr(self.config.group, "__iter__") else [self.config.group]
-        if self.type == "discovery" or self.type == "poller" or self.type == "services":
+        if self.type == "discovery" or self.type == "poller":
             for group in groups:
                 group_workers = max(int(workers / len(groups)), 1)
                 for i in range(group_workers):
