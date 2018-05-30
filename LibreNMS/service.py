@@ -671,15 +671,13 @@ class Service:
             worker_seconds, devices = counter.reset()
 
             # Record the queue state
-            for group in self.config.group:
-                self._db.fetch('INSERT INTO poller_cluster_stats(parent_poller, poller_type, poller_group, depth, devices, worker_seconds, workers, frequency) '
-                               'values(@parent_poller_id, "{0}", {1}, {2}, {3}, {4}, {5}, {6}) '
-                               'ON DUPLICATE KEY UPDATE depth={2}, devices={3}, worker_seconds={4}, workers={5}, frequency={6}; '
-                               .format(worker_type,
-                                       group,
-                                       getattr(self, ''.join([worker_type, '_manager'])).get_queue(group).qsize(),
-                                       devices,
-                                       worker_seconds,
-                                       getattr(self.config, worker_type).workers,
-                                       getattr(self.config, worker_type).frequency)
-                               )
+            self._db.fetch('INSERT INTO poller_cluster_stats(parent_poller, poller_type, depth, devices, worker_seconds, workers, frequency) '
+                           'values(@parent_poller_id, "{0}", {1}, {2}, {3}, {4}, {5}) '
+                           'ON DUPLICATE KEY UPDATE depth={1}, devices={2}, worker_seconds={3}, workers={4}, frequency={5}; '
+                           .format(worker_type,
+                                   sum([getattr(self, ''.join([worker_type, '_manager'])).get_queue(group).qsize() for group in self.config.group]),
+                                   devices,
+                                   worker_seconds,
+                                   getattr(self.config, worker_type).workers,
+                                   getattr(self.config, worker_type).frequency)
+                           )
