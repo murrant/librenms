@@ -359,10 +359,21 @@ class Service:
             self.services_manager.post_work(device[0], device[1])
 
     def poll_services(self, device_id):
-        with TimeitContext.start() as t:
-            info("Checking services on device {}".format(device_id))
-            self.call_script('check-services.php', ('-h', device_id))
-            self.report_execution_time(t.delta(), 'services')
+        if self.lock_services(device_id):
+            try:
+                with TimeitContext.start() as t:
+                    info("Checking services on device {}".format(device_id))
+                    self.call_script('check-services.php', ('-h', device_id))
+                    self.report_execution_time(t.delta(), 'services')
+            except subprocess.CalledProcessError as e:
+                if e.returncode == 5:
+                    info("Device {} is down, cannot poll service, waiting {}s for retry"
+                         .format(device_id, self.config.down_retry))
+                    self.lock_discovery(device_id, True)
+                else:
+                    self.unlock_services(device_id)
+            else:
+                self.unlock_services(device_id)
 
     # ------------ Billing ------------
     def dispatch_calculate_billing(self):
@@ -394,8 +405,6 @@ class Service:
                           .format(device_id, elapsed))
 
     def poll_device(self, device_id):
-        debug("Connections: {}".format(len(self._db._db)))
-
         if self.lock_polling(device_id):
             info('Polling device {}'.format(device_id))
 
@@ -488,6 +497,19 @@ class Service:
 
     def polling_is_locked(self, device_id):
         lock_name = self.gen_lock_name('polling', device_id)
+        return self._lm.check_lock(lock_name)
+
+    def lock_services(self, device_id, retry=False):
+        lock_name = self.gen_lock_name('services', device_id)
+        timeout = self.config.down_retry if retry else self.config.services.frequency
+        return self._lm.lock(lock_name, self.gen_lock_owner(), timeout, retry)
+
+    def unlock_services(self, device_id):
+        lock_name = self.gen_lock_name('services', device_id)
+        return self._lm.unlock(lock_name, self.gen_lock_owner())
+
+    def services_is_locked(self, device_id):
+        lock_name = self.gen_lock_name('services', device_id)
         return self._lm.check_lock(lock_name)
 
     @staticmethod
@@ -650,8 +672,8 @@ class Service:
             # Record the queue state
             for group in self.config.group:
                 self._db.fetch('INSERT INTO poller_cluster_stats(parent_poller, poller_type, poller_group, depth, devices, worker_seconds, workers, frequency) '
-                               'values(@parent_poller_id, "{0}", {1}, {2}, {3}, {4}) '
-                               'ON DUPLICATE KEY UPDATE devices={1}, worker_seconds={2}, workers={3}, interval={4}; '
+                               'values(@parent_poller_id, "{0}", {1}, {2}, {3}, {4}, {5}, {6}) '
+                               'ON DUPLICATE KEY UPDATE depth={2}, devices={3}, worker_seconds={4}, workers={5}, frequency={6}; '
                                .format(worker_type,
                                        group,
                                        getattr(self, ''.join([worker_type, '_manager'])).get_queue(group).qsize(),

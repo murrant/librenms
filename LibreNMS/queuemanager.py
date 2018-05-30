@@ -81,16 +81,23 @@ class QueueManager:
         """
         workers = self.get_poller_config().workers
         groups = self.config.group if hasattr(self.config.group, "__iter__") else [self.config.group]
-        for group in groups:
-            group_workers = max(int(workers / len(groups)), 1)
-            for i in range(group_workers):
-                thread_name = "{}_{}-{}".format(self.type.title(), group, i + 1)
-                pt = threading.Thread(target=self._service_worker, name=thread_name,
-                                      args=(self._work_function, group))
-                pt.daemon = True
-                self._threads.append(pt)
-                pt.start()
-            debug("Started {} {} threads for group {}".format(group_workers, self.type, group))
+        if self.type == "discovery" or self.type == "poller" or self.type == "services":
+            for group in groups:
+                group_workers = max(int(workers / len(groups)), 1)
+                for i in range(group_workers):
+                    thread_name = "{}_{}-{}".format(self.type.title(), group, i + 1)
+                    self.spawn_worker(thread_name, group)
+
+                debug("Started {} {} threads for group {}".format(group_workers, self.type, group))
+        else:
+            self.spawn_worker(self.type.title(), 0)
+
+    def spawn_worker(self, thread_name, group):
+        pt = threading.Thread(target=self._service_worker, name=thread_name,
+                              args=(self._work_function, group))
+        pt.daemon = True
+        self._threads.append(pt)
+        pt.start()
 
     def restart(self):
         """
@@ -138,7 +145,7 @@ class QueueManager:
         :param group:
         :return:
         """
-        debug("Creating queue {}".format(self.queue_name(queue_type, group)))
+        info("Creating queue {}".format(self.queue_name(queue_type, group)))
         try:
             return LibreNMS.RedisQueue(self.queue_name(queue_type, group),
                                        namespace='librenms.queue',
@@ -165,6 +172,8 @@ class QueueManager:
     def queue_name(queue_type, group):
         if queue_type and type(group) == int:
             return "{}:{}".format(type, group)
+        if queue_type and (type(group) == int or group == "all"):
+            return "{}:{}".format(queue_type, group)
         else:
             raise ValueError("Refusing to create improperly scoped queue - parameters were invalid or not set")
 
