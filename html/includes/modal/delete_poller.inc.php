@@ -58,7 +58,7 @@ if (Auth::user()->hasGlobalAdmin()) {
             id = $(e.relatedTarget).data('id');
             pollertype = $(e.relatedTarget).data('pollertype');
             $("#id").val(id);
-            $("#pollertype").val(poller_type);
+            $("#pollertype").val(pollertype);
         });
 
         $('#poller-removal').click('', function (e) {
