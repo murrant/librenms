@@ -190,6 +190,11 @@ class Device extends BaseModel
         return $this->hasMany('App\Models\Package', 'device_id', 'device_id');
     }
 
+    public function perf()
+    {
+        return $this->hasMany('App\Models\DevicePerf', 'device_id');
+    }
+
     public function ports()
     {
         return $this->hasMany('App\Models\Port', 'device_id', 'device_id');

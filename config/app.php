@@ -182,6 +182,7 @@ return [
          * Vendor Service Providers...
          */
         Kamaln7\Toastr\ToastrServiceProvider::class,
+        ConsoleTVs\Charts\ChartsServiceProvider::class,
 
     ],
 

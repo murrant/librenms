@@ -43,7 +43,8 @@
         "symfony/css-selector": "3.*",
         "doctrine/instantiator": "1.0.*",
         "phpdocumentor/reflection-docblock": "3.*",
-        "phpunit/php-token-stream": "1.*"
+        "phpunit/php-token-stream": "1.*",
+        "consoletvs/charts": "6.*"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^2.9.1",

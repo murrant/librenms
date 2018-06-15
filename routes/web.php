@@ -32,6 +32,11 @@ Route::get('/laravel', function () {
 
 Route::post('/ajax/set_resolution', 'AjaxController@setResolution');
 
+Route::get('device/device={device}/tab=performance/', function (\App\Models\Device $device) {
+    $chart = new \App\Charts\Performance($device);
+    return view('charts.performance', ['chart' => $chart]);
+});
+
 
 // Debugbar routes need to be here because of catch-all
 if (config('app.env') !== 'production' && config('app.debug')) {
