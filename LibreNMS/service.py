@@ -212,7 +212,7 @@ class ServiceConfig:
             dotenv.load_dotenv(dotenv_path=env_path, verbose=True)
 
             if not os.getenv('NODE_ID'):
-                raise ImportError(".env with NODE_ID was not imported")
+                raise ImportError(".env does not contain a valid NODE_ID setting.")
 
         except ImportError as e:
             exception("Could not import .env - check that the poller user can read the file, and that composer install has been run recently")
