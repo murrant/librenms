@@ -74,11 +74,12 @@ class Template
      */
     public function bladeBody($data)
     {
-        $alert['alert'] = new AlertData($data['alert']);
+        $alert = new AlertData($data['alert']);
+
         try {
-            return view(['template' => $data['template']->template], $alert)->__toString();
+            return (string) view(['template' => $data['template']->template])->with('alert', $alert);
         } catch (\Exception $e) {
-            return view(['template' => $this->getDefaultTemplate($data)], $alert)->__toString();
+            return (string) view(['template' => $this->getDefaultTemplate()])->with('alert', $alert);
         }
     }
 
@@ -91,11 +92,12 @@ class Template
      */
     public function bladeTitle($data)
     {
-        $alert['alert'] = new AlertData($data['alert']);
+        $alert = new AlertData($data['alert']);
+        dd($alert->toArray());
         try {
-            return view(['template' => $data['title']], $alert)->__toString();
+            return (string) view(['template' => $alert->title])->with('alert', $alert);
         } catch (\Exception $e) {
-            return $data['title'] ?: view(['template' => "Template " . $data['name']], $alert)->__toString();
+            return $alert->has('title') ? $alert->title : $alert->name;
         }
     }
 
@@ -198,16 +200,16 @@ class Template
      */
     public function getDefaultTemplate()
     {
-        return '{{ $title }}' . PHP_EOL .
-            'Severity: {{ $severity }}' . PHP_EOL .
-            '@if ($state == 0)Time elapsed: {{ $elapsed }} @endif ' . PHP_EOL .
-            'Timestamp: {{ $timestamp }}' . PHP_EOL .
-            'Unique-ID: {{ $uid }}' . PHP_EOL .
-            'Rule: @if ($name) {{ $name }} @else {{ $rule }} @endif ' . PHP_EOL .
-            '@if ($faults)Faults:' . PHP_EOL .
-            '@foreach ($faults as $key => $value)' . PHP_EOL .
+        return '{{ $alert->title }}' . PHP_EOL .
+            'Severity: {{ $alert->severity }}' . PHP_EOL .
+            '@if ($alert->state == 0)Time elapsed: {{ $alert->elapsed }} @endif ' . PHP_EOL .
+            'Timestamp: {{ $alert->timestamp }}' . PHP_EOL .
+            'Unique-ID: {{ $alert->uid }}' . PHP_EOL .
+            'Rule: @if ($alert->name) {{ $alert->name }} @else {{ $alert->rule }} @endif ' . PHP_EOL .
+            '@if ($alert->faults)Faults:' . PHP_EOL .
+            '@foreach ($alert->faults as $key => $value)' . PHP_EOL .
             '  #{{ $key }}: {{ $value[\'string\'] }} @endforeach' . PHP_EOL .
             '@endif' . PHP_EOL .
-            'Alert sent to: @foreach ($contacts as $key => $value) {{ $value }} <{{ $key }}> @endforeach';
+            'Alert sent to: @foreach ($alert->contacts as $key => $value) {{ $value }} <{{ $key }}> @endforeach';
     }
 }

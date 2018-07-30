@@ -27,11 +27,26 @@ namespace LibreNMS\Alert;
 
 class AlertData extends \Illuminate\Support\Collection
 {
+    public function __construct($items = [])
+    {
+        parent::__construct($items);
+
+        // recursively create AlertData collections
+//        $this->map(function ($value) {
+//            if (is_array($value)) {
+//                return new static($value);
+//            }
+//            var_dump($value);
+//
+//            return $value;
+//        });
+    }
+
     public function __get($name)
     {
         if ($this->has($name)) {
             return $this->get($name);
         }
-        return "$name is not a valid \$alert data name";
+        return "$name is not a valid alert data name";
     }
 }
