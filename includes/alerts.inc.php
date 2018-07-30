@@ -808,7 +808,7 @@ function ExtTransports($obj)
     global $config;
     $tmp = false;
     $type  = new Template;
-    
+
     // If alert transport mapping exists, override the default transports
     $transport_maps = AlertUtil::getAlertTransports($obj['alert_id']);
 
@@ -847,7 +847,7 @@ function ExtTransports($obj)
             $obj['msg']       = $type->getBody($obj);
             echo "$transport_title => ";
             $instance = new $class($item['transport_id']);
-            $tmp = $instance->deliverAlert($obj, $item['opts']);
+            $tmp = $instance->deliverAlert($obj);
             AlertLog($tmp, $obj, $obj['transport']);
             unset($instance);
             echo '; ';

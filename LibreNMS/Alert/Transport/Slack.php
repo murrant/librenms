@@ -27,22 +27,22 @@ use LibreNMS\Alert\Transport;
 
 class Slack extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
         if (empty($this->config)) {
-            return $this->deliverAlertOld($obj, $opts);
+            return $this->deliverAlertOld($alert_data);
         }
         $slack_opts['url'] = $this->config['slack-url'];
         foreach (explode(PHP_EOL, $this->config['options']) as $option) {
             list($k,$v) = explode('=', $option);
             $slack_opts[$k] = $v;
         }
-        return $this->contactSlack($obj, $slack_opts);
+        return $this->contactSlack($alert_data, $slack_opts);
     }
 
-    public function deliverAlertOld($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        foreach ($opts as $tmp_api) {
+        foreach ($this->getLegacyConfig() as $tmp_api) {
             $this->contactSlack($obj, $tmp_api);
         }
         return true;
@@ -66,6 +66,9 @@ class Slack extends Transport
                 ],
             ],
             'channel' => $api['channel'],
+            'username' => $api['username'],
+            'icon_url' => $api['icon_url'],
+            'icon_emoji' => $api['icon_emoji'],
         ];
         $alert_message = json_encode($data);
         curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
@@ -94,7 +97,7 @@ class Slack extends Transport
                     'title' => 'Webhook URL',
                     'name' => 'slack-url',
                     'descr' => 'Slack Webhook URL',
-                    'type' => 'text',
+                    'type' => 'url',
                 ],
                 [
                     'title' => 'Slack Options',

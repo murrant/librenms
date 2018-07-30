@@ -28,12 +28,12 @@ use LibreNMS\Config;
 
 class Mail extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        return $this->contactMail($obj, $opts);
+        return $this->contactMail($alert_data);
     }
 
-    public function contactMail($obj, $opts)
+    public function contactMail($obj)
     {
         if (empty($this->config['email'])) {
             $email = $obj['contacts'];
@@ -51,7 +51,7 @@ class Mail extends Transport
                     'title' => 'Email',
                     'name' => 'email',
                     'descr' => 'Email address of contact',
-                    'type'  => 'text',
+                    'type'  => 'email',
                 ]
             ],
             'validation' => [

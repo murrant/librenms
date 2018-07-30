@@ -32,22 +32,22 @@ use LibreNMS\Alert\Transport;
 
 class Discord extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (empty($this->config)) {
-            return $this->deliverAlertOld($obj, $opts);
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
         $discord_opts['url'] = $this->config['url'];
         foreach (explode(PHP_EOL, $this->config['options']) as $option) {
             list($k,$v) = explode('=', $option);
             $discord_opts['options'][$k] = $v;
         }
-        return $this->contactDiscord($obj, $discord_opts);
+        return $this->contactDiscord($alert_data, $discord_opts);
     }
 
-    public function deliverAlertOld($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        foreach ($opts as $discord_opts) {
+        foreach ($this->getLegacyConfig() as $discord_opts) {
             $this->contactDiscord($obj, $discord_opts);
         }
         return true;
@@ -92,7 +92,7 @@ class Discord extends Transport
                     'title' => 'Discord URL',
                     'name' => 'url',
                     'descr' => 'Discord URL',
-                    'type' => 'text',
+                    'type' => 'url',
                 ],
                 [
                     'title' => 'Options',

@@ -28,24 +28,22 @@ use LibreNMS\Config;
 
 class Irc extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        return $this->contactIrc($obj, $opts);
+        return $this->contactIrc($alert_data);
     }
 
-    public function contactIrc($obj, $opts)
+    public function contactIrc($obj)
     {
-        $f = Config::get('install_dir') . "/.ircbot.alert";
-        if (file_exists($f) && filetype($f) == "fifo") {
-            $f = fopen($f, "w+");
-            $r = fwrite($f, json_encode($obj) . "\n");
-            $f = fclose($f);
-            if ($r === false) {
-                return false;
-            } else {
-                return true;
-            }
+        $filename = Config::get('install_dir') . "/.ircbot.alert";
+        if (file_exists($filename) && filetype($filename) == "fifo") {
+            $handle = fopen($filename, "w+");
+            $r = fwrite($handle, json_encode($obj) . "\n");
+            fclose($handle);
+            return $r !== false;
         }
+
+        return false;
     }
 
     public static function configTemplate()

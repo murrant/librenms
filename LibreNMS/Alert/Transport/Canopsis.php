@@ -5,26 +5,38 @@ use LibreNMS\Alert\Transport;
 
 class Canopsis extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (!empty($this->config)) {
-            $opts['host'] = $this->config['canopsis-host'];
-            $opts['port'] = $this->config['canopsis-port'];
-            $opts['user'] = $this->config['canopsis-user'];
-            $opts['pass'] = $this->config['canopsis-pass'];
-            $opts['vhost'] = $this->config['canopsis-vhost'];
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        return $this->contactCanopsis($obj, $opts);
+
+        return $this->contactCanopsis(
+            $alert_data,
+            $this->config['canopsis-host'],
+            $this->config['canopsis-port'],
+            $this->config['canopsis-user'],
+            $this->config['canopsis-pass'],
+            $this->config['canopsis-vhost']
+        );
     }
 
-    public function contactCanopsis($obj, $opts)
+    private function deliverAlertOld($obj)
     {
-        // Configurations
-        $host     = $opts["host"];
-        $port     = $opts["port"];
-        $user     = $opts["user"];
-        $pass     = $opts["passwd"];
-        $vhost    = $opts["vhost"];
+        $legacy_config = $this->getLegacyConfig();
+
+        return $this->contactCanopsis(
+            $obj,
+            $legacy_config['host'],
+            $legacy_config['port'],
+            $legacy_config['user'],
+            $legacy_config['passwd'],
+            $legacy_config['vhost']
+        );
+    }
+
+    public function contactCanopsis($obj, $host, $port, $user, $pass, $vhost)
+    {
         $exchange = "canopsis.events";
 
         // Connection
@@ -80,7 +92,7 @@ class Canopsis extends Transport
         $conn->close();
         return true;
     }
-    
+
     public static function configTemplate()
     {
         return [

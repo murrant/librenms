@@ -27,32 +27,43 @@ use LibreNMS\Alert\Transport;
 
 class Smseagle extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
         if (empty($this->config)) {
-            return $this->deliverAlertOld($obj, $opts);
+            return $this->deliverAlertOld($alert_data);
         }
-        $smseagle_opts['url']   = $this->config['playsms-url'];
-        $smseagle_opts['user']  = $this->config['playsms-user'];
-        $smseagle_opts['token'] = $this->config['playsms-pass'];
-        $smseagle_opts['to']    = preg_split('/([,\r\n]+)/', $this->config['playsms-mobiles']);
-        return $this->contactSmseagle($obj, $smseagle_opts);
+
+        return $this->contactSmseagle(
+            $alert_data,
+            $this->config['playsms-url'],
+            $this->config['playsms-user'],
+            $this->config['playsms-pass'],
+            preg_split('/([,\r\n]+)/', $this->config['playsms-mobiles'])
+        );
     }
 
-    public function deliverAlertOld($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        return $this->contactSmseagle($obj, $opts);
+        $legacy_config = $this->getLegacyConfig();
+
+        return $this->contactSmseagle(
+            $obj,
+            $legacy_config['url'],
+            $legacy_config['user'],
+            $legacy_config['token'],
+            $legacy_config['to']
+        );
     }
 
-    public static function contactSmseagle($obj, $opts)
+    public static function contactSmseagle($obj, $url, $user, $token, $to)
     {
         $params = [
-            'login' => $opts['user'],
-            'pass' => $opts['token'],
-            'to' => implode(',', $opts['to']),
+            'login' => $user,
+            'pass' => $token,
+            'to' => implode(',', $to),
             'message' => $obj['title'],
         ];
-        $url    = 'http://' . $opts['url'] . '/index.php/http_api/send_sms?' . http_build_query($params);
+        $url    = 'http://' . $url . '/index.php/http_api/send_sms?' . http_build_query($params);
         $curl   = curl_init($url);
 
         set_curl_proxy($curl);

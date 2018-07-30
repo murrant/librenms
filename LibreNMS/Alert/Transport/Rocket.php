@@ -27,22 +27,22 @@ use LibreNMS\Alert\Transport;
 
 class Rocket extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (empty($this->config)) {
-            return $this->deliverAlertOld($obj, $opts);
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
         $rocket_opts['url'] = $this->config['rocket-url'];
         foreach (explode(PHP_EOL, $this->config['rocket-options']) as $option) {
             list($k,$v) = explode('=', $option);
             $rocket_opts[$k] = $v;
         }
-        return $this->contactRocket($obj, $rocket_opts);
+        return $this->contactRocket($alert_data, $rocket_opts);
     }
 
-    public function deliverAlertOld($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        foreach ($opts as $tmp_api) {
+        foreach ($this->getLegacyConfig() as $tmp_api) {
             $this->contactRocket($obj, $tmp_api);
         }
         return true;
@@ -95,7 +95,7 @@ class Rocket extends Transport
                     'title' => 'Webhook URL',
                     'name' => 'rocket-url',
                     'descr' => 'Rocket.chat Webhook URL',
-                    'type' => 'text',
+                    'type' => 'url',
                 ],
                 [
                     'title' => 'Rocket.chat Options',

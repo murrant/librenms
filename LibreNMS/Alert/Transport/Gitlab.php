@@ -27,17 +27,23 @@ use LibreNMS\Alert\Transport;
 
 class Gitlab extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (!empty($this->config)) {
-            $opts['project-id'] = $this->config['gitlab-id'];
-            $opts['key'] = $this->config['gitlab-key'];
-            $opts['host'] = $this->config['gitlab-host'];
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        return $this->contactGitlab($obj, $opts);
+
+        return $this->contactGitlab($alert_data, $this->config['gitlab-host'], $this->config['gitlab-id'], $this->config['gitlab-key']);
     }
 
-    public function contactGitlab($obj, $opts)
+    public function deliverAlertOld($obj)
+    {
+        $legacy_config = $this->getLegacyConfig();
+
+        return $this->contactGitlab($obj, $legacy_config['host'], $legacy_config['project_id'], $legacy_config['key']);
+    }
+
+    public function contactGitlab($obj, $host, $project_id, $project_key)
     {
         // Don't create tickets for resolutions
         if ($obj['state'] == 0) {
@@ -45,13 +51,11 @@ class Gitlab extends Transport
         } else {
             $device = device_by_id_cache($obj['device_id']); // for event logging
 
-            $project_id  = $opts['project_id'];
-            $project_key = $opts['key'];
             $details     = "Librenms alert for: " . $obj['hostname'];
             $description = $obj['msg'];
             $title       = urlencode($details);
             $desc        = urlencode($description);
-            $url         = $opts['host'] . "/api/v4/projects/$project_id/issues?title=$title&description=$desc";
+            $url         = "$host/api/v4/projects/$project_id/issues?title=$title&description=$desc";
             $curl        = curl_init();
 
             $data       = array("title" => $details,

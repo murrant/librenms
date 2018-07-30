@@ -15,16 +15,19 @@ use LibreNMS\Alert\Transport;
 
 class Ciscospark extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (empty($this->config)) {
-            $room_id = $opts['roomid'];
-            $token = $opts['token'];
-        } else {
-            $room_id = $this->config['room-id'];
-            $token = $this->config['api-token'];
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        return $this->contactCiscospark($obj, $room_id, $token);
+
+        return $this->contactCiscospark($alert_data, $this->config['room-id'], $this->config['api-token']);
+    }
+
+    private function deliverAlertOld($obj)
+    {
+        $legacy_config = $this->getLegacyConfig();
+        return $this->contactCiscospark($obj, $legacy_config['roomid'], $legacy_config['token']);
     }
 
     public function contactCiscospark($obj, $room_id, $token)
@@ -34,7 +37,6 @@ class Ciscospark extends Transport
             'roomId' => $room_id,
             'text' => $text
         );
-        $token = $token;
 
         $curl   = curl_init();
         set_curl_proxy($curl);

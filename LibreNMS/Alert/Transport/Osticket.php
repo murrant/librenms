@@ -12,26 +12,28 @@
 namespace LibreNMS\Alert\Transport;
 
 use LibreNMS\Alert\Transport;
+use LibreNMS\Config;
 
 class Osticket extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (!empty($this->config)) {
-            $opts['url'] = $this->config['os-url'];
-            $opts['token'] = $this->config['os-token'];
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        return $this->contactOsticket($obj, $opts);
+
+        return $this->contactOsticket($alert_data, $this->config['os-url'], $this->config['os-token']);
     }
 
-    public function contactOsticket($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        global $config;
+        $legacy_config = $this->getLegacyConfig();
+        return $this->contactOsticket($obj, $legacy_config['url'], $legacy_config['token']);
+    }
 
-        $url   = $opts['url'];
-        $token = $opts['token'];
-
-        foreach (parse_email($config['email_from']) as $from => $from_name) {
+    public function contactOsticket($obj, $url, $token)
+    {
+        foreach (parse_email(Config::get('email_from')) as $from => $from_name) {
             $email = $from_name . ' <' . $from . '>';
             break;
         }
@@ -64,7 +66,7 @@ class Osticket extends Transport
 
         return true;
     }
-    
+
     public static function configTemplate()
     {
         return [
@@ -73,7 +75,7 @@ class Osticket extends Transport
                     'title' => 'API URL',
                     'name' => 'os-url',
                     'descr' => 'osTicket API URL',
-                    'type' => 'text'
+                    'type' => 'url'
                 ],
                 [
                     'title' => 'API Token',

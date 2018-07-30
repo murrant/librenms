@@ -93,25 +93,16 @@ foreach (scandir($transport_dir) as $transport) {
         // Skip since support has not been added
         continue;
     }
-    
+
     echo '<form method="post" role="form" id="'.strtolower($transport).'-form" class="form-horizontal transport">';
     echo '<input type="hidden" name="transport-type" id="transport-type" value="'.strtolower($transport).'">';
-   
+
     $tmp = call_user_func($class.'::configTemplate');
-    
+
     foreach ($tmp['config'] as $item) {
         echo '<div class="form-group" title="'.$item['descr'].'">';
         echo '<label for="'.$item['name'].'" class="col-sm-3 col-md-2 control-label">'.$item['title'].': </label>';
-        if ($item['type'] == 'text') {
-            echo '<div class="col-sm-9 col-md-10">';
-            echo '<input type="'.$item['type'].'" id="'.$item['name'].'" name="'.$item['name'].'" class="form-control" ';
-            if ($item['required']) {
-                echo 'required>';
-            } else {
-                echo '>';
-            }
-            echo '</div>';
-        } elseif ($item['type'] == 'checkbox') {
+        if ($item['type'] == 'checkbox') {
             echo '<div class="col-sm-2">';
             echo '<input type="checkbox" name="'.$item['name'].'" id="'.$item['name'].'">';
             echo '</div>';
@@ -128,6 +119,25 @@ foreach (scandir($transport_dir) as $transport) {
             echo '<div class="col-sm-9 col-md-10">';
             echo '<textarea name="' . $item['name'] . '" id="' . $item['name'] . '" class="form-control" placeholder="'.$item['descr'].'">';
             echo '</textarea>';
+            echo '</div>';
+        } else {
+            // text and other types
+            echo '<div class="col-sm-9 col-md-10">';
+            echo '<input type="'.$item['type'].'" id="'.$item['name'].'" name="'.$item['name'].'" class="form-control"';
+
+            if (isset($item['pattern'])) {
+                echo ' pattern="' . $item['pattern'] . '"';
+            }
+
+            if (isset($item['default'])) {
+                echo ' data-default="' . $item['default'] . '"';
+            }
+
+            if ($item['required']) {
+                echo ' required>';
+            } else {
+                echo '>';
+            }
             echo '</div>';
         }
         echo '</div>';
@@ -176,11 +186,9 @@ foreach (scandir($transport_dir) as $transport) {
     <script>
         // Scripts related to editing/updating alert transports
 
-        // Display different form on selection 
-        $("#transport-choice").change(function (){
-            $(".transport").hide();
-            $("#" + $(this).val()).show().find("input:text").val("");
-         
+        // Display different form on selection
+        $("#transport-choice").change(function () {
+            showTransport($(this).val())
         });
 
         $("#edit-alert-transport").on("show.bs.modal", function(e) {
@@ -199,15 +207,13 @@ foreach (scandir($transport_dir) as $transport) {
                         toastr.error("Failed to process alert transport");
                     }
                 });
-            
             } else {
             // Resetting to default
                 $("#name").val("");
                 $("#transport-choice").val("mail-form");
-                $(".transport").hide();
-                $("#" + $("#transport-choice").val()).show().find("input:text").val("");
+                showTransport($("#transport-choice").val());
                 $("#is_default").bootstrapSwitch('state', false);
-                
+
                 // Turn on all switches in form
                 var switches = <?php echo json_encode($switches);?>;
                 $.each(switches, function(name, state) {
@@ -216,13 +222,20 @@ foreach (scandir($transport_dir) as $transport) {
             }
         });
 
+        function showTransport(name) {
+            $(".transport").hide();
+            $("#" + name).show().find("input[type!='hidden']").each(function() {
+                var $field = $(this);
+                $field.val($field.data("default") || '');
+            });
+        }
+
         function loadTransport(transport) {
             $("#name").val(transport.name);
             $("#transport-choice").val(transport.type+"-form");
-            $("#is_default").bootstrapSwitch('state', transport.is_default); 
-            $(".transport").hide();
-            $("#" + $("#transport-choice").val()).show().find("input:text").val("");
-             
+            $("#is_default").bootstrapSwitch('state', transport.is_default);
+            showTransport($("#transport-choice").val());
+
             // Populate the field values
             transport.details.forEach(function(config) {
                 var $field = $("#" + config.name);
@@ -241,7 +254,8 @@ foreach (scandir($transport_dir) as $transport) {
             //Combine form data (general and transport specific)
             data = $("form.transports-form").serializeArray();
             data = data.concat($("#" + $("#transport-choice").val()).serializeArray());
-            
+            console.log(data);
+
             if (data !== null) {
                 //post data to ajax form
                 $.ajax({

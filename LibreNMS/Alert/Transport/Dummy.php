@@ -27,9 +27,9 @@ use LibreNMS\Alert\Transport;
 
 class Dummy extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        var_dump($obj);
+        var_dump($this->getLegacyConfig());
         return true;
     }
 

@@ -27,15 +27,20 @@ use LibreNMS\Alert\Transport;
 
 class Pushbullet extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (!empty($this->config)) {
-            $opts = $this->config['pushbullet-token'];
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        return $this->contactPushbullet($obj, $opts);
+        return $this->contactPushbullet($alert_data, $this->config['pushbullet-token']);
     }
 
-    public function contactPushbullet($obj, $opts)
+    public function deliverAlertOld($obj)
+    {
+        return $this->contactPushbullet($obj, $this->getLegacyConfig());
+    }
+
+    public function contactPushbullet($obj, $token)
     {
         // Note: At this point it might be useful to iterate through $obj['contacts'] and send each of them a note ?
 
@@ -50,15 +55,13 @@ class Pushbullet extends Transport
         curl_setopt($curl, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
             'Content-Length: ' . strlen($data),
-            'Authorization: Bearer ' . $opts,
+            'Authorization: Bearer ' . $token,
         ));
 
         $ret  = curl_exec($curl);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         if ($code > 201) {
-            if ($debug) {
-                var_dump($ret);
-            }
+            d_echo($ret);
             return 'HTTP Status code ' . $code;
         }
         return true;

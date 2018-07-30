@@ -27,18 +27,21 @@ use LibreNMS\Alert\Transport;
 
 class Opsgenie extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (!empty($this->config)) {
-            $opts['url'] = $this->config['genie-url'];
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        return $this->contactOpsgenie($obj, $opts);
+        return $this->contactOpsgenie($alert_data, $this->config['genie-url']);
     }
 
-    public function contactOpsgenie($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        $url = $opts['url'];
+        return $this->contactOpsgenie($obj, $this->getLegacyConfig()['url']);
+    }
 
+    public function contactOpsgenie($obj, $url)
+    {
         $curl = curl_init();
 
         set_curl_proxy($curl);
@@ -67,7 +70,7 @@ class Opsgenie extends Transport
                     'title' => 'Webhook URL',
                     'name' => 'genie-url',
                     'descr' => 'OpsGenie Webhook URL',
-                    'type' => 'text'
+                    'type' => 'url'
                 ]
             ],
             'validation' => [

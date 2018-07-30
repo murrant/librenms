@@ -17,54 +17,75 @@
 namespace LibreNMS\Alert\Transport;
 
 use LibreNMS\Alert\Transport;
+use LibreNMS\Util\IP;
 
 class Syslog extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (!empty($this->config)) {
-            $opts['syslog_host'] = $this->config['syslog-host'];
-            $opts['syslog_port'] = $this->config['syslog-port'];
-            $opts['syslog_facility'] = $this->config['syslog-facility'];
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        return $this->contactSyslog($obj, $opts);
+
+        return $this->contactSyslog(
+            $alert_data,
+            $this->config['syslog-host'],
+            $this->config['syslog-port'],
+            $this->config['syslog-facility']
+        );
     }
 
-    public function contactSyslog($obj, $opts)
+
+    public function deliverAlertOld($obj)
+    {
+        $legacy_config = $this->getLegacyConfig();
+
+        return $this->contactSyslog(
+            $obj,
+            $legacy_config['syslog_host'],
+            $legacy_config['syslog_port'],
+            $legacy_config['syslog_facility']
+        );
+    }
+
+    public function contactSyslog($obj, $host, $port, $facility)
     {
         $syslog_host = '127.0.0.1';
         $syslog_port = 514;
         $state       = "Unknown";
-        $facility    = 24; // Default facility is 3 * 8 (daemon)
+
         $severity    = 6; // Default severity is 6 (Informational)
         $sev_txt     = "OK";
         $device      = device_by_id_cache($obj['device_id']); // for event logging
 
-        if (!empty($opts['syslog_facility']) && preg_match("/^\d+$/", $opts['syslog_facility'])) {
-            $facility = (int)$opts['syslog_facility'] * 8;
+        if (preg_match("/^\d+$/", $facility)) {
+            $facility = (int)$facility * 8;
         } else {
-            log_event("Syslog facility is not an integer: " . $opts['syslog_facility'], $device, 'poller', 5);
+            log_event("Syslog facility is not an integer: " . $facility, $device, 'alert', 5);
+            $facility = 24; // Default facility is 3 * 8 (daemon)
         }
-        if (!empty($opts['syslog_host'])) {
-            if (preg_match("/[a-zA-Z]/", $opts['syslog_host'])) {
-                $syslog_host = gethostbyname($opts['syslog_host']);
-                if ($syslog_host === $opts['syslog_host']) {
-                    log_event("Alphanumeric hostname found but does not resolve to an IP.", $device, 'poller', 5);
+
+        if (!empty($host)) {
+            if (preg_match("/[a-zA-Z]/", $host)) {
+                $syslog_host = gethostbyname($host);
+                if ($syslog_host === $host) {
+                    log_event("Alphanumeric hostname found but does not resolve to an IP.", $device, 'alert', 5);
                     return false;
                 }
-            } elseif (filter_var($opts['syslog_host'], FILTER_VALIDATE_IP)) {
-                $syslog_host = $opts['syslog_host'];
+            } elseif (IP::isValid($host)) {
+                $syslog_host = $host;
             } else {
-                log_event("Syslog host is not a valid IP: " . $opts['syslog_host'], $device, 'poller', 5);
+                log_event("Syslog host is not a valid IP: $host", $device, 'alert', 5);
                 return false;
             }
         } else {
-            log_event("Syslog host is empty.", $device, 'poller');
+            log_event("Syslog host is empty.", $device, 'alert');
         }
-        if (!empty($opts['syslog_port']) && preg_match("/^\d+$/", $opts['syslog_port'])) {
-            $syslog_port = $opts['syslog_port'];
+
+        if (preg_match("/^\d+$/", $port)) {
+            $syslog_port = $port;
         } else {
-            log_event("Syslog port is not an integer.", $device, 'poller', 5);
+            log_event("Syslog port is not an integer.", $device, 'alert', 5);
         }
 
         switch ($obj['severity']) {
@@ -126,7 +147,7 @@ class Syslog extends Transport
         }
         return true;
     }
-    
+
     public static function configTemplate()
     {
         return [
@@ -141,13 +162,15 @@ class Syslog extends Transport
                     'title' => 'Port',
                     'name' => 'syslog-port',
                     'descr' => 'Syslog Port',
-                    'type' => 'text'
+                    'type' => 'number',
+                    'default' => '514'
                 ],
                 [
                     'title' => 'Facility',
                     'name' => 'syslog-facility',
-                    'descr' => 'Syslog Facility',
-                    'type' => 'text'
+                    'descr' => 'Syslog Facility (0-23)',
+                    'type' => 'number',
+                    'default' => '3'
                 ]
             ],
             'validation' => [

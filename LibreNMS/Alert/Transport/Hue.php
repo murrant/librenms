@@ -32,30 +32,32 @@ use LibreNMS\Alert\Transport;
  */
 class Hue extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (!empty($this->config)) {
-            $opts['user'] = $this->config['hue-user'];
-            $opts['bridge'] = $this->config['hue-host'];
-            $opts['duration'] = $this->config['hue-duration'];
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
 
-        return $this->contactHue($obj, $opts);
+        return $this->contactHue($alert_data, $this->config['hue-user'], $this->config['hue-host'], $this->config['hue-duration']);
     }
 
-    public function contactHue($obj, $opts)
+    public function deliverAlertOld($obj)
+    {
+        $legacy_config = $this->getLegacyConfig();
+
+        return $this->contactHue($obj, $legacy_config['user'], $legacy_config['bridge'], $legacy_config['duration']);
+    }
+
+
+    public function contactHue($obj, $user, $bridge, $duration)
     {
         // Don't alert on resolve at this time
         if ($obj['state'] == 0) {
             return true;
         } else {
-            $device = device_by_id_cache($obj['device_id']); // for event logging
-            $hue_user  = $opts['user'];
-            $url         = $opts['bridge'] . "/api/$hue_user/groups/0/action";
+            $url         = "$bridge/api/$user/groups/0/action";
+            $datastring = json_encode(["alert" => $duration]);
             $curl        = curl_init();
-            $duration  = $opts['duration'];
-            $data       = array("alert" => $duration);
-            $datastring = json_encode($data);
 
             set_curl_proxy($curl);
 
@@ -71,7 +73,7 @@ class Hue extends Transport
             $ret  = curl_exec($curl);
             $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             if ($code == 200) {
-                d_echo("Sent alert to Phillips Hue Bridge " . $opts['host'] . " for " . $device);
+                d_echo("Sent alert to Phillips Hue Bridge $bridge for " . $obj['device_id']);
                 return true;
             } else {
                 d_echo("Hue bridge connection error: " . serialize($ret));

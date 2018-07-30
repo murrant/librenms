@@ -54,9 +54,8 @@ if ($transport_id) {
 }
 $class  = 'LibreNMS\\Alert\\Transport\\' . ucfirst($transport);
 if (class_exists($class)) {
-    $opts = $config['alert']['transports'][$transport];
     $instance = new $class($transport_id);
-    $tmp = $instance->deliverAlert($obj, $opts);
+    $tmp = $instance->deliverAlert($obj);
     if ($tmp) {
         $status = 'ok';
     }

@@ -28,36 +28,33 @@ use LibreNMS\Alert\Transport;
 
 class Telegram extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (empty($this->config)) {
-            return $this->deliverAlertOld($obj, $opts);
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        $telegram_opts['chat_id'] = $this->config['telegram-chat-id'];
-        $telegram_opts['token'] = $this->config['telegram-token'];
-        return $this->contactTelegram($obj, $telegram_opts);
+
+        return $this->contactTelegram($alert_data, $this->config['telegram-chat-id'], $this->config['telegram-token']);
     }
 
-    public function deliverAlertOld($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        foreach ($opts as $chat_id => $data) {
-            $this->contactTelegram($obj, $data);
+        foreach ($this->getLegacyConfig() as $data) {
+            $this->contactTelegram($obj, $data['chat_id'], $data['token']);
         }
         return true;
     }
 
-    public static function contactTelegram($obj, $data)
+    public static function contactTelegram($obj, $chat_id, $token)
     {
         $curl = curl_init();
         set_curl_proxy($curl);
         $text = urlencode($obj['msg']);
-        curl_setopt($curl, CURLOPT_URL, ("https://api.telegram.org/bot{$data['token']}/sendMessage?chat_id={$data['chat_id']}&parse_mode=html&text=$text"));
+        curl_setopt($curl, CURLOPT_URL, ("https://api.telegram.org/bot$chat_id/sendMessage?chat_id=$token&parse_mode=html&text=$text"));
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         $ret  = curl_exec($curl);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         if ($code != 200) {
-            var_dump("API '$host' returned Error"); //FIXME: propper debuging
-            var_dump("Params: " . $api); //FIXME: propper debuging
             var_dump("Return: " . $ret); //FIXME: propper debuging
             return 'HTTP Status code ' . $code;
         }

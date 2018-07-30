@@ -15,18 +15,24 @@ use LibreNMS\Alert\Transport;
 
 class Msteams extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (!empty($this->config)) {
-            $opts['url'] = $this->config['msteam-url'];
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        
-        return $this->contactMsteams($obj, $opts);
+
+        return $this->contactMsteams($alert_data, $this->config['msteam-url']);
     }
 
-    public function contactMsteams($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        $url   = $opts['url'];
+        $legacy_config = $this->getLegacyConfig();
+
+        return $this->contactMsteams($obj, $legacy_config['url']);
+    }
+
+    public function contactMsteams($obj, $url)
+    {
         $color = ($obj['state'] == 0 ? '#00FF00' : '#FF0000');
         $data  = array(
             'title' => ($obj['name'] ? $obj['name'] . ' on ' . $obj['hostname'] : $obj['title']),
@@ -60,7 +66,7 @@ class Msteams extends Transport
                     'title' => 'Webhook URL',
                     'name' => 'msteam-url',
                     'descr' => 'Microsoft Teams Webhook URL',
-                    'type' => 'text',
+                    'type' => 'url',
                 ]
             ],
             'validation' => [

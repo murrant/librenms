@@ -27,10 +27,10 @@ use LibreNMS\Alert\Transport;
 
 class Hipchat extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (empty($this->config)) {
-            return $this->deliverAlertOld($obj, $opts);
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
         $hipchat_opts['url'] = $this->config['hipchat-url'];
         $hipchat_opts['room_id'] = $this->config['hipchat-room-id'];
@@ -39,13 +39,13 @@ class Hipchat extends Transport
             list($k,$v) = explode('=', $option);
             $hipchat_opts[$k] = $v;
         }
-        return $this->contactHipchat($obj, $hipchat_opts);
+        return $this->contactHipchat($alert_data, $hipchat_opts);
     }
 
-    public function deliverAlertOld($obj, $opts)
+    public function deliverAlertOld($obj)
     {
         // loop through each room
-        foreach ($opts as $option) {
+        foreach ($this->getLegacyConfig() as $option) {
             $this->contactHipchat($obj, $option);
         }
         return true;
@@ -128,13 +128,13 @@ class Hipchat extends Transport
                     'title' => 'API URL',
                     'name' => 'hipchat-url',
                     'descr' => 'Hipchat API URL',
-                    'type' => 'text',
+                    'type' => 'url',
                 ],
                 [
                     'title' => 'Room ID',
                     'name' => 'hipchat-room-id',
                     'descr' => 'Hipchat Room ID',
-                    'type' => 'text',
+                    'type' => 'number',
                 ],
                 [
                     'title' => 'From Name',

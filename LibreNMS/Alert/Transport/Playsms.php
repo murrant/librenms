@@ -27,31 +27,43 @@ use LibreNMS\Alert\Transport;
 
 class Playsms extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (empty($this->config)) {
-            return $this->deliverAlertOld($obj, $opts);
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        $playsms_opts['url']   = $this->config['playsms-url'];
-        $playsms_opts['user']  = $this->config['playsms-user'];
-        $playsms_opts['token'] = $this->config['playsms-token'];
-        $playsms_opts['from']  = $this->config['playsms-from'];
-        $playsms_opts['to']    = preg_split('/([,\r\n]+)/', $this->config['playsms-mobiles']);
-        return $this->contactDiscord($obj, $playsms_opts);
+
+        return $this->contactPlaysms(
+            $alert_data,
+            $this->config['playsms-url'],
+            $this->config['playsms-user'],
+            $this->config['playsms-token'],
+            preg_split('/([,\r\n]+)/', $this->config['playsms-mobiles']),
+            $this->config['playsms-from']
+        );
     }
 
-    public function deliverAlertOld($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        return $this->contactPlaysms($obj, $opts);
+        $legacy_config = $this->getLegacyConfig();
+
+        return $this->contactPlaysms(
+            $obj,
+            $legacy_config['url'],
+            $legacy_config['user'],
+            $legacy_config['token'],
+            $legacy_config['to'],
+            $legacy_config['from']
+        );
     }
 
-    public static function contactPlaysms($obj, $opts)
+    public static function contactPlaysms($obj, $url, $user, $token, $to, $from)
     {
-        $data = array("u" => $opts['user'], "h" => $opts['token'], "to" => implode(',', $opts['to']), "msg" => $obj['title']);
+        $data = array("u" => $user, "h" => $token, "to" => implode(',', $to), "msg" => $obj['title']);
         if (!empty($opts['from'])) {
-            $data["from"] = $opts['from'];
+            $data["from"] = $from;
         }
-        $url  = $opts['url'] . '&op=pv&' . http_build_query($data);
+        $url  = $url . '&op=pv&' . http_build_query($data);
         $curl = curl_init($url);
 
         set_curl_proxy($curl);
@@ -74,7 +86,7 @@ class Playsms extends Transport
                     'title' => 'PlaySMS URL',
                     'name' => 'playsms-url',
                     'descr' => 'PlaySMS URL',
-                    'type' => 'text',
+                    'type' => 'url',
                 ],
                 [
                     'title' => 'User',

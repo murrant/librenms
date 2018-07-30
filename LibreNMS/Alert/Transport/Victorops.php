@@ -28,18 +28,22 @@ use LibreNMS\Alert\Transport;
 
 class Victorops extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (!empty($this->config)) {
-            $opts['url'] = $this->config['victorops-url'];
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        return $this->contactVictorops($obj, $opts);
+
+        return $this->contactVictorops($alert_data, $this->config['victorops-url']);
     }
 
-    public function contactVictorops($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        $url = $opts['url'];
+        return $this->contactVictorops($obj, $this->getLegacyConfig());
+    }
 
+    public function contactVictorops($obj, $url)
+    {
         $protocol = array(
             'entity_id' => ($obj['id'] ? $obj['id'] : $obj['uid']),
             'state_start_time' => strtotime($obj['timestamp']),
@@ -82,11 +86,11 @@ class Victorops extends Transport
                     'title' => 'Post URL',
                     'name' => 'victorops-url',
                     'descr' => 'Victorops Post URL',
-                    'type' => 'text'
+                    'type' => 'url'
                 ]
             ],
             'validation' => [
-                'victorops-url' => 'required|string'
+                'victorops-url' => 'required|url'
             ]
         ];
     }

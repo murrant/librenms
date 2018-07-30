@@ -28,19 +28,19 @@ use LibreNMS\Alert\Transport;
 
 class Api extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (empty($this->config)) {
-            return $this->deliverAlertOld($obj, $opts);
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
         $url = $this->config['api-url'];
         $method = $this->config['api-method'];
-        $this->contactAPI($obj, $url, $method);
+        $this->contactAPI($alert_data, $url, $method);
     }
 
-    private function deliverAlertOld($obj, $opts)
+    private function deliverAlertOld($obj)
     {
-        foreach ($opts as $method => $apis) {
+        foreach ($this->getLegacyConfig() as $method => $apis) {
             foreach ($apis as $api) {
                 $this->contactAPI($obj, $api, $method);
             }
@@ -73,6 +73,8 @@ class Api extends Transport
             var_dump("Return: ".$ret); //FIXME: propper debuging
             return 'HTTP Status code '.$code;
         }
+
+        return true;
     }
 
     public static function configTemplate()
@@ -85,15 +87,15 @@ class Api extends Transport
                     'descr' => 'API Method: GET or POST',
                     'type' => 'select',
                     'options' => [
-                        'get' => 'get',
-                        'get' => 'get'
+                        'GET' => 'GET',
+                        'POST' => 'POST'
                     ]
                 ],
                 [
                     'title' => 'API URL',
                     'name' => 'api-url',
                     'descr' => 'API URL',
-                    'type' => 'text',
+                    'type' => 'url',
                 ]
             ],
             'validation' => [

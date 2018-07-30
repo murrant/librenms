@@ -41,10 +41,10 @@ use LibreNMS\Alert\Transport;
 
 class Pushover extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (empty($this->config)) {
-            return $this->deliverAlertOld($obj, $opts);
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
         $pushover_opts = $this->config;
         unset($pushover_opts['options']);
@@ -52,12 +52,12 @@ class Pushover extends Transport
             list($k,$v) = explode('=', $option);
             $pushover_opts['options'][$k] = $v;
         }
-        return $this->contactPushover($obj, $pushover_opts);
+        return $this->contactPushover($alert_data, $pushover_opts);
     }
 
-    public function deliverAlertOld($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        foreach ($opts as $api) {
+        foreach ($this->getLegacyConfig() as $api) {
             $response = $this->contactPushover($obj, $api);
             if ($response !== true) {
                 return $response;

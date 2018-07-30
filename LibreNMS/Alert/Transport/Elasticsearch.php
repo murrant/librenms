@@ -17,52 +17,71 @@
 namespace LibreNMS\Alert\Transport;
 
 use LibreNMS\Alert\Transport;
+use LibreNMS\Util\IP;
 
 class Elasticsearch extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (!empty($this->config)) {
-            $opts['es_host'] = $this->config['es-host'];
-            $opts['es_port'] = $this->config['es-port'];
-            $opts['es_index'] = $this->config['es-pattern'];
-            $opts['es_proxy'] = $this-> config['es-proxy'];
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
 
-        return $this->contactElasticsearch($obj, $opts);
+        return $this->contactElasticsearch(
+            $alert_data,
+            $this->config['es-host'],
+            $this->config['es-port'],
+            $this->config['es-pattern'],
+            $this->config['es-proxy']
+        );
     }
 
-    public function contactElasticsearch($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        $es_host  = '127.0.0.1';
-        $es_port  = 9200;
-        $index    = strftime("librenms-%Y.%m.%d");
+        $legacy_config = $this->getLegacyConfig();
+        $host = empty($legacy_config['es_host']) ? '127.0.0.1' : $legacy_config['es_host'];
+        $port = isset($legacy_config['es_port']) ? $legacy_config['es_port'] : null;
+        $index = isset($legacy_config['es_index']) ? $legacy_config['es_index'] : null;
+        $proxy = !empty($legacy_config['es_proxy']);
+
+        return $this->contactElasticsearch($obj, $host, $port, $index, $proxy);
+    }
+
+    /**
+     * @param string $host
+     * @param int $port
+     * @param string $index
+     * @return string
+     * @throws \Exception
+     */
+    private function buildUri($host, $port, $index)
+    {
+        $es_host  = $host;
+        $es_port  = ctype_digit($port) ? $port : 9200;
+        $es_index = strftime(empty($index) ? "librenms-%Y.%m.%d" : $index);
         $type     = 'alert';
-        $severity = $obj['severity'];
-        $device   = device_by_id_cache($obj['device_id']); // for event logging
 
-        if (!empty($opts['es_host'])) {
-            if (preg_match("/[a-zA-Z]/", $opts['es_host'])) {
-                $es_host = gethostbyname($opts['es_host']);
-                if ($es_host === $opts['es_host']) {
-                    return "Alphanumeric hostname found but does not resolve to an IP.";
-                }
-            } elseif (filter_var($opts['es_host'], FILTER_VALIDATE_IP)) {
-                $es_host = $opts['es_host'];
-            } else {
-                return "Elasticsearch host is not a valid IP: " . $opts['es_host'];
+        if (preg_match("/[a-zA-Z]/", $es_host)) {
+            $es_host = gethostbyname($es_host);
+            if ($host === $es_host) {
+                throw new \Exception("Alphanumeric hostname found but does not resolve to an IP.");
             }
+        } elseif (!IP::isValid($host)) {
+            throw new \Exception("Elasticsearch host is not a valid IP: " . $host);
         }
 
-        if (!empty($opts['es_port']) && preg_match("/^\d+$/", $opts['es_port'])) {
-            $es_port = $opts['es_port'];
-        }
+        return $es_host . ':' . $es_port . '/' . $es_index . '/' . $type;
+    }
 
-        if (!empty($opts['es_index'])) {
-            $index = strftime($opts['es_index']);
-        }
+    public function contactElasticsearch($obj, $host, $port, $index, $proxy)
+    {
+        $severity = $obj['severity'];
 
-        $host = $es_host . ':' . $es_port . '/' . $index . '/' . $type;
+        try {
+            $uri = $this->buildUri($host, $port, $index);
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
 
         switch ($obj['state']) {
             case 0:
@@ -162,10 +181,10 @@ class Elasticsearch extends Transport
                 }
                 $alert_message = json_encode($data);
                 curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-                if ($opts['es_proxy'] === true) {
+                if ($proxy === true) {
                     set_curl_proxy($curl);
                 }
-                curl_setopt($curl, CURLOPT_URL, $host);
+                curl_setopt($curl, CURLOPT_URL, $uri);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
                 curl_setopt($curl, CURLOPT_POST, true);
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $alert_message);
@@ -173,17 +192,17 @@ class Elasticsearch extends Transport
                 $ret  = curl_exec($curl);
                 $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
                 if ($code != 200 && $code != 201) {
-                    return $host . ' returned HTTP Status code ' . $code . ' for ' . $alert_message;
+                    return $uri . ' returned HTTP Status code ' . $code . ' for ' . $alert_message;
                 }
             }
         } else {
             $curl          = curl_init();
             $alert_message = json_encode($data);
             curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-            if ($opts['es_proxy'] === true) {
+            if ($proxy === true) {
                 set_curl_proxy($curl);
             }
-            curl_setopt($curl, CURLOPT_URL, $host);
+            curl_setopt($curl, CURLOPT_URL, $uri);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_POSTFIELDS, $alert_message);
@@ -191,7 +210,7 @@ class Elasticsearch extends Transport
             $ret  = curl_exec($curl);
             $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             if ($code != 200 && $code != 201) {
-                return $host . ' returned HTTP Status code ' . $code . ' for ' . $alert_message;
+                return $uri . ' returned HTTP Status code ' . $code . ' for ' . $alert_message;
             }
         }
         return true;
@@ -211,13 +230,15 @@ class Elasticsearch extends Transport
                     'title' => 'Port',
                     'name' => 'es-port',
                     'descr' => 'Elasticsearch Port',
-                    'type' => 'text',
+                    'type' => 'number',
+                    'default' => '9200'
                 ],
                 [
                     'title' => 'Index Pattern',
                     'name' => 'es-pattern',
                     'descr' => 'Elasticsearch Index Pattern',
                     'type' => 'text',
+                    'default' => 'librenms-%Y.%m.%d'
                 ],
                 [
                     'title' => 'Use proxy if configured?',
@@ -229,7 +250,7 @@ class Elasticsearch extends Transport
             ],
             'validation' => [
                 'es-host' => 'required|string',
-                'es-port' => 'required|string',
+                'es-port' => 'required|int',
                 'es-pattern' => 'required|string'
             ]
         ];

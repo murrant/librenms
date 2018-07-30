@@ -27,22 +27,24 @@ use LibreNMS\Alert\Transport;
 
 class Pagerduty extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
+        $opts = $this->getLegacyConfig();
+
         $protocol = array(
             'service_key' => $opts,
-            'incident_key' => ($obj['id'] ? $obj['id'] : $obj['uid']),
-            'description' => ($obj['name'] ? $obj['name'] . ' on ' . $obj['hostname'] : $obj['title']),
+            'incident_key' => ($alert_data['id'] ? $alert_data['id'] : $alert_data['uid']),
+            'description' => ($alert_data['name'] ? $alert_data['name'] . ' on ' . $alert_data['hostname'] : $alert_data['title']),
             'client' => 'LibreNMS',
         );
-        if ($obj['state'] == 0) {
+        if ($alert_data['state'] == 0) {
             $protocol['event_type'] = 'resolve';
-        } elseif ($obj['state'] == 2) {
+        } elseif ($alert_data['state'] == 2) {
             $protocol['event_type'] = 'acknowledge';
         } else {
             $protocol['event_type'] = 'trigger';
         }
-        foreach ($obj['faults'] as $fault => $data) {
+        foreach ($alert_data['faults'] as $fault => $data) {
             $protocol['details'][] = $data['string'];
         }
         $curl = curl_init();

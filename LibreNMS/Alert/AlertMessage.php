@@ -1,8 +1,8 @@
 <?php
 /**
- * Transport.php
+ * AlertMessage.php
  *
- * An interface for the transport of alerts.
+ * -Description-
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,19 +19,14 @@
  *
  * @package    LibreNMS
  * @link       http://librenms.org
- * @copyright  2017 Robrecht Plaisier
- * @author     Robbrecht Plaisier <librenms@mcq8.be>
+ * @copyright  2018 Tony Murray
+ * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace LibreNMS\Interfaces\Alert;
+namespace LibreNMS\Alert;
 
-interface Transport
+
+class AlertMessage
 {
-    /**
-     * Gets called when an alert is sent
-     *
-     * @param $alert_data array An array created by DescribeAlert
-     * @return mixed Returns if the call was successful
-     */
-    public function deliverAlert($alert_data);
+
 }

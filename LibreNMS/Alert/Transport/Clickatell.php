@@ -27,19 +27,19 @@ use LibreNMS\Alert\Transport;
 
 class Clickatell extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (empty($this->config)) {
-            return $this->deliverAlertOld($obj, $opts);
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
         $clickatell_opts['token'] = $this->config['clickatell-token'];
         $clickatell_opts['to'] = preg_split('/([,\r\n]+)/', $this->config['clickatell-numbers']);
-        return $this->contactClickatell($obj, $clickatell_opts);
+        return $this->contactClickatell($alert_data, $clickatell_opts);
     }
 
-    public function deliverAlertOld($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        return $this->contactClickatell($obj, $opts);
+        return $this->contactClickatell($obj, $this->getLegacyConfig());
     }
 
     public static function contactClickatell($obj, $opts)

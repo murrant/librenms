@@ -27,21 +27,21 @@ use LibreNMS\Alert\Transport;
 
 class Nagios extends Transport
 {
-    public function deliverAlert($obj, $opts)
+    public function deliverAlert($alert_data)
     {
-        if (empty($this->config)) {
-            return $this->deliverAlertOld($obj, $opts);
+        if ($this->hasLegacyConfig()) {
+            return $this->deliverAlertOld($alert_data);
         }
-        $opts = $this->config['nagios-fifo'];
-        return $this->contactNagios($obj, $opts);
+
+        return $this->contactNagios($alert_data, $this->config['nagios-fifo']);
     }
 
-    public function deliverAlertOld($obj, $opts)
+    public function deliverAlertOld($obj)
     {
-        return $this->contactNagios($obj, $opts);
+        return $this->contactNagios($obj, $this->getLegacyConfig());
     }
 
-    public static function contactNagios($obj, $opts)
+    public static function contactNagios($obj, $fifo)
     {
         /*
          host_perfdata_file_template=
@@ -67,7 +67,7 @@ class Nagios extends Transport
         $format .= str_replace("\n", "", nl2br($obj['msg'])) . "\t";
         $format .= "NULL"; //FIXME: What's the HOSTPERFDATA equivalent for LibreNMS? Oo
         $format .= "\n";
-        return file_put_contents($opts, $format);
+        return file_put_contents($fifo, $format);
     }
 
     public static function configTemplate()
