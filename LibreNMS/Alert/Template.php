@@ -77,9 +77,9 @@ class Template
         $alert = new AlertData($data['alert']);
 
         try {
-            return (string) view(['template' => $data['template']->template])->with('alert', $alert);
+            return view(['template' => $data['template']->template])->with('alert', $alert)->__toString();
         } catch (\Exception $e) {
-            return (string) view(['template' => $this->getDefaultTemplate()])->with('alert', $alert);
+            return view(['template' => $this->getDefaultTemplate()])->with('alert', $alert)->__toString();
         }
     }
 
@@ -93,9 +93,8 @@ class Template
     public function bladeTitle($data)
     {
         $alert = new AlertData($data['alert']);
-        dd($alert->toArray());
         try {
-            return (string) view(['template' => $alert->title])->with('alert', $alert);
+            return view(['template' => $alert->title])->with('alert', $alert)->__toString();
         } catch (\Exception $e) {
             return $alert->has('title') ? $alert->title : $alert->name;
         }

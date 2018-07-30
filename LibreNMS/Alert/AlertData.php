@@ -29,17 +29,15 @@ class AlertData extends \Illuminate\Support\Collection
 {
     public function __construct($items = [])
     {
-        parent::__construct($items);
+        $items = array_map(function ($value) {
+            if (is_array($value) || is_object($value)) {
+                return new static($value);
+            }
 
-        // recursively create AlertData collections
-//        $this->map(function ($value) {
-//            if (is_array($value)) {
-//                return new static($value);
-//            }
-//            var_dump($value);
-//
-//            return $value;
-//        });
+            return $value;
+        }, $items);
+
+        parent::__construct($items);
     }
 
     public function __get($name)
