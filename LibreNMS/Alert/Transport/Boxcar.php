@@ -48,46 +48,60 @@ class Boxcar extends Transport
         if ($this->hasLegacyConfig()) {
             return $this->deliverAlertOld($alert_data);
         }
-        $boxcar_opts['access_token'] = $this->config['boxcar-token'];
-        foreach (explode(PHP_EOL, $this->config['options']) as $option) {
-            list($k,$v) = explode('=', $option);
-            $boxcar_opts[$k] = $v;
-        }
-        return $this->contactBoxcar($alert_data, $boxcar_opts);
+
+        return $this->contactBoxcar(
+            $alert_data,
+            $this->config['boxcar-url'],
+            $this->config['boxcar-critical'],
+            $this->config['boxcar-warning'],
+            $this->config['boxcar-ok']
+            );
     }
 
     public function deliverAlertOld($obj)
     {
-        foreach ($this->getLegacyConfig() as $api) {
-            $this->contactBoxcar($obj, $api);
+        foreach ($this->getLegacyConfig() as $boxcar_config) {
+            $boxcar_opts = [];
+            foreach (explode(PHP_EOL, $boxcar_config['options']) as $option) {
+                list($k,$v) = explode('=', $option);
+                $boxcar_opts[$k] = $v;
+            }
+
+            $this->contactBoxcar(
+                $obj,
+                $boxcar_config['access_token'],
+                $boxcar_opts['sound_critical'],
+                $boxcar_opts['sound_warning'],
+                $boxcar_opts['sound_ok']
+            );
         }
         return true;
     }
 
-    public static function contactBoxcar($obj, $api)
+    public static function contactBoxcar($obj, $token, $critical, $warning, $ok)
     {
         $data                              = [];
-        $data['user_credentials']          = $api['access_token'];
+        $data['user_credentials']          = $token;
         $data['notification[source_name]'] = Config::get('project_id', 'librenms');
         switch ($obj['severity']) {
             case "critical":
                 $severity = "Critical";
-                if (!empty($api['sound_critical'])) {
-                    $data['notification[sound]'] = $api['sound_critical'];
+                if (!empty($critical)) {
+                    $data['notification[sound]'] = $critical;
                 }
                 break;
             case "warning":
                 $severity = "Warning";
-                if (!empty($api['sound_warning'])) {
-                    $data['notification[sound]'] = $api['sound_warning'];
+                if (!empty($warning)) {
+                    $data['notification[sound]'] = $warning;
                 }
                 break;
         }
         switch ($obj['state']) {
             case 0:
                 $title_text = "OK";
-                if (!empty($api['sound_ok'])) {
-                    $data['notification[sound]'] = $api['sound_ok'];
+                if (!empty($ok)) {
+                    $data['notification[sound]'] = $ok;
                 }
                 break;
             case 1:
@@ -131,10 +145,22 @@ class Boxcar extends Transport
                     'type' => 'text',
                 ],
                 [
-                    'title' => 'Boxcar Options',
-                    'name' => 'boxcar-options',
-                    'descr' => 'Boxcar Options',
-                    'type' => 'textarea',
+                    'title' => 'Critical Sound (Optional)',
+                    'name' => 'boxcar-critical',
+                    'descr' => 'Notification sound for critical alerts',
+                    'type' => 'text',
+                ],
+                [
+                    'title' => 'Warning Sound (Optional)',
+                    'name' => 'boxcar-warning',
+                    'descr' => 'Notification sound for warning alerts',
+                    'type' => 'text',
+                ],
+                [
+                    'title' => 'OK Sound (Optional)',
+                    'name' => 'boxcar-ok',
+                    'descr' => 'Notification sound when alerts are cleared',
+                    'type' => 'text',
                 ]
             ],
             'validation' => [

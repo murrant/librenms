@@ -1729,7 +1729,7 @@ echo '
                 if (data.status == 'ok') {
                     toastr.success('Test to ' + transport + ' ok');
                 } else {
-                    toastr.error('Test to ' + transport + ' failed');
+                    toastr.error('Test to ' + transport + ' failed<br />' + data.message );
                 }
             },
             error: function(){
@@ -1764,7 +1764,6 @@ echo '
                         $clone.find('[name="del-api-call"]').attr('data-config_id',data.config_id);
                         $clone.find('[name="global-config-input"]').attr('value', config_value);
                         $clone.find('.api-method').text("API URL (" + new_api_method + ")");
-                    console.log(new_api_method);
                     $("#new-config-api").modal('hide');
                 } else {
                     $("#message").html('<div class="alert alert-info">' + data.message + '</div>');

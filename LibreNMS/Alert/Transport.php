@@ -2,6 +2,8 @@
 
 namespace LibreNMS\Alert;
 
+use App\Models\AlertTransport;
+use LibreNMS\Alert\Transport\Dummy;
 use LibreNMS\Config;
 use LibreNMS\Interfaces\Alert\Transport as TransportInterface;
 
@@ -13,9 +15,30 @@ abstract class Transport implements TransportInterface
     public function __construct($transport_id = null)
     {
         if (!empty($transport_id)) {
-            $sql = "SELECT `transport_config` FROM `alert_transports` WHERE `transport_id`=?";
-            $this->config = json_decode(dbFetchCell($sql, [$transport_id]), true);
+            $this->config = AlertTransport::where('transport_id', $transport_id)->value('transport_config');
         }
+    }
+
+    /**
+     * @param int $transport_id
+     * @return \LibreNMS\Interfaces\Alert\Transport
+     */
+    public static function make($transport_id)
+    {
+        // grab the name of the alert transport
+        $alert_transport = AlertTransport::find($transport_id);
+        $type = $alert_transport->transport_type;
+
+        $class  = 'LibreNMS\\Alert\\Transport\\' . ucfirst($type);
+        if (class_exists($class)) {
+            // save an sql query and load config from existing data
+            $transport = new $class();
+            $transport->config = $alert_transport->transport_config;
+            return $transport;
+        }
+
+        \Log::error("Failed to load alert transport: $type");
+        return new Dummy();
     }
 
     /**

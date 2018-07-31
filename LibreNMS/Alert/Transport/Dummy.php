@@ -30,7 +30,7 @@ class Dummy extends Transport
     public function deliverAlert($alert_data)
     {
         var_dump($this->getLegacyConfig());
-        return true;
+        return false;
     }
 
     public function contactDummy()

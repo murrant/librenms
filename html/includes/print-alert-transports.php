@@ -47,9 +47,9 @@ foreach (dbFetchRows($query) as $transport) {
     } else {
         echo "<td>No</td>";
     }
-    
+
     echo "<td class='col-sm-4'>";
-    
+
     // Iterate through transport config template to display config details
     $class = 'LibreNMS\\Alert\\Transport\\'.ucfirst($transport['type']);
     if (!method_exists($class, 'configTemplate')) {
@@ -58,16 +58,19 @@ foreach (dbFetchRows($query) as $transport) {
     }
     $tmp = call_user_func($class.'::configTemplate');
     $transport_config = json_decode($transport['config'], true);
-    
-    foreach ($tmp['config'] as $item) {
-        $val = $transport_config[$item['name']];
-        
-        // Match value to key name for select inputs
-        if ($item['type'] == 'select') {
-            $val = array_search($val, $item['options']);
-        }
 
-        echo "<i>".$item['title'].": ".$val."<br/></i>";
+    foreach ($tmp['config'] as $item) {
+        // ignore empty options in list
+        if (isset($transport_config[$item['name']]) && $transport_config[$item['name']] !== '') {
+            $val = $transport_config[$item['name']];
+
+            // Match value to key name for select inputs
+            if ($item['type'] == 'select') {
+                $val = array_search($val, $item['options']);
+            }
+
+            echo "<i>".$item['title'].": ".$val."<br/></i>";
+        }
     }
 
     echo "</td>";
@@ -76,13 +79,13 @@ foreach (dbFetchRows($query) as $transport) {
     // Add action buttons for admin users only
     if (Auth::user()->hasGlobalAdmin()) {
         echo "<div class='btn-group btn-group-sm' role='group'>";
-        echo "<button type='button' class='btn btn-primary' data-toggle='modal' data-target='#edit-alert-transport' data-transport_id='".$transport['id']."' name='edit-alert-rule' data-container='body' data-toggle='popover' data-content='Edit transport'><i class='fa fa-lg fa-pencil' aria-hidden='true'></i></button> ";
-        echo "<button type='button' class='btn btn-danger' aria-label='Delete' data-toggle='modal' data-target='#delete-alert-transport' data-transport_id='".$transport['id']."' name='delete-alert-transport' data-container='body' data-toggle='popover' data-content='Delete transport'><i class='fa fa-lg fa-trash' aria-hidden='true'></i></button>";
+        echo "<button type='button' class='btn btn-primary' data-toggle='modal' data-target='#edit-alert-transport' data-transport_id='".$transport['id']."' name='edit-alert-rule' data-container='body' data-content='Edit transport'><i class='fa fa-lg fa-pencil' aria-hidden='true'></i></button> ";
+        echo "<button type='button' class='btn btn-danger' aria-label='Delete' data-toggle='modal' data-target='#delete-alert-transport' data-transport_id='".$transport['id']."' name='delete-alert-transport' data-container='body' data-content='Delete transport'><i class='fa fa-lg fa-trash' aria-hidden='true'></i></button>";
         echo "<button type='button' class='btn btn-warning' data-transport_id='".$transport['id']."' data-transport='{$transport['type']}' name='test-transport' id='test-transport' data-toggle='popover' data-content='Test transport'><i class='fa fa-lg fa-check' aria-hidden='true'></i></button> ";
         echo "</div>";
     }
     echo "</td>";
-    echo "</tr>\r\n";
+    echo "</tr>";
 }
 ?>
     </table>
@@ -144,10 +147,10 @@ foreach (dbFetchRows($query) as $group) {
             data: { type: "test-transport", transport_id: transport_id },
             dataType: "json",
             success: function(data){
-                if (data.status == 'ok') {
+                if (data.status === 'ok') {
                     toastr.success('Test to ' + transport + ' ok');
                 } else {
-                    toastr.error('Test to ' + transport + ' failed');
+                    toastr.error('Test to ' + transport + ' failed<br />' + data.message );
                 }
             },
             error: function(){

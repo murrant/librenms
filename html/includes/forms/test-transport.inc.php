@@ -47,18 +47,20 @@ $obj = array(
     "msg"       => "This is a test alert",
 );
 
-$status = 'error';
 
-if ($transport_id) {
-    $transport = dbFetchCell("SELECT `transport_type` FROM `alert_transports` WHERE `transport_id` = ?", [$transport_id]);
+$transport = \LibreNMS\Alert\Transport::make($transport_id);
+$result = $transport->deliverAlert($obj);
+
+if ($result === true) {
+    $response = [
+        'status' => 'ok'
+    ];
+} else {
+    $response = [
+        'status' => 'error',
+        'message' => $result,
+    ];
 }
-$class  = 'LibreNMS\\Alert\\Transport\\' . ucfirst($transport);
-if (class_exists($class)) {
-    $instance = new $class($transport_id);
-    $tmp = $instance->deliverAlert($obj);
-    if ($tmp) {
-        $status = 'ok';
-    }
-}
+
 header('Content-type: application/json');
-echo _json_encode(array('status' => $status));
+echo json_encode($response);

@@ -46,19 +46,36 @@ class Pushover extends Transport
         if ($this->hasLegacyConfig()) {
             return $this->deliverAlertOld($alert_data);
         }
-        $pushover_opts = $this->config;
-        unset($pushover_opts['options']);
-        foreach (explode(PHP_EOL, $this->config['options']) as $option) {
-            list($k,$v) = explode('=', $option);
-            $pushover_opts['options'][$k] = $v;
-        }
-        return $this->contactPushover($alert_data, $pushover_opts);
+
+        return $this->contactPushover(
+            $alert_data,
+            $this->config['appkey'],
+            $this->config['userkey'],
+            $this->config['pushover-critical'],
+            $this->config['pushover-warning'],
+            $this->config['pushover-ok'],
+            $this->config['options']
+        );
     }
 
-    public function deliverAlertOld($obj)
+    public function deliverAlertOld($alert_data)
     {
-        foreach ($this->getLegacyConfig() as $api) {
-            $response = $this->contactPushover($obj, $api);
+        foreach ($this->getLegacyConfig() as $pushover_config) {
+            $pushover_opts = [];
+            foreach (explode(PHP_EOL, $pushover_config['options']) as $option) {
+                list($k,$v) = explode('=', $option);
+                $pushover_opts[$k] = $v;
+            }
+
+            $response = $this->contactPushover(
+                $alert_data,
+                $pushover_config['appkey'],
+                $pushover_config['userkey'],
+                $pushover_opts['sound_critical'],
+                $pushover_opts['sound_warning'],
+                $pushover_opts['sound_ok'],
+                $pushover_opts
+            );
             if ($response !== true) {
                 return $response;
             }
@@ -66,39 +83,42 @@ class Pushover extends Transport
         return true;
     }
 
-    public function contactPushover($obj, $api)
+    public function contactPushover($obj, $token, $user, $critical, $warning, $ok, $extra = [])
     {
-        $data          = array();
-        $data['token'] = $api['appkey'];
-        $data['user']  = $api['userkey'];
+        $data = [
+            'token' => $token,
+            'user' => $user,
+            'title' => $obj['title'],
+            'message' => $obj['msg'],
+        ];
+
         switch ($obj['severity']) {
             case "critical":
                 $data['priority'] = 1;
-                if (!empty($api['sound_critical'])) {
-                    $data['sound'] = $api['sound_critical'];
+                if (!empty($critical)) {
+                    $data['sound'] = $critical;
                 }
                 break;
             case "warning":
                 $data['priority'] = 1;
-                if (!empty($api['sound_warning'])) {
-                    $data['sound'] = $api['sound_warning'];
+                if (!empty($warning)) {
+                    $data['sound'] = $warning;
                 }
                 break;
         }
         switch ($obj['state']) {
             case 0:
                 $data['priority'] = 0;
-                if (!empty($api['sound_ok'])) {
-                    $data['sound'] = $api['sound_ok'];
+                if (!empty($ok)) {
+                    $data['sound'] = $ok;
                 }
                 break;
         }
-        $data['title']   = $obj['title'];
-        $data['message'] = $obj['msg'];
-        if ($api['options']) {
-            $data = array_merge($data, $api['options']);
+
+        if ($extra) {
+            $data = array_merge($data, $extra);
         }
-        $curl            = curl_init();
+        $curl = curl_init();
         set_curl_proxy($curl);
         curl_setopt($curl, CURLOPT_URL, 'https://api.pushover.net/1/messages.json');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -130,10 +150,29 @@ class Pushover extends Transport
                     'type'  => 'text',
                 ],
                 [
+                    'title' => 'Critical Sound (Optional)',
+                    'name' => 'pushover-critical',
+                    'descr' => 'Notification sound for critical alerts',
+                    'type' => 'text',
+                ],
+                [
+                    'title' => 'Warning Sound (Optional)',
+                    'name' => 'pushover-warning',
+                    'descr' => 'Notification sound for warning alerts',
+                    'type' => 'text',
+                ],
+                [
+                    'title' => 'OK Sound (Optional)',
+                    'name' => 'pushover-ok',
+                    'descr' => 'Notification sound when alerts are cleared',
+                    'type' => 'text',
+                ],
+                [
                     'title' => 'Pushover Options',
                     'name'  => 'options',
-                    'descr' => 'Pushover options',
+                    'descr' => 'Pushover extra options',
                     'type'  => 'textarea',
+
                 ],
             ],
             'validation' => [

@@ -37,38 +37,51 @@ class Discord extends Transport
         if ($this->hasLegacyConfig()) {
             return $this->deliverAlertOld($alert_data);
         }
-        $discord_opts['url'] = $this->config['url'];
-        foreach (explode(PHP_EOL, $this->config['options']) as $option) {
-            list($k,$v) = explode('=', $option);
-            $discord_opts['options'][$k] = $v;
-        }
-        return $this->contactDiscord($alert_data, $discord_opts);
+
+        return $this->contactDiscord(
+            $alert_data,
+            $this->config['url'],
+            $this->config['discord-username'],
+            $this->config['discord-avatar'],
+            $this->config['discord-tts']
+        );
     }
 
     public function deliverAlertOld($obj)
     {
-        foreach ($this->getLegacyConfig() as $discord_opts) {
-            $this->contactDiscord($obj, $discord_opts);
+        foreach ($this->getLegacyConfig() as $discord_config) {
+            $discord_opts = [];
+            foreach (explode(PHP_EOL, $discord_config['options']) as $option) {
+                list($k,$v) = explode('=', $option);
+                $discord_opts[$k] = $v;
+            }
+
+            $this->contactDiscord(
+                $obj,
+                $discord_config['url'],
+                $discord_opts['username'],
+                $discord_opts['avatar_url'],
+                $discord_opts['tts']
+            );
         }
         return true;
     }
 
-    public function contactDiscord($obj, $discord_opts)
+    public function contactDiscord($obj, $url, $username, $avatar, $tts)
     {
-        $host          = $discord_opts['url'];
         $curl          = curl_init();
-        $discord_msg   = strip_tags($obj['msg']);
-        $data          = [
-            'content' => "". $obj['title'] ."\n" . $discord_msg
+
+        $data = [
+            'content' => "". $obj['title'] ."\n" . strip_tags($obj['msg']),
+            'username' => $username,
+            'avatar_url' => $avatar,
+            'tts' => $tts
         ];
-        if (!empty($discord_opts['options'])) {
-            $data = array_merge($data, $discord_opts['options']);
-        }
 
         $alert_message = json_encode($data);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         set_curl_proxy($curl);
-        curl_setopt($curl, CURLOPT_URL, $host);
+        curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $alert_message);
@@ -76,7 +89,7 @@ class Discord extends Transport
         $ret  = curl_exec($curl);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         if ($code != 204) {
-            var_dump("API '$host' returned Error"); //FIXME: propper debuging
+            var_dump("API '$url' returned Error"); //FIXME: propper debuging
             var_dump("Params: " . $alert_message); //FIXME: propper debuging
             var_dump("Return: " . $ret); //FIXME: propper debuging
             return 'HTTP Status code ' . $code;
@@ -95,14 +108,29 @@ class Discord extends Transport
                     'type' => 'url',
                 ],
                 [
-                    'title' => 'Options',
-                    'name' => 'options',
-                    'descr' => 'Enter the config options (format: option=value separated by new lines)',
-                    'type' => 'textarea',
+                    'title' => 'Username (Optional)',
+                    'name' => 'discord-username',
+                    'descr' => 'Override the useranme',
+                    'type' => 'text',
+                ],
+                [
+                    'title' => 'Avatar Url (Optional)',
+                    'name' => 'discord-avatar',
+                    'descr' => 'Override the avatar image url',
+                    'type' => 'url',
+                ],
+                [
+                    'title' => 'TTS',
+                    'name' => 'discord-tts',
+                    'descr' => 'Enable Text-to-Speech for all messages',
+                    'type'  => 'checkbox',
+                    'default' => false,
                 ]
             ],
             'validation' => [
                 'url' => 'required|url',
+                'discord-username' => 'required|url',
+                'discord-avatar' => 'required|url',
             ]
         ];
     }

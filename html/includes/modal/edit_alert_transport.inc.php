@@ -28,7 +28,7 @@ if (Auth::user()->hasGlobalAdmin()) {
                 <div class="modal-body">
                     <form method="post" role="form" id="transports" class="form-horizontal transports-form">
                         <input type="hidden" name="transport_id" id="transport_id" value="">
-                        <input type="hidden" name="type" id="type" value="alert-transports">
+                        <input type="hidden" name="type" value="alert-transports">
                         <div class='form-group' title="The description of this alert transport.">
                             <label for='name' class='col-sm-3 col-md-2 control-label'>Transport name: </label>
                             <div class='col-sm-9 col-md-10'>
@@ -70,7 +70,7 @@ if (Auth::user()->hasGlobalAdmin()) {
                             </div>
                         </div>
                         <div class="form-group" title="The transport is default.">
-                            <label for="default" class="col-sm-3 col-md-2 control-label">Default Alert: </label>
+                            <label for="is_default" class="col-sm-3 col-md-2 control-label">Default Alert: </label>
                             <div class="col-sm-2">
                                 <input type="checkbox" name="is_default" id="is_default">
                             </div>
@@ -95,7 +95,7 @@ foreach (scandir($transport_dir) as $transport) {
     }
 
     echo '<form method="post" role="form" id="'.strtolower($transport).'-form" class="form-horizontal transport">';
-    echo '<input type="hidden" name="transport-type" id="transport-type" value="'.strtolower($transport).'">';
+    echo '<input type="hidden" name="transport-type" value="'.strtolower($transport).'">';
 
     $tmp = call_user_func($class.'::configTemplate');
 
@@ -104,12 +104,12 @@ foreach (scandir($transport_dir) as $transport) {
         echo '<label for="'.$item['name'].'" class="col-sm-3 col-md-2 control-label">'.$item['title'].': </label>';
         if ($item['type'] == 'checkbox') {
             echo '<div class="col-sm-2">';
-            echo '<input type="checkbox" name="'.$item['name'].'" id="'.$item['name'].'">';
+            echo '<input type="checkbox" name="'.$item['name'].'">';
             echo '</div>';
             $switches[$item['name']] = $item['default'];
         } elseif ($item['type'] == 'select') {
             echo '<div class="col-sm-3">';
-            echo '<select name="'.$item['name'].'" id="'.$item['name'].'" class="form-control">';
+            echo '<select name="'.$item['name'].'" class="form-control">';
             foreach ($item['options'] as $descr => $opt) {
                 echo '<option value="'.$opt.'">'.$descr.'</option>';
             }
@@ -117,13 +117,13 @@ foreach (scandir($transport_dir) as $transport) {
             echo '</div>';
         } elseif ($item['type'] === 'textarea') {
             echo '<div class="col-sm-9 col-md-10">';
-            echo '<textarea name="' . $item['name'] . '" id="' . $item['name'] . '" class="form-control" placeholder="'.$item['descr'].'">';
+            echo '<textarea name="' . $item['name'] . '" class="form-control" placeholder="'.$item['descr'].'">';
             echo '</textarea>';
             echo '</div>';
         } else {
             // text and other types
             echo '<div class="col-sm-9 col-md-10">';
-            echo '<input type="'.$item['type'].'" id="'.$item['name'].'" name="'.$item['name'].'" class="form-control"';
+            echo '<input type="'.$item['type'].'" name="'.$item['name'].'" class="form-control"';
 
             if (isset($item['pattern'])) {
                 echo ' pattern="' . $item['pattern'] . '"';
@@ -239,7 +239,7 @@ foreach (scandir($transport_dir) as $transport) {
             // Populate the field values
             transport.details.forEach(function(config) {
                 var $field = $("#" + config.name);
-                if ($field.prop('type') == 'checkbox') {
+                if ($field.prop('type') === 'checkbox') {
                     $field.bootstrapSwitch('state', config.value);
                 } else {
                     $field.val(config.value);
@@ -254,7 +254,6 @@ foreach (scandir($transport_dir) as $transport) {
             //Combine form data (general and transport specific)
             data = $("form.transports-form").serializeArray();
             data = data.concat($("#" + $("#transport-choice").val()).serializeArray());
-            console.log(data);
 
             if (data !== null) {
                 //post data to ajax form

@@ -32,25 +32,40 @@ class Rocket extends Transport
         if ($this->hasLegacyConfig()) {
             return $this->deliverAlertOld($alert_data);
         }
-        $rocket_opts['url'] = $this->config['rocket-url'];
-        foreach (explode(PHP_EOL, $this->config['rocket-options']) as $option) {
-            list($k,$v) = explode('=', $option);
-            $rocket_opts[$k] = $v;
-        }
-        return $this->contactRocket($alert_data, $rocket_opts);
+
+        return $this->contactRocket(
+            $alert_data,
+            $this->config['rocket-url'],
+            $this->config['rocket-username'],
+            $this->config['rocket-icon'],
+            $this->config['rocket-emoji'],
+            $this->config['rocket-channel']
+        );
     }
 
     public function deliverAlertOld($obj)
     {
-        foreach ($this->getLegacyConfig() as $tmp_api) {
-            $this->contactRocket($obj, $tmp_api);
+        foreach ($this->getLegacyConfig() as $rocket_config) {
+            $rocket_opts = [];
+            foreach (explode(PHP_EOL, $rocket_config['options']) as $option) {
+                list($k,$v) = explode('=', $option);
+                $rocket_opts[$k] = $v;
+            }
+
+            $this->contactRocket(
+                $obj,
+                $rocket_config['url'],
+                $rocket_opts['username'],
+                $rocket_opts['icon_url'],
+                $rocket_opts['icon_emoji'],
+                $rocket_opts['channel']
+            );
         }
         return true;
     }
 
-    public static function contactRocket($obj, $api)
+    public static function contactRocket($obj, $url, $username, $icon_url, $icon_emoji, $channel)
     {
-        $host          = $api['url'];
         $curl          = curl_init();
         $rocket_msg    = strip_tags($obj['msg']);
         $color         = ($obj['state'] == 0 ? '#00FF00' : '#FF0000');
@@ -63,15 +78,15 @@ class Rocket extends Transport
                     'text' => $rocket_msg,
                 )
             ),
-            'channel' => $api['channel'],
-            'username' => $api['username'],
-            'icon_url' => $api['icon_url'],
-            'icon_emoji' => $api['icon_emoji'],
+            'channel' => $channel,
+            'username' => $username,
+            'icon_url' => $icon_url,
+            'icon_emoji' => $icon_emoji,
         );
         $alert_message = json_encode($data);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         set_curl_proxy($curl);
-        curl_setopt($curl, CURLOPT_URL, $host);
+        curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $alert_message);
@@ -79,9 +94,9 @@ class Rocket extends Transport
         $ret  = curl_exec($curl);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         if ($code != 200) {
-            var_dump("API '$host' returned Error"); //FIXME: propper debuging
-            var_dump("Params: " . $alert_message); //FIXME: propper debuging
-            var_dump("Return: " . $ret); //FIXME: propper debuging
+            var_dump("API '$url' returned Error"); //FIXME: proper debuging
+            var_dump("Params: " . $alert_message); //FIXME: proper debuging
+            var_dump("Return: " . $ret); //FIXME: proper debuging
             return 'HTTP Status code ' . $code;
         }
         return true;
@@ -98,14 +113,37 @@ class Rocket extends Transport
                     'type' => 'url',
                 ],
                 [
-                    'title' => 'Rocket.chat Options',
-                    'name' => 'rocket-options',
-                    'descr' => 'Rocket.chat Options',
-                    'type' => 'textarea',
+                    'title' => 'Username (Optional)',
+                    'name' => 'rocket-username',
+                    'descr' => 'Override the default username',
+                    'type' => 'text'
+                ],
+                [
+                    'title' => 'Icon URL (Optional)',
+                    'name' => 'rocket-icon',
+                    'descr' => 'An icon image URL string to use in place of the default icon',
+                    'type' => 'url'
+                ],
+                [
+                    'title' => 'Icon Emoji (Optional)',
+                    'name' => 'rocket-emoji',
+                    'descr' => 'An emoji code string to use in place of the default icon.',
+                    'type' => 'text',
+                    'pattern' => ':[a-z0-9_]+:'
+                ],
+                [
+                    'title' => 'Channel (Optional)',
+                    'name' => 'rocket-channel',
+                    'descr' => 'Override the default channel.',
+                    'type' => 'text'
                 ]
             ],
             'validation' => [
                 'rocket-url' => 'required|url',
+                'rocket-username' => 'string',
+                'rocket-icon' => 'url',
+                'rocket-emoji' => 'regex:/:[a-z0-9_]+:/',
+                'rocket-channel' => 'string',
             ]
         ];
     }

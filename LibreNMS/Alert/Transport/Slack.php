@@ -32,25 +32,42 @@ class Slack extends Transport
         if (empty($this->config)) {
             return $this->deliverAlertOld($alert_data);
         }
-        $slack_opts['url'] = $this->config['slack-url'];
-        foreach (explode(PHP_EOL, $this->config['options']) as $option) {
-            list($k,$v) = explode('=', $option);
-            $slack_opts[$k] = $v;
-        }
-        return $this->contactSlack($alert_data, $slack_opts);
+
+        return $this->contactSlack(
+            $alert_data,
+            $this->config['slack-url'],
+            $this->config['slack-username'],
+            $this->config['slack-icon'],
+            $this->config['slack-emoji'],
+            $this->config['slack-author'],
+            $this->config['slack-channel']
+        );
     }
 
     public function deliverAlertOld($obj)
     {
-        foreach ($this->getLegacyConfig() as $tmp_api) {
-            $this->contactSlack($obj, $tmp_api);
+        foreach ($this->getLegacyConfig() as $slack_config) {
+            $slack_opts = [];
+            foreach (explode(PHP_EOL, $slack_config['options']) as $option) {
+                list($k,$v) = explode('=', $option);
+                $slack_opts[$k] = $v;
+            }
+
+            $this->contactSlack(
+                $obj,
+                $slack_config['url'],
+                $slack_opts['username'],
+                $slack_opts['icon_url'],
+                $slack_opts['icon_emoji'],
+                $slack_opts['author_name'],
+                $slack_opts['channel']
+            );
         }
         return true;
     }
 
-    public static function contactSlack($obj, $api)
+    public static function contactSlack($obj, $url, $username, $icon_url, $icon_emoji, $author, $channel)
     {
-        $host          = $api['url'];
         $curl          = curl_init();
         $slack_msg     = strip_tags($obj['msg']);
         $color         = ($obj['state'] == 0 ? '#00FF00' : '#FF0000');
@@ -62,18 +79,18 @@ class Slack extends Transport
                     'title' => $obj['title'],
                     'text' => $slack_msg,
                     'mrkdwn_in' => ['text', 'fallback'],
-                    'author_name' => $api['author_name'],
+                    'author_name' => $author,
                 ],
             ],
-            'channel' => $api['channel'],
-            'username' => $api['username'],
-            'icon_url' => $api['icon_url'],
-            'icon_emoji' => $api['icon_emoji'],
+            'channel' => $channel,
+            'username' => $username,
+            'icon_url' => $icon_url,
+            'icon_emoji' => $icon_emoji,
         ];
         $alert_message = json_encode($data);
         curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         set_curl_proxy($curl);
-        curl_setopt($curl, CURLOPT_URL, $host);
+        curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $alert_message);
@@ -81,9 +98,9 @@ class Slack extends Transport
         $ret  = curl_exec($curl);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         if ($code != 200) {
-            var_dump("API '$host' returned Error"); //FIXME: propper debuging
-            var_dump("Params: " . $alert_message); //FIXME: propper debuging
-            var_dump("Return: " . $ret); //FIXME: propper debuging
+            var_dump("API '$url' returned Error"); //FIXME: proper debuging
+            var_dump("Params: " . $alert_message); //FIXME: proper debuging
+            var_dump("Return: " . $ret); //FIXME: proper debuging
             return 'HTTP Status code ' . $code;
         }
         return true;
@@ -100,14 +117,44 @@ class Slack extends Transport
                     'type' => 'url',
                 ],
                 [
-                    'title' => 'Slack Options',
-                    'name' => 'options',
-                    'descr' => 'Slack Options',
-                    'type' => 'textarea',
+                    'title' => 'Username (Optional)',
+                    'name' => 'slack-username',
+                    'descr' => 'Override the default username.',
+                    'type' => 'text'
+                ],
+                [
+                    'title' => 'Icon URL (Optional)',
+                    'name' => 'slack-icon',
+                    'descr' => 'An icon image URL string to use in place of the default icon.',
+                    'type' => 'url'
+                ],
+                [
+                    'title' => 'Icon Emoji (Optional)',
+                    'name' => 'slack-emoji',
+                    'descr' => 'An emoji code string to use in place of the default icon.',
+                    'type' => 'text',
+                    'pattern' => ':[a-z0-9_]+:'
+                ],
+                [
+                    'title' => 'Author name (Optional)',
+                    'name' => 'slack-author',
+                    'descr' => 'Override the display name for posts.',
+                    'type' => 'text'
+                ],
+                [
+                    'title' => 'Channel (Optional)',
+                    'name' => 'slack-channel',
+                    'descr' => 'Override the default channel. This should be an ID, such as C8UJ12P4P.',
+                    'type' => 'text'
                 ]
             ],
             'validation' => [
                 'slack-url' => 'required|url',
+                'slack-author' => 'string',
+                'slack-icon' => 'url',
+                'slack-emoji' => 'regex:/:[a-z0-9_]+:/',
+                'slack-channel' => 'string',
+                'slack-username' => 'string',
             ]
         ];
     }
