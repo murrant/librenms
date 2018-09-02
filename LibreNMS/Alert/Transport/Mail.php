@@ -23,6 +23,8 @@
  */
 namespace LibreNMS\Alert\Transport;
 
+use App\Mail\AlertNotification;
+use League\Flysystem\Exception;
 use LibreNMS\Alert\Transport;
 use LibreNMS\Config;
 
@@ -35,12 +37,16 @@ class Mail extends Transport
 
     public function contactMail($obj)
     {
-        if (empty($this->config['email'])) {
-            $email = $obj['contacts'];
-        } else {
-            $email = $this->config['email'];
+        $email = empty($this->config['email']) ? $obj['contacts'] : $this->config['email'];
+
+        try {
+            \Mail::to(\LibreNMS\Util\Mail::parseEmails($email))
+                ->send(new AlertNotification($obj['title'], $obj['template'], $obj['alert']));
+
+            return true;
+        } catch (\Exception $e) {
+            return $e->getMessage();
         }
-        return send_mail($email, $obj['title'], $obj['msg'], (Config::get('email_html') == 'true') ? true : false);
     }
 
     public static function configTemplate()

@@ -426,7 +426,7 @@ class Config
     private static function processConfig($persist = true)
     {
         if (!self::get('email_from')) {
-            self::set('email_from', '"' . self::get('project_name') . '" <' . self::get('email_user') . '@' . php_uname('n') . '>');
+            self::set('email_from', '"' . self::get('project_name') . '" <' . self::get('email_user', 'librenms') . '@' . php_uname('n') . '>');
         }
 
         if (self::get('secure_cookies')) {
