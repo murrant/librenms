@@ -62,7 +62,10 @@ class AppServiceProvider extends ServiceProvider
 
         // set default from
         foreach (\LibreNMS\Util\Mail::parseEmails(Config::get('email_from')) as $mail) {
-            $config['from'] = $mail;
+            $config['from'] = [
+                'address' => $mail['email'],
+                'name' => $mail['name']
+            ];
         }
 
         \Config::set('mail', $config);
