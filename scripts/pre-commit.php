@@ -13,7 +13,7 @@ if (getenv('FILES')) {
     $changed_files = exec("git diff --diff-filter=d --name-only master | tr '\n' ' '|sed 's/,*$//g'");
 }
 
-$changed_files = explode(' ', $changed_files);
+$changed_files = $changed_files ? explode(' ', $changed_files) : [];
 
 $map = [
     'docs'   => 0,
@@ -121,7 +121,6 @@ if (check_opt($options, 'db')) {
     putenv('DBTEST=1');
 }
 
-dd($changed_files);
 // No php files, skip the php checks.
 if (!empty($changed_files) && $map['php'] === 0) {
     putenv('SKIP_LINT_CHECK=1');
