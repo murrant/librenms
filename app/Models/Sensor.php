@@ -35,6 +35,11 @@ class Sensor extends BaseModel
 
     // ---- Helper Functions ----
 
+    public function stateDescr()
+    {
+        $this->stateTranslations->where('state_generic_value', $this->current);
+    }
+
     public function classDescr()
     {
         $nice = collect([
@@ -68,5 +73,15 @@ class Sensor extends BaseModel
     public function events()
     {
         return $this->morphMany(Eventlog::class, 'events', 'type', 'reference');
+    }
+
+    public function stateIndexes()
+    {
+        return $this->belongsToMany(StateIndex::class, 'sensors_to_state_indexes', 'sensor_id', 'state_index_id');
+    }
+
+    public function stateTranslations()
+    {
+        return $this->belongsToMany(StateTranslation::class, 'sensors_to_state_indexes', 'sensor_id', 'state_index_id', 'state_index_id', 'state_index_id');
     }
 }
