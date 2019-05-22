@@ -7,3 +7,11 @@ over:
     - { graph: device_bits, text: 'Device Traffic' }
     - { graph: device_wireless_clients, text: 'Connected Clients' }
     - { graph: device_wireless_ccq, text: 'Connection Quality' }
+discovery:
+    -
+        sysObjectID:
+            - .1.3.6.1.4.1.10002.1
+            - .1.3.6.1.4.1.8072.3.2.10
+        snmpgetnext:
+            oid: 'IEEE802dot11-MIB::dot11manufacturerProductName'
+            value: UAP

@@ -173,30 +173,21 @@ function getHostOS($device)
 
     d_echo("| {$device['sysDescr']} | {$device['sysObjectID']} | \n");
 
-    $deferred_os = array(
+    $deferred_os = [
         'freebsd',
         'linux',
-    );
+    ];
 
     // check yaml files
     $os_defs = Config::get('os');
     foreach ($os_defs as $os => $def) {
         if (isset($def['discovery']) && !in_array($os, $deferred_os)) {
             foreach ($def['discovery'] as $item) {
+                c_echo('OS: ' . $os . PHP_EOL);
                 if (checkDiscovery($device, $item)) {
                     return $os;
                 }
             }
-        }
-    }
-
-    // check include files
-    $os = null;
-    $pattern = Config::get('install_dir') . '/includes/discovery/os/*.inc.php';
-    foreach (glob($pattern) as $file) {
-        include $file;
-        if (isset($os)) {
-            return $os;
         }
     }
 
@@ -251,13 +242,16 @@ function checkDiscovery($device, $array)
             if (preg_match_any($device['sysObjectID'], $value) == $check) {
                 return false;
             }
-        } elseif ($key == 'snmpget') {
-            $options = isset($value['options']) ? $value['options'] : '-Oqv';
-            $mib = isset($value['mib']) ? $value['mib'] : null;
-            $mib_dir = isset($value['mib_dir']) ? $value['mib_dir'] : null;
-            $op = isset($value['op']) ? $value['op'] : 'contains';
+        } elseif ($key == 'snmpget' || $key == 'snmpgetnext') {
+            $options = $value['options'] ?? '-Oqv';
+            $mib = $value['mib'] ?? null;
+            $mib_dir = $value['mib_dir'] ?? null;
+            $op = $value['op'] ?? 'contains';
 
-            $get_value = snmp_get($device, $value['oid'], $options, $mib, $mib_dir);
+            $get_value = $key == 'snmpget' ?
+                snmp_get($device, $value['oid'], $options, $mib, $mib_dir) :
+                snmp_getnext($device, $value['oid'], $options, $mib, $mib_dir);
+
             if (compare_var($get_value, $value['value'], $op) == $check) {
                 return false;
             }
