@@ -178,31 +178,54 @@ function getHostOS($device)
         'linux',
     ];
 
-    // check yaml files
-    $os_defs = Config::get('os');
-    foreach ($os_defs as $os => $def) {
-        if (isset($def['discovery']) && !in_array($os, $deferred_os)) {
+    foreach (getSortedOsForDiscovery($deferred_os) as $tier => $defs) {
+        foreach ($defs as $def) {
             foreach ($def['discovery'] as $item) {
-                c_echo('OS: ' . $os . PHP_EOL);
                 if (checkDiscovery($device, $item)) {
-                    return $os;
-                }
-            }
-        }
-    }
-
-    // check deferred os
-    foreach ($deferred_os as $os) {
-        if (isset($os_defs[$os]['discovery'])) {
-            foreach ($os_defs[$os]['discovery'] as $item) {
-                if (checkDiscovery($device, $item)) {
-                    return $os;
+                    return $def['os'];
                 }
             }
         }
     }
 
     return 'generic';
+}
+
+/**
+ * Get discoverable OS grouped by simple (sysDescr and sysObjectID), snmp, and deferred
+ * deferred os are given by name
+ *
+ * @param array $deferred
+ * @return mixed
+ */
+function getSortedOsForDiscovery($deferred = [])
+{
+    return array_reduce(Config::get('os'), function ($defs, $os) use ($deferred) {
+        // deferred
+        if (in_array($os['os'], $deferred)) {
+            $defs['deferred'][] = $os;
+            return $defs;
+        }
+
+        // snmpgets
+        if (isset($os['discovery'])) {
+            foreach ($os['discovery'] as $group) {
+                foreach ($group as $key => $vars) {
+                    if (str_contains($key, 'snmpget')) {
+                        $defs['snmp'][] = $os;
+                        return $defs;
+                    }
+                }
+            }
+
+            // simple sysDescr and sysObjectID checks
+            $defs['simple'][] = $os;
+            return $defs;
+        }
+
+        // no discovery
+        return $defs;
+    }, ['simple' => [], 'snmp' => [], 'deferred' => []]);
 }
 
 /**
