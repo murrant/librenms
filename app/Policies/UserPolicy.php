@@ -9,6 +9,13 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
+    public function before($user, $ability)
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+    }
+
     /**
      * Determine whether the user can manage users.
      *
@@ -17,7 +24,7 @@ class UserPolicy
      */
     public function manage(User $user)
     {
-        return $user->isAdmin();
+        return false;
     }
 
     /**
@@ -29,7 +36,7 @@ class UserPolicy
      */
     public function view(User $user, User $target)
     {
-        return $user->isAdmin() || $target->is($user);
+        return $target->is($user);
     }
 
     /**
@@ -40,7 +47,7 @@ class UserPolicy
      */
     public function create(User $user)
     {
-        return $user->isAdmin();
+        return false;
     }
 
     /**
@@ -52,7 +59,7 @@ class UserPolicy
      */
     public function update(User $user, User $target)
     {
-        return $user->isAdmin() || $target->is($user);
+        return $target->is($user); // fields restricted by validation/controller
     }
 
     /**
@@ -64,6 +71,6 @@ class UserPolicy
      */
     public function delete(User $user, User $target)
     {
-        return $user->isAdmin();
+        return false;
     }
 }
