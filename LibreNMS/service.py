@@ -385,7 +385,7 @@ class Service:
             return
 
         info('Restarting service... ')
-        self._stop_managers_and_wait()
+        self._stop_managers()
         self._release_master()
 
         python = sys.executable
@@ -406,7 +406,7 @@ class Service:
         :param _unused:
         :param _:
         """
-        info('Shutting down, waiting for running jobs to complete...')
+        info('Shutting down...')
 
         self.stop_dispatch_timers()
         self._release_master()
@@ -414,7 +414,7 @@ class Service:
         self.daily_timer.stop()
         self.stats_timer.stop()
 
-        self._stop_managers_and_wait()
+        self._stop_managers()
 
         # try to release master lock
         info('Shutdown of %s/%s complete', os.getpid(), threading.current_thread().name)
@@ -441,13 +441,19 @@ class Service:
             except AttributeError:
                 pass
 
+    def _stop_managers(self):
+        """
+        Send the stop signal to all QueueManagers
+        """
+        for manager in self.queue_managers.values():
+            manager.stop()
+
     def _stop_managers_and_wait(self):
         """
         Stop all QueueManagers, and wait for their processing threads to complete.
         We send the stop signal to all QueueManagers first, then wait for them to finish.
         """
-        for manager in self.queue_managers.values():
-            manager.stop()
+        self._stop_managers()
 
         for manager in self.queue_managers.values():
             manager.stop_and_wait()
