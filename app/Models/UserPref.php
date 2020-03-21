@@ -68,7 +68,7 @@ class UserPref extends BaseModel
 
     public function setValueAttribute($value)
     {
-        if (is_array($value)) {
+        if (is_array($value) || is_bool($value)) {
             $this->attributes['value'] = json_encode($value);
         } else {
             $this->attributes['value'] = $value;
