@@ -1111,12 +1111,7 @@ function format_hostname($device, $hostname = null)
  */
 function get_port_assoc_modes()
 {
-    return [
-        1 => 'ifIndex',
-        2 => 'ifName',
-        3 => 'ifDescr',
-        4 => 'ifAlias',
-    ];
+    return \App\Models\Port::associationModes();
 }
 
 /**

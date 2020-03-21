@@ -110,6 +110,7 @@ class UserPreferencesController extends Controller
                 'required',
                 Rule::in(array_merge(['default'], array_keys($this->getValidStyles()))),
             ],
+            'device_add_advanced' => 'required|boolean',
         ];
 
         $this->validate($request, [
@@ -142,7 +143,7 @@ class UserPreferencesController extends Controller
 
     private function updatePreference($preference, $value)
     {
-        if ($value == 'default') {
+        if ($value === 'default') {
             UserPref::forgetPref(Auth::user(), $preference);
             if (in_array($preference, $this->cachedPreferences)) {
                 Session::forget('preferences.' . $preference);
