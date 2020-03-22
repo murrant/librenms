@@ -26,6 +26,7 @@ class DeviceController extends Controller
      */
     public function create()
     {
+        /** @var User $user */
         $user = auth()->user();
 
         return view('device.create', [
