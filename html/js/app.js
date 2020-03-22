@@ -210,9 +210,17 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       advanced: this.data.advanced,
+      results: [{
+        hostname: 'one',
+        status: 'failed'
+      }, {
+        hostname: 'two',
+        status: 'success'
+      }],
       hostname: null,
       override_ip: null,
       type: 'snmpv2',
+      poller_group: this.data.default_poller_group,
       port: null,
       proto: 'udp',
       transport: '4',

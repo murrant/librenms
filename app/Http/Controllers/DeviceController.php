@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PollerGroups;
+use App\Models\Port;
 use App\Models\User;
 use App\Models\UserPref;
 use Illuminate\Http\Request;
@@ -33,7 +35,10 @@ class DeviceController extends Controller
             'data' => [
                 'advanced' => UserPref::getPref($user, 'device_add_advanced'),
                 'port_association' => Config::get('default_port_association_mode'),
-            ]
+                'default_poller_group' => Config::get('distributed_poller_group'),
+            ],
+            'port_association_modes' => Port::associationModes(),
+            'poller_groups' => PollerGroups::query()->orderBy('group_name')->pluck('group_name', 'id'),
         ]);
     }
 
