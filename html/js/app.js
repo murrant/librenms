@@ -735,7 +735,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
     },
     initialSection: String,
     tabs: {
-      type: Array
+      type: Object
     }
   },
   data: function data() {
@@ -837,7 +837,6 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
       if (_.isEmpty(this.settings)) {
         var sorted_tabs = {};
-        console.log(this.tabs);
         this.tabs.sort(function (a, b) {
           return _this3.translatedCompare('settings.groups.', a, b);
         }).forEach(function (tab) {
