@@ -41,6 +41,23 @@
                                         </div>
                                     </div>
 
+                                    @config('distributed_poller')
+                                    <div class="form-group" v-show="advanced" @if(!$data['advanced']) style="display:none" @endif>
+                                        <label for="poller_group" class="col-sm-3 control-label">@lang('Poller Group')</label>
+                                        <div class="col-sm-9">
+                                            <div class="input-group">
+                                                <select name="poller_group" id="poller_group" class="form-control input-sm" v-model.number="poller_group">
+                                                    <option value="0"> Default poller group</option>
+                                                    @foreach($poller_groups as $id => $group)
+                                                        <option value="{{ $id }}" @if($id == $data['default_poller_group']) selected @endif>{{ $group }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <span class="input-group-addon"><i class="fa fa-fw fa-lg fa-question-circle has-tooltip"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endconfig
+
                                     <div class="form-group">
                                         <label class="col-sm-3 control-label">@lang('Type')</label>
                                         <div class="col-sm-9">
@@ -148,7 +165,7 @@
                                         <div class="col-sm-3">
                                             <div class="input-group">
                                                 <select name="port_association" id="port_association" class="form-control input-sm" v-model="port_association">
-                                                    @foreach(\App\Models\Port::associationModes() as $mode)
+                                                    @foreach($port_association_modes as $mode)
                                                         <option value="{{ $mode }}">{{ $mode }}</option>
                                                     @endforeach
                                                 </select>
@@ -197,6 +214,11 @@
                                     </div>
                                 </form>
                             </div>
+                        </div>
+                    </div>
+                    <div class="col-md-offset-1 col-md-10">
+                        <div :class="['alert', result.status === 'success' ? 'alert-success' : 'alert-danger']" v-for="result in results">
+                            @{{ result.hostname }}
                         </div>
                     </div>
                 </div>

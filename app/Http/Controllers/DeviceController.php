@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Facades\DeviceCache;
 use App\Models\Device;
+use App\Models\PollerGroup;
+use App\Models\Port;
 use App\Models\UserPref;
 use App\Models\Vminfo;
 use Carbon\Carbon;
@@ -228,7 +230,10 @@ class DeviceController extends Controller
             'data' => [
                 'advanced' => UserPref::getPref($user, 'device_add_advanced'),
                 'port_association' => Config::get('default_port_association_mode'),
-            ]
+                'default_poller_group' => Config::get('distributed_poller_group'),
+            ],
+            'port_association_modes' => Port::associationModes(),
+            'poller_groups' => PollerGroup::query()->orderBy('group_name')->pluck('group_name', 'id'),
         ]);
     }
 
