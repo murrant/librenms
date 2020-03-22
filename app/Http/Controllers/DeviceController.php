@@ -44,6 +44,16 @@ class DeviceController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'type' => 'required|in:snmpv1,snmpv2,snmpv3,ping',
+            'hostname' => 'required|ip_or_hostname',
+            'override_ip' => 'nullable|ip',
+            'port' => 'nullable|integer|between:0,65535',
+            'transport' => 'required|in:4,6,auto',
+            'sysname' => 'nullable|string',
+            'os' => 'nullable|string',
+            'hardware' => 'nullable|string',
+        ]);
 
         return response()->json($request->all());
     }

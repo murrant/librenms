@@ -22,7 +22,7 @@ Route::group(['middleware' => ['auth', '2fa'], 'guard' => 'auth'], function () {
     })->where('sub', '.*');
 
     // pages
-    Route::resource('device', 'DeviceController')->only(['create']);
+    Route::resource('device', 'DeviceController')->only(['create', 'store']);
     Route::resource('device-groups', 'DeviceGroupController');
     Route::get('poller', 'PollerController@pollerTab');
     Route::get('poller/log', 'PollerController@logTab');
