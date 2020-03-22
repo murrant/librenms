@@ -30,7 +30,10 @@
                                     <div class="form-group">
                                         <label for="hostname" class="col-sm-3 control-label">@lang('Hostname or IP')</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control input-sm" id="hostname" placeholder="@lang('Hostname')" v-model="hostname">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control input-sm" id="hostname" placeholder="@lang('Hostname')" v-model="hostname">
+                                                <span class="input-group-addon" id="basic-addon2"><i class="fa fa-fw fa-lg fa-question-circle has-tooltip"></i></span>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -59,10 +62,11 @@
                                         <label for="community" class="col-sm-3 control-label">Community</label>
                                         <div class="col-sm-6">
                                             <input type="text" class="form-control input-sm" id="community" placeholder="@lang('Leave blank to use default')">
+                                            <i class="fa fa-fw fa-lg fa-question-circle has-tooltip"></i>
                                         </div>
                                         <div class="col-sm-3">
                                             <a href="{{ route('settings') . '/poller/snmp' }}">
-                                                <button class="btn btn-default btn-sm">@lang('Configure Default')</button>
+                                                <button type="button" class="btn btn-default btn-sm">@lang('Configure Default')</button>
                                             </a>
                                         </div>
                                     </div>
