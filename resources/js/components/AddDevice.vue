@@ -31,6 +31,8 @@
         data() {
             return {
                 advanced: this.data.advanced,
+                hostname: null,
+                override_ip: null,
                 type: 'snmpv2',
                 port: null,
                 proto: 'udp',
@@ -38,16 +40,54 @@
                 sysname: null,
                 os: null,
                 hardware: null,
-                port_association: this.data.port_association
+                port_association: this.data.port_association,
+                auth_level: 'noAuthNoPriv',
+                auth_algo: 'MD5',
+                auth_name: null,
+                auth_pass: null,
+                crypto_algo: 'AES',
+                crypto_pass: null
             }
         },
         methods: {
+            activeClass(active) {
+                return active ? 'active list-bold' : ''
+            },
             toggleAdvanced(event) {
                 this.advanced = event.value;
                 axios.post(route('preferences.store'), {pref: 'device_add_advanced', value: event.value})
                     .catch((error) => {
                         console.log('Failed to toggle advanced persistent preference')
                     })
+            },
+            addDevice(event) {
+                console.log(event);
+                let formData = {
+                    hostname: this.hostname,
+                    override_ip: this.override_ip,
+                    type: this.type,
+                    port: this.port,
+                    proto: this.proto,
+                    transport: this.transport,
+                    sysname: this.sysname,
+                    os: this.os,
+                    hardware: this.hardware,
+                    port_association: this.port_association,
+                    auth_level: this.auth_level,
+                    auth_algo: this.auth_algo,
+                    auth_name: this.auth_name,
+                    auth_pass: this.auth_pass,
+                    crypto_algo: this.crypto_algo,
+                    crypt_pass: this.crypt_pass
+                };
+
+                axios.post(route('device.store'), formData)
+                    .then((event) => {
+                        console.log(event)
+                    })
+                    .catch((event) => {
+                        console.log(event)
+                    });
             }
         }
     }
