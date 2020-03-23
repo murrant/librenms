@@ -218,14 +218,15 @@
                     </div>
                     <div class="col-md-offset-1 col-md-10">
                         <div :class="['alert', resultStatusClass(result.status)]" v-for="result in results" style="display: none" v-show="results.length > 0">
-                            <h4 v-if="result.status === 'success'"><a :href="'{{ url('/') . '/device/device=' }}' + result.device_id">@{{ result.hostname }}</a></h4>
+                            <h4 v-if="result.status === 'success'"><a :href="'{{ url('/') . '/device/device=' }}' + result.device_id">@{{ result.hostname }} <span v-if="result.status === 'canceled'">@lang('Canceled')</span></a></h4>
                             <h4 v-else>@{{ result.hostname }}</h4>
                             <div class="row">
                                 <div class="col-sm-12">
                                     <i v-if="result.status === 'pending'" class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
                                     <span class="pull-right">
-                                        <button v-if="result.status === 'failed'" type="button" class="btn btn-sm btn-default">@lang('Edit')</button>
+                                        <button v-if="result.status === 'failed' || result.status === 'canceled'" type="button" class="btn btn-sm btn-default" @click="restoreFormState(result.data)">@lang('Edit')</button>
                                         <button v-if="result.status === 'failed'" type="button" class="btn btn-sm btn-default">@lang('Force Add')</button>
+                                        <button v-if="result.status === 'pending'" type="button" class="btn btn-sm btn-default" @click="result.status = 'canceled'">@lang('Cancel')</button>
                                     </span>
                                 </div>
                             </div>

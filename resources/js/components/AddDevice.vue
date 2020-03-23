@@ -52,6 +52,19 @@
                 crypto_pass: null
             }
         },
+        mounted() {
+            var isDirty = function() { return false; }
+
+
+            window.addEventListener("beforeunload", event => {
+                if (this.hasPendingResults()) {
+                    let confirmationMessage = 'You still have pending device add requests.';
+
+                    (event || window.event).returnValue = confirmationMessage; //Gecko + IE
+                    return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+                }
+            });
+        },
         methods: {
             activeClass(active) {
                 return active ? 'active list-bold' : ''
@@ -62,6 +75,9 @@
                     .catch((error) => {
                         console.log('Failed to toggle advanced persistent preference')
                     })
+            },
+            hasPendingResults() {
+                return this.results.some(result => result.status === 'pending')
             },
             findResult(hostname) {
                 return this.results.find( result => result['hostname'] === hostname)
@@ -74,26 +90,7 @@
                 return status === 'success' ? 'alert-success' : 'alert-danger'
             },
             addDevice(event) {
-                let formData = {
-                    hostname: this.hostname,
-                    override_ip: this.override_ip,
-                    poller_group: this.poller_group,
-                    type: this.type,
-                    port: this.port,
-                    proto: this.proto,
-                    transport: this.transport,
-                    community: this.community,
-                    sysname: this.sysname,
-                    os: this.os,
-                    hardware: this.hardware,
-                    port_association: this.port_association,
-                    auth_level: this.auth_level,
-                    auth_algo: this.auth_algo,
-                    auth_name: this.auth_name,
-                    auth_pass: this.auth_pass,
-                    crypto_algo: this.crypto_algo,
-                    crypto_pass: this.crypto_pass
-                };
+                let formData = this.collectFormState();
 
                 let existing = this.findResult(this.hostname);
                 if (existing) {
@@ -114,10 +111,52 @@
                         pending['device_id'] = event.data.device_id;
                     })
                     .catch((event) => {
-                        let pending = this.findResult(event.data.hostname);
-                        pending['status'] = 'failed';
-
+                        console.log(event);
+                        // let pending = this.findResult(event.data.hostname);
+                        // pending['status'] = 'failed';
                     });
+            },
+            collectFormState() {
+                return {
+                    hostname: this.hostname,
+                    override_ip: this.override_ip,
+                    poller_group: this.poller_group,
+                    type: this.type,
+                    port: this.port,
+                    proto: this.proto,
+                    transport: this.transport,
+                    community: this.community,
+                    sysname: this.sysname,
+                    os: this.os,
+                    hardware: this.hardware,
+                    port_association: this.port_association,
+                    auth_level: this.auth_level,
+                    auth_algo: this.auth_algo,
+                    auth_name: this.auth_name,
+                    auth_pass: this.auth_pass,
+                    crypto_algo: this.crypto_algo,
+                    crypto_pass: this.crypto_pass
+                };
+            },
+            restoreFormState(state) {
+                this.hostname = state.hostname;
+                this.override_ip = state.override_ip;
+                this.poller_group = state.poller_group;
+                this.type = state.type;
+                this.port = state.port;
+                this.proto = state.proto;
+                this.transport = state.transport;
+                this.community = state.community;
+                this.sysname = state.sysname;
+                this.os = state.os;
+                this.hardware = state.hardware;
+                this.port_association = state.port_association;
+                this.auth_level = state.auth_level;
+                this.auth_algo = state.auth_algo;
+                this.auth_name = state.auth_name;
+                this.auth_pass = state.auth_pass;
+                this.crypto_algo = state.crypto_algo;
+                this.crypto_pass = state.crypto_pass;
             }
         }
     }
