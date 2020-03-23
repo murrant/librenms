@@ -215,15 +215,20 @@ __webpack_require__.r(__webpack_exports__);
         status: 'failed'
       }, {
         hostname: 'two',
-        status: 'success'
+        status: 'pending'
+      }, {
+        hostname: 'three',
+        status: 'success',
+        device_id: 42
       }],
       hostname: null,
       override_ip: null,
-      type: 'snmpv2',
       poller_group: this.data.default_poller_group,
+      type: 'snmpv2',
       port: null,
       proto: 'udp',
       transport: '4',
+      community: null,
       sysname: null,
       os: null,
       hardware: null,
@@ -249,15 +254,30 @@ __webpack_require__.r(__webpack_exports__);
         console.log('Failed to toggle advanced persistent preference');
       });
     },
+    findResult: function findResult(hostname) {
+      return this.results.find(function (result) {
+        return result['hostname'] === hostname;
+      });
+    },
+    resultStatusClass: function resultStatusClass(status) {
+      if (status === 'pending') {
+        return 'alert-info';
+      }
+
+      return status === 'success' ? 'alert-success' : 'alert-danger';
+    },
     addDevice: function addDevice(event) {
-      console.log(event);
+      var _this = this;
+
       var formData = {
         hostname: this.hostname,
         override_ip: this.override_ip,
+        poller_group: this.poller_group,
         type: this.type,
         port: this.port,
         proto: this.proto,
         transport: this.transport,
+        community: this.community,
         sysname: this.sysname,
         os: this.os,
         hardware: this.hardware,
@@ -267,12 +287,30 @@ __webpack_require__.r(__webpack_exports__);
         auth_name: this.auth_name,
         auth_pass: this.auth_pass,
         crypto_algo: this.crypto_algo,
-        crypt_pass: this.crypt_pass
+        crypto_pass: this.crypto_pass
       };
+      var existing = this.findResult(this.hostname);
+
+      if (existing) {
+        existing['data'] = formData;
+        existing['status'] = 'pending';
+      } else {
+        this.results.unshift({
+          hostname: this.hostname,
+          data: formData,
+          status: 'pending'
+        });
+      }
+
       axios.post(route('device.store'), formData).then(function (event) {
-        console.log(event);
+        var pending = _this.findResult(event.data.hostname);
+
+        pending['status'] = 'success';
+        pending['device_id'] = event.data.device_id;
       })["catch"](function (event) {
-        console.log(event);
+        var pending = _this.findResult(event.data.hostname);
+
+        pending['status'] = 'failed';
       });
     }
   }
