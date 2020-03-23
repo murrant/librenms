@@ -241,6 +241,22 @@ __webpack_require__.r(__webpack_exports__);
       crypto_pass: null
     };
   },
+  mounted: function mounted() {
+    var _this = this;
+
+    var isDirty = function isDirty() {
+      return false;
+    };
+
+    window.addEventListener("beforeunload", function (event) {
+      if (_this.hasPendingResults()) {
+        var confirmationMessage = 'You still have pending device add requests.';
+        (event || window.event).returnValue = confirmationMessage; //Gecko + IE
+
+        return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+      }
+    });
+  },
   methods: {
     activeClass: function activeClass(active) {
       return active ? 'active list-bold' : '';
@@ -252,6 +268,11 @@ __webpack_require__.r(__webpack_exports__);
         value: event.value
       })["catch"](function (error) {
         console.log('Failed to toggle advanced persistent preference');
+      });
+    },
+    hasPendingResults: function hasPendingResults() {
+      return this.results.some(function (result) {
+        return result.status === 'pending';
       });
     },
     findResult: function findResult(hostname) {
@@ -267,9 +288,34 @@ __webpack_require__.r(__webpack_exports__);
       return status === 'success' ? 'alert-success' : 'alert-danger';
     },
     addDevice: function addDevice(event) {
-      var _this = this;
+      var _this2 = this;
 
-      var formData = {
+      var formData = this.collectFormState();
+      var existing = this.findResult(this.hostname);
+
+      if (existing) {
+        existing['data'] = formData;
+        existing['status'] = 'pending';
+      } else {
+        this.results.unshift({
+          hostname: this.hostname,
+          data: formData,
+          status: 'pending'
+        });
+      }
+
+      axios.post(route('device.store'), formData).then(function (event) {
+        var pending = _this2.findResult(event.data.hostname);
+
+        pending['status'] = 'success';
+        pending['device_id'] = event.data.device_id;
+      })["catch"](function (event) {
+        console.log(event); // let pending = this.findResult(event.data.hostname);
+        // pending['status'] = 'failed';
+      });
+    },
+    collectFormState: function collectFormState() {
+      return {
         hostname: this.hostname,
         override_ip: this.override_ip,
         poller_group: this.poller_group,
@@ -289,29 +335,26 @@ __webpack_require__.r(__webpack_exports__);
         crypto_algo: this.crypto_algo,
         crypto_pass: this.crypto_pass
       };
-      var existing = this.findResult(this.hostname);
-
-      if (existing) {
-        existing['data'] = formData;
-        existing['status'] = 'pending';
-      } else {
-        this.results.unshift({
-          hostname: this.hostname,
-          data: formData,
-          status: 'pending'
-        });
-      }
-
-      axios.post(route('device.store'), formData).then(function (event) {
-        var pending = _this.findResult(event.data.hostname);
-
-        pending['status'] = 'success';
-        pending['device_id'] = event.data.device_id;
-      })["catch"](function (event) {
-        var pending = _this.findResult(event.data.hostname);
-
-        pending['status'] = 'failed';
-      });
+    },
+    restoreFormState: function restoreFormState(state) {
+      this.hostname = state.hostname;
+      this.override_ip = state.override_ip;
+      this.poller_group = state.poller_group;
+      this.type = state.type;
+      this.port = state.port;
+      this.proto = state.proto;
+      this.transport = state.transport;
+      this.community = state.community;
+      this.sysname = state.sysname;
+      this.os = state.os;
+      this.hardware = state.hardware;
+      this.port_association = state.port_association;
+      this.auth_level = state.auth_level;
+      this.auth_algo = state.auth_algo;
+      this.auth_name = state.auth_name;
+      this.auth_pass = state.auth_pass;
+      this.crypto_algo = state.crypto_algo;
+      this.crypto_pass = state.crypto_pass;
     }
   }
 });

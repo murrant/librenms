@@ -82,8 +82,12 @@ class DeviceController extends Controller
         ]);
 
         $all = $request->all();
-        $all['device_id'] = 1;
-        return response()->json($all);
+        $all['device_id'] = rand(1, 432);
+        if (rand(0,1)) {
+            return response()->json($all);
+        } else {
+            return response()->json($all, 406);
+        }
     }
 
     /**
