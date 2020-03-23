@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Validation\Rule;
 use LibreNMS\Config;
 use LibreNMS\Util\Debug;
 use LibreNMS\Util\Graph;
@@ -220,9 +221,12 @@ class DeviceController extends Controller
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response|\Illuminate\View\View
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function create()
     {
+        $this->authorize('create', \App\Models\Device::class);
+
         /** @var \App\Models\User $user */
         $user = auth()->user();
 
@@ -245,18 +249,35 @@ class DeviceController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', $request->user());
+
+        $v3auth = $request->get('type') == 'snmpv3' && in_array($request->get('auth_level'), ['authNoPriv', 'authPriv']);
+        $v3crypto = $request->get('type') == 'snmpv3' && $request->get('auth_level') == 'authPriv';
+
         $this->validate($request, [
             'type' => 'required|in:snmpv1,snmpv2,snmpv3,ping',
             'hostname' => 'required|ip_or_hostname',
             'override_ip' => 'nullable|ip',
-            'port' => 'nullable|integer|between:0,65535',
+            'proto' => 'required|in:udp,tcp',
             'transport' => 'required|in:4,6,auto',
+            'port' => 'nullable|integer|between:0,65535',
+            'community' => 'nullable|string',
             'sysname' => 'nullable|string',
             'os' => 'nullable|string',
             'hardware' => 'nullable|string',
+            'poller_group' => 'nullable|integer',
+            'port_association' => ['required_unless:type,ping', Rule::in(Port::associationModes())],
+            'auth_level' => 'required_if:type,snmpv3|in:noAuthNoPriv,authNoPriv,authPriv',
+            'auth_algo' => [Rule::requiredIf($v3auth), Rule::in(['MD5', 'SHA'])],
+            'auth_name' => [Rule::requiredIf($v3auth), 'nullable', 'string'],
+            'auth_pass' => [Rule::requiredIf($v3auth), 'nullable', 'string'],
+            'crypto_algo' => [Rule::requiredIf($v3crypto), Rule::in(['AES', 'DES'])],
+            'crypto_pass' => [Rule::requiredIf($v3crypto), 'nullable', 'string'],
         ]);
 
-        return response()->json($request->all());
+        $all = $request->all();
+        $all['device_id'] = 1;
+        return response()->json($all);
     }
 
     /**
