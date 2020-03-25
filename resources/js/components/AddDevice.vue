@@ -55,7 +55,6 @@
         mounted() {
             var isDirty = function() { return false; }
 
-
             window.addEventListener("beforeunload", event => {
                 if (this.hasPendingResults()) {
                     let confirmationMessage = 'You still have pending device add requests.';
@@ -104,17 +103,20 @@
                     });
                 }
 
+                this.clearFormState();
+
                 axios.post(route('device.store'), formData)
-                    .then((event) => {
+                    .then(event => {
                         let pending = this.findResult(event.data.hostname);
                         pending['status'] = 'success';
                         pending['device_id'] = event.data.device_id;
                     })
-                    .catch((event) => {
-                        console.log(event);
-                        // let pending = this.findResult(event.data.hostname);
-                        // pending['status'] = 'failed';
-                    });
+                    // .catch(event => {
+                    //     console.log(error.response.status);
+                    //     console.log(event.response);
+                    //     // let pending = this.findResult(event.data.hostname);
+                    //     // pending['status'] = 'failed';
+                    // })
             },
             collectFormState() {
                 return {
@@ -157,6 +159,26 @@
                 this.auth_pass = state.auth_pass;
                 this.crypto_algo = state.crypto_algo;
                 this.crypto_pass = state.crypto_pass;
+            },
+            clearFormState() {
+                this.hostname = null;
+                this.override_ip = null;
+                this.poller_group = this.data.default_poller_group;
+                this.type = 'snmpv2';
+                this.port = 'udp';
+                this.proto = '4';
+                this.transport = null;
+                this.community = null;
+                this.sysname = null;
+                this.os = null;
+                this.hardware = null;
+                this.port_association = this.data.port_association;
+                this.auth_level = 'noAuthNoPriv';
+                this.auth_algo = 'MD5';
+                this.auth_name = null;
+                this.auth_pass = null;
+                this.crypto_algo = 'AES';
+                this.crypto_pass = null;
             }
         }
     }
