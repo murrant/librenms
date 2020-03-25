@@ -280,7 +280,7 @@ class DeviceController extends Controller
         if (rand(0,1)) {
             return response()->json($all);
         } else {
-            return response()->json($all, 406);
+            return response()->json($all, 422);
         }
     }
 
