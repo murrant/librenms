@@ -26,7 +26,7 @@
 namespace LibreNMS\Util;
 
 use LibreNMS\Config;
-use LibreNMS\Proc;
+use Symfony\Component\Process\Process;
 
 class Snmpsim
 {
@@ -34,7 +34,7 @@ class Snmpsim
     private $ip;
     private $port;
     private $log;
-    /** @var Proc $proc */
+    /** @var Process $proc */
     private $proc;
 
     public function __construct($ip = '127.1.6.1', $port = 1161, $log = '/tmp/snmpsimd.log')
@@ -58,14 +58,14 @@ class Snmpsim
             return;
         }
 
-        $cmd = $this->getCmd();
+        $this->proc = $this->makeProcess();
 
         if (isCli()) {
             echo "Starting snmpsim listening on {$this->ip}:{$this->port}... \n";
-            d_echo($cmd);
+            d_echo($this->proc->getCommandLine());
         }
 
-        $this->proc = new Proc($cmd);
+        $this->proc->start();
 
         if ($wait) {
             sleep($wait);
@@ -73,7 +73,10 @@ class Snmpsim
 
         if (isCli() && !$this->proc->isRunning()) {
             // if starting failed, run snmpsim again and output to the console and validate the data
-            passthru($this->getCmd(false) . ' --validate-data');
+            $this->makeProcess(false, ['--validate-data'])
+                ->setTty(true)
+                ->setTimeout(30)
+                ->run();
 
             if (!is_executable($this->findSnmpsimd())) {
                 echo "\nCould not find snmpsim, you can install it with 'pip install snmpsim'.  If it is already installed, make sure snmpsimd or snmpsimd.py is in PATH\n";
@@ -84,20 +87,11 @@ class Snmpsim
         }
     }
 
-    /**
-     * Stop and start the running snmpsim process
-     */
-    public function restart()
-    {
-        $this->stop();
-        $this->proc = new Proc($this->getCmd());
-    }
-
     public function stop()
     {
         if (isset($this->proc)) {
             if ($this->proc->isRunning()) {
-                $this->proc->terminate();
+                $this->proc->stop();
             }
             unset($this->proc);
         }
@@ -110,8 +104,11 @@ class Snmpsim
      */
     public function run()
     {
+        $this->proc = $this->makeProcess(false)
+            ->setTty(true);
         echo "Starting snmpsim listening on {$this->ip}:{$this->port}... \n";
-        shell_exec($this->getCmd(false));
+        d_echo($this->proc->getCommandLine());
+        $this->proc->run();
     }
 
     public function isRunning()
@@ -151,27 +148,23 @@ class Snmpsim
      * Generate the command for snmpsimd
      *
      * @param bool $with_log
-     * @return string
+     * @return array
      */
     private function getCmd($with_log = true)
     {
-        $cmd = $this->findSnmpsimd();
-
-        $cmd .= " --data-dir={$this->snmprec_dir} --agent-udpv4-endpoint={$this->ip}:{$this->port}";
+        $cmd = [
+            $this->findSnmpsimd(),
+            "--data-dir={$this->snmprec_dir}",
+            "--agent-udpv4-endpoint={$this->ip}:{$this->port}"
+        ];
 
         if (is_null($this->log)) {
-            $cmd .= " --logging-method=null";
+            $cmd[] = "--logging-method=null";
         } elseif ($with_log) {
-            $cmd .= " --logging-method=file:{$this->log}";
+            $cmd[] = "--logging-method=file:{$this->log}";
         }
 
         return $cmd;
-    }
-
-    public function __destruct()
-    {
-        // unset $this->proc to make sure it isn't referenced
-        unset($this->proc);
     }
 
     private function findSnmpsimd()
@@ -181,5 +174,12 @@ class Snmpsim
             $cmd = Config::locateBinary('snmpsimd.py');
         }
         return $cmd;
+    }
+
+    private function makeProcess($log = true, $options = [])
+    {
+        $snmpsim = new Process(array_merge($this->getCmd($log), $options));
+        $snmpsim->setTimeout(0);
+        return $snmpsim;
     }
 }
