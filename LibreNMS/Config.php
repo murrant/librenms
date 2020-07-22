@@ -403,12 +403,7 @@ class Config
      */
     private static function processConfig()
     {
-        // If we're on SSL, let's properly detect it
-        if (isset($_SERVER['HTTPS'])) {
-            self::set('base_url', preg_replace('/^http:/', 'https:', self::get('base_url')));
-        }
-
-        self::set('base_url', Str::finish(self::get('base_url'), '/'));
+        self::set('base_url', self::processBaseUrl(self::get('base_url')));
 
         if (!self::get('email_from')) {
             self::set('email_from', '"' . self::get('project_name') . '" <' . self::get('email_user') . '@' . php_uname('n') . '>');
@@ -540,5 +535,15 @@ class Config
         self::set('db_pass', config("database.connections.$db.password"));
         self::set('db_port', config("database.connections.$db.port", 3306));
         self::set('db_socket', config("database.connections.$db.unix_socket"));
+    }
+
+    private static function processBaseUrl($url)
+    {
+        // If we're on SSL, let's properly detect it
+        if (isset($_SERVER['HTTPS'])) {
+            $url = preg_replace('/^http:/', 'https:', $url);
+        }
+
+        return $url ? Str::finish($url, '/') : $url;
     }
 }
