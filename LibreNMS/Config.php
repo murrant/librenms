@@ -30,6 +30,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use LibreNMS\DB\Eloquent;
+use LibreNMS\Util\Laravel;
 use Log;
 
 class Config
@@ -81,12 +82,12 @@ class Config
      */
     public static function getDefinitions()
     {
-        return json_decode(file_get_contents(base_path('misc/config_definitions.json')), true)['config'];
+        return json_decode(file_get_contents(self::basePath('misc/config_definitions.json')), true)['config'];
     }
 
     private static function loadDefaults()
     {
-        self::$config['install_dir'] = base_path();
+        self::$config['install_dir'] = self::basePath();
         $definitions = self::getDefinitions();
 
         foreach ($definitions as $path => $def) {
@@ -96,7 +97,7 @@ class Config
         }
 
         // load macros from json
-        $macros = json_decode(file_get_contents(base_path('misc/macros.json')), true);
+        $macros = json_decode(file_get_contents(self::basePath('misc/macros.json')), true);
         Arr::set(self::$config, 'alert.macros.rule', $macros);
 
         self::processDefaults();
@@ -109,7 +110,7 @@ class Config
     private static function loadUserConfigFile(&$config)
     {
         // Load user config file
-        @include base_path('config.php');
+        @include self::basePath('config.php');
     }
 
     /**
@@ -377,7 +378,7 @@ class Config
      */
     private static function processDefaults()
     {
-        Arr::set(self::$config, 'log_dir', base_path('logs'));
+        Arr::set(self::$config, 'log_dir', self::basePath('logs'));
         Arr::set(self::$config, 'distributed_poller_name', php_uname('n'));
 
         // set base_url from access URL
@@ -533,13 +534,21 @@ class Config
 
     public static function populateLegacyDbCredentials()
     {
-        $db = config('database.default');
+        $config = Eloquent::getConfig();
+        $db = $config['default'] ?? 'mysql';
 
-        self::set('db_host', config("database.connections.$db.host", 'localhost'));
-        self::set('db_name', config("database.connections.$db.database", 'librenms'));
-        self::set('db_user', config("database.connections.$db.username", 'librenms'));
-        self::set('db_pass', config("database.connections.$db.password"));
-        self::set('db_port', config("database.connections.$db.port", 3306));
-        self::set('db_socket', config("database.connections.$db.unix_socket"));
+        self::set('db_host', $config['connections'][$db]['host'] ?? 'localhost');
+        self::set('db_name', $config['connections'][$db]['database'] ?? 'librenms');
+        self::set('db_user', $config['connections'][$db]['username'] ?? 'librenms');
+        self::set('db_pass', $config['connections'][$db]['password'] ?? null);
+        self::set('db_port', $config['connections'][$db]['port'] ?? 3306);
+        self::set('db_socket', $config['connections'][$db]['database'] ?? null);
+    }
+
+    private static function basePath($path = null)
+    {
+        return Laravel::isBooted()
+            ? base_path($path)
+            : realpath(__DIR__ . '/..') . "/$path";
     }
 }

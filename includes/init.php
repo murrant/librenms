@@ -28,6 +28,7 @@
 
 use LibreNMS\Authentication\LegacyAuth;
 use LibreNMS\Config;
+use LibreNMS\Validations\Php;
 
 global $vars, $console_color;
 
@@ -85,10 +86,12 @@ if (module_selected('alerts', $init_modules)) {
 }
 
 // Boot Laravel
-if (module_selected('web', $init_modules)) {
-    \LibreNMS\Util\Laravel::bootWeb(module_selected('auth', $init_modules));
-} else {
-    \LibreNMS\Util\Laravel::bootCli();
+if (version_compare(PHP_VERSION, Php::PHP_MIN_VERSION, '>=')) {
+    if (module_selected('web', $init_modules)) {
+        \LibreNMS\Util\Laravel::bootWeb(module_selected('auth', $init_modules));
+    } else {
+        \LibreNMS\Util\Laravel::bootCli();
+    }
 }
 
 set_debug(false); // disable debug initially (hides legacy errors too)

@@ -46,7 +46,7 @@ return [
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DATABASE_URL'),
-            'database' => env('DB_DATABASE', storage_path('librenms.sqlite')),
+            'database' => env('DB_DATABASE', realpath(__DIR__ . '/..') . 'storage/librenms.sqlite'),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
@@ -122,7 +122,7 @@ return [
 
         'testing_persistent' => [
             'driver' => 'sqlite',
-            'database' => storage_path('testing.sqlite'),
+            'database' => realpath(__DIR__ . '/..') . 'storage/testing.sqlite',
             'prefix' => '',
             'foreign_key_constraints' => true,
         ],

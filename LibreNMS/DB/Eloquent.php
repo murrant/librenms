@@ -39,11 +39,9 @@ class Eloquent
     {
         // boot Eloquent outside of Laravel
         if (! Laravel::isBooted() && is_null(self::$capsule)) {
-            $install_dir = realpath(__DIR__ . '/../../');
+            Dotenv::createUnsafeImmutable(realpath(__DIR__ . '/../../'))->load();
 
-            Dotenv::create($install_dir)->load();
-
-            $db_config = include $install_dir . '/config/database.php';
+            $db_config = self::getConfig();
             $settings = $db_config['connections'][$db_config['default']];
 
             self::$capsule = new Capsule;
@@ -103,7 +101,7 @@ class Eloquent
      * Access the Database Manager for Fluent style queries. Like the Laravel DB facade.
      *
      * @param string $name
-     * @return \Illuminate\Database\Connection
+     * @return \Illuminate\Database\ConnectionInterface
      */
     public static function DB($name = null)
     {
@@ -119,11 +117,17 @@ class Eloquent
         return self::$capsule->getDatabaseManager()->connection($name);
     }
 
+    public static function getConfig()
+    {
+        return Laravel::isBooted()
+            ? config('database')
+            : include realpath(__DIR__ . '/../../') . '/config/database.php';
+    }
+
     public static function getDriver()
     {
-        $connection = config('database.default');
-
-        return config("database.connections.{$connection}.driver");
+        $config = self::getConfig();
+        return $config['connections'][$config['default']]['driver'] ?? 'mysql';
     }
 
     public static function setConnection($name, $db_host = null, $db_user = '', $db_pass = '', $db_name = '', $db_port = null, $db_socket = null)
