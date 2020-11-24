@@ -41,16 +41,16 @@ class Msteams extends Transport
             'Content-type' => 'application/json',
             'Expect:',
         ]);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
-        if ($this->config['use-json'] === 'on' && $obj['uid'] !== '000') {
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $obj['msg']);
-        }
+        $content = $this->config['use-json'] === 'on' && $obj['uid'] !== '000'
+            ? $obj['msg']
+            : json_encode($data);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
         $ret = curl_exec($curl);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        if ($code != 200) {
-            var_dump('Microsoft Teams returned Error, retry later');
 
-            return false;
+        if ($code != 200) {
+            var_dump($content);
+            return 'Microsoft Teams returned Error: ' . $ret;
         }
 
         return true;
