@@ -1,0 +1,3610 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LibreNMS user and developer documentation">
+      
+      
+        <link rel="canonical" href="https://docs.librenms.org/Extensions/Applications/">
+      
+      
+        <meta name="author" content="LibreNMS">
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.0">
+    
+    
+      
+        <title>Applications - LibreNMS Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.bc7e593a.min.css">
+      
+    
+    
+    
+      
+        
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="../../librenms.css">
+    
+    
+      
+        
+<script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-79149977-2","docs.librenms.org"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})}),document.addEventListener("DOMContentSwitch",function(){ga("send","pageview",document.location.pathname)})</script>
+<script async src="https://www.google-analytics.com/analytics.js"></script>
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#introduction" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href="https://docs.librenms.org" title="LibreNMS Docs" class="md-header-nav__button md-logo" aria-label="LibreNMS Docs">
+      
+  <img src="../../img/librenms.svg" alt="logo">
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
+            LibreNMS Docs
+          </span>
+          <span class="md-header-nav__topic md-ellipsis">
+            
+              Applications
+            
+          </span>
+        </div>
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/librenms/librenms/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://docs.librenms.org" title="LibreNMS Docs" class="md-nav__button md-logo" aria-label="LibreNMS Docs">
+      
+  <img src="../../img/librenms.svg" alt="logo">
+
+    </a>
+    LibreNMS Docs
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/librenms/librenms/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." class="md-nav__link">
+      Home
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      1. General
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="1. General" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon"></span>
+        1. General
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Acknowledgement/" class="md-nav__link">
+      Acknowledgements
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Changelog/" class="md-nav__link">
+      Changelog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/CODE_OF_CONDUCT/" class="md-nav__link">
+      Code of Conduct
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Features/" class="md-nav__link">
+      Features
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Welcome-to-Observium-users/" class="md-nav__link">
+      Welcome to Observium users
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      2. Installing
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="2. Installing" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        <span class="md-nav__icon md-icon"></span>
+        2. Installing
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/" class="md-nav__link">
+      How to install LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Install-LibreNMS/" class="md-nav__link">
+      Install LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Images/" class="md-nav__link">
+      LibreNMS VMs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Migrating-from-Observium/" class="md-nav__link">
+      Migrating from Observium
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+    
+    <label class="md-nav__link" for="nav-4">
+      3. Getting started
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="3. Getting started" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        <span class="md-nav__icon md-icon"></span>
+        3. Getting started
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Releases/" class="md-nav__link">
+      Choosing a release
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Adding-a-Device/" class="md-nav__link">
+      Adding a device
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Groups/" class="md-nav__link">
+      Grouping Devices
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Callback-Stats-and-Privacy/" class="md-nav__link">
+      Submitting stats
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Updating/" class="md-nav__link">
+      Updating an install
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked>
+    
+    <label class="md-nav__link" for="nav-5">
+      4. Basic Setup
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="4. Basic Setup" data-md-level="1">
+      <label class="md-nav__title" for="nav-5">
+        <span class="md-nav__icon md-icon"></span>
+        4. Basic Setup
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Applications
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
+      Applications
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#snmp-extend" class="md-nav__link">
+    SNMP Extend
+  </a>
+  
+    <nav class="md-nav" aria-label="SNMP Extend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sudo" class="md-nav__link">
+    SUDO
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enable-the-application-discovery-module" class="md-nav__link">
+    Enable the application discovery module
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enable-the-applications-to-be-discovered" class="md-nav__link">
+    Enable the application(s) to be discovered
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#agent" class="md-nav__link">
+    Agent
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Agent-Setup/" class="md-nav__link">
+      Check_MK Setup
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Billing-Module/" class="md-nav__link">
+      Billing Module
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Dell-OpenManage/" class="md-nav__link">
+      Dell OpenManage
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../World-Map/" class="md-nav__link">
+      World Map
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Interface-Description-Parsing/" class="md-nav__link">
+      Interface Description Parsing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Network-Map/" class="md-nav__link">
+      Network Map
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Syslog/" class="md-nav__link">
+      Syslog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Dashboards/" class="md-nav__link">
+      Dashboards
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Supermicro/" class="md-nav__link">
+      Supermicro
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
+    
+    <label class="md-nav__link" for="nav-6">
+      5. Advanced Setup
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="5. Advanced Setup" data-md-level="1">
+      <label class="md-nav__title" for="nav-6">
+        <span class="md-nav__icon md-icon"></span>
+        5. Advanced Setup
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/1-Minute-Polling/" class="md-nav__link">
+      1 Minute Polling
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Fast-Ping-Check/" class="md-nav__link">
+      Fast Ping Checking
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Environment-Variables/" class="md-nav__link">
+      Environment Variables
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Configuration/" class="md-nav__link">
+      Configuration Docs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Authentication/" class="md-nav__link">
+      Authentication Options
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Two-Factor-Auth/" class="md-nav__link">
+      Two-Factor Auth
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Auto-Discovery/" class="md-nav__link">
+      Auto-discovery Setup
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Distributed-Poller/" class="md-nav__link">
+      Scaling LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../RRDCached/" class="md-nav__link">
+      RRDCached
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Sub-Directory/" class="md-nav__link">
+      Sub-directory Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Varnish/" class="md-nav__link">
+      Varnish
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Dispatcher-Service/" class="md-nav__link">
+      Dispatcher Service (RC)
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../RRDTune/" class="md-nav__link">
+      RRDTune
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../IRC-Bot/" class="md-nav__link">
+      IRC Bot
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../IRC-Bot-Extensions/" class="md-nav__link">
+      IRC Bot Extensions
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../SNMP-Proxy/" class="md-nav__link">
+      SNMP Proxy
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../SNMP-Trap-Handler/" class="md-nav__link">
+      SNMP Trap Handler
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Customizing-the-Web-UI/" class="md-nav__link">
+      Customizing the Web UI
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Bare-Dashboard/" class="md-nav__link">
+      Bare Dashboard
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Cleanup-options/" class="md-nav__link">
+      Cleanup Options
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+    
+    <label class="md-nav__link" for="nav-7">
+      6. 3rd Party Integration
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="6. 3rd Party Integration" data-md-level="1">
+      <label class="md-nav__title" for="nav-7">
+        <span class="md-nav__icon md-icon"></span>
+        6. 3rd Party Integration
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Gateone/" class="md-nav__link">
+      Gateone
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Graylog/" class="md-nav__link">
+      Graylog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Services/" class="md-nav__link">
+      Nagios Plugins
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../NFSen/" class="md-nav__link">
+      NFSen
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Oxidized/" class="md-nav__link">
+      Oxidized
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Rancid/" class="md-nav__link">
+      Rancid
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../PeeringDB/" class="md-nav__link">
+      PeeringDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Proxmox/" class="md-nav__link">
+      Proxmox
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-7-9" type="checkbox" id="nav-7-9">
+    
+    <label class="md-nav__link" for="nav-7-9">
+      Storing Metrics
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Storing Metrics" data-md-level="2">
+      <label class="md-nav__title" for="nav-7-9">
+        <span class="md-nav__icon md-icon"></span>
+        Storing Metrics
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Metric-Storage/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../metrics/Graphite/" class="md-nav__link">
+      Graphite
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../metrics/InfluxDB/" class="md-nav__link">
+      InfluxDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../metrics/OpenTSDB/" class="md-nav__link">
+      OpenTSDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../metrics/Prometheus/" class="md-nav__link">
+      Prometheus
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Smokeping/" class="md-nav__link">
+      Smokeping
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Weathermap/" class="md-nav__link">
+      Weathermap
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+    
+    <label class="md-nav__link" for="nav-8">
+      7. API
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="7. API" data-md-level="1">
+      <label class="md-nav__title" for="nav-8">
+        <span class="md-nav__icon md-icon"></span>
+        7. API
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/" class="md-nav__link">
+      Using the API
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Devices/" class="md-nav__link">
+      Devices
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/DeviceGroups/" class="md-nav__link">
+      DeviceGroups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Ports/" class="md-nav__link">
+      Ports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/PortGroups/" class="md-nav__link">
+      PortGroups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Alerts/" class="md-nav__link">
+      Alerts
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Routing/" class="md-nav__link">
+      Routing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Switching/" class="md-nav__link">
+      Switching
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Inventory/" class="md-nav__link">
+      Inventory
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Bills/" class="md-nav__link">
+      Bills
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/ARP/" class="md-nav__link">
+      ARP
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Services/" class="md-nav__link">
+      Services
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/System/" class="md-nav__link">
+      System
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Logs/" class="md-nav__link">
+      Logs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Locations/" class="md-nav__link">
+      Locations
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-9" type="checkbox" id="nav-9">
+    
+    <label class="md-nav__link" for="nav-9">
+      8. Alerting
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="8. Alerting" data-md-level="1">
+      <label class="md-nav__title" for="nav-9">
+        <span class="md-nav__icon md-icon"></span>
+        8. Alerting
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Introduction/" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Rules/" class="md-nav__link">
+      Rules
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Templates/" class="md-nav__link">
+      Templates
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Transports/" class="md-nav__link">
+      Transports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Creating-Transport/" class="md-nav__link">
+      Creating Transports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Entities/" class="md-nav__link">
+      Entities
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Macros/" class="md-nav__link">
+      Macros
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Testing/" class="md-nav__link">
+      Testing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Device-Dependencies/" class="md-nav__link">
+      Device Dependencies
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-10" type="checkbox" id="nav-10">
+    
+    <label class="md-nav__link" for="nav-10">
+      9. Getting help
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="9. Getting help" data-md-level="1">
+      <label class="md-nav__title" for="nav-10">
+        <span class="md-nav__icon md-icon"></span>
+        9. Getting help
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/" class="md-nav__link">
+      How to get help
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/FAQ/" class="md-nav__link">
+      FAQ
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Install%20Validation/" class="md-nav__link">
+      Install Validation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Performance/" class="md-nav__link">
+      Performance
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Discovery%20Support/" class="md-nav__link">
+      Discovery Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Poller%20Support/" class="md-nav__link">
+      Poller Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Example-Hardware-Setup/" class="md-nav__link">
+      Example Hardware Setups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Remote-Monitoring-VPN/" class="md-nav__link">
+      Remote Monitoring VPN
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/SNMP-Configuration-Examples/" class="md-nav__link">
+      SNMP Configuration Examples
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/SSL-Configuration/" class="md-nav__link">
+      SSL Configuration
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Troubleshooting/" class="md-nav__link">
+      Device Troubleshooting
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Sensors/" class="md-nav__link">
+      Device Sensors
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-11" type="checkbox" id="nav-11">
+    
+    <label class="md-nav__link" for="nav-11">
+      10. Contributing + Developing
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="10. Contributing + Developing" data-md-level="1">
+      <label class="md-nav__title" for="nav-11">
+        <span class="md-nav__icon md-icon"></span>
+        10. Contributing + Developing
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Getting-Started/" class="md-nav__link">
+      Getting Started
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Using-Git/" class="md-nav__link">
+      Using Git
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Code-Guidelines/" class="md-nav__link">
+      Code Guidelines
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Style-Guidelines/" class="md-nav__link">
+      Style Guidelines
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Validating-Code/" class="md-nav__link">
+      Validating Code
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Code-Structure/" class="md-nav__link">
+      Code Structure
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Creating-Documentation/" class="md-nav__link">
+      Creating Documentation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Licensing/" class="md-nav__link">
+      Licensing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Component/" class="md-nav__link">
+      Component
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-11-11" type="checkbox" id="nav-11-11">
+    
+    <label class="md-nav__link" for="nav-11-11">
+      Support for a new OS
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Support for a new OS" data-md-level="2">
+      <label class="md-nav__title" for="nav-11-11">
+        <span class="md-nav__icon md-icon"></span>
+        Support for a new OS
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Support-New-OS/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Initial-Detection/" class="md-nav__link">
+      Initial Detection
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Mem-CPU-Information/" class="md-nav__link">
+      Mem/CPU Information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Test-Units/" class="md-nav__link">
+      Test Units
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Health-Information/" class="md-nav__link">
+      Health Information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Wireless-Sensors/" class="md-nav__link">
+      Wireless Sensors
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Custom-Graphs/" class="md-nav__link">
+      Custom Graphs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Settings/" class="md-nav__link">
+      Settings
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Sensor-State-Support/" class="md-nav__link">
+      Sensor State Support
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/SNMP-Traps/" class="md-nav__link">
+      SNMP Traps
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Dynamic-Config/" class="md-nav__link">
+      Dynamic Config
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Merging-Pull-Requests/" class="md-nav__link">
+      Merging Pull Requests
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Creating-Release/" class="md-nav__link">
+      Creating Release
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Plugin-System/" class="md-nav__link">
+      Plugin System
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-12" type="checkbox" id="nav-12">
+    
+    <label class="md-nav__link" for="nav-12">
+      11. Misc
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="11. Misc" data-md-level="1">
+      <label class="md-nav__title" for="nav-12">
+        <span class="md-nav__icon md-icon"></span>
+        11. Misc
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Security/" class="md-nav__link">
+      Security information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/CLI-Tools/" class="md-nav__link">
+      CLI Scripts
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-12-3" type="checkbox" id="nav-12-3">
+    
+    <label class="md-nav__link" for="nav-12-3">
+      Device Notes
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Device Notes" data-md-level="2">
+      <label class="md-nav__title" for="nav-12-3">
+        <span class="md-nav__icon md-icon"></span>
+        Device Notes
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Notes/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Notes/Carel-pCOweb-Devices/" class="md-nav__link">
+      Carel pCOweb
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Notes/AsuswrtMerlin/" class="md-nav__link">
+      Asuswrt-Merlin
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Notes/Openwrt/" class="md-nav__link">
+      OpenWRT
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#snmp-extend" class="md-nav__link">
+    SNMP Extend
+  </a>
+  
+    <nav class="md-nav" aria-label="SNMP Extend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sudo" class="md-nav__link">
+    SUDO
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enable-the-application-discovery-module" class="md-nav__link">
+    Enable the application discovery module
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enable-the-applications-to-be-discovered" class="md-nav__link">
+    Enable the application(s) to be discovered
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#agent" class="md-nav__link">
+    Agent
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/librenms/librenms/edit/master/doc/Extensions/Applications.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="introduction">Introduction</h1>
+<p>You can use Application support to graph performance statistics of
+many applications.</p>
+<p>Different applications support a variety of ways to collect data: 1)
+by direct connection to the application, 2) snmpd extend, or 3) <a href="../Agent-Setup/">the
+agent</a>. The monitoring of applications could be added
+before or after the hosts have been added to LibreNMS.</p>
+<p>If multiple methods of collection are listed you only need to enable one.</p>
+<h2 id="snmp-extend">SNMP Extend</h2>
+<p>When using the snmp extend method, the application discovery module
+will pick up which applications you have set up for monitoring
+automatically, even if the device is already in LibreNMS. The
+application discovery module is enabled by default for most *nix
+operating systems, but in some cases you will need to manually enable
+the application discovery module.</p>
+<h3 id="sudo">SUDO</h3>
+<p>One major thing to keep in mind when using SNMP extend is these run as the snmpd
+user that can be an unprivileged user. In these situations you need to use sudo.</p>
+<p>To test if you need sudo, first check the user snmpd is running as.
+Then test if you can run the extend script as that user without issue.
+For example if snmpd is running as 'Debian-snmp' and we want
+to run the extend for proxmox, we check that the following run without error:</p>
+<div class="highlight"><pre><span></span><code>sudo -u Debian-snmp /usr/local/bin/proxmox
+</code></pre></div>
+<p>If it doesn't work, then you will need to use sudo with the extend command.
+For the example above, that would mean adding the line below to the sudoers file:</p>
+<div class="highlight"><pre><span></span><code>Debian-snmp ALL = NOPASSWD: /usr/local/bin/proxmox
+</code></pre></div>
+<p>Finally we would need to add sudo to the extend command, which would look
+like that for proxmox:</p>
+<div class="highlight"><pre><span></span><code>extend proxmox /usr/bin/sudo /usr/local/bin/proxmox
+</code></pre></div>
+<h2 id="enable-the-application-discovery-module">Enable the application discovery module</h2>
+<ol>
+<li>Edit the device for which you want to add this support</li>
+<li>Click on the <em>Modules</em> tab and enable the <code>applications</code> module.</li>
+<li>This will be automatically saved, and you should get a green
+   confirmation pop-up message.</li>
+</ol>
+<p><img alt="Enable-application-module" src="/img/Enable_application_module.png" /></p>
+<p>After you have enabled the application module, it would be wise to
+then also enable which applications you want to monitor, in the rare
+case where LibreNMS does not automatically detect it.</p>
+<p><strong>Note</strong>: Only do this if an application was not auto-discovered by
+LibreNMS during discovery and polling.</p>
+<h2 id="enable-the-applications-to-be-discovered">Enable the application(s) to be discovered</h2>
+<ol>
+<li>Go to the device you have just enabled the application module for.</li>
+<li>Click on the <em>Applications</em> tab and select the applications you
+   want to monitor.</li>
+<li>This will also be automatically saved, and you should get a green
+   confirmation pop-up message.</li>
+</ol>
+<p><img alt="Enable-applications" src="/img/Enable_applications.png" /></p>
+<h2 id="agent">Agent</h2>
+<p>The unix-agent does not have a discovery module, only a poller
+module. That poller module is always disabled by default. It needs to
+be manually enabled if using the agent. Some applications will be
+automatically enabled by the unix-agent poller module. It is better to
+ensure that your application is enabled for monitoring. You can check
+by following the steps under the <code>SNMP Extend</code> heading.</p>
+<ol>
+<li><a href="#apache">Apache</a> - SNMP extend, Agent</li>
+<li><a href="#asterisk">Asterisk</a> - SNMP extend</li>
+<li><a href="#backupninja">backupninja</a> - SNMP extend</li>
+<li><a href="#bind9-aka-named">BIND9/named</a> - SNMP extend, Agent</li>
+<li><a href="#certificate">Certificate</a> - Certificate extend</li>
+<li><a href="#chip">C.H.I.P.</a> - SNMP extend</li>
+<li><a href="#dhcp-stats">DHCP Stats</a> - SNMP extend</li>
+<li><a href="#entropy">Entropy</a> - SNMP extend</li>
+<li><a href="#exim-stats">EXIM Stats</a> - SNMP extend</li>
+<li><a href="#fail2ban">Fail2ban</a> - SNMP extend</li>
+<li><a href="#freebsd-nfs-client">FreeBSD NFS Client</a> - SNMP extend</li>
+<li><a href="#freebsd-nfs-server">FreeBSD NFS Server</a> - SNMP extend</li>
+<li><a href="#freeradius">FreeRADIUS</a> - SNMP extend, Agent</li>
+<li><a href="#freeswitch">Freeswitch</a> - SNMP extend, Agent</li>
+<li><a href="#gpsd">GPSD</a> - SNMP extend, Agent</li>
+<li><a href="#icecast">Icecast</a> - SNMP extend, Agent</li>
+<li><a href="#mailcow-dockerized-postfix">Mailcow-dockerized postfix</a> - SNMP extend</li>
+<li><a href="#mailscanner">Mailscanner</a> - SNMP extend</li>
+<li><a href="#mdadm">Mdadm</a> - SNMP extend</li>
+<li><a href="#memcached">Memcached</a> - SNMP extend</li>
+<li><a href="#munin">Munin</a> - Agent</li>
+<li><a href="#mysql">MySQL</a> - SNMP extend, Agent</li>
+<li><a href="#nginx">NGINX</a> - SNMP extend, Agent</li>
+<li><a href="#nfs-server">NFS Server</a> - SNMP extend</li>
+<li><a href="#ntp-client">NTP Client</a> - SNMP extend</li>
+<li><a href="#ntp-server-aka-ntpd">NTP Server/NTPD</a> - SNMP extend</li>
+<li><a href="#nvidia-gpu">Nvidia GPU</a> - SNMP extend</li>
+<li><a href="#opengridscheduler">Open Grid Scheduler</a> - SNMP extend</li>
+<li><a href="#opensips">Opensips</a> - SNMP extend</li>
+<li><a href="#os-updates">OS Updates</a> - SNMP extend</li>
+<li><a href="#php-fpm">PHP-FPM</a> - SNMP extend</li>
+<li><a href="#pi-hole">Pi-hole</a> - SNMP extend</li>
+<li><a href="#portactivity">Portactivity</a> - SNMP extend</li>
+<li><a href="#postfix">Postfix</a> - SNMP extend</li>
+<li><a href="#postgres">Postgres</a> - SNMP extend</li>
+<li><a href="#powerdns">PowerDNS</a> - Agent</li>
+<li><a href="#powerdns-recursor">PowerDNS Recursor</a> - Direct, SNMP extend, Agent</li>
+<li><a href="#powerdns-dnsdist">PowerDNS dnsdist</a> - SNMP extend</li>
+<li><a href="#proxmox">Proxmox</a> - SNMP extend</li>
+<li><a href="#puppet_agent">Puppet Agent</a> - SNMP extend</li>
+<li><a href="#pureftpd">PureFTPd</a> - SNMP extend</li>
+<li><a href="#raspberry-pi">Raspberry PI</a> - SNMP extend</li>
+<li><a href="#redis">Redis</a> - SNMP extend</li>
+<li><a href="#sdfs-info">SDFS info</a> - SNMP extend</li>
+<li><a href="#seafile">Seafile</a> - SNMP extend</li>
+<li><a href="#smart">SMART</a> - SNMP extend</li>
+<li><a href="#squid">Squid</a> - SNMP proxy</li>
+<li><a href="#tinydns-aka-djbdns">TinyDNS/djbdns</a> - Agent</li>
+<li><a href="#unbound">Unbound</a> - SNMP extend, Agent</li>
+<li><a href="#ups-nut">UPS-nut</a> - SNMP extend</li>
+<li><a href="#ups-apcups">UPS-apcups</a> - SNMP extend</li>
+<li><a href="#voip-monitor">Voip-monitor</a> - SNMP extend</li>
+<li><a href="#zfs">ZFS</a> - SNMP extend</li>
+</ol>
+<h1 id="apache">Apache</h1>
+<p>Either use SNMP extend or use the agent.</p>
+<p>Note that you need to install and configure the Apache
+<a href="https://httpd.apache.org/docs/2.4/en/mod/mod_status.html">mod_status</a>
+module before trying the script.</p>
+<h2 id="snmp-extend_1">SNMP Extend</h2>
+<p>1: Download the script onto the desired host (the host must be added
+to LibreNMS devices)</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/apache-stats.py -O /etc/snmp/apache-stats.py
+</code></pre></div>
+<p>2: Make the script executable (chmod +x /etc/snmp/apache-stats.py)</p>
+<p>3: Create the cache directory, '/var/cache/librenms/' and make sure
+that it is owned by the user running the SNMP daemon.</p>
+<div class="highlight"><pre><span></span><code>mkdir -p /var/cache/librenms/
+</code></pre></div>
+<p>4: Verify it is working by running /etc/snmp/apache-stats.py Package <code>urllib3</code> for python3 needs to be
+installed. In Debian-based systems for example you can achieve this by issuing:</p>
+<div class="highlight"><pre><span></span><code>apt-get install python3-urllib3
+</code></pre></div>
+<p>5: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend apache /etc/snmp/apache-stats.py
+</code></pre></div>
+<p>6: Restart snmpd on your host</p>
+<p>7: Test by running</p>
+<div class="highlight"><pre><span></span><code>snmpwalk &lt;various options depending on your setup&gt; localhost NET-SNMP-EXTEND-MIB::nsExtendOutput2Table
+</code></pre></div>
+<h2 id="agent_1">Agent</h2>
+<p><a href="../Agent-Setup/">Install the agent</a> on this device if it isn't already
+and copy the <code>apache</code> script to <code>/usr/lib/check_mk_agent/local/</code></p>
+<p>1: Verify it is working by running /usr/lib/check_mk_agent/local/apache
+(If you get error like "Can't locate LWP/Simple.pm". libwww-perl needs
+to be installed: apt-get install libwww-perl)</p>
+<p>2: Create the cache directory, '/var/cache/librenms/' and make sure
+that it is owned by the user running the SNMP daemon.</p>
+<div class="highlight"><pre><span></span><code>mkdir -p /var/cache/librenms/
+</code></pre></div>
+<p>3: On the device page in Librenms, edit your host and check the
+<code>Apache</code> under the Applications tab.</p>
+<h1 id="asterisk">Asterisk</h1>
+<p>A small shell script that reports various Asterisk call status.</p>
+<h2 id="snmp-extend_2">SNMP Extend</h2>
+<p>1: Download the <a href="https://github.com/librenms/librenms-agent/blob/master/snmp/asterisk">asterisk
+script</a>
+to <code>/etc/snmp/</code> on your asterisk server.
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/asterisk -O /etc/snmp/asterisk
+</code></pre></div></p>
+<p>2: Run <code>chmod +x /etc/snmp/asterisk</code></p>
+<p>3: Configure <code>ASCLI</code> in the script.</p>
+<p>4: Verify it is working by running <code>/etc/snmp/asterisk</code></p>
+<p>5: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend asterisk /etc/snmp/asterisk
+</code></pre></div>
+<p>6: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="backupninja">backupninja</h1>
+<p>A small shell script that reports status of last backupninja backup.</p>
+<h2 id="snmp-extend_3">SNMP Extend</h2>
+<p>1: Download the <a href="https://github.com/librenms/librenms-agent/blob/master/snmp/backupninja.py">backupninja
+script</a>
+to <code>/etc/snmp/backupninja.py</code> on your backuped server.
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/backupninja.py -O /etc/snmp/backupninja.py`
+</code></pre></div>
+2: Make the script executable: <code>chmod +x /etc/snmp/backupninja.py</code>
+3: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend backupninja /etc/snmp/backupninja.py
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<h1 id="bind9-aka-named">BIND9 aka named</h1>
+<p>1: Create stats file with appropriate permissions:</p>
+<div class="highlight"><pre><span></span><code>~$ touch /var/cache/bind/stats
+~$ chown bind:bind /var/cache/bind/stats
+</code></pre></div>
+<p>Change <code>user:group</code> to the user and group that's running bind/named.</p>
+<p>2: Bind/named configuration:</p>
+<div class="highlight"><pre><span></span><code>options {
+    ...
+    statistics-file &quot;/var/cache/bind/stats&quot;;
+    zone-statistics yes;
+    ...
+};
+</code></pre></div>
+<p>3: Restart your bind9/named after changing the configuration.</p>
+<p>4: Verify that everything works by executing <code>rndc stats &amp;&amp; cat
+/var/cache/bind/stats</code>. In case you get a <code>Permission Denied</code> error,
+make sure you changed the ownership correctly.</p>
+<p>5: Also be aware that this file is appended to each time <code>rndc stats</code>
+is called. Given this it is suggested you setup file rotation for
+it. Alternatively you can also set zero_stats to 1 in the config.</p>
+<p>6: The script for this also requires the Perl module
+<code>File::ReadBackwards</code>.</p>
+<div class="highlight"><pre><span></span><code>FreeBSD       =&gt; p5-File-ReadBackwards
+CentOS/RedHat =&gt; perl-File-ReadBackwards
+Debian/Ubuntu =&gt; libfile-readbackwards-perl
+</code></pre></div>
+<p>If it is not available, it can be installed by <code>cpan -i File::ReadBackwards</code>.</p>
+<p>7: You may possibly need to configure the agent/extend script as well.</p>
+<p>The config file's path defaults to the same path as the script, but
+with .config appended. So if the script is located at
+<code>/etc/snmp/bind</code>, the config file will be
+<code>/etc/snmp/bind.config</code>. Alternatively you can also specify a config
+via <code>-c $file</code>.</p>
+<p>Anything starting with a # is comment. The format for variables are
+$variable=$value. Empty lines are ignored. Spaces and tabs at either
+the start or end of a line are ignored.</p>
+<p>Content of an example /etc/snmp/bind.config . Please edit with your
+own settings.</p>
+<div class="highlight"><pre><span></span><code>rndc = The path to rndc. Default: /usr/bin/env rndc
+call_rndc = A 0/1 boolean on whether or not to call rndc stats.
+    Suggest to set to 0 if using netdata. Default: 1
+stats_file = The path to the named stats file. Default: /var/cache/bind/stats
+agent = A 0/1 boolean for if this is being used as a LibreNMS
+    agent or not. Default: 0
+zero_stats = A 0/1 boolean for if the stats file should be zeroed
+    first. Default: 0 (1 if guessed)
+</code></pre></div>
+<p>If you want to guess at the configuration, call the script with <code>-g</code>
+and it will print out what it thinks it should be.</p>
+<h2 id="snmp-extend_4">SNMP Extend</h2>
+<p>1: Copy the bind shell script, to the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://github.com/librenms/librenms-agent/raw/master/snmp/bind -O /etc/snmp/bind
+</code></pre></div>
+<p>2: Make the script executable</p>
+<div class="highlight"><pre><span></span><code>chmod +x /etc/snmp/bind
+</code></pre></div>
+<p>3: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend bind /etc/snmp/bind
+</code></pre></div>
+<p>4: Restart snmpd on the host in question.</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h2 id="agent_2">Agent</h2>
+<p>1: <a href="../Agent-Setup/">Install the agent</a> on this device if it isn't
+already and copy the script to <code>/usr/lib/check_mk_agent/local/bind</code>
+via <code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/bind -O /usr/lib/check_mk_agent/local/bind</code></p>
+<p>2: Run <code>chmod +x /usr/lib/check_mk_agent/local/bind</code></p>
+<p>3: Set the variable 'agent' to '1' in the config.</p>
+<h1 id="certificate">Certificate</h1>
+<p>A small python3 script that checks age and remaining validity of certificates</p>
+<p>This script needs following packages on Debian/Ubuntu Systems:
+* python3
+* python3-openssl</p>
+<p>Content of an example /etc/snmp/certificate.json . Please edit with your own settings.
+<div class="highlight"><pre><span></span><code>{&quot;domains&quot;: [
+    {&quot;fqdn&quot;: &quot;www.mydomain.com&quot;},
+    {&quot;fqdn&quot;: &quot;some.otherdomain.org&quot;,
+     &quot;port&quot;: 8443},
+    {&quot;fqdn&quot;: &quot;personal.domain.net&quot;}
+]
+}
+</code></pre></div>
+Key 'domains' contains a list of domains to check.
+Optional you can define a port. By default it checks on port 443.</p>
+<h2 id="snmp-extend_5">SNMP Extend</h2>
+<ol>
+<li>
+<p>Copy the shell script to the desired host.
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/certificate.py -O /etc/snmp/certificate.py
+</code></pre></div></p>
+</li>
+<li>
+<p>Run <code>chmod +x /etc/snmp/certificate.py</code></p>
+</li>
+<li>
+<p>Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:
+<div class="highlight"><pre><span></span><code>extend certificate /etc/snmp/certificate.py
+</code></pre></div></p>
+</li>
+<li>Restart snmpd on your host</li>
+</ol>
+<p>The application should be auto-discovered as described at the top of the page. If it is not, please follow the steps set out under <code>SNMP Extend</code> heading top of page.</p>
+<h1 id="chip">C.H.I.P</h1>
+<p>C.H.I.P. is a $9 R8 based tiny computer ideal for small projects.
+Further details: <a href="https://getchip.com/pages/chip">https://getchip.com/pages/chip</a></p>
+<p>1: Copy the shell script to the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/chip.sh -O /etc/snmp/power-stat.sh
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/power-stat.sh</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend power-stat /etc/snmp/power-stat.sh
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="dhcp-stats">DHCP Stats</h1>
+<p>A small python3 script that reports current DHCP leases stats and pool usage.</p>
+<p>Also you have to install the dhcpd-pools Package.
+Under Ubuntu/Debian just run <code>apt install dhcpd-pools</code></p>
+<h2 id="snmp-extend_6">SNMP Extend</h2>
+<p>1: Copy the shell script to the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://github.com/librenms/librenms-agent/raw/master/snmp/dhcp.py -O /etc/snmp/dhcp.py
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/dhcp.py</code></p>
+<p>3: edit a config file:</p>
+<p>Content of an example /etc/snmp/dhcp.json . Please edit with your own settings.
+<div class="highlight"><pre><span></span><code>{&quot;leasefile&quot;: &quot;/var/lib/dhcp/dhcpd.leases&quot;
+}
+</code></pre></div>
+Key 'leasefile' specifies the path to your lease file.</p>
+<p>4: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend dhcpstats /etc/snmp/dhcp.py
+</code></pre></div>
+<p>5: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="entropy">Entropy</h1>
+<p>A small shell script that checks your system's available random entropy.</p>
+<h2 id="snmp-extend_7">SNMP Extend</h2>
+<p>1: Download the script onto the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/entropy.sh -O /etc/snmp/entropy.sh
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/entropy.sh</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend entropy /etc/snmp/entropy.sh
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="exim-stats">EXIM Stats</h1>
+<p>SNMP extend script to get your exim stats data into your host.</p>
+<h2 id="snmp-extend_8">SNMP Extend</h2>
+<p>1: Download the script onto the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/exim-stats.sh -O /etc/snmp/exim-stats.sh
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/exim-stats.sh</code></p>
+<p>3: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend exim-stats /etc/snmp/exim-stats.sh
+</code></pre></div>
+<p>4: If you are using sudo edit your sudo users (usually <code>visudo</code>) and
+add at the bottom:</p>
+<div class="highlight"><pre><span></span><code>snmp ALL=(ALL) NOPASSWD: /etc/snmp/exim-stats.sh, /usr/bin/exim*
+</code></pre></div>
+<p>5: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="fail2ban">Fail2ban</h1>
+<h2 id="snmp-extend_9">SNMP Extend</h2>
+<p>1: Copy the shell script, fail2ban, to the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://github.com/librenms/librenms-agent/raw/master/snmp/fail2ban -O /etc/snmp/fail2ban
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/fail2ban</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend fail2ban /etc/snmp/fail2ban
+</code></pre></div>
+<p>If you want to use the cache, it is as below, by using the -c switch.</p>
+<div class="highlight"><pre><span></span><code>extend fail2ban /etc/snmp/fail2ban -c
+</code></pre></div>
+<p>If you want to use the cache and update it if needed, this can by
+using the -c and -U switches.</p>
+<div class="highlight"><pre><span></span><code>extend fail2ban /etc/snmp/fail2ban -c -U
+</code></pre></div>
+<p>If you need to specify a custom location for the fail2ban-client, that
+can be done via the -f switch.</p>
+<p>If not specified, "/usr/bin/env fail2ban-client" is used.</p>
+<div class="highlight"><pre><span></span><code>extend fail2ban /etc/snmp/fail2ban -f /foo/bin/fail2ban-client
+</code></pre></div>
+<p>5: Restart snmpd on your host</p>
+<p>6: If you wish to use caching, add the following to /etc/crontab and
+restart cron.</p>
+<div class="highlight"><pre><span></span><code>*/3    *    *    *    *    root    /etc/snmp/fail2ban -u
+</code></pre></div>
+<p>7: Restart or reload cron on your system.</p>
+<p>If you have more than a few jails configured, you may need to use
+caching as each jail needs to be polled and fail2ban-client can't do
+so in a timely manner for than a few. This can result in failure of
+other SNMP information being polled.</p>
+<p>For additional details of the switches, please see the POD in the
+script it self at the top.</p>
+<h1 id="freebsd-nfs-client">FreeBSD NFS Client</h1>
+<h2 id="snmp-extend_10">SNMP Extend</h2>
+<p>1: Copy the shell script, fbsdnfsserver, to the desired host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/fbsdnfsclient
+-O /etc/snmp/fbsdnfsclient</code></p>
+<p>2: Run <code>chmod +x /etc/snmp/fbsdnfsclient</code></p>
+<p>3: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend fbsdnfsclient /etc/snmp/fbsdnfsclient
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="freebsd-nfs-server">FreeBSD NFS Server</h1>
+<h2 id="snmp-extend_11">SNMP Extend</h2>
+<p>1: Copy the shell script, fbsdnfsserver, to the desired host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/fbsdnfsserver
+-O /etc/snmp/fbsdnfsserver</code></p>
+<p>2: Run <code>chmod +x /etc/snmp/fbsdnfsserver</code></p>
+<p>3: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend fbsdnfsserver /etc/snmp/fbsdnfsserver
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="freeradius">FreeRADIUS</h1>
+<p>The FreeRADIUS application extension requires that status_server be
+enabled in your FreeRADIUS config.  For more information see:
+<a href="https://wiki.freeradius.org/config/Status">https://wiki.freeradius.org/config/Status</a></p>
+<p>You should note that status requests increment the FreeRADIUS request
+stats.  So LibreNMS polls will ultimately be reflected in your
+stats/charts.</p>
+<p>1: Go to your FreeRADIUS configuration directory (usually /etc/raddb
+or /etc/freeradius).</p>
+<p>2: <code>cd sites-enabled</code></p>
+<p>3: <code>ln -s ../sites-available/status status</code></p>
+<p>4: Restart FreeRADIUS.</p>
+<p>5: You should be able to test with the radclient as follows...</p>
+<div class="highlight"><pre><span></span><code>echo &quot;Message-Authenticator = 0x00, FreeRADIUS-Statistics-Type = 31, Response-Packet-Type = Access-Accept&quot; | \
+radclient -x localhost:18121 status adminsecret
+</code></pre></div>
+<p>Note that adminsecret is the default secret key in status_server.
+Change if you've modified this.</p>
+<h2 id="snmp-extend_12">SNMP Extend</h2>
+<p>1: Copy the freeradius shell script, to the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/freeradius.sh -O /etc/snmp/freeradius.sh
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/freeradius.sh</code></p>
+<p>3: If you've made any changes to the FreeRADIUS status_server config
+(secret key, port, etc.) edit freeradius.sh and adjust the config
+variable accordingly.</p>
+<p>4: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend freeradius /etc/snmp/freeradius.sh
+</code></pre></div>
+<p>5: Restart snmpd on the host in question.</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h2 id="agent_3">Agent</h2>
+<p>1: <a href="../Agent-Setup/">Install the agent</a> on this device if it isn't
+already and copy the script to
+<code>/usr/lib/check_mk_agent/local/freeradius.sh</code> via <code>wget
+https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/freeradius.sh
+-O /usr/lib/check_mk_agent/local/freeradius.sh</code></p>
+<p>2: Run <code>chmod +x /usr/lib/check_mk_agent/local/freeradius.sh</code></p>
+<p>3: If you've made any changes to the FreeRADIUS status_server config
+(secret key, port, etc.) edit freeradius.sh and adjust the config
+variable accordingly.</p>
+<p>4: Edit the freeradius.sh script and set the variable 'AGENT' to '1'
+in the config.</p>
+<h1 id="freeswitch">Freeswitch</h1>
+<p>A small shell script that reports various Freeswitch call status.</p>
+<h2 id="agent_4">Agent</h2>
+<p>1: <a href="../Agent-Setup/">Install the agent</a> on your Freeswitch server if it
+isn't already</p>
+<p>2: Copy the <a href="https://github.com/librenms/librenms-agent/blob/master/agent-local/freeswitch">freeswitch
+script</a>
+to <code>/usr/lib/check_mk_agent/local/</code></p>
+<p>3: Configure <code>FSCLI</code> in the script. You may also have to create an
+<code>/etc/fs_cli.conf</code> file if your <code>fs_cli</code> command requires
+authentication.</p>
+<p>4: Verify it is working by running <code>/usr/lib/check_mk_agent/local/freeswitch</code></p>
+<h2 id="snmp-extend_13">SNMP Extend</h2>
+<p>1: Copy the <a href="https://github.com/librenms/librenms-agent/blob/master/agent-local/freeswitch">freeswitch
+script</a>
+to <code>/etc/snmp/</code> on your Freeswitch server.</p>
+<p>2: Run <code>chmod +x /etc/snmp/freeswitch</code></p>
+<p>3: Configure <code>FSCLI</code> in the script. You may also have to create an
+<code>/etc/fs_cli.conf</code> file if your <code>fs_cli</code> command requires
+authentication.</p>
+<p>4: Verify it is working by running <code>/etc/snmp/freeswitch</code></p>
+<p>5: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend freeswitch /etc/snmp/freeswitch
+</code></pre></div>
+<p>6: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="gpsd">GPSD</h1>
+<h2 id="snmp-extend_14">SNMP Extend</h2>
+<p>1: Download the script onto the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/gpsd -O /etc/snmp/gpsd
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/gpsd</code></p>
+<p>3: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend gpsd /etc/snmp/gpsd
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading at the top of the page.</p>
+<h2 id="agent_5">Agent</h2>
+<p><a href="../Agent-Setup/">Install the agent</a> on this device if it isn't already
+and copy the <code>gpsd</code> script to <code>/usr/lib/check_mk_agent/local/</code></p>
+<p>You may need to configure <code>$server</code> or <code>$port</code>.</p>
+<p>Verify it is working by running <code>/usr/lib/check_mk_agent/local/gpsd</code></p>
+<h1 id="icecast">Icecast</h1>
+<p>Shell script that reports load average/memory/open-files stats of Icecast</p>
+<h2 id="snmp-extend_15">SNMP Extend</h2>
+<ol>
+<li>Copy the shell script, icecast-stats.sh, to the desired host (the host must be added to LibreNMS devices) 
+<div class="highlight"><pre><span></span><code>wget https://github.com/librenms/librenms-agent/raw/master/snmp/icecast-stats.sh -O /etc/snmp/icecast-stats.sh
+</code></pre></div></li>
+</ol>
+<p>2: Make the script executable <code>chmod +x /etc/snmp/icecast-stats.sh</code></p>
+<ol>
+<li>Verify it is working by running <code>/etc/snmp/icecast-stats.sh</code></li>
+</ol>
+<p>4: Edit your snmpd.conf file (usually <code>/etc/snmp/icecast-stats.sh</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend icecast /etc/snmp/icecast-stats.sh
+</code></pre></div>
+<h1 id="mailcow-dockerized-postfix">mailcow-dockerized postfix</h1>
+<h2 id="snmp-extend_16">SNMP Extend</h2>
+<p>1: Download the script into the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/mailcow-dockerized-postfix -O /etc/snmp/mailcow-dockerized-postfix
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/mailcow-dockerized-postfix</code></p>
+<blockquote>
+<p>Maybe you will be neeed to install <code>pflogsumm</code> on debian based OS. Please check if you have package installed. </p>
+</blockquote>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend mailcow-postfix /etc/snmp/mailcow-dockerized-postfix
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="mailscanner">Mailscanner</h1>
+<h2 id="snmp-extend_17">SNMP Extend</h2>
+<p>1: Download the script onto the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/mailscanner.php -O /etc/snmp/mailscanner.php
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/mailscanner.php</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend mailscanner /etc/snmp/mailscanner.php
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="mdadm">Mdadm</h1>
+<p>This shell script checks mdadm health and array data</p>
+<h2 id="snmp-extend_18">SNMP Extend</h2>
+<p>1: Download the script onto the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/mdadm -O /etc/snmp/mdadm
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/mdadm</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend mdadm /etc/snmp/mdadm
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the
+top of the page. If it is not, please follow the steps set out
+under <code>SNMP Extend</code> heading top of page.</p>
+<h1 id="memcached">Memcached</h1>
+<h2 id="snmp-extend_19">SNMP Extend</h2>
+<p>1: Copy the <a href="https://github.com/librenms/librenms-agent/blob/master/agent-local/memcached">memcached
+   script</a>
+   to <code>/etc/snmp/</code> on your remote server.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/agent-local/memcached -O /etc/snmp/memcached
+</code></pre></div>
+<p>2: Make the script executable: <code>chmod +x /etc/snmp/memcached</code></p>
+<p>3: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend memcached /etc/snmp/memcached
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="munin">Munin</h1>
+<h2 id="agent_6">Agent</h2>
+<ol>
+<li>Install the script to your agent: <code>wget
+   https://raw.githubusercontent.com/librenms/librenms-agent/master/agent-local/munin
+   -O /usr/lib/check_mk_agent/local/munin</code></li>
+<li>Make the script executable (<code>chmod +x
+   /usr/lib/check_mk_agent/local/munin</code>)</li>
+<li>Create the munin scripts dir: <code>mkdir -p
+   /usr/share/munin/munin-scripts</code></li>
+<li>Install your munin scripts into the above directory.</li>
+</ol>
+<p>To create your own custom munin scripts, please see this example:</p>
+<div class="highlight"><pre><span></span><code>#!/bin/bash
+if [ &quot;$1&quot; = &quot;config&quot; ]; then
+    echo &#39;graph_title Some title&#39;
+    echo &#39;graph_args --base 1000 -l 0&#39; #not required
+    echo &#39;graph_vlabel Some label&#39;
+    echo &#39;graph_scale no&#39; #not required, can be yes/no
+    echo &#39;graph_category system&#39; #Choose something meaningful, can be anything
+    echo &#39;graph_info This graph shows something awesome.&#39; #Short desc
+    echo &#39;foobar.label Label for your unit&#39; # Repeat these two lines as much as you like
+    echo &#39;foobar.info Desc for your unit.&#39;
+    exit 0
+fi
+echo -n &quot;foobar.value &quot; $(date +%s) #Populate a value, here unix-timestamp
+</code></pre></div>
+<h1 id="mysql">MySQL</h1>
+<p>Create the cache directory, '/var/cache/librenms/' and make sure
+that it is owned by the user running the SNMP daemon.</p>
+<div class="highlight"><pre><span></span><code>mkdir -p /var/cache/librenms/
+</code></pre></div>
+<p>The MySQL script requires PHP-CLI and the PHP MySQL extension, so
+please verify those are installed.</p>
+<p>CentOS (May vary based on PHP version)</p>
+<div class="highlight"><pre><span></span><code>yum install php-cli php-mysql
+</code></pre></div>
+<p>Debian (May vary based on PHP version)</p>
+<div class="highlight"><pre><span></span><code>apt-get install php-cli php-mysql
+</code></pre></div>
+<p>Unlike most other scripts, the MySQL script requires a configuration
+file <code>mysql.cnf</code> in the same directory as the extend or agent script
+with following content:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&lt;?</span><span class="nx">php</span>
+<span class="nv">$mysql_user</span> <span class="o">=</span> <span class="s1">&#39;root&#39;</span><span class="p">;</span>
+<span class="nv">$mysql_pass</span> <span class="o">=</span> <span class="s1">&#39;toor&#39;</span><span class="p">;</span>
+<span class="nv">$mysql_host</span> <span class="o">=</span> <span class="s1">&#39;localhost&#39;</span><span class="p">;</span>
+<span class="nv">$mysql_port</span> <span class="o">=</span> <span class="mi">3306</span><span class="p">;</span>
+</code></pre></div>
+<p>Note that depending on your MySQL installation (chrooted install for example),
+you may have to specify 127.0.0.1 instead of localhost. Localhost make
+a MySQL connection via the mysql socket, while 127.0.0.1 make a standard
+IP connection to mysql.</p>
+<h2 id="agent_7">Agent</h2>
+<p><a href="../Agent-Setup/">Install the agent</a> on this device if it isn't already</p>
+<p>and copy the <code>mysql</code> script to <code>/usr/lib/check_mk_agent/local/</code></p>
+<p>Verify it is working by running <code>/usr/lib/check_mk_agent/local/mysql</code></p>
+<h2 id="snmp-extend_20">SNMP extend</h2>
+<p>1: Copy the mysql script to the desired host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/mysql -O /etc/snmp/mysql</code></p>
+<p>2: Run <code>chmod +x /etc/snmp/mysql</code></p>
+<p>3: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend mysql /etc/snmp/mysql
+</code></pre></div>
+<p>4: Restart snmpd.</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="nginx">NGINX</h1>
+<p>NGINX is a free, open-source, high-performance HTTP server: <a href="https://www.nginx.org/">https://www.nginx.org/</a></p>
+<p>It's required to have the following directive in your nginx
+configuration responsible for the localhost server:</p>
+<div class="highlight"><pre><span></span><code>location /nginx-status {
+    stub_status on;
+    access_log   off;
+    allow 127.0.0.1;
+    allow ::1;
+    deny all;
+}
+</code></pre></div>
+<h2 id="snmp-extend_21">SNMP Extend</h2>
+<p>1: Download the script onto the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/nginx -O /etc/snmp/nginx
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/nginx</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend nginx /etc/snmp/nginx
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h2 id="agent_8">Agent</h2>
+<p><a href="../Agent-Setup/">Install the agent</a> on this device if it isn't already
+and copy the <code>nginx</code> script to <code>/usr/lib/check_mk_agent/local/</code></p>
+<h1 id="nfs-server">NFS Server</h1>
+<p>Export the NFS stats from as server.</p>
+<h2 id="snmp-extend_22">SNMP Extend</h2>
+<p>1: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add :</p>
+<div class="highlight"><pre><span></span><code>extend nfs-server /bin/cat /proc/net/rpc/nfsd
+</code></pre></div>
+<p>note : find out where cat is located using : <code>which cat</code></p>
+<p>2: reload snmpd service to activate the configuration</p>
+<h1 id="ntp-client">NTP Client</h1>
+<p>A shell script that gets stats from ntp client.</p>
+<h2 id="snmp-extend_23">SNMP Extend</h2>
+<p>1: Download the script onto the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/ntp-client -O /etc/snmp/ntp-client
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/ntp-client</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend ntp-client /etc/snmp/ntp-client
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="ntp-server-aka-ntpd">NTP Server aka NTPD</h1>
+<p>A shell script that gets stats from ntp server (ntpd).</p>
+<h2 id="snmp-extend_24">SNMP Extend</h2>
+<ol>
+<li>Download the script onto the desired host.</li>
+</ol>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/ntp-server.sh -O /etc/snmp/ntp-server.sh
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/ntp-server.sh</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend ntp-server /etc/snmp/ntp-server.sh
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="nvidia-gpu">Nvidia GPU</h1>
+<h2 id="snmp-extend_25">SNMP Extend</h2>
+<p>1: Copy the shell script, nvidia, to the desired host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/nvidia -O
+/etc/snmp/nvidia</code></p>
+<p>2: Run <code>chmod +x /etc/snmp/nvidia</code></p>
+<p>3: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend nvidia /etc/snmp/nvidia
+</code></pre></div>
+<p>5: Restart snmpd on your host.</p>
+<p>6: Verify you have nvidia-smi installed, which it generally should be
+if you have the driver from Nvida installed.</p>
+<p>The GPU numbering on the graphs will correspond to how the nvidia-smi
+sees them as being.</p>
+<p>For questions about what the various values are/mean, please see the
+nvidia-smi man file under the section covering dmon.</p>
+<h1 id="open-grid-scheduler">Open Grid Scheduler</h1>
+<p>Shell script to track the OGS/GE jobs running on clusters.</p>
+<h2 id="snmp-extend_26">SNMP Extend</h2>
+<p>1: Download the script onto the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/agent-local/rocks.sh -O /etc/snmp/rocks.sh
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/rocks.sh</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend ogs /etc/snmp/rocks.sh
+</code></pre></div>
+<p>4: Restart snmpd.</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="opensips">Opensips</h1>
+<p>Script that reports load-average/memory/open-files stats of Opensips</p>
+<h2 id="snmp-extend_27">SNMP Extend</h2>
+<p>1: Download the script onto the desired host. <code>wget
+   https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/opensips-stats.sh
+   -O /etc/snmp/opensips-stats.sh</code></p>
+<p>2: Make the script executable: <code>chmod +x /etc/snmp/opensips-stats.sh</code></p>
+<ol>
+<li>Verify it is working by running <code>/etc/snmp/opensips-stats.sh</code></li>
+</ol>
+<p>3: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend opensips /etc/snmp/opensips-stats.sh
+</code></pre></div>
+<h1 id="os-updates">OS Updates</h1>
+<p>A small shell script that checks your system package manager for any
+available updates. Supports apt-get/pacman/yum/zypper package
+managers.</p>
+<p>For pacman users automatically refreshing the database, it is
+recommended you use an alternative database location
+<code>--dbpath=/var/lib/pacman/checkupdate</code></p>
+<h2 id="snmp-extend_28">SNMP Extend</h2>
+<p>1: Download the script onto the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/osupdate -O /etc/snmp/osupdate
+</code></pre></div>
+<p>2: Run <code>chmod +x /etc/snmp/osupdate</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend osupdate /etc/snmp/osupdate
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p><em>Note</em>: apt-get depends on an updated package index. There are several
+ways to have your system run <code>apt-get update</code> automatically. The
+easiest is to create <code>/etc/apt/apt.conf.d/10periodic</code> and pasting the
+following in it: <code>APT::Periodic::Update-Package-Lists "1";</code>. If you
+have apticron, cron-apt or apt-listchanges installed and configured,
+chances are that packages are already updated periodically .</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="php-fpm">PHP-FPM</h1>
+<h2 id="snmp-extend_29">SNMP Extend</h2>
+<p>1: Copy the shell script, phpfpmsp, to the desired host. <code>wget
+   https://github.com/librenms/librenms-agent/raw/master/snmp/phpfpmsp
+   -O /etc/snmp/phpfpmsp</code></p>
+<p>2: Run <code>chmod +x /etc/snmp/phpfpmsp</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend phpfpmsp /etc/snmp/phpfpmsp
+</code></pre></div>
+<p>5: Edit /etc/snmp/phpfpmsp to include the status URL for the PHP-FPM
+   pool you are monitoring.</p>
+<p>6: Restart snmpd on your host</p>
+<p>It is worth noting that this only monitors a single pool. If you want
+to monitor multiple pools, this won't do it.</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="pi-hole">Pi-hole</h1>
+<h2 id="snmp-extend_30">SNMP Extend</h2>
+<p>1: Copy the shell script, pi-hole, to the desired host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/pi-hole -O
+/etc/snmp/pi-hole</code></p>
+<p>2: Run <code>chmod +x /etc/snmp/pi-hole</code></p>
+<p>3: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend pi-hole /etc/snmp/pi-hole
+</code></pre></div>
+<p>4: To get all data you must get your API auth token from Pi-hole
+server and change the API_AUTH_KEY entry inside the snmp script.</p>
+<p>5: Restard snmpd.</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="portactivity">Portactivity</h1>
+<h2 id="snmp-extend_31">SNMP Extend</h2>
+<p>Ubuntu is shown below.</p>
+<div class="highlight"><pre><span></span><code>apt install libparse-netstat-perl
+apt install libjson-perl
+</code></pre></div>
+<p>2: Copy the Perl script to the desired host (the host must be added to
+   LibreNMS devices)</p>
+<div class="highlight"><pre><span></span><code>wget https://github.com/librenms/librenms-agent/raw/master/snmp/portactivity -O /etc/snmp/portactivity
+</code></pre></div>
+<p>3: Make the script executable. (chmod +x /etc/snmp/portactivity)</p>
+<p>4: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend portactivity /etc/snmp/portactivity -p http,ldap,imap
+</code></pre></div>
+<p>Will monitor HTTP, LDAP, and IMAP. The -p switch specifies what ports
+to use. This is a comma seperated list.</p>
+<p>These must be found in '/etc/services' or where ever NSS is set to
+fetch it from. If not, it will throw an error.</p>
+<p>If you want to JSON returned by it to be printed in a pretty format
+use the -P flag.</p>
+<p>5: Restart snmpd on your host.</p>
+<p>Please note that for only TCP[46] services are supported.</p>
+<h1 id="postfix">Postfix</h1>
+<h2 id="snmp-extend_32">SNMP Extend</h2>
+<p>1: Copy the shell script, postfix-queues, to the desired host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/postfix-queues
+-O /etc/snmp/postfix-queues</code></p>
+<p>2: Copy the Perl script, postfixdetailed, to the desired host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/postfixdetailed
+-O /etc/snmp/postfixdetailed</code></p>
+<p>3: Make both scripts executable. Run <code>chmod +x
+/etc/snmp/postfixdetailed /etc/snmp/postfix-queues</code></p>
+<p>4: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend mailq /etc/snmp/postfix-queues
+extend postfixdetailed /etc/snmp/postfixdetailed
+</code></pre></div>
+<p>5: Restart snmpd.</p>
+<p>6: Install pflogsumm for your OS.</p>
+<p>7: Make sure the cache file in /etc/snmp/postfixdetailed is some place
+that snmpd can write too. This file is used for tracking changes
+between various values between each time it is called by snmpd. Also
+make sure the path for pflogsumm is correct.</p>
+<p>8: Run /etc/snmp/postfixdetailed to create the initial cache file so
+you don't end up with some crazy initial starting value. Please note
+that each time /etc/snmp/postfixdetailed is ran, the cache file is
+updated, so if this happens in between LibreNMS doing it then the
+values will be thrown off for that polling period.</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<blockquote>
+<p>NOTE: If using RHEL for your postfix server, qshape must be
+installed manually as it is not officially supported. CentOs 6 rpms
+seem to work without issues.</p>
+</blockquote>
+<h1 id="postgres">Postgres</h1>
+<h2 id="snmp-extend_33">SNMP Extend</h2>
+<p>1: Copy the shell script, postgres, to the desired host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/postgres -O
+/etc/snmp/postgres</code></p>
+<p>2: Run <code>chmod +x /etc/snmp/postgres</code></p>
+<p>3: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend postgres /etc/snmp/postgres
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>5: Install the Nagios check check_postgres.pl on your system:
+<a href="https://github.com/bucardo/check_postgres">https://github.com/bucardo/check_postgres</a></p>
+<p>6: Verify the path to check_postgres.pl in /etc/snmp/postgres is
+correct.</p>
+<p>7: If you wish it to ignore the database postgres for totalling up the
+stats, set ignorePG to 1(the default) in /etc/snmp/postgres. If you
+are using netdata or the like, you may wish to set this or otherwise
+that total will be very skewed on systems with light or moderate usage.</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="powerdns">PowerDNS</h1>
+<p>An authoritative DNS server: <a href="https://www.powerdns.com/auth.html">https://www.powerdns.com/auth.html</a></p>
+<h2 id="snmp-extend_34">SNMP Extend</h2>
+<p>1: Copy the shell script, powerdns.py, to the desired host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/powerdns.py
+-O /etc/snmp/powerdns.py</code></p>
+<p>2: Run <code>chmod +x /etc/snmp/powerdns.py</code></p>
+<p>3: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend powerdns /etc/snmp/powerdns.py
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h2 id="agent_9">Agent</h2>
+<p><a href="../Agent-Setup/">Install the agent</a> on this device if it isn't already
+and copy the <code>powerdns</code> script to <code>/usr/lib/check_mk_agent/local/</code></p>
+<h1 id="powerdns-recursor">PowerDNS Recursor</h1>
+<p>A recursive DNS server: <a href="https://www.powerdns.com/recursor.html">https://www.powerdns.com/recursor.html</a></p>
+<h2 id="direct">Direct</h2>
+<p>The LibreNMS polling host must be able to connect to port 8082 on the
+monitored device. The web-server must be enabled, see the Recursor
+docs: <a href="https://doc.powerdns.com/md/recursor/settings/#webserver">https://doc.powerdns.com/md/recursor/settings/#webserver</a></p>
+<h2 id="variables">Variables</h2>
+<p><code>$config['apps']['powerdns-recursor']['api-key']</code> required, this is
+defined in the Recursor config</p>
+<p><code>$config['apps']['powerdns-recursor']['port']</code> numeric, defines the
+port to connect to PowerDNS Recursor on.  The default is 8082</p>
+<p><code>$config['apps']['powerdns-recursor']['https']</code> true or false,
+defaults to use http.</p>
+<h2 id="snmp-extend_35">SNMP Extend</h2>
+<p>1: Copy the shell script, powerdns-recursor, to the desired
+host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/powerdns-recursor
+-O /etc/snmp/powerdns-recursor</code></p>
+<p>2: Run <code>chmod +x /etc/snmp/powerdns-recursor</code></p>
+<p>3: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend powerdns-recursor /etc/snmp/powerdns-recursor
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h2 id="agent_10">Agent</h2>
+<p><a href="../Agent-Setup/">Install the agent</a> on this device if it isn't already
+and copy the <code>powerdns-recursor</code> script to
+<code>/usr/lib/check_mk_agent/local/</code></p>
+<p>This script uses <code>rec_control get-all</code> to collect stats.</p>
+<h1 id="powerdns-dnsdist">PowerDNS-dnsdist</h1>
+<h2 id="snmp-extend_36">SNMP Extend</h2>
+<p>1: Copy the BASH script to the desired host.</p>
+<div class="highlight"><pre><span></span><code>wget https://github.com/librenms/librenms-agent/raw/master/snmp/powerdns-dnsdist -O /etc/snmp/powerdns-dnsdist
+</code></pre></div>
+<p>2: Make the script executable (chmod +x /etc/snmp/powerdns-dnsdist)</p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend powerdns-dnsdist /etc/snmp/powerdns-dnsdist
+</code></pre></div>
+<p>4: Restart snmpd on your host.</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="proxmox">Proxmox</h1>
+<p>1: For Proxmox 4.4+ install the libpve-apiclient-perl package <code>apt
+   install libpve-apiclient-perl</code></p>
+<p>2: Download the script onto the desired host (the host must be added
+   to LibreNMS devices) <code>wget
+   https://raw.githubusercontent.com/librenms/librenms-agent/master/agent-local/proxmox
+   -O /usr/local/bin/proxmox</code></p>
+<p>3: Run <code>chmod +x /usr/local/bin/proxmox</code></p>
+<p>4: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:
+   <code>extend proxmox /usr/local/bin/proxmox</code></p>
+<p>5: Note: if your snmpd doesn't run as root, you might have to invoke
+   the script using sudo and modify the "extend" line</p>
+<div class="highlight"><pre><span></span><code>extend proxmox /usr/bin/sudo /usr/local/bin/proxmox
+</code></pre></div>
+<p>after, edit your sudo users (usually <code>visudo</code>) and add at the bottom:</p>
+<div class="highlight"><pre><span></span><code>Debian-snmp ALL=(ALL) NOPASSWD: /usr/local/bin/proxmox
+</code></pre></div>
+<p>6: Restart snmpd on your host</p>
+<h1 id="puppet-agent">Puppet Agent</h1>
+<p>SNMP extend script to get your Puppet Agent data into your host.</p>
+<h2 id="snmp-extend_37">SNMP Extend</h2>
+<p>1: Download the script onto the desired host. <code>wget
+   https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/puppet_agent.py
+   -O /etc/snmp/puppet_agent.py</code></p>
+<p>2: Make the script executable: <code>chmod +x /etc/snmp/puppet_agent.py</code></p>
+<p>3: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend puppet-agent /etc/snmp/puppet_agent.py
+</code></pre></div>
+<p>The Script needs <code>python3-yaml</code> package to be installed.</p>
+<p>Per default script searches for on of this files:</p>
+<ul>
+<li>/var/cache/puppet/state/last_run_summary.yaml</li>
+<li>/opt/puppetlabs/puppet/cache/state/last_run_summary.yaml</li>
+</ul>
+<p>optionally you can add a specific summary file with creating <code>/etc/snmp/puppet.json</code>
+<div class="highlight"><pre><span></span><code>{
+     &quot;agent&quot;: {
+        &quot;summary_file&quot;: &quot;/my/custom/path/to/summary_file&quot;
+     }
+}
+</code></pre></div>
+custom summary file has highest priority</p>
+<p>4: Restart snmpd on the host</p>
+<h1 id="pureftpd">PureFTPd</h1>
+<p>SNMP extend script to monitor PureFTPd.</p>
+<h2 id="snmp-extend_38">SNMP Extend</h2>
+<p>1: Download the script onto the desired host. <code>wget
+   https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/pureftpd.py
+   -O /etc/snmp/pureftpd.py</code></p>
+<p>2: Make the script executable: <code>chmod +x /etc/snmp/pureftpd.py</code></p>
+<p>3: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend pureftpd sudo /etc/snmp/pureftpd.py
+</code></pre></div>
+<p>4: Edit your sudo users (usually <code>visudo</code>) and add at the bottom:</p>
+<p><div class="highlight"><pre><span></span><code>snmp ALL=(ALL) NOPASSWD: /etc/snmp/pureftpd.py
+</code></pre></div>
+or the path where your pure-ftpwho is located</p>
+<p>5: If pure-ftpwho is not located in /usr/sbin</p>
+<p>you will also need to create a config file, which is named</p>
+<p>pureftpd.json. The file has to be located in /etc/snmp/.</p>
+<div class="highlight"><pre><span></span><code>{&quot;pureftpwho_cmd&quot;: &quot;/usr/sbin/pure-ftpwho&quot;
+}
+</code></pre></div>
+<p>5: Restart snmpd on your host</p>
+<h1 id="raspberry-pi">Raspberry PI</h1>
+<p>SNMP extend script to get your PI data into your host.</p>
+<h2 id="snmp-extend_39">SNMP Extend</h2>
+<p>1: Download the script onto the desired host. <code>wget
+   https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/raspberry.sh
+   -O /etc/snmp/raspberry.sh</code></p>
+<p>2: Make the script executable: <code>chmod +x /etc/snmp/raspberry.sh</code></p>
+<p>3: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend raspberry /usr/bin/sudo /bin/sh /etc/snmp/raspberry.sh
+</code></pre></div>
+<p>4: Edit your sudo users (usually <code>visudo</code>) and add at the bottom:</p>
+<div class="highlight"><pre><span></span><code>snmp ALL=(ALL) NOPASSWD: /bin/sh /etc/snmp/raspberry.sh
+</code></pre></div>
+<p><strong>Note:</strong> If you are using Raspian, the default user is
+<code>Debian-snmp</code>. Change <code>snmp</code> above to <code>Debian-snmp</code>. You can verify
+the user snmpd is using with <code>ps aux | grep snmpd</code></p>
+<p>5: Restart snmpd on PI host</p>
+<h1 id="redis">Redis</h1>
+<p>SNMP extend script to monitor your Redis Server</p>
+<h2 id="snmp-extend_40">SNMP Extend</h2>
+<p>1: Download the script onto the desired host. <code>wget
+   https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/redis.py
+   -O /etc/snmp/redis.py</code></p>
+<p>2: Make the script executable: <code>chmod +x /etc/snmp/redis.py</code></p>
+<p>3: Edit your snmpd.conf file (usually <code>/etc/snmp/snmpd.conf</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend redis /etc/snmp/redis.py
+</code></pre></div>
+<h1 id="seafile">Seafile</h1>
+<p>SNMP extend script to monitor your Seafile Server</p>
+<h2 id="snmp-extend_41">SNMP Extend</h2>
+<p>1: Copy the Python script, seafile.py, to the desired host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/seafile.py -O
+/etc/snmp/seafile.py</code></p>
+<p>Also you have to install the requests Package for Python3.
+Under Ubuntu/Debian just run <code>apt install python3-requests</code></p>
+<p>2: Run <code>chmod +x /etc/snmp/seafile.py</code></p>
+<p>3: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend seafile /etc/snmp/seafile.py
+</code></pre></div>
+<p>4: You will also need to create the config file, which is named
+seafile.json . The script has to be located at /etc/snmp/.</p>
+<div class="highlight"><pre><span></span><code>{&quot;url&quot;: &quot;https://seafile.mydomain.org&quot;,
+ &quot;username&quot;: &quot;some_admin_login@mail.address&quot;,
+ &quot;password&quot;: &quot;password&quot;,
+ &quot;account_identifier&quot;: &quot;name&quot;
+ &quot;hide_monitoring_account&quot;: true
+}
+</code></pre></div>
+<p>The variables are as below.</p>
+<div class="highlight"><pre><span></span><code>url = Url how to get access to Seafile Server
+username = Login to Seafile Server.
+           It is important that used Login has admin privileges.
+           Otherwise most API calls will be denied.
+password = Password to the configured login.
+account_identifier = Defines how user accounts are listed in RRD Graph.
+                     Options are: name, email
+hide_monitoring_account = With this Boolean you can hide the Account which you
+                          use to access Seafile API
+</code></pre></div>
+<p><strong>Note:</strong>It is recommended to use a dedicated Administrator account for monitoring.</p>
+<h1 id="smart">SMART</h1>
+<h2 id="snmp-extend_42">SNMP Extend</h2>
+<ol>
+<li>Copy the Perl script, smart, to the desired host.</li>
+</ol>
+<p><code>wget https://github.com/librenms/librenms-agent/raw/master/snmp/smart -O /etc/snmp/smart</code></p>
+<ol>
+<li>
+<p>Run <code>chmod +x /etc/snmp/smart</code></p>
+</li>
+<li>
+<p>Edit your snmpd.conf file and add:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>extend smart /etc/snmp/smart
+</code></pre></div>
+<ol>
+<li>You will also need to create the config file, which defaults to the same path as the script,
+but with .config appended. So if the script is located at /etc/snmp/smart, the config file
+will be <code>/etc/snmp/smart.config</code>. Alternatively you can also specific a config via <code>-c</code>.</li>
+</ol>
+<p>Anything starting with a # is comment. The format for variables is $variable=$value. Empty
+lines are ignored. Spaces and tabes at either the start or end of a line are ignored. Any
+line with out a matched variable or # are treated as a disk.</p>
+<div class="highlight"><pre><span></span><code>#This is a comment
+cache=/var/cache/smart
+smartctl=/usr/bin/env smartctl
+useSN=1
+ada0
+ada1
+da5 /dev/da5 -d sat
+twl0,0 /dev/twl0 -d 3ware,0
+twl0,1 /dev/twl0 -d 3ware,1
+twl0,2 /dev/twl0 -d 3ware,2
+</code></pre></div>
+<p>The variables are as below.</p>
+<div class="highlight"><pre><span></span><code>cache = The path to the cache file to use. Default: /var/cache/smart
+smartctl = The path to use for smartctl. Default: /usr/bin/env smartctl
+useSN = If set to 1, it will use the disks SN for reporting instead of the device name.
+        1 is the default. 0 will use the device name.
+</code></pre></div>
+<p>A disk line is can be as simple as just a disk name under /dev/. Such as in the config above
+The line "ada0" would resolve to "/dev/ada0" and would be called with no special argument. If
+a line has a space in it, everything before the space is treated as the disk name and is what
+used for reporting and everything after that is used as the argument to be passed to smartctl.</p>
+<p>If you want to guess at the configuration, call it with -g and it will print out what it thinks
+it should be.</p>
+<ol>
+<li>Restart snmpd on your host</li>
+</ol>
+<p>If you have a large number of more than one or two disks on a system,
+you should consider adding this to cron. Also make sure the cache file
+is some place it can be written to.</p>
+<div class="highlight"><pre><span></span><code> */3 * * * * /etc/snmp/smart -u
+</code></pre></div>
+<ol>
+<li>If your snmp agent runs as user "snmp", edit your sudo users
+   (usually <code>visudo</code>) and add at the bottom:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>snmp ALL=(ALL) NOPASSWD: /etc/snmp/smart, /usr/bin/env smartctl
+</code></pre></div>
+<p>and modify your snmpd.conf file accordingly:</p>
+<div class="highlight"><pre><span></span><code>extend smart /usr/bin/sudo /etc/snmp/smart
+</code></pre></div>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<p>If you set useSN to 1, it is worth noting that you will loose
+history(not able to access it from the web interface) for that device
+each time you change it. You will also need to run camcontrol or the
+like on said server to figure out what device actually corresponds
+with that serial number.</p>
+<p>Also if the system you are using uses non-static device naming based
+on bus information, it may be worthwhile just using the SN as the
+device ID is going to be irrelevant in that case.</p>
+<h1 id="squid">Squid</h1>
+<h2 id="snmp-proxy">SNMP Proxy</h2>
+<p>1: Enable SNMP for Squid like below, if you have not already, and
+restart it.</p>
+<div class="highlight"><pre><span></span><code>acl snmppublic snmp_community public
+snmp_port 3401
+snmp_access allow snmppublic localhost
+snmp_access deny all
+</code></pre></div>
+<p>2: Restart squid on your host.</p>
+<p>3: Edit your snmpd.conf file and add, making sure you have the same
+community, host, and port as above:</p>
+<div class="highlight"><pre><span></span><code>proxy -v 2c -c public 127.0.0.1:3401 1.3.6.1.4.1.3495
+</code></pre></div>
+<p>For more advanced information on Squid and SNMP or setting up proxying
+for net-snmp, please see the links below.</p>
+<p><a href="http://wiki.squid-cache.org/Features/Snmp">http://wiki.squid-cache.org/Features/Snmp</a>
+<a href="http://www.net-snmp.org/wiki/index.php/Snmpd_proxy">http://www.net-snmp.org/wiki/index.php/Snmpd_proxy</a></p>
+<h1 id="tinydns-aka-djbdns">TinyDNS aka djbdns</h1>
+<h2 id="agent_11">Agent</h2>
+<p><a href="../Agent-Setup/">Install the agent</a> on this device if it isn't already
+and copy the <code>tinydns</code> script to <code>/usr/lib/check_mk_agent/local/</code></p>
+<p><em>Note</em>: We assume that you use DJB's
+<a href="http://cr.yp.to/daemontools.html">Daemontools</a> to start/stop
+tinydns. And that your tinydns instance is located in <code>/service/dns</code>,
+adjust this path if necessary.</p>
+<p>1: Replace your <em>log</em>'s <code>run</code> file, typically located in
+   <code>/service/dns/log/run</code> with:</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/sh</span>
+<span class="nb">exec</span> setuidgid dnslog tinystats ./main/tinystats/ multilog t n3 s250000 ./main/
+</code></pre></div>
+<p>2: Create tinystats directory and chown:</p>
+<div class="highlight"><pre><span></span><code>mkdir /service/dns/log/main/tinystats
+chown dnslog:nofiles /service/dns/log/main/tinystats
+</code></pre></div>
+<p>3: Restart TinyDNS and Daemontools: <code>/etc/init.d/svscan restart</code>
+   <em>Note</em>: Some say <code>svc -t /service/dns</code> is enough, on my install
+   (Gentoo) it doesn't rehook the logging and I'm forced to restart it
+   entirely.</p>
+<h1 id="unbound">Unbound</h1>
+<p>Unbound configuration:</p>
+<div class="highlight"><pre><span></span><code># Enable extended statistics.
+server:
+        extended-statistics: yes
+        statistics-cumulative: yes
+
+remote-control:
+        control-enable: yes
+        control-interface: 127.0.0.1
+</code></pre></div>
+<p>Restart your unbound after changing the configuration, verify it is
+working by running <code>unbound-control stats</code>.</p>
+<h2 id="option-1-snmp-extend-preferred-and-easiest-method">Option 1: SNMP Extend (Preferred and easiest method)</h2>
+<p>1: Copy the shell script, unbound, to the desired host. <code>wget
+https://github.com/librenms/librenms-agent/raw/master/snmp/unbound -O
+/etc/snmp/unbound</code></p>
+<p>2: Run <code>chmod +x /etc/snmp/unbound</code></p>
+<p>3: Edit your snmpd.conf file and add:</p>
+<div class="highlight"><pre><span></span><code>extend unbound /usr/bin/sudo /etc/snmp/unbound
+</code></pre></div>
+<p>4: Restart snmpd.</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="option-2-agent">Option 2: Agent</h1>
+<p><a href="#agent-setup">Install the agent</a> on this device if it isn't already
+and copy the <code>unbound.sh</code> script to <code>/usr/lib/check_mk_agent/local/</code></p>
+<h1 id="ups-nut">UPS-nut</h1>
+<p>A small shell script that exports nut ups status.</p>
+<h2 id="snmp-extend_43">SNMP Extend</h2>
+<p>1: Copy the <a href="https://github.com/librenms/librenms-agent/blob/master/snmp/ups-nut.sh">ups
+   nut</a>
+   to <code>/etc/snmp/</code> on your host.</p>
+<p>2: Make the script executable (chmod +x /etc/snmp/ups-nut.sh)</p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend ups-nut /etc/snmp/ups-nut.sh
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="ups-apcups">UPS-apcups</h1>
+<p>A small shell script that exports apcacess ups status.</p>
+<h2 id="snmp-extend_44">SNMP Extend</h2>
+<p>1: Copy the <a href="https://github.com/librenms/librenms-agent/blob/master/snmp/ups-apcups">ups
+   apcups</a>
+   to <code>/etc/snmp/</code> on your host.</p>
+<p>2: Run <code>chmod +x /etc/snmp/ups-apcups</code></p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend ups-apcups /etc/snmp/ups-apcups
+</code></pre></div>
+<p>If 'apcaccess' is not in the PATH enviromental variable snmpd is
+using, you may need to do something like below.</p>
+<div class="highlight"><pre><span></span><code>extend ups-apcups/usr/bin/env PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin /etc/snmp/ups-apcups
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="sdfs-info">SDFS info</h1>
+<p>A small shell script that exportfs SDFS volume info.</p>
+<h2 id="snmp-extend_45">SNMP Extend</h2>
+<p>1: Download the script onto the desired host (the host must be added
+   to LibreNMS devices)</p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/sdfsinfo -O /etc/snmp/sdfsinfo
+</code></pre></div>
+<p>2: Make the script executable (chmod +x /etc/snmp/sdfsinfo)</p>
+<p>3: Edit your snmpd.conf file (usually /etc/snmp/snmpd.conf) and add:</p>
+<div class="highlight"><pre><span></span><code>extend sdfsinfo /etc/snmp/sdfsinfo
+</code></pre></div>
+<p>4: Restart snmpd on your host</p>
+<p>The application should be auto-discovered as described at the top of
+the page. If it is not, please follow the steps set out under <code>SNMP
+Extend</code> heading top of page.</p>
+<h1 id="voip-monitor">Voip-monitor</h1>
+<p>Shell script that reports cpu-load/memory/open-files files stats of Voip Monitor</p>
+<h2 id="snmp-extend_46">SNMP Extend</h2>
+<p>1: Download the script onto the desired host. <code>wget
+   https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/voipmon-stats.sh
+   -O /etc/snmp/voipmon-stats.sh</code></p>
+<p>2: Make the script executable: <code>chmod +x /etc/snmp/voipmon-stats.sh</code></p>
+<p>3: Edit your snmpd.conf file (usually <code>/etc/snmp/voipmon-stats.sh</code>) and add:</p>
+<div class="highlight"><pre><span></span><code>extend voipmon /etc/snmp/voipmon-stats.sh
+</code></pre></div>
+<h1 id="zfs">ZFS</h1>
+<h2 id="snmp-extend_47">SNMP Extend</h2>
+<p><code>zfs-linux</code> requires python3 &gt;=python3.5.</p>
+<p>The installation steps are:</p>
+<ol>
+<li>Copy the polling script to the desired host (the host must be added
+   to LibreNMS devices)</li>
+<li>Make the script executable</li>
+<li>Edit snmpd.conf to include ZFS stats</li>
+</ol>
+<h3 id="freebsd">FreeBSD</h3>
+<div class="highlight"><pre><span></span><code>wget https://github.com/librenms/librenms-agent/raw/master/snmp/zfs-freebsd -O /etc/snmp/zfs-freebsd
+chmod +x /etc/snmp/zfs-freebsd
+echo &quot;extend zfs /etc/snmp/zfs-freebsd&quot; &gt;&gt; /etc/snmp/snmpd.conf
+</code></pre></div>
+<h3 id="linux">Linux</h3>
+<div class="highlight"><pre><span></span><code>wget https://github.com/librenms/librenms-agent/raw/master/snmp/zfs-linux -O /etc/snmp/zfs-linux
+chmod +x /etc/snmp/zfs-linux
+echo &quot;extend zfs sudo /etc/snmp/zfs-linux&quot; &gt;&gt; /etc/snmp/snmpd.conf
+</code></pre></div>
+<p>Edit your sudo users (usually <code>visudo</code>) and add at the bottom:</p>
+<div class="highlight"><pre><span></span><code>snmp ALL=(ALL) NOPASSWD: /etc/snmp/zfs-linux
+</code></pre></div>
+<p>Now restart snmpd and you're all set.</p>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../../General/Updating/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Updating an install
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../Agent-Setup/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Check_MK Setup
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/vendor.6a3d08fc.min.js"></script>
+      <script src="../../assets/javascripts/bundle.71201edf.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      
+      <script>
+        app = initialize({
+          base: "../..",
+          features: [],
+          search: Object.assign({
+            worker: "../../assets/javascripts/worker/search.4ac00218.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+        <script src="../../librenms-docs.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2817 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LibreNMS user and developer documentation">
+      
+      
+        <link rel="canonical" href="https://docs.librenms.org/Developing/os/Health-Information/">
+      
+      
+        <meta name="author" content="LibreNMS">
+      
+      <link rel="shortcut icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.0">
+    
+    
+      
+        <title>Health Information - LibreNMS Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.bc7e593a.min.css">
+      
+    
+    
+    
+      
+        
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="../../../librenms.css">
+    
+    
+      
+        
+<script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-79149977-2","docs.librenms.org"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})}),document.addEventListener("DOMContentSwitch",function(){ga("send","pageview",document.location.pathname)})</script>
+<script async src="https://www.google-analytics.com/analytics.js"></script>
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sensors" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href="https://docs.librenms.org" title="LibreNMS Docs" class="md-header-nav__button md-logo" aria-label="LibreNMS Docs">
+      
+  <img src="../../../img/librenms.svg" alt="logo">
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
+            LibreNMS Docs
+          </span>
+          <span class="md-header-nav__topic md-ellipsis">
+            
+              Health Information
+            
+          </span>
+        </div>
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/librenms/librenms/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://docs.librenms.org" title="LibreNMS Docs" class="md-nav__button md-logo" aria-label="LibreNMS Docs">
+      
+  <img src="../../../img/librenms.svg" alt="logo">
+
+    </a>
+    LibreNMS Docs
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/librenms/librenms/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../.." class="md-nav__link">
+      Home
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      1. General
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="1. General" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon"></span>
+        1. General
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../General/Acknowledgement/" class="md-nav__link">
+      Acknowledgements
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../General/Changelog/" class="md-nav__link">
+      Changelog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../General/CODE_OF_CONDUCT/" class="md-nav__link">
+      Code of Conduct
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Features/" class="md-nav__link">
+      Features
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../General/Welcome-to-Observium-users/" class="md-nav__link">
+      Welcome to Observium users
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      2. Installing
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="2. Installing" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        <span class="md-nav__icon md-icon"></span>
+        2. Installing
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Installation/" class="md-nav__link">
+      How to install LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Installation/Install-LibreNMS/" class="md-nav__link">
+      Install LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Installation/Images/" class="md-nav__link">
+      LibreNMS VMs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Installation/Migrating-from-Observium/" class="md-nav__link">
+      Migrating from Observium
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+    
+    <label class="md-nav__link" for="nav-4">
+      3. Getting started
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="3. Getting started" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        <span class="md-nav__icon md-icon"></span>
+        3. Getting started
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../General/Releases/" class="md-nav__link">
+      Choosing a release
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Adding-a-Device/" class="md-nav__link">
+      Adding a device
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Device-Groups/" class="md-nav__link">
+      Grouping Devices
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../General/Callback-Stats-and-Privacy/" class="md-nav__link">
+      Submitting stats
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../General/Updating/" class="md-nav__link">
+      Updating an install
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
+    
+    <label class="md-nav__link" for="nav-5">
+      4. Basic Setup
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="4. Basic Setup" data-md-level="1">
+      <label class="md-nav__title" for="nav-5">
+        <span class="md-nav__icon md-icon"></span>
+        4. Basic Setup
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Applications/" class="md-nav__link">
+      Applications
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Agent-Setup/" class="md-nav__link">
+      Check_MK Setup
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Billing-Module/" class="md-nav__link">
+      Billing Module
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Dell-OpenManage/" class="md-nav__link">
+      Dell OpenManage
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/World-Map/" class="md-nav__link">
+      World Map
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Interface-Description-Parsing/" class="md-nav__link">
+      Interface Description Parsing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Network-Map/" class="md-nav__link">
+      Network Map
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Syslog/" class="md-nav__link">
+      Syslog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Dashboards/" class="md-nav__link">
+      Dashboards
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Supermicro/" class="md-nav__link">
+      Supermicro
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
+    
+    <label class="md-nav__link" for="nav-6">
+      5. Advanced Setup
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="5. Advanced Setup" data-md-level="1">
+      <label class="md-nav__title" for="nav-6">
+        <span class="md-nav__icon md-icon"></span>
+        5. Advanced Setup
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/1-Minute-Polling/" class="md-nav__link">
+      1 Minute Polling
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Fast-Ping-Check/" class="md-nav__link">
+      Fast Ping Checking
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Environment-Variables/" class="md-nav__link">
+      Environment Variables
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Configuration/" class="md-nav__link">
+      Configuration Docs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Authentication/" class="md-nav__link">
+      Authentication Options
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Two-Factor-Auth/" class="md-nav__link">
+      Two-Factor Auth
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Auto-Discovery/" class="md-nav__link">
+      Auto-discovery Setup
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Distributed-Poller/" class="md-nav__link">
+      Scaling LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/RRDCached/" class="md-nav__link">
+      RRDCached
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Sub-Directory/" class="md-nav__link">
+      Sub-directory Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Varnish/" class="md-nav__link">
+      Varnish
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Dispatcher-Service/" class="md-nav__link">
+      Dispatcher Service (RC)
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/RRDTune/" class="md-nav__link">
+      RRDTune
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/IRC-Bot/" class="md-nav__link">
+      IRC Bot
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/IRC-Bot-Extensions/" class="md-nav__link">
+      IRC Bot Extensions
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/SNMP-Proxy/" class="md-nav__link">
+      SNMP Proxy
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/SNMP-Trap-Handler/" class="md-nav__link">
+      SNMP Trap Handler
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Customizing-the-Web-UI/" class="md-nav__link">
+      Customizing the Web UI
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Bare-Dashboard/" class="md-nav__link">
+      Bare Dashboard
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Cleanup-options/" class="md-nav__link">
+      Cleanup Options
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+    
+    <label class="md-nav__link" for="nav-7">
+      6. 3rd Party Integration
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="6. 3rd Party Integration" data-md-level="1">
+      <label class="md-nav__title" for="nav-7">
+        <span class="md-nav__icon md-icon"></span>
+        6. 3rd Party Integration
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Gateone/" class="md-nav__link">
+      Gateone
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Graylog/" class="md-nav__link">
+      Graylog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Services/" class="md-nav__link">
+      Nagios Plugins
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/NFSen/" class="md-nav__link">
+      NFSen
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Oxidized/" class="md-nav__link">
+      Oxidized
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Rancid/" class="md-nav__link">
+      Rancid
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/PeeringDB/" class="md-nav__link">
+      PeeringDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Proxmox/" class="md-nav__link">
+      Proxmox
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-7-9" type="checkbox" id="nav-7-9">
+    
+    <label class="md-nav__link" for="nav-7-9">
+      Storing Metrics
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Storing Metrics" data-md-level="2">
+      <label class="md-nav__title" for="nav-7-9">
+        <span class="md-nav__icon md-icon"></span>
+        Storing Metrics
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Metric-Storage/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/metrics/Graphite/" class="md-nav__link">
+      Graphite
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/metrics/InfluxDB/" class="md-nav__link">
+      InfluxDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/metrics/OpenTSDB/" class="md-nav__link">
+      OpenTSDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/metrics/Prometheus/" class="md-nav__link">
+      Prometheus
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Smokeping/" class="md-nav__link">
+      Smokeping
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Weathermap/" class="md-nav__link">
+      Weathermap
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+    
+    <label class="md-nav__link" for="nav-8">
+      7. API
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="7. API" data-md-level="1">
+      <label class="md-nav__title" for="nav-8">
+        <span class="md-nav__icon md-icon"></span>
+        7. API
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/" class="md-nav__link">
+      Using the API
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/Devices/" class="md-nav__link">
+      Devices
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/DeviceGroups/" class="md-nav__link">
+      DeviceGroups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/Ports/" class="md-nav__link">
+      Ports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/PortGroups/" class="md-nav__link">
+      PortGroups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/Alerts/" class="md-nav__link">
+      Alerts
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/Routing/" class="md-nav__link">
+      Routing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/Switching/" class="md-nav__link">
+      Switching
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/Inventory/" class="md-nav__link">
+      Inventory
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/Bills/" class="md-nav__link">
+      Bills
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/ARP/" class="md-nav__link">
+      ARP
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/Services/" class="md-nav__link">
+      Services
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/System/" class="md-nav__link">
+      System
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/Logs/" class="md-nav__link">
+      Logs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../API/Locations/" class="md-nav__link">
+      Locations
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-9" type="checkbox" id="nav-9">
+    
+    <label class="md-nav__link" for="nav-9">
+      8. Alerting
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="8. Alerting" data-md-level="1">
+      <label class="md-nav__title" for="nav-9">
+        <span class="md-nav__icon md-icon"></span>
+        8. Alerting
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Alerting/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Alerting/Introduction/" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Alerting/Rules/" class="md-nav__link">
+      Rules
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Alerting/Templates/" class="md-nav__link">
+      Templates
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Alerting/Transports/" class="md-nav__link">
+      Transports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Alerting/Creating-Transport/" class="md-nav__link">
+      Creating Transports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Alerting/Entities/" class="md-nav__link">
+      Entities
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Alerting/Macros/" class="md-nav__link">
+      Macros
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Alerting/Testing/" class="md-nav__link">
+      Testing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Alerting/Device-Dependencies/" class="md-nav__link">
+      Device Dependencies
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-10" type="checkbox" id="nav-10">
+    
+    <label class="md-nav__link" for="nav-10">
+      9. Getting help
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="9. Getting help" data-md-level="1">
+      <label class="md-nav__title" for="nav-10">
+        <span class="md-nav__icon md-icon"></span>
+        9. Getting help
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/" class="md-nav__link">
+      How to get help
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/FAQ/" class="md-nav__link">
+      FAQ
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Install%20Validation/" class="md-nav__link">
+      Install Validation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Performance/" class="md-nav__link">
+      Performance
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Discovery%20Support/" class="md-nav__link">
+      Discovery Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Poller%20Support/" class="md-nav__link">
+      Poller Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Example-Hardware-Setup/" class="md-nav__link">
+      Example Hardware Setups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Remote-Monitoring-VPN/" class="md-nav__link">
+      Remote Monitoring VPN
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/SNMP-Configuration-Examples/" class="md-nav__link">
+      SNMP Configuration Examples
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/SSL-Configuration/" class="md-nav__link">
+      SSL Configuration
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Device-Troubleshooting/" class="md-nav__link">
+      Device Troubleshooting
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Device-Sensors/" class="md-nav__link">
+      Device Sensors
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-11" type="checkbox" id="nav-11" checked>
+    
+    <label class="md-nav__link" for="nav-11">
+      10. Contributing + Developing
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="10. Contributing + Developing" data-md-level="1">
+      <label class="md-nav__title" for="nav-11">
+        <span class="md-nav__icon md-icon"></span>
+        10. Contributing + Developing
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Getting-Started/" class="md-nav__link">
+      Getting Started
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Using-Git/" class="md-nav__link">
+      Using Git
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Code-Guidelines/" class="md-nav__link">
+      Code Guidelines
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Style-Guidelines/" class="md-nav__link">
+      Style Guidelines
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Validating-Code/" class="md-nav__link">
+      Validating Code
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Code-Structure/" class="md-nav__link">
+      Code Structure
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Creating-Documentation/" class="md-nav__link">
+      Creating Documentation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Licensing/" class="md-nav__link">
+      Licensing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Component/" class="md-nav__link">
+      Component
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-11-11" type="checkbox" id="nav-11-11" checked>
+    
+    <label class="md-nav__link" for="nav-11-11">
+      Support for a new OS
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Support for a new OS" data-md-level="2">
+      <label class="md-nav__title" for="nav-11-11">
+        <span class="md-nav__icon md-icon"></span>
+        Support for a new OS
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support-New-OS/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Initial-Detection/" class="md-nav__link">
+      Initial Detection
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Mem-CPU-Information/" class="md-nav__link">
+      Mem/CPU Information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Test-Units/" class="md-nav__link">
+      Test Units
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Health Information
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
+      Health Information
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sensors" class="md-nav__link">
+    Sensors
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simple-health-discovery" class="md-nav__link">
+    Simple health discovery
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-health-discovery" class="md-nav__link">
+    Advanced health discovery
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-new-sensor-class" class="md-nav__link">
+    Adding a new sensor class
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-health-sensor-example" class="md-nav__link">
+    Advanced health sensor example
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Wireless-Sensors/" class="md-nav__link">
+      Wireless Sensors
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Custom-Graphs/" class="md-nav__link">
+      Custom Graphs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Settings/" class="md-nav__link">
+      Settings
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Sensor-State-Support/" class="md-nav__link">
+      Sensor State Support
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../SNMP-Traps/" class="md-nav__link">
+      SNMP Traps
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Dynamic-Config/" class="md-nav__link">
+      Dynamic Config
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Merging-Pull-Requests/" class="md-nav__link">
+      Merging Pull Requests
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Creating-Release/" class="md-nav__link">
+      Creating Release
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Extensions/Plugin-System/" class="md-nav__link">
+      Plugin System
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-12" type="checkbox" id="nav-12">
+    
+    <label class="md-nav__link" for="nav-12">
+      11. Misc
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="11. Misc" data-md-level="1">
+      <label class="md-nav__title" for="nav-12">
+        <span class="md-nav__icon md-icon"></span>
+        11. Misc
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../General/Security/" class="md-nav__link">
+      Security information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/CLI-Tools/" class="md-nav__link">
+      CLI Scripts
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-12-3" type="checkbox" id="nav-12-3">
+    
+    <label class="md-nav__link" for="nav-12-3">
+      Device Notes
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Device Notes" data-md-level="2">
+      <label class="md-nav__title" for="nav-12-3">
+        <span class="md-nav__icon md-icon"></span>
+        Device Notes
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Device-Notes/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Device-Notes/Carel-pCOweb-Devices/" class="md-nav__link">
+      Carel pCOweb
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Device-Notes/AsuswrtMerlin/" class="md-nav__link">
+      Asuswrt-Merlin
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../../Support/Device-Notes/Openwrt/" class="md-nav__link">
+      OpenWRT
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sensors" class="md-nav__link">
+    Sensors
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simple-health-discovery" class="md-nav__link">
+    Simple health discovery
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-health-discovery" class="md-nav__link">
+    Advanced health discovery
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-new-sensor-class" class="md-nav__link">
+    Adding a new sensor class
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-health-sensor-example" class="md-nav__link">
+    Advanced health sensor example
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/librenms/librenms/edit/master/doc/Developing/os/Health-Information.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                  <h1>Health Information</h1>
+                
+                <h4 id="sensors">Sensors</h4>
+<p>This document will guide you through adding health / sensor
+information for your new device.</p>
+<p>Currently we have support for the following health metrics along with
+the values we expect to see the data in:</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>airflow</td>
+<td>cfm</td>
+</tr>
+<tr>
+<td>ber</td>
+<td>ratio</td>
+</tr>
+<tr>
+<td>charge</td>
+<td>%</td>
+</tr>
+<tr>
+<td>chromatic_dispersion</td>
+<td>ps/nm</td>
+</tr>
+<tr>
+<td>cooling</td>
+<td>W</td>
+</tr>
+<tr>
+<td>count</td>
+<td>#</td>
+</tr>
+<tr>
+<td>current</td>
+<td>A</td>
+</tr>
+<tr>
+<td>dbm</td>
+<td>dBm</td>
+</tr>
+<tr>
+<td>delay</td>
+<td>s</td>
+</tr>
+<tr>
+<td>eer</td>
+<td>eer</td>
+</tr>
+<tr>
+<td>fanspeed</td>
+<td>rpm</td>
+</tr>
+<tr>
+<td>frequency</td>
+<td>Hz</td>
+</tr>
+<tr>
+<td>humidity</td>
+<td>%</td>
+</tr>
+<tr>
+<td>load</td>
+<td>%</td>
+</tr>
+<tr>
+<td>loss</td>
+<td>%</td>
+</tr>
+<tr>
+<td>power</td>
+<td>W</td>
+</tr>
+<tr>
+<td>power_consumed</td>
+<td>kWh</td>
+</tr>
+<tr>
+<td>power_factor</td>
+<td>ratio</td>
+</tr>
+<tr>
+<td>pressure</td>
+<td>kPa</td>
+</tr>
+<tr>
+<td>quality_factor</td>
+<td>dB</td>
+</tr>
+<tr>
+<td>runtime</td>
+<td>Min</td>
+</tr>
+<tr>
+<td>signal</td>
+<td>dBm</td>
+</tr>
+<tr>
+<td>snr</td>
+<td>SNR</td>
+</tr>
+<tr>
+<td>state</td>
+<td>#</td>
+</tr>
+<tr>
+<td>temperature</td>
+<td>C</td>
+</tr>
+<tr>
+<td>voltage</td>
+<td>V</td>
+</tr>
+<tr>
+<td>waterflow</td>
+<td>l/m</td>
+</tr>
+<tr>
+<td>percent</td>
+<td>%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="simple-health-discovery">Simple health discovery</h4>
+<p>We have support for defining health / sensor discovery using YAML
+files so that you don't need to know how to write PHP.</p>
+<blockquote>
+<p>Please note that DISPLAY-HINTS are disabled so ensure you use the
+correct divisor / multiplier if applicable.</p>
+</blockquote>
+<p>All yaml files are located in
+<code>includes/definitions/discovery/$os.yaml</code>. Defining the information
+here is not always possible and is heavily reliant on vendors being
+sensible with the MIBs they generate. Only snmp walks are supported
+and you must provide a sane table that can be traversed and contains
+all of the data you need. We will use netbotz as an example here.</p>
+<p><code>includes/definitions/discovery/netbotz.yaml</code></p>
+<div class="highlight"><pre><span></span><code><span class="nt">mib</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">NETBOTZV2-MIB</span>
+<span class="nt">modules</span><span class="p">:</span>
+    <span class="nt">sensors</span><span class="p">:</span>
+        <span class="nt">airflow</span><span class="p">:</span>
+            <span class="nt">options</span><span class="p">:</span>
+                <span class="nt">skip_value_lt</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0</span>
+            <span class="nt">data</span><span class="p">:</span>
+                <span class="p p-Indicator">-</span>
+                    <span class="nt">oid</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">airFlowSensorTable</span>
+                    <span class="nt">value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">airFlowSensorValue</span>
+                    <span class="nt">divisor</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10</span>
+                    <span class="nt">num_oid</span><span class="p">:</span> <span class="s">&#39;.1.3.6.1.4.1.5528.100.4.1.5.1.2.{{</span><span class="nv"> </span><span class="s">$index</span><span class="nv"> </span><span class="s">}}&#39;</span>
+                    <span class="nt">descr</span><span class="p">:</span> <span class="s">&#39;{{</span><span class="nv"> </span><span class="s">$airFlowSensorLabel</span><span class="nv"> </span><span class="s">}}&#39;</span>
+                    <span class="nt">index</span><span class="p">:</span> <span class="s">&#39;airFlowSensorValue.{{</span><span class="nv"> </span><span class="s">$index</span><span class="nv"> </span><span class="s">}}&#39;</span>
+</code></pre></div>
+<p>At the top you can define one or more mibs to be used in the lookup of data:</p>
+<p><code>mib: NETBOTZV2-MIB</code>
+For use of multiple MIB files separate them with a colon: <code>mib: NETBOTZV2-MIB:SECOND-MIB</code></p>
+<p>For <code>data:</code> you have the following options:</p>
+<p>The only sensor we have defined here is airflow. The available options
+are as follows:</p>
+<ul>
+<li><code>oid</code> (required): This is the name of the table you want to do the snmp walk on.</li>
+<li><code>value</code> (optional): This is the key within the table that contains
+  the value. If not provided willuse <code>oid</code></li>
+<li><code>num_oid</code> (required): This is the numerical OID that contains
+  <code>value</code>. This should always include <code>{{ $index }}</code>.  snmptranslate
+  -On can help figure out the number.
+  In case the index is a string, <code>{{ $index_string }}</code> can be used instead.</li>
+<li><code>divisor</code> (optional): This is the divisor to use against the returned <code>value</code>.</li>
+<li><code>multiplier</code> (optional): This is the multiplier to use against the returned <code>value</code>.</li>
+<li><code>low_limit</code> (optional): This is the critical low threshold that
+  <code>value</code> should be (used in alerting). If an OID is specified then
+  divisor / multiplier are used.</li>
+<li><code>low_warn_limit</code> (optional): This is the warning low threshold that
+  <code>value</code> should be (used in alerting). If an OID is specified then
+  divisor / multiplier are used.</li>
+<li><code>warn_limit</code> (optional): This is the warning high threshold that
+  <code>value</code> should be (used in alerting). If an OID is specified then
+  divisor / multiplier are used.</li>
+<li><code>high_limit</code> (optional): This is the critical high threshold that
+  <code>value</code> should be (used in alerting). If an OID is specified then
+  divisor / multiplier are used.</li>
+<li><code>descr</code> (required): The visible label for this sensor. It can be a
+  key with in the table or a static string, optionally using <code>{{ index }}</code>.</li>
+<li><code>group</code> (optional): Groups sensors together under in the webui,
+  displaying this text. Not specifying this will put the sensors in
+  the default group.</li>
+<li><code>index</code> (optional): This is the index value we use to uniquely
+  identify this sensor. <code>{{ $index }}</code> will be replaced by the <code>index</code>
+  from the snmp walk.</li>
+<li><code>skip_values</code> (optional): This is an array of values we should skip
+  over (see note below).</li>
+<li><code>skip_value_lt</code> (optional): If sensor value is less than this, skip the discovery.</li>
+<li><code>skip_value_gt</code> (optional): If sensor value is greater than this, skip the discovery.</li>
+<li><code>entPhysicalIndex</code> (optional): If the sensor belongs to a physical
+  entity then you can specify the index here.</li>
+<li><code>entPhysicalIndex_measured</code> (optional): If the sensor belongs to a
+  physical entity then you can specify the entity type here.</li>
+<li><code>user_func</code> (optional): You can provide a function name for the
+  sensors value to be processed through (i.e. Convert fahrenheit to
+  celsius use <code>fahrenheit_to_celsius</code>)</li>
+</ul>
+<p>For <code>options:</code> you have the following available:</p>
+<ul>
+<li><code>divisor</code>: This is the divisor to use against the returned <code>value</code>.</li>
+<li><code>multiplier</code>: This is the multiplier to use against the returned <code>value</code>.</li>
+<li><code>skip_values</code>: This is an array of values we should skip over (see note below).</li>
+<li><code>skip_value_lt</code>: If sensor value is less than this, skip the discovery.</li>
+<li><code>skip_value_gt</code>: If sensor value is greater than this, skip the discovery.</li>
+</ul>
+<p>Multiple variables can be used in the sensors definition. The syntax
+is <code>{{ $variable }}</code>. Any oid in the current table can be used, as
+well as pre_cached data. The index ($index) and the sub_indexes (in
+case the oid is indexed multiple times) are also available: if
+$index="1.20", then $subindex0="1" and $subindex1="20".</p>
+<blockquote>
+<p><code>skip_values</code> can also compare items within the OID table against
+values. The index of the sensor is used to retrieve the value
+from the OID, unless a target index is appended to the OID.
+Comparisons behave on a logical OR basis when chained, so only
+one of them needs to be matched for that particular sensor
+to be skipped during discovery. An example of this is below:</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code>                    <span class="nt">skip_values</span><span class="p">:</span>
+                    <span class="p p-Indicator">-</span>
+                      <span class="nt">oid</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sensUnit</span>
+                      <span class="nt">op</span><span class="p">:</span> <span class="s">&#39;!=&#39;</span>
+                      <span class="nt">value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">4</span>
+                    <span class="p p-Indicator">-</span>
+                      <span class="nt">oid</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sensConfig.0</span>
+                      <span class="nt">op</span><span class="p">:</span> <span class="s">&#39;!=&#39;</span>
+                      <span class="nt">value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+</code></pre></div>
+<blockquote>
+<p><code>op</code> can be any of the following operators :</p>
+<p>=, !=, ==, !==, &lt;=, &gt;=, &lt;, &gt;,
+starts, ends, contains, regex, in_array, not_starts,
+not_ends, not_contains, not_regex, not_in_array, exists</p>
+<p>Example:</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code>                    <span class="nt">skip_values</span><span class="p">:</span>
+                    <span class="p p-Indicator">-</span>
+                      <span class="nt">oid</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sensorName</span>
+                      <span class="nt">op</span><span class="p">:</span> <span class="s">&#39;not_in_array&#39;</span>
+                      <span class="nt">value</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;sensor1&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;sensor2&#39;</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>                    <span class="nt">skip_values</span><span class="p">:</span>
+                    <span class="p p-Indicator">-</span>
+                      <span class="nt">oid</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sensorOptionalOID</span>
+                      <span class="nt">op</span><span class="p">:</span> <span class="s">&#39;exists&#39;</span>
+                      <span class="nt">value</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+</code></pre></div>
+<p>If you aren't able to use yaml to perform the sensor discovery, you
+will most likely need to use Advanced health discovery.</p>
+<h4 id="advanced-health-discovery">Advanced health discovery</h4>
+<p>If you can't use the yaml files as above, then you will need to create
+the discovery code in php.</p>
+<p>The directory structure for sensor information is
+<code>includes/discovery/sensors/$class/$os.inc.php</code>. The format of all of
+the sensors follows the same code format which is to collect sensor information
+via SNMP and then call the <code>discover_sensor()</code> function; with the exception of state 
+sensors which requires additional code. Sensor information is commonly found in an ENTITY
+mib supplied by device's vendor in the form of a table. Other mib tables may be used as
+well. Sensor information is first collected by
+<code>includes/discovery/sensors/pre_cache/$os.inc.php</code>. This program will pull in data
+from mib tables into a <code>$pre_cache</code> array that can then be used in
+<code>includes/discovery/sensors/$class/$os.inc.php</code> to extract specific values which are
+then passed to <code>discover_sensor()</code>.</p>
+<p><code>discover_sensor()</code> Accepts the following arguments:</p>
+<ul>
+<li>&amp;$valid = This is always $valid['sensor'], do not pass any other values.</li>
+<li>$class = Required. This is the sensor class from the table above (i.e humidity).</li>
+<li>$device = Required. This is the $device array.</li>
+<li>$oid = Required. This must be the numerical OID for where the data
+  can be found, i.e .1.2.3.4.5.6.7.0</li>
+<li>$index = Required. This must be unique for this sensor class, device
+  and type. Typically it's the index from the table being walked or it
+  could be the name of the OID if it's a single value.</li>
+<li>$type = Required. This should be the OS name, i.e pulse.</li>
+<li>$descr = Required. This is a descriptive value for the sensor. Some
+  devices will provide names to use.</li>
+<li>$divisor = Defaults to 1. This is used to divided the returned value.</li>
+<li>$multiplier = Defaults to 1. This is used to multiply the returned value.</li>
+<li>$low_limit = Defaults to null. Sets the low threshold limit for the
+  sensor, used in alerting to report out range sensors.</li>
+<li>$low_warn_limit = Defaults to null. Sets the low warning limit for
+  the sensor, used in alerting to report near out of range sensors.</li>
+<li>$warn_limit = Defaults to null. Sets the high warning limit for the
+  sensor, used in alerting to report near out of range sensors.</li>
+<li>$high_limit = Defaults to null. Sets the high limit for the sensor,
+  used in alerting to report out range sensors.</li>
+<li>$current = Defaults to null. Can be used to set the current value on
+  discovery. Poller will update this on the next poll cycle anyway.</li>
+<li>$poller_type = Defaults to snmp. Things like the unix-agent can set
+  different values but for the most part this should be left as snmp.</li>
+<li>$entPhysicalIndex = Defaults to null. Sets the entPhysicalIndex to
+  be used to look up further hardware if available.</li>
+<li>$entPhysicalIndex_measured = Defaults to null. Sets the type of
+  entPhysicalIndex used, i.e ports.</li>
+<li>$user_func = Defaults to null. You can provide a function name for
+  the sensors value to be processed through (i.e. Convert fahrenheit
+  to celsius use <code>fahrenheit_to_celsius</code>)</li>
+<li>$group = Defaults to null. Groups sensors together under in the
+  webui, displaying this text.</li>
+</ul>
+<p>For the majority of devices, this is all that's required to add
+support for a sensor. Polling is done based on the data gathered using
+<code>discover_sensor()</code>. If custom polling is needed then the file format
+is similar to discovery:
+<code>includes/polling/sensors/$class/$os.inc.php</code>. Whilst it's possible to
+perform additional  snmp queries within polling this should be avoided
+where possible. The value for the OID is already available as <code>$sensor_value</code>.</p>
+<p>Graphing is performed automatically for sensors, no custom graphing is
+required or supported.</p>
+<h4 id="adding-a-new-sensor-class">Adding a new sensor class</h4>
+<p>You will need to add code for your new sensor class in the following existing files:</p>
+<ul>
+<li><code>app/Models/Sensor.php</code>: add a free icon from <a href="https://fontawesome.com/icons?d=gallery&amp;m=free">Font Awesome</a>
+in the $icons array.</li>
+<li><code>doc/Developing/os/Health-Information.md</code>: documentation for every sensor class is mandatory.</li>
+<li><code>includes/discovery/sensors.inc.php</code>: add the sensor class to the $run_sensors array.</li>
+<li><code>includes/discovery/functions.inc.php</code>: optional - if sensible low_limit and high_limit values
+are guessable when a SNMP-retrievable threshold is not available, add a case for the sensor class
+to the sensor_limit() and/or sensor_low_limit() functions.</li>
+<li><code>LibreNMS/Util/ObjectCache.php</code>: optional - choose menu grouping for the sensor class.</li>
+<li><code>includes/html/pages/device/health.inc.php</code>: add a dbFetchCell(), $datas[], and $type_text[]
+entry for the sensor class.</li>
+<li><code>includes/html/pages/device/overview.inc.php</code>: add <code>require 'overview/sensors/$class.inc.php'</code>
+in the desired order for the device overview page.</li>
+<li><code>includes/html/pages/health.inc.php</code>: add a $type_text[] entry for the sensor class.</li>
+<li><code>resources/lang/en/sensors.php</code>: add human-readable names and units for the sensor class
+in English, feel free to do so for other languages as well.</li>
+</ul>
+<p>Create and populate new files for the sensor class in the following places:</p>
+<ul>
+<li><code>includes/discovery/sensors/$class/</code>: create the folder where advanced php-based discovery
+files are stored. Not used for yaml discovery.
+=======</li>
+<li><code>includes/html/pages/device/health.inc.php</code>: add a dbFetchCell(), $datas[], and $type_text[] entry for the sensor class.</li>
+<li><code>includes/html/pages/device/overview.inc.php</code>: add <code>require 'overview/sensors/$class.inc.php'</code> in the desired
+order for the device overview page.</li>
+<li><code>includes/html/pages/health.inc.php</code>: add a $type_text[] entry for the sensor class.</li>
+<li><code>resources/lang/en/sensors.php</code>: add human-readable names and units for the sensor class in English, feel
+free to do so for other languages as well.</li>
+</ul>
+<p>Create and populate new files for the sensor class in the following places:</p>
+<ul>
+<li><code>includes/discovery/sensors/$class/</code>: create the folder where advanced php-based discovery files
+are stored. Not used for yaml discovery.</li>
+<li><code>includes/html/graphs/device/$class.inc.php</code>: define unit names used in RRDtool graphs.</li>
+<li><code>includes/html/graphs/sensor/$class.inc.php</code>: define various <a href="https://oss.oetiker.ch/rrdtool/doc/rrdgraph_graph.en.html">parameters</a> for RRDtool graphs.</li>
+<li><code>includes/html/pages/device/health/$class.inc.php</code></li>
+<li><code>includes/html/pages/device/overview/sensors/$class.inc.php</code></li>
+<li><code>includes/html/pages/health/$class.inc.php</code></li>
+</ul>
+<h4 id="advanced-health-sensor-example">Advanced health sensor example</h4>
+<p>This example shows how to build sensors using the advanced method. In this example we will
+be collecting optical power level (dBm) from Adva FSP150CC family MetroE devices. This example
+will assume an understanding of SNMP and MIBs.</p>
+<p>First we setup <code>includes/discovery/sensors/pre_cache/adva_fsp150.inc</code> as shown below. The first
+line walks the cmEntityObject table to get information about the chassis and line cards. From
+this information we extract the model type which will identify which tables in the CM-Facility-Mib
+the ports are populated in. The program then reads the appropriate table into the <code>$pre_cache</code>
+array <code>adva_fsp150_ports</code>. This array will have OID indexies for each port, which we will use
+later to identify our sensor OIDs. </p>
+<div class="highlight"><pre><span></span><code>$pre_cache[&#39;adva_fsp150&#39;] = snmpwalk_cache_multi_oid($device, &#39;cmEntityObjects&#39;, [], &#39;CM-ENTITY-MIB&#39;, null, &#39;-OQUbs&#39;);
+$neType = $pre_cache[&#39;adva_fsp150&#39;][1][&#39;neType&#39;];
+
+if ($neType == &#39;ccxg116pro&#39;) {
+    $pre_cache[&#39;adva_fsp150_ports&#39;] = snmpwalk_cache_multi_oid($device, &#39;cmEthernetTrafficPortTable&#39;, $pre_cache[&#39;adva_fsp150_ports&#39;], &#39;CM-FACILITY-MIB&#39;, null, &#39;-OQUbs&#39;);
+} else {
+    $pre_cache[&#39;adva_fsp150_ports&#39;] = snmpwalk_cache_multi_oid($device, &#39;cmEthernetNetPortTable&#39;, $pre_cache[&#39;adva_fsp150_ports&#39;], &#39;CM-FACILITY-MIB&#39;, null, &#39;-OQUbs&#39;);
+    $pre_cache[&#39;adva_fsp150_ports&#39;] = snmpwalk_cache_multi_oid($device, &#39;cmEthernetAccPortTable&#39;, $pre_cache[&#39;adva_fsp150_ports&#39;], &#39;CM-FACILITY-MIB&#39;, null, &#39;-OQUbs&#39;);
+}
+</code></pre></div>
+<p>Next we are going to build our sensor discovery code. These are optical readings, so the file will be
+created as the dBm sensor type in <code>includes/discover/sensors/dbm/adva_fsp150.inc.php</code>. Below is
+a snippet of the code:</p>
+<div class="highlight"><pre><span></span><code>foreach ($pre_cache[&#39;adva_fsp150_ports&#39;] as $index =&gt; $entry) {
+    if ($entry[&#39;cmEthernetTrafficPortMediaType&#39;] == &#39;fiber&#39;) {
+        //Discover received power level
+        $oidRx = &#39;.1.3.6.1.4.1.2544.1.12.5.1.21.1.34.&#39; . $index . &#39;.3&#39;;
+        $oidTx = &#39;.1.3.6.1.4.1.2544.1.12.5.1.21.1.33.&#39; . $index . &#39;.3&#39;;
+        $currentRx = snmp_get($device, $oidRx, &#39;-Oqv&#39;, &#39;CM-PERFORMANCE-MIB&#39;, &#39;/opt/librenms/mibs/adva&#39;);
+        $currentTx = snmp_get($device, $oidTx, &#39;-Oqv&#39;, &#39;CM-PERFORMANCE-MIB&#39;, &#39;/opt/librenms/mibs/adva&#39;);
+        if ($currentRx != 0 || $currentTx != 0) {
+            $entPhysicalIndex = $entry[&#39;cmEthernetTrafficPortIfIndex&#39;];
+            $entPhysicalIndex_measured = &#39;ports&#39;;
+            $descrRx = dbFetchCell(&#39;SELECT `ifName` FROM `ports` WHERE `ifIndex`= ? AND `device_id` = ?&#39;, [$entry[&#39;cmEthernetTrafficPortIfIndex&#39;], $device[&#39;device_id&#39;]]) . &#39; Rx Power&#39;;
+
+            discover_sensor(
+                $valid[&#39;sensor&#39;],
+                &#39;dbm&#39;,
+                $device,
+                $oidRx,
+                &#39;cmEthernetTrafficPortStatsOPR.&#39; . $index,
+                &#39;adva_fsp150&#39;,
+                $descrRx,
+                $divisor,
+                $multiplier,
+                null,
+                null,
+                null,
+                null,
+                $currentRx,
+                &#39;snmp&#39;,
+                $entPhysicalIndex,
+                $entPhysicalIndex_measured
+            );
+
+            $descrTx = dbFetchCell(&#39;SELECT `ifName` FROM `ports` WHERE `ifIndex`= ? AND `device_id` = ?&#39;, [$entry[&#39;cmEthernetTrafficPortIfIndex&#39;], $device[&#39;device_id&#39;]]) . &#39; Tx Power&#39;;
+
+            discover_sensor(
+                $valid[&#39;sensor&#39;],
+                &#39;dbm&#39;,
+                $device,
+                $oidTx,
+                &#39;cmEthernetTrafficPortStatsOPT.&#39; . $index,
+                &#39;adva_fsp150&#39;,
+                $descrTx,
+                $divisor,
+                $multiplier,
+                null,
+                null,
+                null,
+                null,
+                $currentTx,
+                &#39;snmp&#39;,
+                $entPhysicalIndex,
+                $entPhysicalIndex_measured
+            );
+        }
+    }
+}
+</code></pre></div>
+<p>First the program will loop through each port's index value. In the case of Advas, the ports are
+names Ethernet 1-1-1-1, 1-1-1-2, etc, and they are indexed as oid.1.1.1.1, oid.1.1.1.2, etc in
+the mib.</p>
+<p>Next the program checks which table the port exists in and that the connector type is 'fiber'. There
+are other port tables in the full code that were ommitted from the example for brevity. Copper
+media won't have optical readings, so if the media type isn't fiber we skip discovery for that port.</p>
+<p>The next two lines build the OIDs for getting the optical receive and transmit values using the
+<code>$index</code> for the port. Using the OIDs the program gets the current receive and transmit values
+($currentRx and $currentTx repectively) to verify the values are not 0. Not all SFPs collect digital
+optical monitoring (DOM) data, in the case of Adva the value of both transmit and recieve will be
+0 if DOM is not available. While 0 is a valid value for optical power, its extremely unlikely that
+both will be 0 if DOM is present. If DOM is not available, then the program stops discovery for
+that port. Note that while this is the case with Adva, other vendors may differ in how they handle
+optics that do not supply DOM. Please check your vendor's mibs.</p>
+<p>Next the program assigns the values of $entPhysicalIndex and $entPhysicalIndex_measured. In this
+case $entPhysicalIndex is set to the value of the <code>cmEthernetTrafficPortIfIndex</code> so that it is
+associated with port. This will also allow the sensor graphs to show up on the associated port's
+page in the GUI in addition to the Health page.</p>
+<p>Following that the program uses a database call to get the description of the port which will be
+used as the title for the graph in the GUI.</p>
+<p>Lastly the program calls <code>discover_sensor()</code> and passes the information collected in the previous
+steps. The <code>null</code> values are for low, low warning, high, and high warning values, which are not
+collected in the Adva's MIB.</p>
+<p>You can manually run discovery to verify the code works by running <code>./discovery.php -h $device_id -m sensors</code>.
+You can use <code>-v</code> to see what calls are being used during discovery and <code>-d</code> to see debug output.
+In the output under <code>#### Load disco module sensors ####</code> you can see a list of sensors types. If
+there is a <code>+</code> a sensor is added, if there is a <code>-</code> one was deleted, and a <code>.</code> means no change. If
+there is nothing next to the sensor type then the sensor was not discovered. There is is also
+information about changes to the database and RRD files at the bottom.</p>
+<div class="highlight"><pre><span></span><code>[librenms@nms-test ~]$ ./discovery.php -h 2 -m sensors
+LibreNMS Discovery
+164.113.194.250 2 adva_fsp150
+
+#### Load disco module core ####
+
+&gt;&gt; Runtime for discovery module &#39;core&#39;: 0.0240 seconds with 66536 bytes
+&gt;&gt; SNMP: [2/0.06s] MySQL: [3/0.00s] RRD: [0/0.00s]
+#### Unload disco module core ####
+
+
+#### Load disco module sensors ####
+Pre-cache adva_fsp150:
+ ENTITY-SENSOR: Caching OIDs: entPhysicalDescr entPhysicalName entPhySensorType entPhySensorScale entPhySensorPrecision entPhySensorValue entPhySensorOperStatus
+Airflow:
+Current: .
+Charge:
+Dbm: Adva FSP-150 dBm..
+Fanspeed:
+Frequency:
+Humidity:
+Load:
+Power:
+Power_consumed:
+Power_factor:
+Runtime:
+Signal:
+State:
+Count:
+Temperature: ..
+Voltage: .
+Snr:
+Pressure:
+Cooling:
+Delay:
+Quality_factor:
+Chromatic_dispersion:
+Ber:
+Eer:
+Waterflow:
+Percent:
+
+&gt;&gt; Runtime for discovery module &#39;sensors&#39;: 3.9340 seconds with 190024 bytes
+&gt;&gt; SNMP: [16/3.89s] MySQL: [36/0.03s] RRD: [0/0.00s]
+#### Unload disco module sensors ####
+
+Discovered in 5.521 seconds
+
+SNMP [18/3.96s]: Get[8/0.81s] Getnext[0/0.00s] Walk[10/3.15s]
+MySQL [41/0.03s]: Cell[10/0.01s] Row[-4/-0.00s] Rows[31/0.02s] Column[0/0.00s] Update[2/0.00s] Insert[2/0.00s] Delete[0/0.00s]
+RRD [0/0.00s]: Update[0/0.00s] Create [0/0.00s] Other[0/0.00s]
+</code></pre></div>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../Test-Units/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Test Units
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../Wireless-Sensors/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Wireless Sensors
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../../assets/javascripts/vendor.6a3d08fc.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.71201edf.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      
+      <script>
+        app = initialize({
+          base: "../../..",
+          features: [],
+          search: Object.assign({
+            worker: "../../../assets/javascripts/worker/search.4ac00218.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+        <script src="../../../librenms-docs.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2668 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LibreNMS user and developer documentation">
+      
+      
+        <link rel="canonical" href="https://docs.librenms.org/Support/FAQ/">
+      
+      
+        <meta name="author" content="LibreNMS">
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.0">
+    
+    
+      
+        <title>FAQ - LibreNMS Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.bc7e593a.min.css">
+      
+    
+    
+    
+      
+        
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="../../librenms.css">
+    
+    
+      
+        
+<script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-79149977-2","docs.librenms.org"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})}),document.addEventListener("DOMContentSwitch",function(){ga("send","pageview",document.location.pathname)})</script>
+<script async src="https://www.google-analytics.com/analytics.js"></script>
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#getting-started" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href="https://docs.librenms.org" title="LibreNMS Docs" class="md-header-nav__button md-logo" aria-label="LibreNMS Docs">
+      
+  <img src="../../img/librenms.svg" alt="logo">
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
+            LibreNMS Docs
+          </span>
+          <span class="md-header-nav__topic md-ellipsis">
+            
+              FAQ
+            
+          </span>
+        </div>
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/librenms/librenms/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://docs.librenms.org" title="LibreNMS Docs" class="md-nav__button md-logo" aria-label="LibreNMS Docs">
+      
+  <img src="../../img/librenms.svg" alt="logo">
+
+    </a>
+    LibreNMS Docs
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/librenms/librenms/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." class="md-nav__link">
+      Home
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      1. General
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="1. General" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon"></span>
+        1. General
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Acknowledgement/" class="md-nav__link">
+      Acknowledgements
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Changelog/" class="md-nav__link">
+      Changelog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/CODE_OF_CONDUCT/" class="md-nav__link">
+      Code of Conduct
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Features/" class="md-nav__link">
+      Features
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Welcome-to-Observium-users/" class="md-nav__link">
+      Welcome to Observium users
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      2. Installing
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="2. Installing" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        <span class="md-nav__icon md-icon"></span>
+        2. Installing
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/" class="md-nav__link">
+      How to install LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Install-LibreNMS/" class="md-nav__link">
+      Install LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Images/" class="md-nav__link">
+      LibreNMS VMs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Migrating-from-Observium/" class="md-nav__link">
+      Migrating from Observium
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+    
+    <label class="md-nav__link" for="nav-4">
+      3. Getting started
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="3. Getting started" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        <span class="md-nav__icon md-icon"></span>
+        3. Getting started
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Releases/" class="md-nav__link">
+      Choosing a release
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Adding-a-Device/" class="md-nav__link">
+      Adding a device
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Device-Groups/" class="md-nav__link">
+      Grouping Devices
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Callback-Stats-and-Privacy/" class="md-nav__link">
+      Submitting stats
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Updating/" class="md-nav__link">
+      Updating an install
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
+    
+    <label class="md-nav__link" for="nav-5">
+      4. Basic Setup
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="4. Basic Setup" data-md-level="1">
+      <label class="md-nav__title" for="nav-5">
+        <span class="md-nav__icon md-icon"></span>
+        4. Basic Setup
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Applications/" class="md-nav__link">
+      Applications
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Agent-Setup/" class="md-nav__link">
+      Check_MK Setup
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Billing-Module/" class="md-nav__link">
+      Billing Module
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Dell-OpenManage/" class="md-nav__link">
+      Dell OpenManage
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/World-Map/" class="md-nav__link">
+      World Map
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Interface-Description-Parsing/" class="md-nav__link">
+      Interface Description Parsing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Network-Map/" class="md-nav__link">
+      Network Map
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Syslog/" class="md-nav__link">
+      Syslog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Dashboards/" class="md-nav__link">
+      Dashboards
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Supermicro/" class="md-nav__link">
+      Supermicro
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
+    
+    <label class="md-nav__link" for="nav-6">
+      5. Advanced Setup
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="5. Advanced Setup" data-md-level="1">
+      <label class="md-nav__title" for="nav-6">
+        <span class="md-nav__icon md-icon"></span>
+        5. Advanced Setup
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../1-Minute-Polling/" class="md-nav__link">
+      1 Minute Polling
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Fast-Ping-Check/" class="md-nav__link">
+      Fast Ping Checking
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Environment-Variables/" class="md-nav__link">
+      Environment Variables
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Configuration/" class="md-nav__link">
+      Configuration Docs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Authentication/" class="md-nav__link">
+      Authentication Options
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Two-Factor-Auth/" class="md-nav__link">
+      Two-Factor Auth
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Auto-Discovery/" class="md-nav__link">
+      Auto-discovery Setup
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Distributed-Poller/" class="md-nav__link">
+      Scaling LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/RRDCached/" class="md-nav__link">
+      RRDCached
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Sub-Directory/" class="md-nav__link">
+      Sub-directory Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Varnish/" class="md-nav__link">
+      Varnish
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Dispatcher-Service/" class="md-nav__link">
+      Dispatcher Service (RC)
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/RRDTune/" class="md-nav__link">
+      RRDTune
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/IRC-Bot/" class="md-nav__link">
+      IRC Bot
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/IRC-Bot-Extensions/" class="md-nav__link">
+      IRC Bot Extensions
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/SNMP-Proxy/" class="md-nav__link">
+      SNMP Proxy
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/SNMP-Trap-Handler/" class="md-nav__link">
+      SNMP Trap Handler
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Customizing-the-Web-UI/" class="md-nav__link">
+      Customizing the Web UI
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Bare-Dashboard/" class="md-nav__link">
+      Bare Dashboard
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Cleanup-options/" class="md-nav__link">
+      Cleanup Options
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+    
+    <label class="md-nav__link" for="nav-7">
+      6. 3rd Party Integration
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="6. 3rd Party Integration" data-md-level="1">
+      <label class="md-nav__title" for="nav-7">
+        <span class="md-nav__icon md-icon"></span>
+        6. 3rd Party Integration
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Gateone/" class="md-nav__link">
+      Gateone
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Graylog/" class="md-nav__link">
+      Graylog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Services/" class="md-nav__link">
+      Nagios Plugins
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/NFSen/" class="md-nav__link">
+      NFSen
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Oxidized/" class="md-nav__link">
+      Oxidized
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Rancid/" class="md-nav__link">
+      Rancid
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/PeeringDB/" class="md-nav__link">
+      PeeringDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Proxmox/" class="md-nav__link">
+      Proxmox
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-7-9" type="checkbox" id="nav-7-9">
+    
+    <label class="md-nav__link" for="nav-7-9">
+      Storing Metrics
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Storing Metrics" data-md-level="2">
+      <label class="md-nav__title" for="nav-7-9">
+        <span class="md-nav__icon md-icon"></span>
+        Storing Metrics
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Metric-Storage/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/metrics/Graphite/" class="md-nav__link">
+      Graphite
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/metrics/InfluxDB/" class="md-nav__link">
+      InfluxDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/metrics/OpenTSDB/" class="md-nav__link">
+      OpenTSDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/metrics/Prometheus/" class="md-nav__link">
+      Prometheus
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Smokeping/" class="md-nav__link">
+      Smokeping
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Weathermap/" class="md-nav__link">
+      Weathermap
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+    
+    <label class="md-nav__link" for="nav-8">
+      7. API
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="7. API" data-md-level="1">
+      <label class="md-nav__title" for="nav-8">
+        <span class="md-nav__icon md-icon"></span>
+        7. API
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/" class="md-nav__link">
+      Using the API
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Devices/" class="md-nav__link">
+      Devices
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/DeviceGroups/" class="md-nav__link">
+      DeviceGroups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Ports/" class="md-nav__link">
+      Ports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/PortGroups/" class="md-nav__link">
+      PortGroups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Alerts/" class="md-nav__link">
+      Alerts
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Routing/" class="md-nav__link">
+      Routing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Switching/" class="md-nav__link">
+      Switching
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Inventory/" class="md-nav__link">
+      Inventory
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Bills/" class="md-nav__link">
+      Bills
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/ARP/" class="md-nav__link">
+      ARP
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Services/" class="md-nav__link">
+      Services
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/System/" class="md-nav__link">
+      System
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Logs/" class="md-nav__link">
+      Logs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Locations/" class="md-nav__link">
+      Locations
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-9" type="checkbox" id="nav-9">
+    
+    <label class="md-nav__link" for="nav-9">
+      8. Alerting
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="8. Alerting" data-md-level="1">
+      <label class="md-nav__title" for="nav-9">
+        <span class="md-nav__icon md-icon"></span>
+        8. Alerting
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Introduction/" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Rules/" class="md-nav__link">
+      Rules
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Templates/" class="md-nav__link">
+      Templates
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Transports/" class="md-nav__link">
+      Transports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Creating-Transport/" class="md-nav__link">
+      Creating Transports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Entities/" class="md-nav__link">
+      Entities
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Macros/" class="md-nav__link">
+      Macros
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Testing/" class="md-nav__link">
+      Testing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Device-Dependencies/" class="md-nav__link">
+      Device Dependencies
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-10" type="checkbox" id="nav-10" checked>
+    
+    <label class="md-nav__link" for="nav-10">
+      9. Getting help
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="9. Getting help" data-md-level="1">
+      <label class="md-nav__title" for="nav-10">
+        <span class="md-nav__icon md-icon"></span>
+        9. Getting help
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../" class="md-nav__link">
+      How to get help
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
+      FAQ
+    </a>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Install%20Validation/" class="md-nav__link">
+      Install Validation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Performance/" class="md-nav__link">
+      Performance
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Discovery%20Support/" class="md-nav__link">
+      Discovery Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Poller%20Support/" class="md-nav__link">
+      Poller Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Example-Hardware-Setup/" class="md-nav__link">
+      Example Hardware Setups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Remote-Monitoring-VPN/" class="md-nav__link">
+      Remote Monitoring VPN
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../SNMP-Configuration-Examples/" class="md-nav__link">
+      SNMP Configuration Examples
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../SSL-Configuration/" class="md-nav__link">
+      SSL Configuration
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Troubleshooting/" class="md-nav__link">
+      Device Troubleshooting
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Sensors/" class="md-nav__link">
+      Device Sensors
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-11" type="checkbox" id="nav-11">
+    
+    <label class="md-nav__link" for="nav-11">
+      10. Contributing + Developing
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="10. Contributing + Developing" data-md-level="1">
+      <label class="md-nav__title" for="nav-11">
+        <span class="md-nav__icon md-icon"></span>
+        10. Contributing + Developing
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Getting-Started/" class="md-nav__link">
+      Getting Started
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Using-Git/" class="md-nav__link">
+      Using Git
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Code-Guidelines/" class="md-nav__link">
+      Code Guidelines
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Style-Guidelines/" class="md-nav__link">
+      Style Guidelines
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Validating-Code/" class="md-nav__link">
+      Validating Code
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Code-Structure/" class="md-nav__link">
+      Code Structure
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Creating-Documentation/" class="md-nav__link">
+      Creating Documentation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Licensing/" class="md-nav__link">
+      Licensing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Component/" class="md-nav__link">
+      Component
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-11-11" type="checkbox" id="nav-11-11">
+    
+    <label class="md-nav__link" for="nav-11-11">
+      Support for a new OS
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Support for a new OS" data-md-level="2">
+      <label class="md-nav__title" for="nav-11-11">
+        <span class="md-nav__icon md-icon"></span>
+        Support for a new OS
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Support-New-OS/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Initial-Detection/" class="md-nav__link">
+      Initial Detection
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Mem-CPU-Information/" class="md-nav__link">
+      Mem/CPU Information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Test-Units/" class="md-nav__link">
+      Test Units
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Health-Information/" class="md-nav__link">
+      Health Information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Wireless-Sensors/" class="md-nav__link">
+      Wireless Sensors
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Custom-Graphs/" class="md-nav__link">
+      Custom Graphs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Settings/" class="md-nav__link">
+      Settings
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Sensor-State-Support/" class="md-nav__link">
+      Sensor State Support
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/SNMP-Traps/" class="md-nav__link">
+      SNMP Traps
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Dynamic-Config/" class="md-nav__link">
+      Dynamic Config
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Merging-Pull-Requests/" class="md-nav__link">
+      Merging Pull Requests
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Creating-Release/" class="md-nav__link">
+      Creating Release
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Plugin-System/" class="md-nav__link">
+      Plugin System
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-12" type="checkbox" id="nav-12">
+    
+    <label class="md-nav__link" for="nav-12">
+      11. Misc
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="11. Misc" data-md-level="1">
+      <label class="md-nav__title" for="nav-12">
+        <span class="md-nav__icon md-icon"></span>
+        11. Misc
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Security/" class="md-nav__link">
+      Security information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../CLI-Tools/" class="md-nav__link">
+      CLI Scripts
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-12-3" type="checkbox" id="nav-12-3">
+    
+    <label class="md-nav__link" for="nav-12-3">
+      Device Notes
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Device Notes" data-md-level="2">
+      <label class="md-nav__title" for="nav-12-3">
+        <span class="md-nav__icon md-icon"></span>
+        Device Notes
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Notes/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Notes/Carel-pCOweb-Devices/" class="md-nav__link">
+      Carel pCOweb
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Notes/AsuswrtMerlin/" class="md-nav__link">
+      Asuswrt-Merlin
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Notes/Openwrt/" class="md-nav__link">
+      OpenWRT
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/librenms/librenms/edit/master/doc/Support/FAQ.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="getting-started">Getting started</h1>
+<ul>
+<li><a href="#faq1">How do I install LibreNMS?</a></li>
+<li><a href="#faq2">How do I add a device?</a></li>
+<li><a href="#faq3">How do I get help?</a></li>
+<li><a href="#faq4">What are the supported OSes for installing LibreNMS on?</a></li>
+<li><a href="#faq5">Do you have a demo available?</a></li>
+</ul>
+<h1 id="support">Support</h1>
+<ul>
+<li><a href="#how-does-librenms-use-mibs">How does LibreNMS use MIBs?</a></li>
+<li><a href="#faq6">Why do I get blank pages sometimes in the WebUI?</a></li>
+<li><a href="#faq10">Why do I not see any graphs?</a></li>
+<li><a href="#faq7">How do I debug pages not loading correctly?</a></li>
+<li><a href="#faq11">How do I debug the discovery process?</a></li>
+<li><a href="#faq12">How do I debug the poller process?</a></li>
+<li><a href="#faq14">Why do I get a lot apache or rrdtool zombies in my process list?</a></li>
+<li><a href="#faq15">Why do I see traffic spikes in my graphs?</a></li>
+<li><a href="#faq17">Why do I see gaps in my graphs?</a></li>
+<li><a href="#faq16">How do I change the IP / hostname of a device?</a></li>
+<li><a href="#faq19">My device doesn't finish polling within 300 seconds</a></li>
+<li><a href="#faq18">Things aren't working correctly?</a></li>
+<li><a href="#faq21">What do the values mean in my graphs?</a></li>
+<li><a href="#faq22">Why does a device show as a warning?</a></li>
+<li><a href="#faq23">Why do I not see all interfaces in the Overall traffic graph for a device?</a></li>
+<li><a href="#faq24">How do I move my LibreNMS install to another server?</a></li>
+<li><a href="#faq25">Why is my EdgeRouter device not detected?</a></li>
+<li><a href="#faq26">Why are some of my disks not showing?</a></li>
+<li><a href="#faq27">Why are my disks reporting an incorrect size?</a></li>
+<li><a href="#faq28">What does mean \"ignore alert tag\" on device, component, service and port?</a></li>
+<li><a href="#faq29">Why can't Normal and Global View users see Oxidized?</a></li>
+<li><a href="#faq30">What is the Demo User for?</a></li>
+<li><a href="#faq31">Why does modifying 'Default Alert Template' fail?</a></li>
+<li><a href="#faq32">Why would alert un-mute itself</a></li>
+<li><a href="#faq33">How do I change the Device Type?</a></li>
+<li><a href="#faq-where-do-i-update-my-database-credentials">Where do I update my database credentials?</a></li>
+<li><a href="#my-reverse-proxy-is-not-working">My reverse proxy is not working</a></li>
+<li><a href="#my-alerts-aren't-being-delivered-on-time">My alerts aren't being delivered on time</a></li>
+<li><a href="#my-alert-templates-stopped-working">My alert templates stopped working</a></li>
+<li><a href="#how-do-i-use-trend-prediction-in-graphs">How do I use trend prediction in graphs</a></li>
+<li><a href="#move-db-to-another-server">How do I move only the DB to another server</a></li>
+<li><a href="#optional-requirements-for-snmpv3-sha2-auth">What are the "optional requirements message" when I add SNMPv3 devices</a></li>
+</ul>
+<h1 id="developing">Developing</h1>
+<ul>
+<li><a href="#faq8">How do I add support for a new OS?</a></li>
+<li><a href="#faq20">What information do you need to add a new OS?</a></li>
+<li><a href="#faq9">What can I do to help?</a></li>
+<li><a href="#faq13">How can I test another users branch?</a></li>
+</ul>
+<h2 id="how-do-i-install-librenms"><a name="faq1"> How do I install LibreNMS?</a></h2>
+<p>This is currently well documented within the doc folder of the installation files.</p>
+<p>Please see the following <a href="../../Installation/Installing-LibreNMS/">doc</a></p>
+<h2 id="how-do-i-add-a-device"><a name="faq2"> How do I add a device?</a></h2>
+<p>You have two options for adding a new device into LibreNMS.</p>
+<p>1: Using the command line via ssh you can add a new device by changing
+   to the directory of your LibreNMS install and typing (be sure to
+   put the correct details).</p>
+<div class="highlight"><pre><span></span><code>./addhost.php [community] [v1|v2c] [port] [udp|udp6|tcp|tcp6]
+</code></pre></div>
+<blockquote>
+<p>Please note that if the community contains special characters such
+as <code>$</code> then you will need to wrap it in <code>'</code>. I.e: <code>'Pa$$w0rd'</code>.</p>
+</blockquote>
+<p>2: Using the web interface, go to Devices and then Add Device. Enter
+   the details required for the device that you want to add and then
+   click 'Add Host'.</p>
+<h2 id="how-do-i-get-help"><a name="faq3"> How do I get help?</a></h2>
+<p><a href="../">Getting Help</a></p>
+<h2 id="what-are-the-supported-oses-for-installing-librenms-on"><a name="faq4"> What are the supported OSes for installing LibreNMS on?</a></h2>
+<p>Supported is quite a strong word :) The 'officially' supported distros are:</p>
+<ul>
+<li>Ubuntu / Debian</li>
+<li>Red Hat / CentOS</li>
+<li>Gentoo</li>
+</ul>
+<p>However we will always aim to help wherever possible so if you are
+running a distro that isn't one of the above then give it a try anyway
+and if you need help then jump on the <a href="https://t.libren.ms/discord">discord
+server</a>.</p>
+<h2 id="do-you-have-a-demo-available"><a name="faq5"> Do you have a demo available?</a></h2>
+<p>We do indeed, you can find access to the demo <a href="https://demo.librenms.org">here</a></p>
+<h2 id="how-does-librenms-use-mibs"><a name='how-does-librenms-use-mibs'>How does LibreNMS use MIBs?</a></h2>
+<p>LibreNMS does not parse MIBs to discover sensors for devices.
+LibreNMS uses static discovery definitions written in YAML or PHP.
+Therefore, updating a MIB alone will not improve OS support, the
+definitions must be updated.  LibreNMS only uses MIBs to make OIDs
+easier to read.</p>
+<h2 id="why-do-i-get-blank-pages-sometimes-in-the-webui"><a name="faq6"> Why do I get blank pages sometimes in the WebUI?</a></h2>
+<p>You can enable debug information by setting <code>APP_DEBUG=true</code> in your
+.env. (Do not leave this enabled, it could leak private data)</p>
+<p>If the page you are trying to load has a substantial amount of data in
+it then it could be that the php memory limit needs to be increased in
+<a href="../Configuration/#core">config.php</a>.</p>
+<h2 id="why-do-i-not-see-any-graphs"><a name="faq10"> Why do I not see any graphs?</a></h2>
+<p>The easiest way to check if all is well is to run <code>./validate.php</code> as
+root from within your install directory. This should give you info on
+why things aren't working.</p>
+<p>One other reason could be a restricted snmpd.conf file or snmp view
+which limits the data sent back. If you use net-snmp then we suggest
+using the <a href="https://raw.githubusercontent.com/librenms/librenms/master/snmpd.conf.example">included
+snmpd.conf</a>
+file.</p>
+<h2 id="how-do-i-debug-pages-not-loading-correctly"><a name="faq7"> How do I debug pages not loading correctly?</a></h2>
+<p>A debug system is in place which enables you to see the output from
+php errors, warnings and notices along with the MySQL queries that
+have been run for that page.</p>
+<p>You can enable debug information by setting <code>APP_DEBUG=true</code> in your
+.env. (Do not leave this enabled, it could leak private data) To see
+additional information, run <code>./scripts/composer_wrapper.php install</code>,
+to install additional debug tools. This will add a debug bar at the
+bottom of every page that will show you detailed debug information.</p>
+<h2 id="how-do-i-debug-the-discovery-process"><a name="faq11"> How do I debug the discovery process?</a></h2>
+<p>Please see the <a href="../Discovery%20Support/">Discovery Support</a> document
+for further details.</p>
+<h2 id="how-do-i-debug-the-poller-process"><a name="faq12"> How do I debug the poller process?</a></h2>
+<p>Please see the <a href="../Poller%20Support/">Poller Support</a> document
+for further details.</p>
+<h2 id="why-do-i-get-a-lot-apache-or-rrdtool-zombies-in-my-process-list"><a name="faq14"> Why do I get a lot apache or rrdtool zombies in my process list?</a></h2>
+<p>If this is related to your web service for LibreNMS then this has been
+tracked down to an issue within php which the developers aren't
+fixing. We have implemented a work around which means you shouldn't be
+seeing this. If you are, please report this in <a href="https://github.com/librenms/librenms/issues/443">issue
+443</a>.</p>
+<h2 id="why-do-i-see-traffic-spikes-in-my-graphs"><a name="faq15"> Why do I see traffic spikes in my graphs?</a></h2>
+<p>This occurs either when a counter resets or the device sends back
+bogus data making it look like a counter reset. We have enabled
+support for setting a maximum value for rrd files for ports.</p>
+<p>Before this all rrd files were set to 100G max values, now you can
+enable support to limit this to the actual port speed.</p>
+<p>rrdtool tune will change the max value when the interface speed is
+detected as being changed (min value will be set for anything 10M or
+over) or when you run the included script (./scripts/tune_port.php) -
+see <a href="../../Extensions/RRDTune/">RRDTune doc</a></p>
+<p>SNMP ifInOctets and ifOutOctets are counters, which means they start
+ at 0 (at device boot) and count up from there. LibreNMS records the
+ value every 5 minutes and uses the difference between the previous
+ value and the current value to calculate rate. (Also, this value
+ resets to 0 when it hits the max value)</p>
+<p>Now, when the value is not recorded for awhile RRD (our time series
+storage) does not record a 0, it records the last value, otherwise,
+there would be even worse problems. Then finally we get the current
+ifIn/OutOctets value and record that. Now, it appears as though all of
+the traffic since it stopped getting values have occurred in the last
+5 minute interval.</p>
+<p>So whenever you see spikes like this, it means we have not received data from the device for several polling intervals. The cause can vary quite a bit: bad snmp implementations, intermittant network connectivity, broken poller, and more.</p>
+<h2 id="why-do-i-see-gaps-in-my-graphs"><a name="faq17"> Why do I see gaps in my graphs?</a></h2>
+<p>This is most commonly due to the poller not being able to complete
+it's run within 300 seconds. Check which devices are causing this by
+going to /poll-log/ within the Web interface.</p>
+<p>When you find the device(s) which are taking the longest you can then
+look at the Polling module graph under Graphs -&gt; Poller -&gt; Poller
+Modules Performance. Take a look at what modules are taking the
+longest and disabled un used modules.</p>
+<p>If you poll a large number of devices / ports then it's recommended to
+run a local recurisve dns server such as pdns-recursor.</p>
+<p>Running RRDCached is also highly advised in larger installs but has
+benefits no matter the size.</p>
+<h2 id="how-do-i-change-the-ip-hostname-of-a-device"><a name="faq16"> How do I change the IP / hostname of a device?</a></h2>
+<p>There is a host rename tool called renamehost.php in your librenms
+root directory. When renaming you are also changing the device's IP /
+hostname address for monitoring.</p>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code>./renamehost.php &lt;old hostname&gt; &lt;new hostname&gt;
+</code></pre></div>
+<p>You can also rename a device in the Web UI by going to the device,
+then clicking settings Icon -&gt; Edit.</p>
+<h2 id="my-device-doesnt-finish-polling-within-300-seconds"><a name="faq19"> My device doesn't finish polling within 300 seconds</a></h2>
+<p>We have a few things you can try:</p>
+<ul>
+<li>Disable unnecessary polling modules under edit device.</li>
+<li>Set a max repeater value within the snmp settings for a device. What
+  to set this to is tricky, you really should run an snmpbulkwalk with
+  -Cr10 through -Cr50 to see what works best. 50 is usually a good
+  choice if the device can cope.</li>
+</ul>
+<h2 id="things-arent-working-correctly"><a name="faq18"> Things aren't working correctly?</a></h2>
+<p>Run <code>./validate.php</code> as root from within your install.</p>
+<p>Re-run <code>./validate.php</code> once you've resolved any issues raised.</p>
+<p>You have an odd issue - we'd suggest you join our <a href="https://t.libren.ms/discord">discord
+server</a> to discuss.</p>
+<h2 id="what-do-the-values-mean-in-my-graphs"><a name="faq21"> What do the values mean in my graphs?</a></h2>
+<p>The values you see are reported as metric values. Thanks to a post on
+<a href="https://www.reddit.com/r/networking/comments/4xzpfj/rrd_graph_interface_error_label_what_is_the_m/">Reddit</a>
+here are those values:</p>
+<div class="highlight"><pre><span></span><code>10^-18  a - atto
+10^-15  f - femto
+10^-12  p - pico
+10^-9   n - nano
+10^-6   u - micro
+10^-3   m - milli
+0    (no unit)
+10^3    k - kilo
+10^6    M - mega
+10^9    G - giga
+10^12   T - tera
+10^15   P - peta
+</code></pre></div>
+<h2 id="why-does-a-device-show-as-a-warning"><a name="faq22"> Why does a device show as a warning?</a></h2>
+<p>This is indicating that the device has rebooted within the last 24
+hours (by default). If you want to adjust this threshold then you can
+do so by setting <code>$config['uptime_warning'] = '84600';</code> in
+<code>config.php</code>. The value must be in seconds.</p>
+<h2 id="why-do-i-not-see-all-interfaces-in-the-overall-traffic-graph-for-a-device"><a name="faq23"> Why do I not see all interfaces in the Overall traffic graph for a device?</a></h2>
+<p>By default numerous interface types and interface descriptions are
+excluded from this graph. The excluded defailts are:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/loopback/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/tunnel/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/virtual/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/mpls/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/ieee8023adLag/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/l2vlan/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/ppp/&#39;</span><span class="p">;</span>
+
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_descr&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/loopback/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_descr&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/vlan/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_descr&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/tunnel/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_descr&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/bond/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_descr&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/null/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_descr&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/dummy/&#39;</span><span class="p">;</span>
+</code></pre></div>
+<p>If you would like to re-include l2vlan interfaces for instance, you
+first need to <code>unset</code> the config array and set your options:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">unset</span><span class="p">(</span><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">]);</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/loopback/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/tunnel/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/virtual/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/mpls/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/ieee8023adLag/&#39;</span><span class="p">;</span>
+<span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;device_traffic_iftype&#39;</span><span class="p">][]</span> <span class="o">=</span> <span class="s1">&#39;/ppp/&#39;</span><span class="p">;</span>
+</code></pre></div>
+<h2 id="how-do-i-move-my-librenms-install-to-another-server"><a name="faq24"> How do I move my LibreNMS install to another server?</a></h2>
+<p>If you are moving from one CPU architecture to another then you will
+need to dump the rrd files and re-create them. If you are in this
+scenario then you can use <a href="https://vlan50.com/2015/04/17/migrating-from-observium-to-librenms/">Dan Brown's migration
+scripts</a>.</p>
+<p>If you are just moving to another server with the same CPU
+architecture then the following steps should be all that's needed:</p>
+<ul>
+<li>Install LibreNMS as per our normal documentation; you don't need to
+  run through the web installer or building the sql schema.</li>
+<li>Stop cron by commenting out all lines in <code>/etc/cron.d/librenms</code></li>
+<li>Dump the MySQL database <code>librenms</code> from your old server (<code>mysqldump
+  librenms -u root -p &gt; librenms.sql</code>)...</li>
+<li>and import it into your new server (<code>mysql -u root -p librenms &lt; librenms.sql</code>).</li>
+<li>Copy the <code>rrd/</code> folder to the new server.</li>
+<li>Copy the <code>.env</code> and <code>config.php</code> files to the new server.</li>
+<li>Check for modified files (eg specific os, ...) with <code>git status</code> and 
+  migrate them.</li>
+<li>Ensure ownership of the copied files and folders (substitute your
+  user if necessary) - <code>chown -R librenms:librenms /opt/librenms</code></li>
+<li>Delete old pollers on the GUI (gear icon --&gt; Pollers --&gt; Pollers)</li>
+<li>Validate your installation (/opt/librenms/validate.php)</li>
+<li>Re-enable cron by uncommenting all lines in <code>/etc/cron.d/librenms</code></li>
+</ul>
+<h2 id="why-is-my-edgerouter-device-not-detected"><a name="faq25"> Why is my EdgeRouter device not detected?</a></h2>
+<p>If you have <code>service snmp description</code> set in your config then this
+will be why, please remove this. For some reason Ubnt have decided
+setting this value should override the sysDescr value returned which
+breaks our detection.</p>
+<p>If you don't have that set then this may be then due to an update of
+EdgeOS or a new device type, please <a href="https://github.com/librenms/librenms/issues/new">create an
+issue</a>.</p>
+<h2 id="why-are-some-of-my-disks-not-showing"><a name="faq26"> Why are some of my disks not showing?</a></h2>
+<p>If you are monitoring a linux server then net-snmp doesn't always
+expose all disks via hrStorage (HOST-RESOURCES-MIB). We have
+additional support which will retrieve disks via dskTable
+(UCD-SNMP-MIB). To expose these disks you need to add additional
+config to your snmpd.conf file. For example, to expose <code>/dev/sda1</code>
+which may be mounted as <code>/storage</code> you can specify:</p>
+<p><code>disk /dev/sda1</code></p>
+<p>Or</p>
+<p><code>disk /storage</code></p>
+<p>Restart snmpd and LibreNMS should populate the additional disk after a fresh discovery.</p>
+<h3 id="why-are-my-disks-reporting-an-incorrect-size"><a name="faq27"> Why are my disks reporting an incorrect size?</a></h3>
+<p>There is a known issue for net-snmp, which causes it to report
+incorrect disk size and disk usage when the size of the disk (or raid)
+are larger then 16TB, a workaround has been implemented but is not
+active on Centos 6.8 by default due to the fact that this workaround
+breaks official SNMP specs, and as such could cause unexpected
+behaviour in other SNMP tools. You can activate the workaround by
+adding to /etc/snmp/snmpd.conf :</p>
+<p><code>realStorageUnits 0</code></p>
+<h2 id="what-does-mean-ignore-alert-tag-on-device-component-service-and-port"><a name="faq28"> What does mean \"ignore alert tag\" on device, component, service and port?</a></h2>
+<p>Tag device, component, service and port to ignore alerts. Alert checks will still run.
+However, ignore tag can be read in alert rules. For example on device, if <code>devices.ignore = 0</code> 
+or <code>macros.device = 1</code> condition is is set and ignore alert tag is on,
+the alert rule won't match. The alert rule is ignored.</p>
+<h2 id="how-do-i-add-support-for-a-new-os"><a name="faq8"> How do I add support for a new OS?</a></h2>
+<p>Please see <a href="../../Developing/Support-New-OS/">Supporting a new OS</a> if you are adding all
+the support yourself, i.e. writing all of the supporting code. If you are only able
+to supply supporting info, and would like the help of others to write up the code, please
+follow the below steps.</p>
+<h2 id="what-information-do-you-need-to-add-a-new-os"><a name="faq20"> What information do you need to add a new OS?</a></h2>
+<p>Please <a href="https://community.librenms.org/c/feature-requests">open a feature request in the community forum</a> and provide
+the output of Discovery, Poller, and Snmpwalk as separate non-expiring
+<a href="https://p.libren.ms/">https://p.libren.ms/</a> links :</p>
+<p>Please use preferably the command line to obtain the information.
+Especially, if snmpwalk results in a large amount of data. Replace the
+relevant information in these commands such as HOSTNAME and
+COMMUNITY. Use <code>snmpwalk</code> instead of <code>snmpbulkwalk</code> for v1 devices.</p>
+<blockquote>
+<p>These commands will automatically upload the data to LibreNMS servers.</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code>./discovery.php -h HOSTNAME -d <span class="p">|</span> ./pbin.sh
+./poller.php -h HOSTNAME -r -f -d <span class="p">|</span> ./pbin.sh
+snmpbulkwalk -OUneb -v2c -c COMMUNITY HOSTNAME .  <span class="p">|</span> ./pbin.sh
+</code></pre></div>
+<p>You can use the links provided by these commands within the community post.</p>
+<p>If possible please also provide what the OS name should be if it doesn't exist already,
+as well as any useful link (MIBs from vendor, logo, etc etc)</p>
+<h2 id="what-can-i-do-to-help"><a name="faq9"> What can I do to help?</a></h2>
+<p>Thanks for asking, sometimes it's not quite so obvious and everyone
+can contribute something different. So here are some ways you can help
+LibreNMS improve.</p>
+<ul>
+<li>Code. This is a big thing. We want this community to grow by the
+  software developing and evolving to cater for users needs. The
+  biggest area that people can help make this happen is by providing
+  code support. This doesn't necessarily mean contributing code for
+  discovering a new device:</li>
+<li>Web UI, a new look and feel has been adopted but we are not
+      finished by any stretch of the imagination. Make suggestions,
+      find and fix bugs, update the design / layout.</li>
+<li>Poller / Discovery code. Improving it (we think a lot can be done
+    to speed things up), adding new device support and updating old
+    ones.</li>
+<li>The LibreNMS main website, this is hosted on GitHub like the main
+    repo and we accept use contributions here as well :)</li>
+<li>Hardware. We don't physically need it but if we are to add device
+  support, it's made a whole lot easier with access to the kit via
+  SNMP.</li>
+<li>If you've got MIBs, they are handy as well :)</li>
+<li>If you know the vendor and can get permission to use logos that's also great.</li>
+<li>Bugs. Found one? We want to know about it. Most bugs are fixed after
+  being spotted and reported by someone, I'd love to say we are
+  amazing developers and will fix all bugs before you spot them but
+  that's just not true.</li>
+<li>Feature requests. Can't code / won't code. No worries, chuck a
+  feature request into our <a href="https://community.librenms.org">community
+  forum</a> with enough detail and
+  someone will take a look. A lot of the time this might be what
+  interests someone, they need the same feature or they just have
+  time. Please be patient, everyone who contributes does so in their
+  own time.</li>
+<li>Documentation. Documentation can always be improved and every little
+  bit helps. Not all features are currently documented or documented
+  well, there's speeling mistakes etc. It's very easy to submit
+  updates <a href="https://help.github.com/articles/editing-files-in-another-user-s-repository/">through the GitHub
+  website</a>,
+  no git experience needed.</li>
+<li>Be nice, this is the foundation of this project. We expect everyone
+  to be nice. People will fall out, people will disagree but please do
+  it so in a respectable way.</li>
+<li>Ask questions. Sometimes just by asking questions you prompt deeper
+  conversations that can lead us to somewhere amazing so please never
+  be afraid to ask a question.</li>
+</ul>
+<h2 id="how-can-i-test-another-users-branch"><a name="faq13"> How can I test another users branch?</a></h2>
+<p>LibreNMS can and is developed by anyone, this means someone may be
+working on a new feature or support for a device that you want. It can
+be helpful for others to test these new features, using Git, this is
+made easy.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span> /opt/librenms
+</code></pre></div>
+<p>Firstly ensure that your current branch is in good state:</p>
+<div class="highlight"><pre><span></span><code>git status
+</code></pre></div>
+<p>If you see <code>nothing to commit, working directory clean</code> then let's go for it :)</p>
+<p>Let's say that you want to test a users (f0o) new development branch
+(issue-1337) then you can do the following:</p>
+<div class="highlight"><pre><span></span><code>git remote add f0o https://github.com/f0o/librenms.git
+git remote update f0o
+git checkout issue-1337
+</code></pre></div>
+<p>Once you are done testing, you can easily switch back to the master branch:</p>
+<div class="highlight"><pre><span></span><code>git checkout master
+</code></pre></div>
+<p>If you want to pull any new updates provided by f0o's branch then
+whilst you are still in it, do the following:</p>
+<div class="highlight"><pre><span></span><code>git pull f0o issue-1337
+</code></pre></div>
+<h2 id="why-cant-normal-and-global-view-users-see-oxidized"><a name="faq29"> Why can't Normal and Global View users see Oxidized?</a></h2>
+<p>Configs can often contain sensitive data. Because of that only global
+admins can see configs.</p>
+<h2 id="what-is-the-demo-user-for"><a name="faq30"> What is the Demo User for?</a></h2>
+<p>Demo users allow full access except adding/editing users and deleting
+devices and can't change passwords.</p>
+<h2 id="why-does-modifying-default-alert-template-fail"><a name="faq31"> Why does modifying 'Default Alert Template' fail?</a></h2>
+<p>This template's entry could be missing in the database. Please run
+this from the LibreNMS directory:</p>
+<div class="highlight"><pre><span></span><code>php artisan db:seed --class<span class="o">=</span>DefaultAlertTemplateSeeder
+</code></pre></div>
+<h2 id="why-would-alert-un-mute-itself"><a name="faq32"> Why would alert un-mute itself?</a></h2>
+<p>If alert un-mutes itself then it most likely means that the alert
+cleared and is then triggered again. Please review eventlog as it will
+tell you in there.</p>
+<h2 id="how-do-i-change-the-device-type"><a name="faq33"> How do I change the Device Type?</a></h2>
+<p>You can change the Device Type by going to the device you would like
+to change, then click on the Gear Icon -&gt; Edit. If you would like to
+define custom types, we suggest using <a href="/Extensions/Device-Groups/">Device
+Groups</a>. They will be listed in the
+menu similarly to device types.</p>
+<h2 id="where-do-i-update-my-database-credentials"><a name="faq-where-do-i-update-my-database-credentials">Where do I update my database credentials?</a></h2>
+<p>If you've changed your database credentials then you will need to
+update LibreNMS with those new details.
+Please edit <code>.env</code></p>
+<p><a href="../Environment-Variables/#database">.env</a>:</p>
+<div class="highlight"><pre><span></span><code>DB_HOST=
+DB_DATABASE=
+DB_USERNAME=
+DB_PASSWORD=
+DB_PORT=
+</code></pre></div>
+<h2 id="my-reverse-proxy-is-not-working"><a name='my-reverse-proxy-is-not-working'>My reverse proxy is not working</a></h2>
+<p>Make sure your proxy is passing the proper variables.
+At a minimum: X-Forwarded-For and X-Forwarded-Proto (X-Forwarded-Port if needed)</p>
+<p>You also need to <a href="../Environment-Variables/#trusted-reverse-proxies">Set the proxy or proxies as trusted</a></p>
+<p>If you are using a subdirectory on the reverse proxy and not on the actual web server,
+you may need to set <a href="../Environment-Variables/#base-url">APP_URL</a> and <code>$config['base_url']</code>.</p>
+<h2 id="my-alerts-arent-being-delivered-on-time"><a name='my-alerts-aren't-being-delivered-on-time'>My alerts aren't being delivered on time</a></h2>
+<p>If you're running MySQL/MariaDB on a separate machine or container
+make sure the timezone is set properly on both the LibreNMS <strong>and</strong>
+MySQL/MariaDB instance. Alerts will be delivered according to
+MySQL/MariaDB's time, so a mismatch between the two can cause alerts
+to be delivered late if LibreNMS is on a timezone later than
+MySQL/MariaDB.</p>
+<h2 id="my-alert-templates-stopped-working"><a name='my-alert-templates-stopped-working'>My alert templates stopped working</a></h2>
+<p>You should probably have a look in the documentation concerning the
+new <a href="../../Alerting/Templates/">template syntax</a>. Since version 1.42,
+syntax changed, and you basically need to convert your templates to
+this new syntax (including the titles).</p>
+<h2 id="how-do-i-use-trend-prediction-in-graphs"><a name='how-do-i-use-trend-prediction-in-graphs'>How do I use trend prediction in graphs</a></h2>
+<p>As of <a href="https://community.librenms.org/t/v1-55-release-changelog-august-2019/9428">Ver. 1.55</a> a new feature has been added where you can view a simple linear prediction in port graphs.</p>
+<blockquote>
+<p>It doesn't work on non-port graphs or consolidated graphs at the time this FAQ entry was written.</p>
+</blockquote>
+<p>To view a prediction:</p>
+<ul>
+<li>Click on any <code>port</code> graph of any network device</li>
+<li>Select a <code>From</code> date to your liking (not earlier than the device was actually added to LNMS), and then select a future date in the <code>To</code> field.</li>
+<li>Click update</li>
+</ul>
+<p>You should now see a linear prediction line on the graph.</p>
+<h2 id="how-do-i-move-only-the-db-to-another-server"><a name='move-db-to-another-server'>How do I move only the DB to another server?</a></h2>
+<p>There is already a reference how to move your whole LNMS installation to another server. But the following steps will help you to split up an "All-in-one" installation to one LibreNMS installation with a seperate database install. 
+*Note: This section assumes you have a MySQL/MariaDB instance</p>
+<ul>
+<li>Stop the apache and mysql service in you LibreNMS installation.</li>
+<li>Edit out all the cron entries in <code>/etc/cron.d/librenms</code>. </li>
+<li>Dump your <code>librenms</code>database on your current install by issuing <code>mysqldump librenms -u root -p &gt; librenms.sql</code>.</li>
+<li>Stop and disable the MySQL server on your current install.</li>
+<li>On your new server make sure you create a new database with the standard install command, no need to add a user for localhost though.</li>
+<li>Copy this over to your new database server and import it with <code>mysql -u root -p librenms &lt; librenms.sql</code>.</li>
+<li>Enter to mysql and add permissions with the following two commands:
+<div class="highlight"><pre><span></span><code>GRANT ALL PRIVILEGES ON librenms.* TO &#39;librenms&#39;@&#39;IP_OF_YOUR_LNMS_SERVER&#39; IDENTIFIED BY &#39;PASSWORD&#39; WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON librenms.* TO &#39;librenms&#39;@&#39;FQDN_OF_YOUR_LNMS_SERVER&#39; IDENTIFIED BY &#39;PASSWORD&#39; WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+exit;
+</code></pre></div></li>
+<li>Enable and restart MySQL server.</li>
+<li>Edit your <code>config.php</code> file to point the install to the new database server location.</li>
+<li><strong>Very important</strong>: On your LibreNMS server, inside your install directory is a <code>.env</code> file, in it you need to edit the <code>DBHOST</code> paramater to point to your new server location. </li>
+<li>After all this is done, enable all the cron entries again and start apache.</li>
+</ul>
+<h2 id="what-are-the-optional-requirements-message-when-i-add-snmpv3-devices"><a name='optional-requirements-for-snmpv3-sha2-auth'>What are the "optional requirements message" when I add SNMPv3 devices?</a></h2>
+<p>When you add a device via the WebUI you may see a little message stating "Optional requirements are not met so some options are disabled". Do not panic. This simply means your system does not contain <strong>openssl &gt;= 1.1</strong> and <strong>net-snmp &gt;= 5.8</strong>, which are the minimum specifications needed to be able to use AES-192,AES-256 as crypto algorithms and SHA-224|256|384|512 as auth algorithms. </p>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                How to get help
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../Install%20Validation/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Install Validation
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/vendor.6a3d08fc.min.js"></script>
+      <script src="../../assets/javascripts/bundle.71201edf.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      
+      <script>
+        app = initialize({
+          base: "../..",
+          features: [],
+          search: Object.assign({
+            worker: "../../assets/javascripts/worker/search.4ac00218.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+        <script src="../../librenms-docs.js"></script>
+      
+    
+  </body>
+</html>

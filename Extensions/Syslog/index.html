@@ -1,0 +1,2632 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LibreNMS user and developer documentation">
+      
+      
+        <link rel="canonical" href="https://docs.librenms.org/Extensions/Syslog/">
+      
+      
+        <meta name="author" content="LibreNMS">
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.0">
+    
+    
+      
+        <title>Syslog - LibreNMS Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.bc7e593a.min.css">
+      
+    
+    
+    
+      
+        
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="../../librenms.css">
+    
+    
+      
+        
+<script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-79149977-2","docs.librenms.org"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})}),document.addEventListener("DOMContentSwitch",function(){ga("send","pageview",document.location.pathname)})</script>
+<script async src="https://www.google-analytics.com/analytics.js"></script>
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#setting-up-syslog-support" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href="https://docs.librenms.org" title="LibreNMS Docs" class="md-header-nav__button md-logo" aria-label="LibreNMS Docs">
+      
+  <img src="../../img/librenms.svg" alt="logo">
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
+            LibreNMS Docs
+          </span>
+          <span class="md-header-nav__topic md-ellipsis">
+            
+              Syslog
+            
+          </span>
+        </div>
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/librenms/librenms/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://docs.librenms.org" title="LibreNMS Docs" class="md-nav__button md-logo" aria-label="LibreNMS Docs">
+      
+  <img src="../../img/librenms.svg" alt="logo">
+
+    </a>
+    LibreNMS Docs
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/librenms/librenms/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." class="md-nav__link">
+      Home
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      1. General
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="1. General" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon"></span>
+        1. General
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Acknowledgement/" class="md-nav__link">
+      Acknowledgements
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Changelog/" class="md-nav__link">
+      Changelog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/CODE_OF_CONDUCT/" class="md-nav__link">
+      Code of Conduct
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Features/" class="md-nav__link">
+      Features
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Welcome-to-Observium-users/" class="md-nav__link">
+      Welcome to Observium users
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      2. Installing
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="2. Installing" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        <span class="md-nav__icon md-icon"></span>
+        2. Installing
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/" class="md-nav__link">
+      How to install LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Install-LibreNMS/" class="md-nav__link">
+      Install LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Images/" class="md-nav__link">
+      LibreNMS VMs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Migrating-from-Observium/" class="md-nav__link">
+      Migrating from Observium
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+    
+    <label class="md-nav__link" for="nav-4">
+      3. Getting started
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="3. Getting started" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        <span class="md-nav__icon md-icon"></span>
+        3. Getting started
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Releases/" class="md-nav__link">
+      Choosing a release
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Adding-a-Device/" class="md-nav__link">
+      Adding a device
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Groups/" class="md-nav__link">
+      Grouping Devices
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Callback-Stats-and-Privacy/" class="md-nav__link">
+      Submitting stats
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Updating/" class="md-nav__link">
+      Updating an install
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked>
+    
+    <label class="md-nav__link" for="nav-5">
+      4. Basic Setup
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="4. Basic Setup" data-md-level="1">
+      <label class="md-nav__title" for="nav-5">
+        <span class="md-nav__icon md-icon"></span>
+        4. Basic Setup
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Applications/" class="md-nav__link">
+      Applications
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Agent-Setup/" class="md-nav__link">
+      Check_MK Setup
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Billing-Module/" class="md-nav__link">
+      Billing Module
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Dell-OpenManage/" class="md-nav__link">
+      Dell OpenManage
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../World-Map/" class="md-nav__link">
+      World Map
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Interface-Description-Parsing/" class="md-nav__link">
+      Interface Description Parsing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Network-Map/" class="md-nav__link">
+      Network Map
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Syslog
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
+      Syslog
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#syslog-server-installation" class="md-nav__link">
+    Syslog server installation
+  </a>
+  
+    <nav class="md-nav" aria-label="Syslog server installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syslog-ng" class="md-nav__link">
+    syslog-ng
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rsyslog" class="md-nav__link">
+    rsyslog
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logstash" class="md-nav__link">
+    logstash
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Dashboards/" class="md-nav__link">
+      Dashboards
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Supermicro/" class="md-nav__link">
+      Supermicro
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
+    
+    <label class="md-nav__link" for="nav-6">
+      5. Advanced Setup
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="5. Advanced Setup" data-md-level="1">
+      <label class="md-nav__title" for="nav-6">
+        <span class="md-nav__icon md-icon"></span>
+        5. Advanced Setup
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/1-Minute-Polling/" class="md-nav__link">
+      1 Minute Polling
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Fast-Ping-Check/" class="md-nav__link">
+      Fast Ping Checking
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Environment-Variables/" class="md-nav__link">
+      Environment Variables
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Configuration/" class="md-nav__link">
+      Configuration Docs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Authentication/" class="md-nav__link">
+      Authentication Options
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Two-Factor-Auth/" class="md-nav__link">
+      Two-Factor Auth
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Auto-Discovery/" class="md-nav__link">
+      Auto-discovery Setup
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Distributed-Poller/" class="md-nav__link">
+      Scaling LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../RRDCached/" class="md-nav__link">
+      RRDCached
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Sub-Directory/" class="md-nav__link">
+      Sub-directory Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Varnish/" class="md-nav__link">
+      Varnish
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Dispatcher-Service/" class="md-nav__link">
+      Dispatcher Service (RC)
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../RRDTune/" class="md-nav__link">
+      RRDTune
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../IRC-Bot/" class="md-nav__link">
+      IRC Bot
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../IRC-Bot-Extensions/" class="md-nav__link">
+      IRC Bot Extensions
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../SNMP-Proxy/" class="md-nav__link">
+      SNMP Proxy
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../SNMP-Trap-Handler/" class="md-nav__link">
+      SNMP Trap Handler
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Customizing-the-Web-UI/" class="md-nav__link">
+      Customizing the Web UI
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Bare-Dashboard/" class="md-nav__link">
+      Bare Dashboard
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Cleanup-options/" class="md-nav__link">
+      Cleanup Options
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+    
+    <label class="md-nav__link" for="nav-7">
+      6. 3rd Party Integration
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="6. 3rd Party Integration" data-md-level="1">
+      <label class="md-nav__title" for="nav-7">
+        <span class="md-nav__icon md-icon"></span>
+        6. 3rd Party Integration
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Gateone/" class="md-nav__link">
+      Gateone
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Graylog/" class="md-nav__link">
+      Graylog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Services/" class="md-nav__link">
+      Nagios Plugins
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../NFSen/" class="md-nav__link">
+      NFSen
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Oxidized/" class="md-nav__link">
+      Oxidized
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Rancid/" class="md-nav__link">
+      Rancid
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../PeeringDB/" class="md-nav__link">
+      PeeringDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Proxmox/" class="md-nav__link">
+      Proxmox
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-7-9" type="checkbox" id="nav-7-9">
+    
+    <label class="md-nav__link" for="nav-7-9">
+      Storing Metrics
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Storing Metrics" data-md-level="2">
+      <label class="md-nav__title" for="nav-7-9">
+        <span class="md-nav__icon md-icon"></span>
+        Storing Metrics
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Metric-Storage/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../metrics/Graphite/" class="md-nav__link">
+      Graphite
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../metrics/InfluxDB/" class="md-nav__link">
+      InfluxDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../metrics/OpenTSDB/" class="md-nav__link">
+      OpenTSDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../metrics/Prometheus/" class="md-nav__link">
+      Prometheus
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Smokeping/" class="md-nav__link">
+      Smokeping
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Weathermap/" class="md-nav__link">
+      Weathermap
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+    
+    <label class="md-nav__link" for="nav-8">
+      7. API
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="7. API" data-md-level="1">
+      <label class="md-nav__title" for="nav-8">
+        <span class="md-nav__icon md-icon"></span>
+        7. API
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/" class="md-nav__link">
+      Using the API
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Devices/" class="md-nav__link">
+      Devices
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/DeviceGroups/" class="md-nav__link">
+      DeviceGroups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Ports/" class="md-nav__link">
+      Ports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/PortGroups/" class="md-nav__link">
+      PortGroups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Alerts/" class="md-nav__link">
+      Alerts
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Routing/" class="md-nav__link">
+      Routing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Switching/" class="md-nav__link">
+      Switching
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Inventory/" class="md-nav__link">
+      Inventory
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Bills/" class="md-nav__link">
+      Bills
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/ARP/" class="md-nav__link">
+      ARP
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Services/" class="md-nav__link">
+      Services
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/System/" class="md-nav__link">
+      System
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Logs/" class="md-nav__link">
+      Logs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Locations/" class="md-nav__link">
+      Locations
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-9" type="checkbox" id="nav-9">
+    
+    <label class="md-nav__link" for="nav-9">
+      8. Alerting
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="8. Alerting" data-md-level="1">
+      <label class="md-nav__title" for="nav-9">
+        <span class="md-nav__icon md-icon"></span>
+        8. Alerting
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Introduction/" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Rules/" class="md-nav__link">
+      Rules
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Templates/" class="md-nav__link">
+      Templates
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Transports/" class="md-nav__link">
+      Transports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Creating-Transport/" class="md-nav__link">
+      Creating Transports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Entities/" class="md-nav__link">
+      Entities
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Macros/" class="md-nav__link">
+      Macros
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Testing/" class="md-nav__link">
+      Testing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Device-Dependencies/" class="md-nav__link">
+      Device Dependencies
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-10" type="checkbox" id="nav-10">
+    
+    <label class="md-nav__link" for="nav-10">
+      9. Getting help
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="9. Getting help" data-md-level="1">
+      <label class="md-nav__title" for="nav-10">
+        <span class="md-nav__icon md-icon"></span>
+        9. Getting help
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/" class="md-nav__link">
+      How to get help
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/FAQ/" class="md-nav__link">
+      FAQ
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Install%20Validation/" class="md-nav__link">
+      Install Validation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Performance/" class="md-nav__link">
+      Performance
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Discovery%20Support/" class="md-nav__link">
+      Discovery Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Poller%20Support/" class="md-nav__link">
+      Poller Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Example-Hardware-Setup/" class="md-nav__link">
+      Example Hardware Setups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Remote-Monitoring-VPN/" class="md-nav__link">
+      Remote Monitoring VPN
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/SNMP-Configuration-Examples/" class="md-nav__link">
+      SNMP Configuration Examples
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/SSL-Configuration/" class="md-nav__link">
+      SSL Configuration
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Troubleshooting/" class="md-nav__link">
+      Device Troubleshooting
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Sensors/" class="md-nav__link">
+      Device Sensors
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-11" type="checkbox" id="nav-11">
+    
+    <label class="md-nav__link" for="nav-11">
+      10. Contributing + Developing
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="10. Contributing + Developing" data-md-level="1">
+      <label class="md-nav__title" for="nav-11">
+        <span class="md-nav__icon md-icon"></span>
+        10. Contributing + Developing
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Getting-Started/" class="md-nav__link">
+      Getting Started
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Using-Git/" class="md-nav__link">
+      Using Git
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Code-Guidelines/" class="md-nav__link">
+      Code Guidelines
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Style-Guidelines/" class="md-nav__link">
+      Style Guidelines
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Validating-Code/" class="md-nav__link">
+      Validating Code
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Code-Structure/" class="md-nav__link">
+      Code Structure
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Creating-Documentation/" class="md-nav__link">
+      Creating Documentation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Licensing/" class="md-nav__link">
+      Licensing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Component/" class="md-nav__link">
+      Component
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-11-11" type="checkbox" id="nav-11-11">
+    
+    <label class="md-nav__link" for="nav-11-11">
+      Support for a new OS
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Support for a new OS" data-md-level="2">
+      <label class="md-nav__title" for="nav-11-11">
+        <span class="md-nav__icon md-icon"></span>
+        Support for a new OS
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Support-New-OS/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Initial-Detection/" class="md-nav__link">
+      Initial Detection
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Mem-CPU-Information/" class="md-nav__link">
+      Mem/CPU Information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Test-Units/" class="md-nav__link">
+      Test Units
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Health-Information/" class="md-nav__link">
+      Health Information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Wireless-Sensors/" class="md-nav__link">
+      Wireless Sensors
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Custom-Graphs/" class="md-nav__link">
+      Custom Graphs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Settings/" class="md-nav__link">
+      Settings
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Sensor-State-Support/" class="md-nav__link">
+      Sensor State Support
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/SNMP-Traps/" class="md-nav__link">
+      SNMP Traps
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Dynamic-Config/" class="md-nav__link">
+      Dynamic Config
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Merging-Pull-Requests/" class="md-nav__link">
+      Merging Pull Requests
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Creating-Release/" class="md-nav__link">
+      Creating Release
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Plugin-System/" class="md-nav__link">
+      Plugin System
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-12" type="checkbox" id="nav-12">
+    
+    <label class="md-nav__link" for="nav-12">
+      11. Misc
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="11. Misc" data-md-level="1">
+      <label class="md-nav__title" for="nav-12">
+        <span class="md-nav__icon md-icon"></span>
+        11. Misc
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Security/" class="md-nav__link">
+      Security information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/CLI-Tools/" class="md-nav__link">
+      CLI Scripts
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-12-3" type="checkbox" id="nav-12-3">
+    
+    <label class="md-nav__link" for="nav-12-3">
+      Device Notes
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Device Notes" data-md-level="2">
+      <label class="md-nav__title" for="nav-12-3">
+        <span class="md-nav__icon md-icon"></span>
+        Device Notes
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Notes/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Notes/Carel-pCOweb-Devices/" class="md-nav__link">
+      Carel pCOweb
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Notes/AsuswrtMerlin/" class="md-nav__link">
+      Asuswrt-Merlin
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Support/Device-Notes/Openwrt/" class="md-nav__link">
+      OpenWRT
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#syslog-server-installation" class="md-nav__link">
+    Syslog server installation
+  </a>
+  
+    <nav class="md-nav" aria-label="Syslog server installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#syslog-ng" class="md-nav__link">
+    syslog-ng
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rsyslog" class="md-nav__link">
+    rsyslog
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logstash" class="md-nav__link">
+    logstash
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/librenms/librenms/edit/master/doc/Extensions/Syslog.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="setting-up-syslog-support">Setting up syslog support</h1>
+<p>This document will explain how to send syslog data to LibreNMS.
+Please also refer to the file Graylog.md for an alternate way of
+integrating syslog with LibreNMS.</p>
+<h2 id="syslog-server-installation">Syslog server installation</h2>
+<h3 id="syslog-ng">syslog-ng</h3>
+<p>For Debian / Ubuntu:</p>
+<div class="highlight"><pre><span></span><code>apt-get install syslog-ng
+</code></pre></div>
+<p>For CentOS / RedHat</p>
+<div class="highlight"><pre><span></span><code>yum install syslog-ng
+</code></pre></div>
+<p>Once syslog-ng is installed, edit the relevant config file (most
+likely /etc/syslog-ng/syslog-ng.conf) and paste the following:</p>
+<div class="highlight"><pre><span></span><code>@version:3.5
+@include <span class="s2">&quot;scl.conf&quot;</span>
+
+<span class="c1"># syslog-ng configuration file.</span>
+<span class="c1">#</span>
+<span class="c1"># This should behave pretty much like the original syslog on RedHat. But</span>
+<span class="c1"># it could be configured a lot smarter.</span>
+<span class="c1">#</span>
+<span class="c1"># See syslog-ng(8) and syslog-ng.conf(5) for more information.</span>
+<span class="c1">#</span>
+<span class="c1"># Note: it also sources additional configuration files (*.conf)</span>
+<span class="c1">#       located in /etc/syslog-ng/conf.d/</span>
+
+options <span class="o">{</span>
+        chain_hostnames<span class="o">(</span>off<span class="o">)</span><span class="p">;</span>
+        flush_lines<span class="o">(</span><span class="m">0</span><span class="o">)</span><span class="p">;</span>
+        use_dns<span class="o">(</span>no<span class="o">)</span><span class="p">;</span>
+        use_fqdn<span class="o">(</span>no<span class="o">)</span><span class="p">;</span>
+        owner<span class="o">(</span><span class="s2">&quot;root&quot;</span><span class="o">)</span><span class="p">;</span>
+        group<span class="o">(</span><span class="s2">&quot;adm&quot;</span><span class="o">)</span><span class="p">;</span>
+        perm<span class="o">(</span><span class="m">0640</span><span class="o">)</span><span class="p">;</span>
+        stats_freq<span class="o">(</span><span class="m">0</span><span class="o">)</span><span class="p">;</span>
+        bad_hostname<span class="o">(</span><span class="s2">&quot;^gconfd</span>$<span class="s2">&quot;</span><span class="o">)</span><span class="p">;</span>
+<span class="o">}</span><span class="p">;</span>
+
+<span class="nb">source</span> s_sys <span class="o">{</span>
+    system<span class="o">()</span><span class="p">;</span>
+    internal<span class="o">()</span><span class="p">;</span>
+<span class="o">}</span><span class="p">;</span>
+
+<span class="nb">source</span> s_net <span class="o">{</span>
+        tcp<span class="o">(</span>port<span class="o">(</span><span class="m">514</span><span class="o">)</span> flags<span class="o">(</span>syslog-protocol<span class="o">))</span><span class="p">;</span>
+        udp<span class="o">(</span>port<span class="o">(</span><span class="m">514</span><span class="o">)</span> flags<span class="o">(</span>syslog-protocol<span class="o">))</span><span class="p">;</span>
+<span class="o">}</span><span class="p">;</span>
+
+<span class="c1">########################</span>
+<span class="c1"># Destinations</span>
+<span class="c1">########################</span>
+destination d_librenms <span class="o">{</span>
+        program<span class="o">(</span><span class="s2">&quot;/opt/librenms/syslog.php&quot;</span> template <span class="o">(</span><span class="s2">&quot;</span><span class="nv">$HOST</span><span class="s2">||</span><span class="nv">$FACILITY</span><span class="s2">||</span><span class="nv">$PRIORITY</span><span class="s2">||</span><span class="nv">$LEVEL</span><span class="s2">||</span><span class="nv">$TAG</span><span class="s2">||</span><span class="nv">$R_YEAR</span><span class="s2">-</span><span class="nv">$R_MONTH</span><span class="s2">-</span><span class="nv">$R_DAY</span><span class="s2"> </span><span class="nv">$R_HOUR</span><span class="s2">:</span><span class="nv">$R_MIN</span><span class="s2">:</span><span class="nv">$R_SEC</span><span class="s2">||</span><span class="nv">$MSG</span><span class="s2">||</span><span class="nv">$PROGRAM</span><span class="s2">\n&quot;</span><span class="o">)</span> template-escape<span class="o">(</span>yes<span class="o">))</span><span class="p">;</span>
+<span class="o">}</span><span class="p">;</span>
+
+filter f_kernel     <span class="o">{</span> facility<span class="o">(</span>kern<span class="o">)</span><span class="p">;</span> <span class="o">}</span><span class="p">;</span>
+filter f_default    <span class="o">{</span> level<span class="o">(</span>info..emerg<span class="o">)</span> and
+                        not <span class="o">(</span>facility<span class="o">(</span>mail<span class="o">)</span>
+                        or facility<span class="o">(</span>authpriv<span class="o">)</span>
+                        or facility<span class="o">(</span>cron<span class="o">))</span><span class="p">;</span> <span class="o">}</span><span class="p">;</span>
+filter f_auth       <span class="o">{</span> facility<span class="o">(</span>authpriv<span class="o">)</span><span class="p">;</span> <span class="o">}</span><span class="p">;</span>
+filter f_mail       <span class="o">{</span> facility<span class="o">(</span>mail<span class="o">)</span><span class="p">;</span> <span class="o">}</span><span class="p">;</span>
+filter f_emergency  <span class="o">{</span> level<span class="o">(</span>emerg<span class="o">)</span><span class="p">;</span> <span class="o">}</span><span class="p">;</span>
+filter f_news       <span class="o">{</span> facility<span class="o">(</span>uucp<span class="o">)</span> or
+                        <span class="o">(</span>facility<span class="o">(</span>news<span class="o">)</span>
+                        and level<span class="o">(</span>crit..emerg<span class="o">))</span><span class="p">;</span> <span class="o">}</span><span class="p">;</span>
+filter f_boot   <span class="o">{</span> facility<span class="o">(</span>local7<span class="o">)</span><span class="p">;</span> <span class="o">}</span><span class="p">;</span>
+filter f_cron   <span class="o">{</span> facility<span class="o">(</span>cron<span class="o">)</span><span class="p">;</span> <span class="o">}</span><span class="p">;</span>
+
+<span class="c1">########################</span>
+<span class="c1"># Log paths</span>
+<span class="c1">########################</span>
+log <span class="o">{</span>
+        source<span class="o">(</span>s_net<span class="o">)</span><span class="p">;</span>
+        source<span class="o">(</span>s_sys<span class="o">)</span><span class="p">;</span>
+        destination<span class="o">(</span>d_librenms<span class="o">)</span><span class="p">;</span>
+<span class="o">}</span><span class="p">;</span>
+
+<span class="c1"># Source additional configuration files (.conf extension only)</span>
+@include <span class="s2">&quot;/etc/syslog-ng/conf.d/*.conf&quot;</span>
+
+
+<span class="c1"># vim:ft=syslog-ng:ai:si:ts=4:sw=4:et:</span>
+</code></pre></div>
+<p>Next start syslog-ng:</p>
+<div class="highlight"><pre><span></span><code>service syslog-ng restart
+</code></pre></div>
+<p>Add the following to your LibreNMS <code>config.php</code> file to enable the Syslog extension:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;enable_syslog&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
+<p>If no messages make it to the syslog tab in LibreNMS, chances are you experience an issue with SELinux. If so, create a file mycustom-librenms-rsyslog.te , with the following content:</p>
+<div class="highlight"><pre><span></span><code>module mycustom-librenms-rsyslog 1.0;
+
+require {
+        type syslogd_t;
+        type httpd_sys_rw_content_t;
+        type ping_exec_t;
+        class process execmem;
+        class dir { getattr search write };
+        class file { append getattr execute open read };
+}
+
+#============= syslogd_t ==============
+allow syslogd_t httpd_sys_rw_content_t:dir { getattr search write };
+allow syslogd_t httpd_sys_rw_content_t:file { open read append getattr };
+allow syslogd_t self:process execmem;
+allow syslogd_t ping_exec_t:file execute;
+</code></pre></div>
+<p>Then, as root, execute the following commands:</p>
+<div class="highlight"><pre><span></span><code>checkmodule -M -m -o mycustom-librenms-rsyslog.mod mycustom-librenms-rsyslog.te
+semodule_package -o mycustom-librenms-rsyslog.pp -m mycustom-librenms-rsyslog.mod
+semodule -i mycustom-librenms-rsyslog.pp
+</code></pre></div>
+<h3 id="rsyslog">rsyslog</h3>
+<p>If you prefer rsyslog, here are some hints on how to get it working.</p>
+<p>Add the following to your rsyslog config somewhere (could be at the
+top of the file in the step below, could be in <code>rsyslog.conf</code> if you
+are using remote logs for something else on this host)</p>
+<div class="highlight"><pre><span></span><code># Listen for syslog messages on UDP:514
+$ModLoad imudp
+$UDPServerRun 514
+</code></pre></div>
+<p>Create a file called <code>/etc/rsyslog.d/30-librenms.conf</code>and add the following depending on your version of rsyslog.</p>
+<div class="tabbed-set" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><label for="__tabbed_1_1">Version 8</label><div class="tabbed-content">
+<div class="highlight"><pre><span></span><code># Feed syslog messages to librenms
+module(load=&quot;omprog&quot;)
+
+template(name=&quot;librenms&quot;
+        type=&quot;string&quot;
+        string= &quot;%fromhost%||%syslogfacility%||%syslogpriority%||%syslogseverity%||%syslogtag%||%$year%-%$month%-%$day% %timegenerated:8:25%||%msg%||%programname%\n&quot;)
+        action(type=&quot;omprog&quot;
+        binary=&quot;/opt/librenms/syslog.php&quot;
+        template=&quot;librenms&quot;)
+
+&amp; stop
+</code></pre></div>
+</div>
+<input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><label for="__tabbed_1_2">Version 7</label><div class="tabbed-content">
+<div class="highlight"><pre><span></span><code>#Feed syslog messages to librenms
+$ModLoad omprog
+
+$template librenms,&quot;%fromhost%||%syslogfacility%||%syslogpriority%||%syslogseverity%||%syslogtag%||%$year%-%$month%-%$day% %timegenerated:8:25%||%msg%||%programname%\n&quot;
+
+*.* action(type=&quot;omprog&quot; binary=&quot;/opt/librenms/syslog.php&quot; template=&quot;librenms&quot;)
+
+&amp; stop
+</code></pre></div>
+</div>
+<input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><label for="__tabbed_1_3">Legacy</label><div class="tabbed-content">
+<div class="highlight"><pre><span></span><code># Feed syslog messages to librenms
+$ModLoad omprog
+$template librenms,&quot;%FROMHOST%||%syslogfacility-text%||%syslogpriority-text%||%syslogseverity%||%syslogtag%||%$YEAR%-%$MONTH%-%$DAY%    %timegenerated:8:25%||%msg%||%programname%\n&quot;
+
+$ActionOMProgBinary /opt/librenms/syslog.php
+*.* :omprog:;librenms
+</code></pre></div>
+</div>
+</div>
+<p>If your rsyslog server is recieving messages relayed by another syslog
+server, you may try replacing <code>%fromhost%</code> with <code>%hostname%</code>, since
+<code>fromhost</code> is the host the message was received from, not the host
+that generated the message.  The <code>fromhost</code> property is preferred as
+it avoids problems caused by devices sending incorrect hostnames in
+syslog messages.</p>
+<p>Add the following to your LibreNMS <code>config.php</code> file to enable the Syslog extension:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;enable_syslog&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="logstash">logstash</h3>
+<p>If you prefer logstash, and it is installed on the same server as
+LibreNMS, here are some hints on how to get it working.</p>
+<p>First, install the output-exec plugin for logstash:</p>
+<div class="highlight"><pre><span></span><code>/usr/share/logstash/bin/logstash-plugin install logstash-output-exec
+</code></pre></div>
+<p>Next, create a logstash configuration file
+(ex. /etc/logstash/conf.d/logstash-simple.conf), and add the
+following:</p>
+<div class="highlight"><pre><span></span><code>input {
+syslog {
+    port =&gt; 514
+  }
+}
+
+
+output {
+        exec {
+        command =&gt; &quot;echo `echo %{host},,,,%{facility},,,,%{priority},,,,%{severity},,,,%{facility_label},,,,``date --date=&#39;%{timestamp}&#39; &#39;+%Y-%m-%d %H:%M:%S&#39;``echo &#39;,,,,%{message}&#39;``echo ,,,,%{program} | sed &#39;s/\x25\x7b\x70\x72\x6f\x67\x72\x61\x6d\x7d/%{facility_label}/&#39;` | sed &#39;s/,,,,/||/g&#39; | /opt/librenms/syslog.php &amp;&quot;
+        }
+        elasticsearch {
+        hosts =&gt; [&quot;10.10.10.10:9200&quot;]
+        index =&gt; &quot;syslog-%{+YYYY.MM.dd}&quot;
+        }
+}
+</code></pre></div>
+<p>Replace 10.10.10.10 with your primary elasticsearch server IP, and set
+the incoming syslog port. Alternatively, if you already have a
+logstash config file that works except for the LibreNMS export, take
+only the "exec" section from output and add it.</p>
+<p>Add the following to your LibreNMS <code>config.php</code> file to enable the Syslog extension:</p>
+<div class="highlight"><pre><span></span><code>$config[&#39;enable_syslog&#39;] = 1;
+</code></pre></div>
+<h1 id="syslog-clean-up">Syslog Clean Up</h1>
+<p>Can be set inside of  <code>config.php</code></p>
+<div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;syslog_purge&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span>
+</code></pre></div>
+<p>The cleanup is run by daily.sh and any entries over X days old are
+automatically purged. Values are in days. See here for more Clean Up
+Options <a href="../../Support/Cleanup-options/">Link</a></p>
+<h1 id="client-configuration">Client configuration</h1>
+<p>Below are sample configurations for a variety of clients. You should
+understand the config before using it as you may want to make some
+slight changes. Further configuration hints may be found in the file Graylog.md.</p>
+<p>Replace librenms.ip with IP or hostname of your LibreNMS install.</p>
+<p>Replace any variables in <brackets> with the relevant information.</p>
+<h2 id="syslog">syslog</h2>
+<div class="highlight"><pre><span></span><code>*.*     @librenms.ip
+</code></pre></div>
+<h2 id="rsyslog_1">rsyslog</h2>
+<div class="highlight"><pre><span></span><code>*.* @librenms.ip:514
+</code></pre></div>
+<h2 id="cisco-asa">Cisco ASA</h2>
+<div class="highlight"><pre><span></span><code>logging enable
+logging timestamp
+logging buffer-size 200000
+logging buffered debugging
+logging trap notifications
+logging host &lt;outside interface name&gt; librenms.ip
+</code></pre></div>
+<h2 id="cisco-ios">Cisco IOS</h2>
+<div class="highlight"><pre><span></span><code>logging trap debugging
+logging facility local6
+logging librenms.ip
+</code></pre></div>
+<h2 id="cisco-nxos">Cisco NXOS</h2>
+<div class="highlight"><pre><span></span><code>logging server librenms.ip 5 use-vrf default facility local6
+</code></pre></div>
+<h2 id="juniper-junos">Juniper Junos</h2>
+<div class="highlight"><pre><span></span><code>set system syslog host librenms.ip authorization any
+set system syslog host librenms.ip daemon any
+set system syslog host librenms.ip kernel any
+set system syslog host librenms.ip user any
+set system syslog host librenms.ip change-log any
+set system syslog host librenms.ip source-address &lt;management ip&gt;
+set system syslog host librenms.ip exclude-hostname
+set system syslog time-format
+</code></pre></div>
+<h2 id="huawei-vrp">Huawei VRP</h2>
+<div class="highlight"><pre><span></span><code>info-center loghost librenms.ip
+info-center timestamp debugging short-date without-timezone // Optional
+info-center timestamp log short-date // Optional
+info-center timestamp trap short-date // Optional
+//This is optional config, especially if the device is in public ip and you dont&#39;want to get a lot of messages of ACL
+info-center filter-id bymodule-alias VTY ACL_DENY
+info-center filter-id bymodule-alias SSH SSH_FAIL
+info-center filter-id bymodule-alias SNMP SNMP_FAIL
+info-center filter-id bymodule-alias SNMP SNMP_IPLOCK
+info-center filter-id bymodule-alias SNMP SNMP_IPUNLOCK
+info-center filter-id bymodule-alias HTTP ACL_DENY
+</code></pre></div>
+<h2 id="huawei-smartax-gpon-olt">Huawei SmartAX (GPON OLT)</h2>
+<div class="highlight"><pre><span></span><code>loghost add librenms.ip librenms
+loghost activate name librenms
+</code></pre></div>
+<h2 id="allied-telesis-alliedware-plus">Allied Telesis Alliedware Plus</h2>
+<div class="highlight"><pre><span></span><code>log date-format iso // Required so syslog-ng/LibreNMS can correctly interpret the log message formatting.
+log host x.x.x.x
+log host x.x.x.x level &lt;errors&gt; // Required. A log-level must be specified for syslog messages to send.
+log host x.x.x.x level notices program imish // Useful for seeing all commands executed by users.
+log host x.x.x.x level notices program imi // Required for Oxidized Syslog hook log message.
+log host source &lt;eth0&gt;
+</code></pre></div>
+<p>If you have permitted udp and tcp 514 through any firewall then that
+should be all you need. Logs should start appearing and displayed
+within the LibreNMS web UI.</p>
+<h2 id="windows">Windows</h2>
+<p>By Default windows has no native way to send logs to a remote syslog server.</p>
+<p>Using this how to you can download Datagram-Syslog Agent to send logs
+to a remote syslog server (LibreNMS).</p>
+<h3 id="note">Note</h3>
+<p>Keep in mind you can use any agent or program to send the logs. We are
+just using this Datagram-Syslog Agent for this example.</p>
+<p><a href="http://techgenix.com/configuring-syslog-agent-windows-server-2012/">Link to How to</a></p>
+<p>You will need to download and install "Datagram-Syslog Agent" for this how to
+<a href="http://download.cnet.com/Datagram-SyslogAgent/3001-2085_4-10370938.html">Link to Download</a></p>
+<h1 id="external-hooks">External hooks</h1>
+<p>Trigger external scripts based on specific syslog patterns being
+matched with syslog hooks. Add the following to your LibreNMS
+<code>config.php</code> to enable hooks:</p>
+<div class="highlight"><pre><span></span><code>$config[&#39;enable_syslog_hooks&#39;] = 1;
+</code></pre></div>
+<p>The below are some example hooks to call an external script in the
+event of a configuration change on Cisco ASA, IOS, NX-OS and IOS-XR
+devices. Add to your <code>config.php</code> file to enable.</p>
+<h2 id="cisco-asa_1">Cisco ASA</h2>
+<div class="highlight"><pre><span></span><code>$config[&#39;os&#39;][&#39;asa&#39;][&#39;syslog_hook&#39;][] = Array(&#39;regex&#39; =&gt; &#39;/%ASA-(config-)?5-111005/&#39;, &#39;script&#39; =&gt; &#39;/opt/librenms/scripts/syslog-notify-oxidized.php&#39;);
+</code></pre></div>
+<h2 id="cisco-ios_1">Cisco IOS</h2>
+<div class="highlight"><pre><span></span><code>$config[&#39;os&#39;][&#39;ios&#39;][&#39;syslog_hook&#39;][] = Array(&#39;regex&#39; =&gt; &#39;/%SYS-(SW[0-9]+-)?5-CONFIG_I/&#39;, &#39;script&#39; =&gt; &#39;/opt/librenms/scripts/syslog-notify-oxidized.php&#39;);
+</code></pre></div>
+<h2 id="cisco-nxos_1">Cisco NXOS</h2>
+<div class="highlight"><pre><span></span><code>$config[&#39;os&#39;][&#39;nxos&#39;][&#39;syslog_hook&#39;][] = Array(&#39;regex&#39; =&gt; &#39;/%VSHD-5-VSHD_SYSLOG_CONFIG_I/&#39;, &#39;script&#39; =&gt; &#39;/opt/librenms/scripts/syslog-notify-oxidized.php&#39;);
+</code></pre></div>
+<h2 id="cisco-iosxr">Cisco IOSXR</h2>
+<div class="highlight"><pre><span></span><code>$config[&#39;os&#39;][&#39;iosxr&#39;][&#39;syslog_hook&#39;][] = Array(&#39;regex&#39; =&gt; &#39;/%GBL-CONFIG-6-DB_COMMIT/&#39;, &#39;script&#39; =&gt; &#39;/opt/librenms/scripts/syslog-notify-oxidized.php&#39;);
+</code></pre></div>
+<h2 id="juniper-junos_1">Juniper Junos</h2>
+<div class="highlight"><pre><span></span><code>$config[&#39;os&#39;][&#39;junos&#39;][&#39;syslog_hook&#39;][] = Array(&#39;regex&#39; =&gt; &#39;/UI_COMMIT:/&#39;, &#39;script&#39; =&gt; &#39;/opt/librenms/scripts/syslog-notify-oxidized.php&#39;);
+</code></pre></div>
+<h2 id="juniper-screenos">Juniper ScreenOS</h2>
+<div class="highlight"><pre><span></span><code>$config[&#39;os&#39;][&#39;screenos&#39;][&#39;syslog_hook&#39;][] = Array(&#39;regex&#39; =&gt; &#39;/System configuration saved/&#39;, &#39;script&#39; =&gt; &#39;/opt/librenms/scripts/syslog-notify-oxidized.php&#39;);
+</code></pre></div>
+<h2 id="allied-telesis-alliedware-plus_1">Allied Telesis Alliedware Plus</h2>
+<p><strong>Note:</strong> At least software version 5.4.8-2.1 is required. <code>log host
+x.x.x.x level notices program imi</code> may also be required depending on
+configuration. This is to ensure the syslog hook log message gets sent
+to the syslog server.</p>
+<div class="highlight"><pre><span></span><code>$config[&#39;os&#39;][&#39;awplus&#39;][&#39;syslog_hook&#39;][] = Array(&#39;regex&#39; =&gt; &#39;/IMI.+.Startup-config saved on/&#39;, &#39;script&#39; =&gt; &#39;/opt/librenms/scripts/syslog-notify-oxidized.php&#39;);
+</code></pre></div>
+<h1 id="configuration-options">Configuration Options</h1>
+<h2 id="matching-syslogs-to-hosts-with-different-names">Matching syslogs to hosts with different names</h2>
+<p>In some cases, you may get logs that aren't being associated with the
+device in LibreNMS. For example, in LibreNMS the device is known as
+"ne-core-01", and that's how DNS resolves. However, the received
+syslogs are for "loopback.core-nw".</p>
+<p>To fix this issue, you can configure LibreNMS to translate the
+incoming syslog hostname into another hostname, so that the logs get
+associated with the correct device.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>$config[&#39;syslog_xlate&#39;] = array(
+        &#39;loopback0.core7k1.noc.net&#39; =&gt; &#39;n7k1-core7k1&#39;,
+        &#39;loopback0.core7k2.noc.net&#39; =&gt; &#39;n7k2-core7k2&#39;
+);
+</code></pre></div>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../Network-Map/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Network Map
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../Dashboards/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Dashboards
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/vendor.6a3d08fc.min.js"></script>
+      <script src="../../assets/javascripts/bundle.71201edf.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      
+      <script>
+        app = initialize({
+          base: "../..",
+          features: [],
+          search: Object.assign({
+            worker: "../../assets/javascripts/worker/search.4ac00218.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+        <script src="../../librenms-docs.js"></script>
+      
+    
+  </body>
+</html>

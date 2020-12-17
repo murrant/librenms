@@ -1,0 +1,3283 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="LibreNMS user and developer documentation">
+      
+      
+        <link rel="canonical" href="https://docs.librenms.org/Support/SNMP-Configuration-Examples/">
+      
+      
+        <meta name="author" content="LibreNMS">
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.0">
+    
+    
+      
+        <title>SNMP Configuration Examples - LibreNMS Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.bc7e593a.min.css">
+      
+    
+    
+    
+      
+        
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="../../librenms.css">
+    
+    
+      
+        
+<script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-79149977-2","docs.librenms.org"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})}),document.addEventListener("DOMContentSwitch",function(){ga("send","pageview",document.location.pathname)})</script>
+<script async src="https://www.google-analytics.com/analytics.js"></script>
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#snmp-configuration-examples" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href="https://docs.librenms.org" title="LibreNMS Docs" class="md-header-nav__button md-logo" aria-label="LibreNMS Docs">
+      
+  <img src="../../img/librenms.svg" alt="logo">
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
+            LibreNMS Docs
+          </span>
+          <span class="md-header-nav__topic md-ellipsis">
+            
+              SNMP Configuration Examples
+            
+          </span>
+        </div>
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/librenms/librenms/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://docs.librenms.org" title="LibreNMS Docs" class="md-nav__button md-logo" aria-label="LibreNMS Docs">
+      
+  <img src="../../img/librenms.svg" alt="logo">
+
+    </a>
+    LibreNMS Docs
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/librenms/librenms/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." class="md-nav__link">
+      Home
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      1. General
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="1. General" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon"></span>
+        1. General
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Acknowledgement/" class="md-nav__link">
+      Acknowledgements
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Changelog/" class="md-nav__link">
+      Changelog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/CODE_OF_CONDUCT/" class="md-nav__link">
+      Code of Conduct
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Features/" class="md-nav__link">
+      Features
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Welcome-to-Observium-users/" class="md-nav__link">
+      Welcome to Observium users
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      2. Installing
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="2. Installing" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        <span class="md-nav__icon md-icon"></span>
+        2. Installing
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/" class="md-nav__link">
+      How to install LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Install-LibreNMS/" class="md-nav__link">
+      Install LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Images/" class="md-nav__link">
+      LibreNMS VMs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Installation/Migrating-from-Observium/" class="md-nav__link">
+      Migrating from Observium
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+    
+    <label class="md-nav__link" for="nav-4">
+      3. Getting started
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="3. Getting started" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        <span class="md-nav__icon md-icon"></span>
+        3. Getting started
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Releases/" class="md-nav__link">
+      Choosing a release
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Adding-a-Device/" class="md-nav__link">
+      Adding a device
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Device-Groups/" class="md-nav__link">
+      Grouping Devices
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Callback-Stats-and-Privacy/" class="md-nav__link">
+      Submitting stats
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Updating/" class="md-nav__link">
+      Updating an install
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
+    
+    <label class="md-nav__link" for="nav-5">
+      4. Basic Setup
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="4. Basic Setup" data-md-level="1">
+      <label class="md-nav__title" for="nav-5">
+        <span class="md-nav__icon md-icon"></span>
+        4. Basic Setup
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Applications/" class="md-nav__link">
+      Applications
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Agent-Setup/" class="md-nav__link">
+      Check_MK Setup
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Billing-Module/" class="md-nav__link">
+      Billing Module
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Dell-OpenManage/" class="md-nav__link">
+      Dell OpenManage
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/World-Map/" class="md-nav__link">
+      World Map
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Interface-Description-Parsing/" class="md-nav__link">
+      Interface Description Parsing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Network-Map/" class="md-nav__link">
+      Network Map
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Syslog/" class="md-nav__link">
+      Syslog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Dashboards/" class="md-nav__link">
+      Dashboards
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Supermicro/" class="md-nav__link">
+      Supermicro
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
+    
+    <label class="md-nav__link" for="nav-6">
+      5. Advanced Setup
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="5. Advanced Setup" data-md-level="1">
+      <label class="md-nav__title" for="nav-6">
+        <span class="md-nav__icon md-icon"></span>
+        5. Advanced Setup
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../1-Minute-Polling/" class="md-nav__link">
+      1 Minute Polling
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Fast-Ping-Check/" class="md-nav__link">
+      Fast Ping Checking
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Environment-Variables/" class="md-nav__link">
+      Environment Variables
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Configuration/" class="md-nav__link">
+      Configuration Docs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Authentication/" class="md-nav__link">
+      Authentication Options
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Two-Factor-Auth/" class="md-nav__link">
+      Two-Factor Auth
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Auto-Discovery/" class="md-nav__link">
+      Auto-discovery Setup
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Distributed-Poller/" class="md-nav__link">
+      Scaling LibreNMS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/RRDCached/" class="md-nav__link">
+      RRDCached
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Sub-Directory/" class="md-nav__link">
+      Sub-directory Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Varnish/" class="md-nav__link">
+      Varnish
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Dispatcher-Service/" class="md-nav__link">
+      Dispatcher Service (RC)
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/RRDTune/" class="md-nav__link">
+      RRDTune
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/IRC-Bot/" class="md-nav__link">
+      IRC Bot
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/IRC-Bot-Extensions/" class="md-nav__link">
+      IRC Bot Extensions
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/SNMP-Proxy/" class="md-nav__link">
+      SNMP Proxy
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/SNMP-Trap-Handler/" class="md-nav__link">
+      SNMP Trap Handler
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Customizing-the-Web-UI/" class="md-nav__link">
+      Customizing the Web UI
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Bare-Dashboard/" class="md-nav__link">
+      Bare Dashboard
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Cleanup-options/" class="md-nav__link">
+      Cleanup Options
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
+    
+    <label class="md-nav__link" for="nav-7">
+      6. 3rd Party Integration
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="6. 3rd Party Integration" data-md-level="1">
+      <label class="md-nav__title" for="nav-7">
+        <span class="md-nav__icon md-icon"></span>
+        6. 3rd Party Integration
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Gateone/" class="md-nav__link">
+      Gateone
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Graylog/" class="md-nav__link">
+      Graylog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Services/" class="md-nav__link">
+      Nagios Plugins
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/NFSen/" class="md-nav__link">
+      NFSen
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Oxidized/" class="md-nav__link">
+      Oxidized
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Rancid/" class="md-nav__link">
+      Rancid
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/PeeringDB/" class="md-nav__link">
+      PeeringDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Proxmox/" class="md-nav__link">
+      Proxmox
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-7-9" type="checkbox" id="nav-7-9">
+    
+    <label class="md-nav__link" for="nav-7-9">
+      Storing Metrics
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Storing Metrics" data-md-level="2">
+      <label class="md-nav__title" for="nav-7-9">
+        <span class="md-nav__icon md-icon"></span>
+        Storing Metrics
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Metric-Storage/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/metrics/Graphite/" class="md-nav__link">
+      Graphite
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/metrics/InfluxDB/" class="md-nav__link">
+      InfluxDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/metrics/OpenTSDB/" class="md-nav__link">
+      OpenTSDB
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/metrics/Prometheus/" class="md-nav__link">
+      Prometheus
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Smokeping/" class="md-nav__link">
+      Smokeping
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Weathermap/" class="md-nav__link">
+      Weathermap
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+    
+    <label class="md-nav__link" for="nav-8">
+      7. API
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="7. API" data-md-level="1">
+      <label class="md-nav__title" for="nav-8">
+        <span class="md-nav__icon md-icon"></span>
+        7. API
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/" class="md-nav__link">
+      Using the API
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Devices/" class="md-nav__link">
+      Devices
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/DeviceGroups/" class="md-nav__link">
+      DeviceGroups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Ports/" class="md-nav__link">
+      Ports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/PortGroups/" class="md-nav__link">
+      PortGroups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Alerts/" class="md-nav__link">
+      Alerts
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Routing/" class="md-nav__link">
+      Routing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Switching/" class="md-nav__link">
+      Switching
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Inventory/" class="md-nav__link">
+      Inventory
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Bills/" class="md-nav__link">
+      Bills
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/ARP/" class="md-nav__link">
+      ARP
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Services/" class="md-nav__link">
+      Services
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/System/" class="md-nav__link">
+      System
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Logs/" class="md-nav__link">
+      Logs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../API/Locations/" class="md-nav__link">
+      Locations
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-9" type="checkbox" id="nav-9">
+    
+    <label class="md-nav__link" for="nav-9">
+      8. Alerting
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="8. Alerting" data-md-level="1">
+      <label class="md-nav__title" for="nav-9">
+        <span class="md-nav__icon md-icon"></span>
+        8. Alerting
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Introduction/" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Rules/" class="md-nav__link">
+      Rules
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Templates/" class="md-nav__link">
+      Templates
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Transports/" class="md-nav__link">
+      Transports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Creating-Transport/" class="md-nav__link">
+      Creating Transports
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Entities/" class="md-nav__link">
+      Entities
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Macros/" class="md-nav__link">
+      Macros
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Testing/" class="md-nav__link">
+      Testing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Alerting/Device-Dependencies/" class="md-nav__link">
+      Device Dependencies
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-10" type="checkbox" id="nav-10" checked>
+    
+    <label class="md-nav__link" for="nav-10">
+      9. Getting help
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="9. Getting help" data-md-level="1">
+      <label class="md-nav__title" for="nav-10">
+        <span class="md-nav__icon md-icon"></span>
+        9. Getting help
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../" class="md-nav__link">
+      How to get help
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../FAQ/" class="md-nav__link">
+      FAQ
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Install%20Validation/" class="md-nav__link">
+      Install Validation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Performance/" class="md-nav__link">
+      Performance
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Discovery%20Support/" class="md-nav__link">
+      Discovery Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Poller%20Support/" class="md-nav__link">
+      Poller Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Example-Hardware-Setup/" class="md-nav__link">
+      Example Hardware Setups
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Remote-Monitoring-VPN/" class="md-nav__link">
+      Remote Monitoring VPN
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        SNMP Configuration Examples
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
+      SNMP Configuration Examples
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#devices" class="md-nav__link">
+    Devices
+  </a>
+  
+    <nav class="md-nav" aria-label="Devices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cisco" class="md-nav__link">
+    Cisco
+  </a>
+  
+    <nav class="md-nav" aria-label="Cisco">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adaptive-security-appliance-asa" class="md-nav__link">
+    Adaptive Security Appliance (ASA)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-ios-xe" class="md-nav__link">
+    IOS / IOS XE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nx-os" class="md-nav__link">
+    NX-OS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wireless-lan-controller-wlc" class="md-nav__link">
+    Wireless LAN Controller (WLC)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eaton" class="md-nav__link">
+    Eaton
+  </a>
+  
+    <nav class="md-nav" aria-label="Eaton">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#network-card-ms" class="md-nav__link">
+    Network Card-MS
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hpe-3par" class="md-nav__link">
+    HPE 3PAR
+  </a>
+  
+    <nav class="md-nav" aria-label="HPE 3PAR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inform-os-32x" class="md-nav__link">
+    Inform OS 3.2.x
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infoblox" class="md-nav__link">
+    Infoblox
+  </a>
+  
+    <nav class="md-nav" aria-label="Infoblox">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nios-7x" class="md-nav__link">
+    NIOS 7.x+
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#juniper" class="md-nav__link">
+    Juniper
+  </a>
+  
+    <nav class="md-nav" aria-label="Juniper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#junos-os" class="md-nav__link">
+    Junos OS
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mikrotik" class="md-nav__link">
+    Mikrotik
+  </a>
+  
+    <nav class="md-nav" aria-label="Mikrotik">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#routeros-6x" class="md-nav__link">
+    RouterOS 6.x
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#palo-alto" class="md-nav__link">
+    Palo Alto
+  </a>
+  
+    <nav class="md-nav" aria-label="Palo Alto">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#panos-6x7x" class="md-nav__link">
+    PANOS 6.x/7.x
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ubiquiti" class="md-nav__link">
+    Ubiquiti
+  </a>
+  
+    <nav class="md-nav" aria-label="Ubiquiti">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgeos" class="md-nav__link">
+    EdgeOs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vmware" class="md-nav__link">
+    VMware
+  </a>
+  
+    <nav class="md-nav" aria-label="VMware">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#esxesxi-5x6x" class="md-nav__link">
+    ESX/ESXi 5.x/6.x
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vcenter-6x" class="md-nav__link">
+    VCenter 6.x
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operating-systems" class="md-nav__link">
+    Operating systems
+  </a>
+  
+    <nav class="md-nav" aria-label="Operating systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linux-snmpd-v2" class="md-nav__link">
+    Linux (snmpd v2)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-snmpd-v3" class="md-nav__link">
+    Linux (snmpd v3)
+  </a>
+  
+    <nav class="md-nav" aria-label="Linux (snmpd v3)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#restart-the-snmpd-service" class="md-nav__link">
+    Restart the snmpd service
+  </a>
+  
+    <nav class="md-nav" aria-label="Restart the snmpd service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#centos-6-red-hat-6" class="md-nav__link">
+    CentOS 6 / Red hat 6
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#centos-7-red-hat-7" class="md-nav__link">
+    CentOS 7 / Red hat 7
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ubuntu" class="md-nav__link">
+    Ubuntu
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-server-2008-r2" class="md-nav__link">
+    Windows Server 2008 R2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-server-2012-r2-and-2016" class="md-nav__link">
+    Windows Server 2012 R2 and 2016
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mac-osx" class="md-nav__link">
+    Mac OSX
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../SSL-Configuration/" class="md-nav__link">
+      SSL Configuration
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Troubleshooting/" class="md-nav__link">
+      Device Troubleshooting
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Sensors/" class="md-nav__link">
+      Device Sensors
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-11" type="checkbox" id="nav-11">
+    
+    <label class="md-nav__link" for="nav-11">
+      10. Contributing + Developing
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="10. Contributing + Developing" data-md-level="1">
+      <label class="md-nav__title" for="nav-11">
+        <span class="md-nav__icon md-icon"></span>
+        10. Contributing + Developing
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Getting-Started/" class="md-nav__link">
+      Getting Started
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Using-Git/" class="md-nav__link">
+      Using Git
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Code-Guidelines/" class="md-nav__link">
+      Code Guidelines
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Style-Guidelines/" class="md-nav__link">
+      Style Guidelines
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Validating-Code/" class="md-nav__link">
+      Validating Code
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Code-Structure/" class="md-nav__link">
+      Code Structure
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Creating-Documentation/" class="md-nav__link">
+      Creating Documentation
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Licensing/" class="md-nav__link">
+      Licensing
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Component/" class="md-nav__link">
+      Component
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-11-11" type="checkbox" id="nav-11-11">
+    
+    <label class="md-nav__link" for="nav-11-11">
+      Support for a new OS
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Support for a new OS" data-md-level="2">
+      <label class="md-nav__title" for="nav-11-11">
+        <span class="md-nav__icon md-icon"></span>
+        Support for a new OS
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Support-New-OS/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Initial-Detection/" class="md-nav__link">
+      Initial Detection
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Mem-CPU-Information/" class="md-nav__link">
+      Mem/CPU Information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Test-Units/" class="md-nav__link">
+      Test Units
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Health-Information/" class="md-nav__link">
+      Health Information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Wireless-Sensors/" class="md-nav__link">
+      Wireless Sensors
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Custom-Graphs/" class="md-nav__link">
+      Custom Graphs
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/os/Settings/" class="md-nav__link">
+      Settings
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Sensor-State-Support/" class="md-nav__link">
+      Sensor State Support
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/SNMP-Traps/" class="md-nav__link">
+      SNMP Traps
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Dynamic-Config/" class="md-nav__link">
+      Dynamic Config
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Merging-Pull-Requests/" class="md-nav__link">
+      Merging Pull Requests
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Developing/Creating-Release/" class="md-nav__link">
+      Creating Release
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Extensions/Plugin-System/" class="md-nav__link">
+      Plugin System
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-12" type="checkbox" id="nav-12">
+    
+    <label class="md-nav__link" for="nav-12">
+      11. Misc
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="11. Misc" data-md-level="1">
+      <label class="md-nav__title" for="nav-12">
+        <span class="md-nav__icon md-icon"></span>
+        11. Misc
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../General/Security/" class="md-nav__link">
+      Security information
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../CLI-Tools/" class="md-nav__link">
+      CLI Scripts
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-12-3" type="checkbox" id="nav-12-3">
+    
+    <label class="md-nav__link" for="nav-12-3">
+      Device Notes
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Device Notes" data-md-level="2">
+      <label class="md-nav__title" for="nav-12-3">
+        <span class="md-nav__icon md-icon"></span>
+        Device Notes
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Notes/" class="md-nav__link">
+      Intro
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Notes/Carel-pCOweb-Devices/" class="md-nav__link">
+      Carel pCOweb
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Notes/AsuswrtMerlin/" class="md-nav__link">
+      Asuswrt-Merlin
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Device-Notes/Openwrt/" class="md-nav__link">
+      OpenWRT
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#devices" class="md-nav__link">
+    Devices
+  </a>
+  
+    <nav class="md-nav" aria-label="Devices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cisco" class="md-nav__link">
+    Cisco
+  </a>
+  
+    <nav class="md-nav" aria-label="Cisco">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adaptive-security-appliance-asa" class="md-nav__link">
+    Adaptive Security Appliance (ASA)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ios-ios-xe" class="md-nav__link">
+    IOS / IOS XE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nx-os" class="md-nav__link">
+    NX-OS
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wireless-lan-controller-wlc" class="md-nav__link">
+    Wireless LAN Controller (WLC)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eaton" class="md-nav__link">
+    Eaton
+  </a>
+  
+    <nav class="md-nav" aria-label="Eaton">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#network-card-ms" class="md-nav__link">
+    Network Card-MS
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hpe-3par" class="md-nav__link">
+    HPE 3PAR
+  </a>
+  
+    <nav class="md-nav" aria-label="HPE 3PAR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inform-os-32x" class="md-nav__link">
+    Inform OS 3.2.x
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infoblox" class="md-nav__link">
+    Infoblox
+  </a>
+  
+    <nav class="md-nav" aria-label="Infoblox">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nios-7x" class="md-nav__link">
+    NIOS 7.x+
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#juniper" class="md-nav__link">
+    Juniper
+  </a>
+  
+    <nav class="md-nav" aria-label="Juniper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#junos-os" class="md-nav__link">
+    Junos OS
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mikrotik" class="md-nav__link">
+    Mikrotik
+  </a>
+  
+    <nav class="md-nav" aria-label="Mikrotik">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#routeros-6x" class="md-nav__link">
+    RouterOS 6.x
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#palo-alto" class="md-nav__link">
+    Palo Alto
+  </a>
+  
+    <nav class="md-nav" aria-label="Palo Alto">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#panos-6x7x" class="md-nav__link">
+    PANOS 6.x/7.x
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ubiquiti" class="md-nav__link">
+    Ubiquiti
+  </a>
+  
+    <nav class="md-nav" aria-label="Ubiquiti">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#edgeos" class="md-nav__link">
+    EdgeOs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vmware" class="md-nav__link">
+    VMware
+  </a>
+  
+    <nav class="md-nav" aria-label="VMware">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#esxesxi-5x6x" class="md-nav__link">
+    ESX/ESXi 5.x/6.x
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vcenter-6x" class="md-nav__link">
+    VCenter 6.x
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operating-systems" class="md-nav__link">
+    Operating systems
+  </a>
+  
+    <nav class="md-nav" aria-label="Operating systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linux-snmpd-v2" class="md-nav__link">
+    Linux (snmpd v2)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-snmpd-v3" class="md-nav__link">
+    Linux (snmpd v3)
+  </a>
+  
+    <nav class="md-nav" aria-label="Linux (snmpd v3)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#restart-the-snmpd-service" class="md-nav__link">
+    Restart the snmpd service
+  </a>
+  
+    <nav class="md-nav" aria-label="Restart the snmpd service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#centos-6-red-hat-6" class="md-nav__link">
+    CentOS 6 / Red hat 6
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#centos-7-red-hat-7" class="md-nav__link">
+    CentOS 7 / Red hat 7
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ubuntu" class="md-nav__link">
+    Ubuntu
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-server-2008-r2" class="md-nav__link">
+    Windows Server 2008 R2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-server-2012-r2-and-2016" class="md-nav__link">
+    Windows Server 2012 R2 and 2016
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mac-osx" class="md-nav__link">
+    Mac OSX
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/librenms/librenms/edit/master/doc/Support/SNMP-Configuration-Examples.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="snmp-configuration-examples">SNMP configuration examples</h1>
+<p>Table of Content:</p>
+<ul>
+<li><a href="#devices">Devices</a></li>
+<li><a href="#cisco">Cisco</a><ul>
+<li><a href="#adaptive-security-appliance-asa">Adaptive Security Appliance (ASA)</a></li>
+<li><a href="#ios--ios-xe">IOS / IOS XE</a></li>
+<li><a href="#nx-os">NX-OS</a></li>
+<li><a href="#wireless-lan-controller-wlc">Wireless LAN Controller (WLC)</a></li>
+</ul>
+</li>
+<li><a href="#hpe3par">HPE 3PAR</a></li>
+<li><a href="#inform-os-32x">Inform OS 3.2.x</a></li>
+<li><a href="#infoblox">Infoblox</a><ul>
+<li><a href="#nios-7x">NIOS 7.x+</a></li>
+</ul>
+</li>
+<li><a href="#juniper">Juniper</a><ul>
+<li><a href="#junos-os">Junos OS</a></li>
+</ul>
+</li>
+<li><a href="#mikrotik">Mikrotik</a><ul>
+<li><a href="#routeros-6x">RouterOS 6.x</a></li>
+</ul>
+</li>
+<li><a href="#palo-alto">Palo Alto</a><ul>
+<li><a href="#panos-6x7x">PANOS 6.x/7.x</a></li>
+</ul>
+</li>
+<li><a href="#ubiquiti">Ubiquiti</a><ul>
+<li><a href="#edgeos">EdgeOs</a></li>
+</ul>
+</li>
+<li><a href="#vmware">VMware</a><ul>
+<li><a href="#esxesxi-5x6x">ESX/ESXi 5.x/6.x</a></li>
+<li><a href="#vcenter-6x">VCenter 6.x</a></li>
+</ul>
+</li>
+<li><a href="#operating-systems">Operating systems</a></li>
+<li><a href="#linux-snmpd">Linux (snmpd v2)</a></li>
+<li><a href="#linux-snmpd-v3">Linux (snmpd v3)</a></li>
+<li><a href="#windows-server-2008-r2">Windows Server 2008 R2</a></li>
+<li><a href="#windows-server-2012-r2-and-2016">Windows Server 2012 R2 and 2016</a></li>
+<li><a href="#Mac-OSX">Mac OSX</a></li>
+</ul>
+<h2 id="devices">Devices</h2>
+<h3 id="cisco">Cisco</h3>
+<h4 id="adaptive-security-appliance-asa">Adaptive Security Appliance (ASA)</h4>
+<p>ASDM</p>
+<ol>
+<li>Launch ASDM and connect to your device</li>
+<li>Go to Configuration &gt; Management Access &gt; SNMP</li>
+<li>Add your community string</li>
+<li>Add in the "SNMP Host Access List" section your LibreNMS server IP address</li>
+<li>Click Apply and Save</li>
+</ol>
+<p>CLI</p>
+<div class="highlight"><pre><span></span><code># SNMPv2c
+
+snmp-server community &lt;YOUR-COMMUNITY&gt;
+snmp-server contact &lt;YOUR-CONTACT&gt;
+snmp-server location &lt;YOUR-LOCATION&gt;
+snmp-server host &lt;INTERFACE&gt; &lt;LIBRENMS-IP&gt; poll community &lt;YOUR-COMMUNITY&gt; version 2c
+
+# SNMPv3
+
+snmp-server group &lt;GROUP-NAME&gt; v3 priv
+snmp-server user &lt;USER-NAME&gt; &lt;GROUP-NAME&gt; v3 auth sha &lt;AUTH-PASSWORD&gt; priv aes 128 &lt;PRIV-PASSWORD&gt;
+snmp-server contact &lt;YOUR-CONTACT&gt;
+snmp-server location &lt;YOUR-LOCATION&gt;
+snmp-server host &lt;INTERFACE&gt; &lt;LIBRENMS-IP&gt; poll version 3 &lt;USER-NAME&gt;
+</code></pre></div>
+<blockquote>
+<p>Note: If the device is unable to find the SNMP user, reboot the ASA. Once rebooted, continue the steps as normal.</p>
+</blockquote>
+<h4 id="ios-ios-xe">IOS / IOS XE</h4>
+<div class="highlight"><pre><span></span><code># SNMPv2c
+
+snmp-server community &lt;YOUR-COMMUNITY&gt; RO
+snmp-server contact &lt;YOUR-CONTACT&gt;
+snmp-server location &lt;YOUR-LOCATION&gt;
+
+# SNMPv3
+
+snmp-server group &lt;GROUP-NAME&gt; v3 priv
+snmp-server user &lt;USER-NAME&gt; &lt;GROUP-NAME&gt; v3 auth sha &lt;AUTH-PASSWORD&gt; priv aes 128 &lt;PRIV-PASSWORD&gt;
+snmp-server contact &lt;YOUR-CONTACT&gt;
+snmp-server location &lt;YOUR-LOCATION&gt;
+
+# Note: The following is also required if using SNMPv3 and you want to populate the FDB table.
+
+snmp-server group &lt;GROUP-NAME&gt; v3 priv context vlan- match prefix
+</code></pre></div>
+<blockquote>
+<p>Note: If the device is unable to find the SNMP user, reboot the ASA. Once rebooted, continue the steps as normal.</p>
+</blockquote>
+<h4 id="nx-os">NX-OS</h4>
+<div class="highlight"><pre><span></span><code># SNMPv2c
+
+snmp-server community &lt;YOUR-COMMUNITY&gt; RO
+snmp-server contact &lt;YOUR-CONTACT&gt;
+snmp-server location &lt;YOUR-LOCATION&gt;
+
+# SNMPv3
+
+snmp-server user &lt;USER-NAME&gt; &lt;GROUP-NAME&gt; v3 auth sha &lt;AUTH-PASSWORD&gt; priv aes 128 &lt;PRIV-PASSWORD&gt;
+snmp-server contact &lt;YOUR-CONTACT&gt;
+snmp-server location &lt;YOUR-LOCATION&gt;
+</code></pre></div>
+<h4 id="wireless-lan-controller-wlc">Wireless LAN Controller (WLC)</h4>
+<ol>
+<li>Access the web admin page and log in</li>
+<li>If you are running version 8.1 and later, on the new dashboard click "Advanced"</li>
+<li>Go to management Tab</li>
+<li>On SNMP sub-menu, select "Communities"</li>
+<li>Click "New..."</li>
+<li>Add your community name and leave IP addresses empty</li>
+<li>Click Apply and Save</li>
+</ol>
+<h3 id="eaton">Eaton</h3>
+<h4 id="network-card-ms">Network Card-MS</h4>
+<ol>
+<li>Connect to the Web UI of the device</li>
+<li>Upgrade to the lastest available manufacturer firmware which applies to your hardware revision. Refer to the releasenotes.   For devices which can use the Lx releases, <em>do</em> install LD.</li>
+<li>After rebooting the card (safe for connected load), configure Network, System and Access Control. Save config for each step.</li>
+<li>Configure SNMP. The device defaults to both SNMP v1 and v3 enabled, with default credentials. Disable what you do not need. SNMP v3 works, but uses MD5/DES. You may have to add another section to your SNMP credentials table in LibreNMS. Save.</li>
+</ol>
+<h3 id="hpe-3par">HPE 3PAR</h3>
+<h4 id="inform-os-32x">Inform OS 3.2.x</h4>
+<ul>
+<li>Access the CLI</li>
+<li>Add an SNMP Manager with your LibreNMS IP address:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>addsnmpmgr &lt;librenms ip&gt;
+</code></pre></div>
+<ul>
+<li>Add your SNMP community:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>setsnmppw &lt;community&gt;
+</code></pre></div>
+<h3 id="infoblox">Infoblox</h3>
+<h4 id="nios-7x">NIOS 7.x+</h4>
+<ol>
+<li>Access the web admin page and log in</li>
+<li>Go to Grid tab &gt; Grid Manager</li>
+<li>In the right menu select "Grid properties"</li>
+<li>Select "SNMP" menu</li>
+<li>Click "Enable SNMPv1/SNMPv2 Queries"</li>
+<li>Add your community</li>
+<li>Click Save &amp; Close</li>
+</ol>
+<h3 id="juniper">Juniper</h3>
+<h4 id="junos-os">Junos OS</h4>
+<p>for SNMPv1/v2c</p>
+<div class="highlight"><pre><span></span><code>set snmp description description
+set snmp location location
+set snmp contact contact
+set snmp community YOUR-COMMUNITY authorization read-only
+</code></pre></div>
+<p>for SNMPv3 (authPriv):</p>
+<div class="highlight"><pre><span></span><code>set snmp v3 usm local-engine user authpriv authentication-sha authentication-password YOUR_AUTH_SECRET
+set snmp v3 usm local-engine user authpriv privacy-aes128 privacy-password YOUR_PRIV_SECRET
+set snmp v3 vacm security-to-group security-model usm security-name authpriv group mysnmpv3
+set snmp v3 vacm access group mysnmpv3 default-context-prefix security-model any security-level authentication read-view mysnmpv3view
+set snmp v3 vacm access group mysnmpv3 default-context-prefix security-model any security-level privacy read-view mysnmpv3view
+set snmp view mysnmpv3view oid iso include
+</code></pre></div>
+<h3 id="mikrotik">Mikrotik</h3>
+<h4 id="routeros-6x">RouterOS 6.x</h4>
+<p>CLI SNMP v2 Configuration</p>
+<p><div class="highlight"><pre><span></span><code>/snmp community
+set [ find default=yes ] read-access=no
+add addresses=&lt;ALLOWED-SRC-IPs/NETMASK&gt; name=&lt;COMMUNITY&gt;
+/snmp
+set contact=&quot;&lt;NAME&gt;&quot; enabled=yes engine-id=&lt;ENGINE ID&gt; location=&quot;&lt;LOCALTION&gt;&quot;
+</code></pre></div>
+Notes:</p>
+<ul>
+<li>About the snmp community commands:<ul>
+<li>The commands change the default snmp community.  It is probably possible to create a new one instead.</li>
+<li><ALLOWED-SRC-IPs/NETMASK> specify the address and host (not network) netmask of the LibreNMS server.  Example: 192.168.8.71/32</li>
+<li>trap-version=2 must also be specified if some other trap-version has been set</li>
+<li>trap-interfaces may also be used to limit the interfaces the router listens on</li>
+</ul>
+</li>
+<li>About the snmp command:<ul>
+<li>contact, engine-id and location are optional</li>
+<li>trap-community is probably required if a new snmp community has been created.</li>
+</ul>
+</li>
+</ul>
+<p>CLI SNMP v3 Configuration for <em>authPriv</em>
+<div class="highlight"><pre><span></span><code>/snmp community 
+add name=&quot;&lt;COMMUNITY&gt;&quot; addresses=&quot;&lt;ALLOWED-SRC-IPs/NETMASK&gt;&quot; 
+set &quot;&lt;COMMUNITY&gt;&quot; authentication-password=&quot;&lt;AUTH_PASS&gt;&quot; authentication-protocol=MD5
+set &quot;&lt;COMMUNITY&gt;&quot; encryption-password=&quot;&lt;ENCRYP_PASS&gt;&quot; encryption-protocol=AES
+set &quot;&lt;COMMUNITY&gt;&quot; read-access=yes write-access=no security=private
+#Disable public SNMP
+set public read-access=no write-access=no security=private
+/snmp
+set contact=&quot;&lt;NAME&gt;&quot; enabled=yes engine-id=&quot;&lt;ENGINE ID&gt;&quot; location=&quot;&lt;LOCALTION&gt;&quot;
+</code></pre></div>
+Notes:</p>
+<ul>
+<li>Use password with length of min 8 chars</li>
+</ul>
+<p>Notes for both SNMP v2 and v3</p>
+<ul>
+<li>In some cases of advanced routing one may need to set explicitly the source IP address from which the SNMP daemon will reply - <code>/snmp set src-address=&lt;SELF_IP_ADDRESS&gt;</code></li>
+</ul>
+<h3 id="palo-alto">Palo Alto</h3>
+<h4 id="panos-6x7x">PANOS 6.x/7.x</h4>
+<ol>
+<li>Access the web admin page and log in</li>
+<li>Go to Device tab &gt; Setup</li>
+<li>Go to the sub-tab "Operations"</li>
+<li>Click "SNMP Setup"</li>
+<li>Enter your SNMP community and then click "OK"</li>
+<li>Click Apply</li>
+</ol>
+<p>Note that you need to allow SNMP on the needed interfaces. To do that
+you need to create a network "Interface Mgmt" profile for standard
+interface and allow SNMP under "Device &gt; Management &gt; Management
+Interface Settings" for out of band management interface.</p>
+<p>One may also configure SNMP from the command line, which is useful
+when you need to configure more than one firewall for SNMP
+monitoring. Log into the firewall(s) via ssh, and perform these
+commands for basic SNMPv3 configuration:</p>
+<div class="highlight"><pre><span></span><code>username@devicename&gt; configure
+username@devicename# set deviceconfig system service disable-snmp no
+username@devicename# set deviceconfig system snmp-setting access-setting version v3 views pa view iso oid 1.3.6.1
+username@devicename# set deviceconfig system snmp-setting access-setting version v3 views pa view iso option include
+username@devicename# set deviceconfig system snmp-setting access-setting version v3 views pa view iso mask 0xf0
+username@devicename# set deviceconfig system snmp-setting access-setting version v3 users authpriv authpwd YOUR_AUTH_SECRET
+username@devicename# set deviceconfig system snmp-setting access-setting version v3 users authpriv privpwd YOUR_PRIV_SECRET
+username@devicename# set deviceconfig system snmp-setting access-setting version v3 users authpriv view pa
+username@devicename# set deviceconfig system snmp-setting snmp-system location &quot;Yourcity, Yourcountry [60.4,5.31]&quot;
+username@devicename# set deviceconfig system snmp-setting snmp-system contact noc@your.org
+username@devicename# commit
+username@devicename# exit
+</code></pre></div>
+<h3 id="ubiquiti">Ubiquiti</h3>
+<h4 id="edgeos">EdgeOs</h4>
+<p>If you use the HTTP interface:
+1. Access the legacy web admin page and log in
+1. Go to System &gt; Advanced Configuration
+1. Go to the sub-tab "SNMP" &gt; "Community"
+1. Click "Add Community Group"
+1. Enter your SNMP community, ip address and click submit
+1. Go to System &gt; Summary
+1. Go to the sub-tab "Description"
+1. Enter your System Name, System Location and System Contact.
+1. Click submit
+1. Click "Save Configuration"</p>
+<p>If you use CLI:
+<div class="highlight"><pre><span></span><code>username@devicename&gt; enable
+username@devicename# configure
+username@devicename (Config)# snmp-server community &quot;public&quot; ro
+username@devicename (Config)# snmp-server sysname &quot;devicename&quot;
+username@devicename (Config)# snmp-server contact &quot;noc@example.com&quot;
+username@devicename (Config)# exit
+username@devicename# write memory
+</code></pre></div></p>
+<h3 id="vmware">VMware</h3>
+<h4 id="esxesxi-5x6x">ESX/ESXi 5.x/6.x</h4>
+<p>Log on to your ESX server by means of ssh. You may have to enable the
+ssh service in the GUI first.
+From the CLI, execute the following commands:</p>
+<div class="highlight"><pre><span></span><code>esxcli system snmp set --authentication SHA1
+esxcli system snmp set --privacy AES128
+esxcli system snmp hash --auth-hash YOUR_AUTH_SECRET --priv-hash YOUR_PRIV_SECRET --raw-secret
+</code></pre></div>
+<p>This command produces output like this</p>
+<div class="highlight"><pre><span></span><code>   Authhash: f3d8982fc28e8d1346c26eee49eb2c4a5950c934
+   Privhash: 0596ab30b315576a4e9f7d7bde65bf49b749e335
+</code></pre></div>
+<p>Now define a SNMPv3 user:</p>
+<div class="highlight"><pre><span></span><code>esxcli system snmp set --users &lt;username&gt;/f3d8982fc28e8d1346c26eee49eb2c4a5950c934/0596ab30b315576a4e9f7d7bde65bf49b749e335/priv
+esxcli system snmp set -L &quot;Yourcity, Yourcountry [60.4,5.3]&quot;
+esxcli system snmp set -C noc@your.org
+esxcli system snmp set --enable true
+</code></pre></div>
+<blockquote>
+<p>Note: In case of snmp timouts, disable the firewall with <code>esxcli
+network firewall set --enabled false</code> If snmp timeouts still occur
+with firewall disabled, migrate VMs if needed and reboot ESXi host.</p>
+</blockquote>
+<h4 id="vcenter-6x">VCenter 6.x</h4>
+<p>Log on to your ESX server by means of ssh. You may have to enable the
+ssh service in the GUI first. From the CLI, execute the following
+commands:</p>
+<div class="highlight"><pre><span></span><code>snmp.set --authentication SHA1
+snmp.set --privacy AES128
+snmp.hash --auth_hash YOUR_AUTH_SECRET --priv_hash YOUR_PRIV_SECRET --raw_secret true
+</code></pre></div>
+<p>This command produces output like this</p>
+<div class="highlight"><pre><span></span><code>   Privhash: 0596ab30b315576a4e9f7d7bde65bf49b749e335
+   Authhash: f3d8982fc28e8d1346c26eee49eb2c4a5950c934
+</code></pre></div>
+<p>Now define a SNMPv3 user:</p>
+<div class="highlight"><pre><span></span><code>snmp.set --users authpriv/f3d8982fc28e8d1346c26eee49eb2c4a5950c934/0596ab30b315576a4e9f7d7bde65bf49b749e335/priv
+snmp.enable
+</code></pre></div>
+<h2 id="operating-systems">Operating systems</h2>
+<h3 id="linux-snmpd-v2">Linux (snmpd v2)</h3>
+<p>Replace your snmpd.conf file by the example below and edit it with
+appropriate community in "RANDOMSTRINGGOESHERE".</p>
+<div class="highlight"><pre><span></span><code>vi /etc/snmp/snmpd.conf
+</code></pre></div>
+<div class="highlight"><pre><span></span><code># Change RANDOMSTRINGGOESHERE to your preferred SNMP community string
+com2sec readonly  default         RANDOMSTRINGGOESHERE
+
+group MyROGroup v2c        readonly
+view all    included  .1                               80
+access MyROGroup &quot;&quot;      any       noauth    exact  all    none   none
+
+syslocation Rack, Room, Building, City, Country [GPSX,Y]
+syscontact Your Name &lt;your@email.address&gt;
+
+#Distro Detection
+extend distro /usr/bin/distro
+#Hardware Detection (uncomment to enable)
+#extend hardware &#39;/bin/cat /sys/devices/virtual/dmi/id/product_name&#39;
+#extend manufacturer &#39;/bin/cat /sys/devices/virtual/dmi/id/sys_vendor&#39;
+#extend serial &#39;/bin/cat /sys/devices/virtual/dmi/id/product_serial&#39;
+</code></pre></div>
+<p><strong>NOTE</strong>: On some systems the snmpd is running as its own user, which
+means it can't read <code>/sys/devices/virtual/dmi/id/product_serial</code> which
+is mode 0400. One solution is to include <code>@reboot chmod 444
+/sys/devices/virtual/dmi/id/product_serial</code> in the crontab for root or
+equivalent.</p>
+<p>Non-x86 or SMBIOS-based systems, such as ARM-based Raspberry Pi units should
+query device tree locations for this metadata, for example:
+<div class="highlight"><pre><span></span><code>extend hardware &#39;/bin/cat /sys/firmware/devicetree/base/model&#39;
+extend serial &#39;/bin/cat /sys/firmware/devicetree/base/serial-number&#39;
+</code></pre></div></p>
+<p>The LibreNMS server include a copy of this example here:</p>
+<div class="highlight"><pre><span></span><code>/opt/librenms/snmpd.conf.example
+</code></pre></div>
+<p>The binary /usr/bin/distro must be copied from the original source repository:</p>
+<div class="highlight"><pre><span></span><code>curl -o /usr/bin/distro https://raw.githubusercontent.com/librenms/librenms-agent/master/snmp/distro
+chmod +x /usr/bin/distro
+</code></pre></div>
+<h3 id="linux-snmpd-v3">Linux (snmpd v3)</h3>
+<p>Go to /etc/snmp/snmpd.conf</p>
+<p>Open the file in vi or nano /etc/snmp/snmpd.conf and add the following
+line to create SNMPV3 User (replace username and passwords with your
+own):</p>
+<div class="highlight"><pre><span></span><code>createUser authPrivUser SHA &quot;authPassword&quot; AES &quot;privPassword&quot;
+</code></pre></div>
+<p>Make sure the agent listens to all interfaces by adding the following
+line inside snmpd.conf:</p>
+<div class="highlight"><pre><span></span><code>agentAddress udp:161,udp6:[::1]:161
+</code></pre></div>
+<p>This line simply means listen to connections across all interfaces
+IPv4 and IPv6 respectively</p>
+<p>Uncomment and change the following line to give read access to the
+username created above (rouser is what LibreNMS uses) :</p>
+<div class="highlight"><pre><span></span><code>#rouser authPrivUser priv
+</code></pre></div>
+<p>Change the following details inside snmpd.conf</p>
+<div class="highlight"><pre><span></span><code>syslocation Rack, Room, Building, City, Country [GPSX,Y]
+syscontact Your Name &lt;your@email.address&gt;
+</code></pre></div>
+<p>Save and exit the file</p>
+<h4 id="restart-the-snmpd-service">Restart the snmpd service</h4>
+<h5 id="centos-6-red-hat-6">CentOS 6 / Red hat 6</h5>
+<div class="highlight"><pre><span></span><code>service snmpd restart
+</code></pre></div>
+<h5 id="centos-7-red-hat-7">CentOS 7 / Red hat 7</h5>
+<div class="highlight"><pre><span></span><code>systemctl restart snmpd
+</code></pre></div>
+<p>Add SNMP to Firewalld</p>
+<div class="highlight"><pre><span></span><code>firewall-cmd --zone=public --permanent --add-service=snmp
+firewall-cmd --reload
+</code></pre></div>
+<h5 id="ubuntu">Ubuntu</h5>
+<div class="highlight"><pre><span></span><code>service snmpd restart
+</code></pre></div>
+<h3 id="windows-server-2008-r2">Windows Server 2008 R2</h3>
+<ol>
+<li>Log in to your Windows Server 2008 R2</li>
+<li>Start "Server Manager" under "Administrative Tools"</li>
+<li>Click "Features" and then click "Add Feature"</li>
+<li>Check (if not checked) "SNMP Service", click "Next" until "Install"</li>
+<li>Start "Services" under "Administrative Tools"</li>
+<li>Edit "SNMP Service" properties</li>
+<li>Go to the security tab</li>
+<li>In "Accepted community name" click "Add" to add your community string and permission</li>
+<li>In "Accept SNMP packets from these hosts" click "Add" and add your
+   LibreNMS server IP address</li>
+<li>Validate change by clicking "Apply"</li>
+</ol>
+<h3 id="windows-server-2012-r2-and-2016">Windows Server 2012 R2 and 2016</h3>
+<ol>
+<li>Log in to your Windows Server 2012 R2</li>
+<li>Start "Server Manager" under "Administrative Tools"</li>
+<li>Click "Manage" and then "Add Roles and Features"</li>
+<li>Continue by pressing "Next" to the "Features" menu</li>
+<li>Install (if not installed) "SNMP Service"</li>
+<li>Start "Services" under "Administrative Tools"</li>
+<li>Edit "SNMP Service" properties</li>
+<li>Go to the security tab</li>
+<li>In "Accepted community name" click "Add" to add your community string and permission</li>
+<li>In "Accept SNMP packets from these hosts" click "Add" and add your
+   LibreNMS server IP address</li>
+<li>Validate change by clicking "Apply"</li>
+</ol>
+<blockquote>
+<p>Note: SNMPv3 can be supported on Windows platforms with the use of Net-SNMP.</p>
+</blockquote>
+<h3 id="mac-osx">Mac OSX</h3>
+<p>Step 1: <code>sudo nano /etc/snmp/snmpd.conf</code></p>
+<div class="highlight"><pre><span></span><code><span class="c1">#Allow read-access with the following SNMP Community String:</span>
+rocommunity public
+
+<span class="c1"># all other settings are optional but recommended.</span>
+
+<span class="c1"># Location of the device</span>
+syslocation data centre A
+
+<span class="c1"># Human Contact for the device</span>
+syscontact SysAdmin
+
+<span class="c1"># System Name of the device</span>
+sysName SystemName
+
+<span class="c1"># the system OID for this device. This is optional but recommended,</span>
+<span class="c1"># to identify this as a MAC OS system.</span>
+sysobjectid <span class="m">1</span>.3.6.1.4.1.8072.3.2.16
+</code></pre></div>
+<p>Step 2:</p>
+<div class="highlight"><pre><span></span><code>sudo launchctl load -w /System/Library/LaunchDaemons/org.net-snmp.snmpd.plist
+</code></pre></div>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../Remote-Monitoring-VPN/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Remote Monitoring VPN
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../SSL-Configuration/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                SSL Configuration
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/vendor.6a3d08fc.min.js"></script>
+      <script src="../../assets/javascripts/bundle.71201edf.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      
+      <script>
+        app = initialize({
+          base: "../..",
+          features: [],
+          search: Object.assign({
+            worker: "../../assets/javascripts/worker/search.4ac00218.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+        <script src="../../librenms-docs.js"></script>
+      
+    
+  </body>
+</html>
