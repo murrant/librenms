@@ -2240,8 +2240,8 @@ default it for all users in LibreNMS.</p>
 <li>Availability Map: Displays all devices with colored tiles, green up,
   yellow for warning (device has been restarted in last 24 hours),red
   for down. You can also list all services and ignored/disabled
-  devcies in this widget.</li>
-<li>Componet Status: List all componets Ok state, Warning state, Critical state.</li>
+  devices in this widget.</li>
+<li>Components Status: List all components Ok state, Warning state, Critical state.</li>
 <li>Device Summary horizontal: List device totals, up, down, ignored,
   disabled. Same for ports and services.</li>
 <li>Device Summary vertical: List device totals, up, down, ignored,
@@ -2258,16 +2258,16 @@ default it for all users in LibreNMS.</p>
   usage. Note the device type has to be listed as "Server".</li>
 <li>Syslog: Displays all syslog entries.</li>
 <li>Top Devices: By Traffic, or  Uptime, or Response time, or Poller
-  Duration, or Procssor load, or Memory Usage, or Storage Usage.</li>
+  Duration, or Processor load, or Memory Usage, or Storage Usage.</li>
 <li>Top Interfaces: Lists top interfaces by traffic utilization.</li>
-<li>Worldmap: displays all your devices locations. From syslocation or
+<li>World Map: displays all your devices locations. From syslocation or
   from override sysLocation.</li>
 </ul>
 <p>List of Widgets:
 <img alt="List of Widgets" src="/img/list-widgets.png" title="List of the widgets" /></p>
 <h2 id="dashboard-permissions">Dashboard Permissions</h2>
 <ul>
-<li>Private: Sets the dashabord to only the user that created the
+<li>Private: Sets the dashboard to only the user that created the
   dashboard can view and edit.</li>
 <li>Shared Read: Sets the dashboard to allow other users to view the
   dashboard, but cant make changes to the dashboard.</li>
@@ -2299,7 +2299,7 @@ id. You will need to know this in order to map the port to the graph.</p>
 <p>When using the Generic-image widget you can provide the width and
 height of the widget with your request. This will ensure that the
 image will fit nicely with the dimensions if the Generic-image widget.
-You can add @AUTO_HEIGHT@ and @AUTO_WIDTH@ to the Image URL as parameters.</p>
+You can add <code>@AUTO_HEIGHT@</code> and <code>@AUTO_WIDTH@</code> to the Image URL as parameters.</p>
 <p>Examples:</p>
 <ul>
 <li><a href="http://librenms.example.com/graph.php?id=333%2C444&amp;type=multiport_bits_separate&amp;legend=no&amp;absolute=1&amp;from=-14200&amp;width=@AUTO_WIDTH@&amp;height=@AUTO_HEIGHT@">http://librenms.example.com/graph.php?id=333%2C444&amp;type=multiport_bits_separate&amp;legend=no&amp;absolute=1&amp;from=-14200&amp;width=@AUTO_WIDTH@&amp;height=@AUTO_HEIGHT@</a></li>

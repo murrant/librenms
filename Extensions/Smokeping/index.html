@@ -1158,8 +1158,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#nginx-password-authentification" class="md-nav__link">
-    Nginx Password Authentification
+  <a href="#nginx-password-authentication" class="md-nav__link">
+    Nginx Password Authentication
   </a>
   
 </li>
@@ -2333,8 +2333,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#nginx-password-authentification" class="md-nav__link">
-    Nginx Password Authentification
+  <a href="#nginx-password-authentication" class="md-nav__link">
+    Nginx Password Authentication
   </a>
   
 </li>
@@ -2471,7 +2471,7 @@ remark = Welcome to the SmokePing website of &lt;b&gt;Insert Company Name Here&l
 </code></pre></div>
 <p>Note there may be other stanza's (possibly <code>*** Slaves ***</code>) between the
 <code>*** Probes ***</code> and <code>*** Targets ***</code> stanza's - leave these intact.</p>
-<p>Leave everything else untouched. If you need to add other confiruation, make
+<p>Leave everything else untouched. If you need to add other configuration, make
 sure it comes <em>after</em> the LibreNMS configuration, and keep in mind that
 Smokeping does not allow duplicate modules, and cares about the configuration
 file sequence.</p>
@@ -2508,7 +2508,7 @@ remark = Welcome to the SmokePing website of &lt;b&gt;Insert Company Name Here&l
 
 @include /etc/smokeping/config.d/librenms-targets.conf
 </code></pre></div>
-<p>Leave everything else untouched. If you need to add other confiruation, make
+<p>Leave everything else untouched. If you need to add other configuration, make
 sure it comes <em>after</em> the LibreNMS configuration, and keep in mind that
 Smokeping does not allow duplicate modules, and cares about the configuration
 file sequence.</p>
@@ -2588,7 +2588,7 @@ specified in <a href="../../Installation/Installation-Ubuntu-1804-Nginx/">Config
 <p>After saving the configuration file, verify your Nginx configuration file syntax
 is OK with <code>sudo nginx -t</code>, then restart Nginx with <code>sudo systemctl restart nginx</code></p>
 <p>You should be able to load the Smokeping web interface at <code>http://yourhost/smokeping</code></p>
-<h4 id="nginx-password-authentification">Nginx Password Authentification</h4>
+<h4 id="nginx-password-authentication">Nginx Password Authentication</h4>
 <p>You can use the purpose-made htpasswd utility included in the
 apache2-utils package (Nginx password files use the same format as
 Apache). You can install it on Ubuntu with</p>
@@ -2647,8 +2647,8 @@ will have one. If you're trying to integrate LibreNMS, smokeping <em>and</em> an
 source of configuration, you need to make sure there are no duplicate or missing
 definitions.</p>
 <h3 id="file-usrsbinsendmail-does-not-exist">File '/usr/sbin/sendmail' does not exist`</h3>
-<p>If you got this error at the end of the installation, simply edit
-commend out the sendmail entry in the configuration:</p>
+<p>If you got this error at the end of the installation, simply edit or
+comment out the sendmail entry in the configuration:</p>
 <div class="highlight"><pre><span></span><code><span class="gd">-sendmail = /usr/sbin/sendmail</span>
 <span class="gi">+#sendmail = /usr/sbin/sendmail</span>
 </code></pre></div>

@@ -1882,9 +1882,29 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#windows-server-2012-r2-and-2016" class="md-nav__link">
-    Windows Server 2012 R2 and 2016
+  <a href="#windows-server-2012-r2-and-newer" class="md-nav__link">
+    Windows Server 2012 R2 and newer
   </a>
+  
+    <nav class="md-nav" aria-label="Windows Server 2012 R2 and newer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gui" class="md-nav__link">
+    GUI
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#powershell" class="md-nav__link">
+    PowerShell
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2726,9 +2746,29 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#windows-server-2012-r2-and-2016" class="md-nav__link">
-    Windows Server 2012 R2 and 2016
+  <a href="#windows-server-2012-r2-and-newer" class="md-nav__link">
+    Windows Server 2012 R2 and newer
   </a>
+  
+    <nav class="md-nav" aria-label="Windows Server 2012 R2 and newer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gui" class="md-nav__link">
+    GUI
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#powershell" class="md-nav__link">
+    PowerShell
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2803,7 +2843,7 @@
 <li><a href="#linux-snmpd">Linux (snmpd v2)</a></li>
 <li><a href="#linux-snmpd-v3">Linux (snmpd v3)</a></li>
 <li><a href="#windows-server-2008-r2">Windows Server 2008 R2</a></li>
-<li><a href="#windows-server-2012-r2-and-2016">Windows Server 2012 R2 and 2016</a></li>
+<li><a href="#windows-server-2012-r2-and-newer">Windows Server 2012 R2 and newer</a></li>
 <li><a href="#Mac-OSX">Mac OSX</a></li>
 </ul>
 <h2 id="devices">Devices</h2>
@@ -2884,7 +2924,7 @@ snmp-server location &lt;YOUR-LOCATION&gt;
 <h4 id="network-card-ms">Network Card-MS</h4>
 <ol>
 <li>Connect to the Web UI of the device</li>
-<li>Upgrade to the lastest available manufacturer firmware which applies to your hardware revision. Refer to the releasenotes.   For devices which can use the Lx releases, <em>do</em> install LD.</li>
+<li>Upgrade to the latest available manufacturer firmware which applies to your hardware revision. Refer to the release notes.   For devices which can use the Lx releases, <em>do</em> install LD.</li>
 <li>After rebooting the card (safe for connected load), configure Network, System and Access Control. Save config for each step.</li>
 <li>Configure SNMP. The device defaults to both SNMP v1 and v3 enabled, with default credentials. Disable what you do not need. SNMP v3 works, but uses MD5/DES. You may have to add another section to your SNMP credentials table in LibreNMS. Save.</li>
 </ol>
@@ -3044,7 +3084,7 @@ esxcli system snmp set -C noc@your.org
 esxcli system snmp set --enable true
 </code></pre></div>
 <blockquote>
-<p>Note: In case of snmp timouts, disable the firewall with <code>esxcli
+<p>Note: In case of snmp timeouts, disable the firewall with <code>esxcli
 network firewall set --enabled false</code> If snmp timeouts still occur
 with firewall disabled, migrate VMs if needed and reboot ESXi host.</p>
 </blockquote>
@@ -3154,9 +3194,10 @@ firewall-cmd --reload
    LibreNMS server IP address</li>
 <li>Validate change by clicking "Apply"</li>
 </ol>
-<h3 id="windows-server-2012-r2-and-2016">Windows Server 2012 R2 and 2016</h3>
+<h3 id="windows-server-2012-r2-and-newer">Windows Server 2012 R2 and newer</h3>
+<h4 id="gui">GUI</h4>
 <ol>
-<li>Log in to your Windows Server 2012 R2</li>
+<li>Log in to your Windows Server 2012 R2 or newer</li>
 <li>Start "Server Manager" under "Administrative Tools"</li>
 <li>Click "Manage" and then "Add Roles and Features"</li>
 <li>Continue by pressing "Next" to the "Features" menu</li>
@@ -3169,6 +3210,13 @@ firewall-cmd --reload
    LibreNMS server IP address</li>
 <li>Validate change by clicking "Apply"</li>
 </ol>
+<h4 id="powershell">PowerShell</h4>
+<p>The following example will install SNMP, set the Librenms IP and set a read only community string.<br />
+Replace <code>$IP</code> and <code>$communitystring</code> with your values.  </p>
+<div class="highlight"><pre><span></span><code><span class="nb">Install-WindowsFeature</span> <span class="n">-Name</span> <span class="s1">&#39;SNMP-Service&#39;</span><span class="p">,</span><span class="s1">&#39;RSAT-SNMP&#39;</span>
+<span class="nb">New-ItemProperty</span> <span class="n">-Path</span> <span class="s2">&quot;HKLM:\SYSTEM\CurrentControlSet\services\SNMP\Parameters\PermittedManagers&quot;</span>  <span class="n">-Name</span> <span class="n">2</span> <span class="n">-Value</span> <span class="nv">$IP</span>
+<span class="nb">New-ItemProperty</span> <span class="n">-Path</span> <span class="s2">&quot;HKLM:\SYSTEM\CurrentControlSet\services\SNMP\Parameters\ValidCommunities&quot;</span>  <span class="n">-Name</span> <span class="nv">$communitystring</span> <span class="n">-Value</span> <span class="n">4</span>
+</code></pre></div>
 <blockquote>
 <p>Note: SNMPv3 can be supported on Windows platforms with the use of Net-SNMP.</p>
 </blockquote>

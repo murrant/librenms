@@ -2144,7 +2144,7 @@ longer be available to log in.</strong></p>
 <h1 id="enable-authentication-module">Enable authentication module</h1>
 <p>To enable a particular authentication module you need to set this up
 in config.php. Please note that only ONE module can be
-enabled. LibreNMS doesn't support multiple authentication mechanism at
+enabled. LibreNMS doesn't support multiple authentication mechanisms at
 the same time.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;auth_mechanism&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mysql&quot;</span><span class="p">;</span>
 </code></pre></div>
@@ -2205,8 +2205,8 @@ have read only access unless otherwise specified.</p>
 <p>Cleanup of old accounts is done by checking the authlog. You will need
 to set the number of days when old accounts will be purged
 AUTOMATICALLY by daily.sh.</p>
-<p>Please ensure that you set the $config['authlog_purge'] value to be
-greater than $config['active_directory']['users_purge'] otherwise old
+<p>Please ensure that you set the <code>$config['authlog_purge']</code> value to be
+greater than <code>$config['active_directory']['users_purge']</code> otherwise old
 users won't be removed.</p>
 <h2 id="sample-configuration">Sample configuration</h2>
 <div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;auth_mechanism&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;active_directory&#39;</span><span class="p">;</span>
@@ -2319,8 +2319,8 @@ then need to assign the relevant permissions unless you set
 <p>Cleanup of old accounts is done by checking the authlog. You will need
 to set the number of days when old accounts will be purged
 AUTOMATICALLY by daily.sh.</p>
-<p>Please ensure that you set the $config['authlog_purge'] value to be
-greater than $config['radius']['users_purge'] otherwise old users
+<p>Please ensure that you set the <code>$config['authlog_purge']</code> value to be
+greater than <code>$config['radius']['users_purge']</code> otherwise old users
 won't be removed.</p>
 <h1 id="http-authentication">HTTP Authentication</h1>
 <p>Config option: <code>http-auth</code></p>
@@ -2410,7 +2410,7 @@ try and guess.</p>
 <ul>
 <li>Reads values from environment variables</li>
 <li>Automatically creates users when they're first seen</li>
-<li>Authomatically updates users with new values</li>
+<li>Automatically updates users with new values</li>
 <li>Gives everyone privilege level 10</li>
 </ul>
 <p>This happens to mimic the behaviour of <a href="#http-auth">http-auth</a>, so if
@@ -2499,12 +2499,12 @@ may create pseudo arrays).</p>
 <p>This filter causes the mechanism to only consider groups matching a regular expression.</p>
 <h3 id="logout-behaviour">Logout Behaviour</h3>
 <p>LibreNMS has no capability to log out a user authenticated via Single
-Sign-On - that responsability falls to the Relying Party.</p>
+Sign-On - that responsibility falls to the Relying Party.</p>
 <p>If your Relying Party has a magic URL that needs to be called to end a
 session, you can configure LibreNMS to direct the user to it:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;post_logout_action&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/Shibboleth.sso/Logout&#39;</span><span class="p">;</span>
 </code></pre></div>
-<p>This option functions independantly of the Single Sign-on mechanism.</p>
+<p>This option functions independently of the Single Sign-on mechanism.</p>
 <h2 id="complete-configuration">Complete Configuration</h2>
 <p>This configuration works on my deployment with a Shibboleth relying
 party, injecting environment variables, with the IDP supplying a list

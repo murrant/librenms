@@ -2133,7 +2133,7 @@ Groups can be drawn with Network Map.</p>
 <h1 id="network-map-configurator">Network Map Configurator</h1>
 <p>This link will show you all the options and explain what they
 do. <a href="https://visjs.github.io/vis-network/docs/network/">Link</a>
-You may also access the dyanamic configuration interface <a href="https://visjs.github.io/vis-network/examples/network/other/configuration.html">example
+You may also access the dynamic configuration interface <a href="https://visjs.github.io/vis-network/examples/network/other/configuration.html">example
 here</a>
 from within LibreNMS by adding the following to config.php</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;network_map_vis_options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;{</span>
@@ -2144,15 +2144,15 @@ from within LibreNMS by adding the following to config.php</p>
 <p>You may want to disable the automatic page refresh while you're
 tweaking your configuration, as the refresh will reset the dynamic
 configuration UI to the values currently saved in config.php This can
-be done by going clicking on the Settings Icon then Refresh Pause.</p>
+be done by clicking on the Settings Icon then Refresh Pause.</p>
 <h2 id="configurator-output">Configurator Output</h2>
 <p>Once you've achieved your desired map appearance, click the generate
 options button at the bottom to be given the necessary parameters to
 add to your config.php file. You will need to paste the genrated
 config into config.php the format will need to look something like
-this. Note that the configuartor will output the config with <code>var options</code>
-you will need strip that out and at the end of the config you need to
-add in <code>}';</code> see the example below.</p>
+this. Note that the configurator will output the config with <code>var options</code>
+you will need to strip them out and at the end of the config you need to
+add an <code>}';</code> see the example below.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;network_map_vis_options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;{</span>
 <span class="s1">  &quot;nodes&quot;: {</span>
 <span class="s1">    &quot;color&quot;: {</span>

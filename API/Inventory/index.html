@@ -1242,6 +1242,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#get_inventory_for_device" class="md-nav__link">
+    get_inventory_for_device
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2134,6 +2141,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#get_inventory_for_device" class="md-nav__link">
+    get_inventory_for_device
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2162,7 +2176,8 @@ cage, then the sfp itself. The way this API call is designed is to
 enable a recursive lookup. The first call will retrieve the root
 entry, included within this response will be entPhysicalIndex, you can
 then call for entPhysicalContainedIn which will then return the next
-layer of results.</p>
+layer of results.  To retrieve all items together, see 
+<a href="#get_inventory_for_device">get_inventory_for_device</a>.</p>
 <p>Route: <code>/api/v0/inventory/:hostname</code></p>
 <ul>
 <li>hostname can be either the device hostname or the device id</li>
@@ -2176,6 +2191,47 @@ layer of results.</p>
   inventory assigned to a previous component, for example specifying
   the chassis (entPhysicalIndex) will retrieve all items where the
   chassis is the parent.</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>curl -H &#39;X-Auth-Token: YOURAPITOKENHERE&#39; https://librenms.org/api/v0/inventory/localhost?entPhysicalContainedIn=65536
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;count&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">&quot;inventory&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;entPhysical_id&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;device_id&quot;</span><span class="p">:</span> <span class="s2">&quot;32&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalIndex&quot;</span><span class="p">:</span> <span class="s2">&quot;262145&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalDescr&quot;</span><span class="p">:</span> <span class="s2">&quot;Linux 3.3.5 ehci_hcd RB400 EHCI&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalClass&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalName&quot;</span><span class="p">:</span> <span class="s2">&quot;1:1&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalHardwareRev&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalFirmwareRev&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalSoftwareRev&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalAlias&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalAssetID&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalIsFRU&quot;</span><span class="p">:</span> <span class="s2">&quot;false&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalModelName&quot;</span><span class="p">:</span> <span class="s2">&quot;0x0002&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalVendorType&quot;</span><span class="p">:</span> <span class="s2">&quot;zeroDotZero&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalSerialNum&quot;</span><span class="p">:</span> <span class="s2">&quot;rb400_usb&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalContainedIn&quot;</span><span class="p">:</span> <span class="s2">&quot;65536&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalParentRelPos&quot;</span><span class="p">:</span> <span class="s2">&quot;-1&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;entPhysicalMfgName&quot;</span><span class="p">:</span> <span class="s2">&quot;0x1d6b&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;ifIndex&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="get_inventory_for_device"><code>get_inventory_for_device</code></h3>
+<p>Retrieve the flattened inventory for a device.  This retrieves all 
+inventory items for a device regardless of their structure, and may be 
+more useful for devices with with nested components.</p>
+<p>Route: <code>/api/v0/inventory/:hostname/all</code></p>
+<ul>
+<li>hostname can be either the device hostname or the device id</li>
 </ul>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>curl -H &#39;X-Auth-Token: YOURAPITOKENHERE&#39; https://librenms.org/api/v0/inventory/localhost?entPhysicalContainedIn=65536

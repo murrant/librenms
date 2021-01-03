@@ -2267,7 +2267,7 @@
                 
                 <h1 id="snmp-trap-handling">SNMP trap handling</h1>
 <p>Currently, LibreNMS supports a lot of trap handlers. You can check them on 
-GitHub <a href="https://github.com/librenms/librenms/tree/master/LibreNMS/Snmptrap/Handlers">there</a>.
+GitHub <a href="https://github.com/librenms/librenms/tree/master/LibreNMS/Snmptrap/Handlers">here</a>.
 To add more see <a href="../../Developing/SNMP-Traps/">Adding new SNMP Trap handlers</a>. Traps are handled via snmptrapd. </p>
 <p>snmptrapd is an SNMP application that receives and logs SNMP TRAP and INFORM messages.</p>
 <blockquote>
@@ -2322,7 +2322,7 @@ WantedBy=multi-user.target
 <blockquote>
 <p>In Ubuntu 18 is service located by default in <code>/etc/systemd/system/multi-user.target.wants/snmptrapd.service</code></p>
 </blockquote>
-<p>There is a list of snmptrapd options:</p>
+<p>Here is a list of snmptrapd options:</p>
 <table>
 <thead>
 <tr>
@@ -2358,13 +2358,13 @@ will typically fail (snmptrapd cannot load that many mibs). Better is to specify
 exact MIB files defining the traps you are interested in, for example for LinkDown and LinkUp
 as well as BGP traps, use <code>-m IF-MIB:BGP4-MIB</code>. Multiple files can be added, separated with <code>:</code>.</p>
 <p>If you want to test or store original TRAPS in log then:</p>
-<p>Create folder for storing traps for example in file <code>traps.log</code></p>
+<p>Create a folder for storing traps for example in file <code>traps.log</code></p>
 <div class="highlight"><pre><span></span><code>sudo mkdir /var/log/snmptrap
 </code></pre></div>
-<p>Add following config to your snmptrapd.service after <code>ExecStart=/usr/sbin/snmptrapd -f -m ALL -M /opt/librenms/mibs</code></p>
+<p>Add the following config to your snmptrapd.service after <code>ExecStart=/usr/sbin/snmptrapd -f -m ALL -M /opt/librenms/mibs</code></p>
 <div class="highlight"><pre><span></span><code>-tLf /var/log/snmptrap/traps.log
 </code></pre></div>
-<p>After succesfuly configured service reload service files, enable, and start the snmptrapd service:</p>
+<p>After successfully configuring the service, reload service files, enable, and start the snmptrapd service:</p>
 <div class="highlight"><pre><span></span><code>sudo systemctl daemon-reload
 sudo systemctl enable snmptrapd
 sudo systemctl restart snmptrapd
@@ -2393,7 +2393,7 @@ SNMPv2-MIB::sysUpTime.0 = Timeticks: (149721964) 17 days, 7:53:39.64    SNMPv2-M
 <h3 id="event-logging">Event logging</h3>
 <p>You can configure generic event logging for snmp traps.  This will log
 an event of the type trap for received traps. These events can be used for alerting.
-By default, only the TrapOID is logged. Buf you can enable the "detailed" variant,
+By default, only the TrapOID is logged. But you can enable the "detailed" variant,
 and all the data received with the trap will be logged.</p>
 <p>The parameter can be found in General Settings / External / SNMP Traps Integration.</p>
 <p>It can also be configured in <code>config.php</code></p>

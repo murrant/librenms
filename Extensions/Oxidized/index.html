@@ -2157,7 +2157,7 @@ switch on 'Enable the return of groups to Oxidized':</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;oxidized&#39;</span><span class="p">][</span><span class="s1">&#39;default_group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span><span class="p">;</span>
 </code></pre></div>
 <h1 id="selinux">SELinux</h1>
-<p>If you're runnng SELinux, you'll need to allow httpd to connect
+<p>If you're running SELinux, you'll need to allow httpd to connect
 outbound to the network, otherwise Oxidized integration in the web UI
 will silently fail:</p>
 <div class="highlight"><pre><span></span><code>setsebool -P httpd_can_network_connect 1

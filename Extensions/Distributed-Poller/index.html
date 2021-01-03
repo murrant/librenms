@@ -2244,9 +2244,13 @@ cause issues with a large number of devices.</p>
 <p>A last note to make sure of, is that all pollers writing to the same DB
 need to have the same <code>APP_KEY</code> value set in the <code>.env</code> file.</p>
 <h3 id="discovery">Discovery</h3>
-<p>It's not necessary to run discovery services on all pollers. In fact,
-you should only run one discovery process per poller group. Designate
-a single poller to run discovery (or a separate server if required).</p>
+<p>Depending on your setup will depend on how you configure your discovery processes.</p>
+<p><strong>Cron based polling</strong></p>
+<p>It's not necessary to run discovery services on all pollers. In fact, you should 
+only run one discovery process per poller group.
+Designate a single poller to run discovery (or a separate server if required).</p>
+<p><strong>Dispatcher service</strong>
+When using the dispatcher service, discovery can run on all nodes.</p>
 <h3 id="configuration">Configuration</h3>
 <p>Settings in config.php should be copied to all servers as they only apply locally.</p>
 <p>One way around this is to set settings in the database via the web ui or <code>./lnms config:set</code></p>

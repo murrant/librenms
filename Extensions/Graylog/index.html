@@ -901,9 +901,80 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Graylog
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
     <a href="./" class="md-nav__link md-nav__link--active">
       Graylog
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#timezone" class="md-nav__link">
+    Timezone
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#graylog-version" class="md-nav__link">
+    Graylog Version
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uri" class="md-nav__link">
+    URI
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-credentials" class="md-nav__link">
+    User Credentials
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tls-certificate" class="md-nav__link">
+    TLS Certificate
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#match-any-address" class="md-nav__link">
+    Match Any Address
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recent-devices" class="md-nav__link">
+    Recent Devices
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -2098,6 +2169,63 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#timezone" class="md-nav__link">
+    Timezone
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#graylog-version" class="md-nav__link">
+    Graylog Version
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uri" class="md-nav__link">
+    URI
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-credentials" class="md-nav__link">
+    User Credentials
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tls-certificate" class="md-nav__link">
+    TLS Certificate
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#match-any-address" class="md-nav__link">
+    Match Any Address
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recent-devices" class="md-nav__link">
+    Recent Devices
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -2138,42 +2266,63 @@ or as a totally standalone appliance.</p>
 <span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;graylog&#39;</span><span class="p">][</span><span class="s1">&#39;password&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;admin&#39;</span><span class="p">;</span>
 <span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;graylog&#39;</span><span class="p">][</span><span class="s1">&#39;version&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="s1">&#39;2.4&#39;</span><span class="p">;</span>
 </code></pre></div>
+<h2 id="timezone">Timezone</h2>
 <p>Graylog messages are stored using GMT timezone. You can display
 graylog messages in LibreNMS webui using your desired timezone by
-setting following option in config.php:</p>
+setting the following option in config.php:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;graylog&#39;</span><span class="p">][</span><span class="s1">&#39;timezone&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Europe/Bucharest&#39;</span><span class="p">;</span>
 </code></pre></div>
 <p>Timezone must be PHP supported timezones, available at:
 <a href="http://php.net/manual/en/timezones.php">http://php.net/manual/en/timezones.php</a></p>
+<h2 id="graylog-version">Graylog Version</h2>
 <p>If you are running a version earlier than Graylog then please set
-<code>$config['graylog']['version']</code> to the version  number of your Graylog
+<div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;graylog&#39;</span><span class="p">][</span><span class="s1">&#39;version&#39;</span><span class="p">]</span>
+</code></pre></div>
+to the version  number of your Graylog
 install. Earlier versions than 2.1 use the default port <code>12900</code></p>
+<h2 id="uri">URI</h2>
 <p>If you have altered the default uri for your Graylog setup then you
-can override the default of <code>/api/</code> using <code>$config['graylog']['base_uri'] = '/somepath/';</code></p>
+can override the default of <code>/api/</code> using 
+<div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;graylog&#39;</span><span class="p">][</span><span class="s1">&#39;base_uri&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/somepath/&#39;</span><span class="p">;</span>
+</code></pre></div></p>
+<h2 id="user-credentials">User Credentials</h2>
 <p>If you choose to use another user besides the admin user, please note
 that currently you must give the user "admin" permissions from within
 Graylog, "read" permissions alone are not sufficient.</p>
+<h2 id="tls-certificate">TLS Certificate</h2>
 <p>If you have enabled TLS for the Graylog API and you are using a
 self-signed certificate, please make sure that the certificate is
 trusted by your LibreNMS host, otherwise the connection will
 fail. Additionally, the certificate's Common Name (CN) has to match
-the FQDN or IP address specified in <code>$config['graylog']['server']</code>.</p>
+the FQDN or IP address specified in 
+<div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;graylog&#39;</span><span class="p">][</span><span class="s1">&#39;server&#39;</span><span class="p">]</span>
+</code></pre></div></p>
+<h2 id="match-any-address">Match Any Address</h2>
 <p>If you want to match the source address of the log entries against any
 IP address of a device instead of only against the primary address and
 the host name to assign the log entries to a device, you can activate
-this function using $config['graylog']['match-any-address'] = 'true';</p>
+this function using </p>
+<div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;graylog&#39;</span><span class="p">][</span><span class="s1">&#39;match-any-address&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;true&#39;</span><span class="p">;</span>
+</code></pre></div>
+<h2 id="recent-devices">Recent Devices</h2>
 <p>There are 2 configuration parameters to influence the behaviour of the
 "Recent Graylog" table on the overview page of the
-devices. $config['graylog']['device-page']['rowCount'] sets the
-maximum number of rows to be displayed (default: 10) With
-$config['graylog']['device-page']['loglevel'] you can set which
-loglevels should be displayed on the overview page. (default: 7, min:
-0, max: 7) $config['graylog']['device-page']['loglevel'] = 4 shows
-only entries with a log level less than or equal to 4 (Emergency,
+devices. </p>
+<div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;graylog&#39;</span><span class="p">][</span><span class="s1">&#39;device-page&#39;</span><span class="p">][</span><span class="s1">&#39;rowCount&#39;</span><span class="p">]</span>
+</code></pre></div>
+<p>Sets the maximum number of rows to be displayed (default: 10) </p>
+<div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;graylog&#39;</span><span class="p">][</span><span class="s1">&#39;device-page&#39;</span><span class="p">][</span><span class="s1">&#39;loglevel&#39;</span><span class="p">]</span>
+</code></pre></div>
+<p>You can set which loglevels that should be displayed on the overview page. (default: 7, min:
+0, max: 7) </p>
+<p><div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;graylog&#39;</span><span class="p">][</span><span class="s1">&#39;device-page&#39;</span><span class="p">][</span><span class="s1">&#39;loglevel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
+</code></pre></div>
+Shows only entries with a log level less than or equal to 4 (Emergency,
 Alert, Critical, Error, Warning).</p>
 <p>You can set a default Log Level Filter with
-$config['graylog']['loglevel'] (applies to  /graylog and
-/device/device=/tab=logs/section=graylog/ (min: 0, max: 7)</p>
+<div class="highlight"><pre><span></span><code><span class="nv">$config</span><span class="p">[</span><span class="s1">&#39;graylog&#39;</span><span class="p">][</span><span class="s1">&#39;loglevel&#39;</span><span class="p">]</span>
+</code></pre></div>
+ (applies to  /graylog and /device/device=/tab=logs/section=graylog/ (min: 0, max: 7)</p>
 <h1 id="suppressingenabling-the-domain-part-of-a-hostname-for-specific-platforms">Suppressing/enabling the domain part of a hostname for specific platforms</h1>
 <p>You should see if what you get in syslog/Graylog matches up with your
 configured hosts first. If you need to modify the syslog messages from

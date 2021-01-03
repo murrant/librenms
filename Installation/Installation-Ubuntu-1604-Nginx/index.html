@@ -2167,6 +2167,11 @@ systemctl restart php7.0-fpm
  <span class="kn">charset</span> <span class="s">utf-8</span><span class="p">;</span>
  <span class="kn">gzip</span> <span class="no">on</span><span class="p">;</span>
  <span class="kn">gzip_types</span> <span class="s">text/css</span> <span class="s">application/javascript</span> <span class="s">text/javascript</span> <span class="s">application/x-javascript</span> <span class="s">image/svg+xml</span> <span class="s">text/plain</span> <span class="s">text/xsd</span> <span class="s">text/xsl</span> <span class="s">text/xml</span> <span class="s">image/x-icon</span><span class="p">;</span>
+
+ <span class="kn">proxy_read_timeout</span> <span class="mi">300</span><span class="p">;</span>
+ <span class="kn">proxy_connect_timeout</span> <span class="mi">300</span><span class="p">;</span>
+ <span class="kn">proxy_send_timeout</span> <span class="mi">300</span><span class="p">;</span>
+
  <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>
   <span class="kn">try_files</span> <span class="nv">$uri</span> <span class="nv">$uri/</span> <span class="s">/index.php?</span><span class="nv">$query_string</span><span class="p">;</span>
  <span class="p">}</span>
