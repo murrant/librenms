@@ -24,6 +24,8 @@
 
 namespace LibreNMS\Data\Store;
 
+use App\Data\DataGroup;
+use App\Data\DataSet;
 use Illuminate\Support\Str;
 use LibreNMS\Config;
 use LibreNMS\Data\Measure\Measurement;
@@ -47,6 +49,7 @@ class Rrd extends BaseDatastore
     private $rrdcached;
     private $rra;
     private $step;
+    private $heartbeat;
 
     public function __construct()
     {
@@ -56,6 +59,7 @@ class Rrd extends BaseDatastore
         $this->init();
         $this->rrd_dir = Config::get('rrd_dir', Config::get('install_dir') . '/rrd');
         $this->step = Config::get('rrd.step', 300);
+        $this->heartbeat = Config::get('rrd.heartbeat', 600);
         $this->rra = Config::get(
             'rrd_rra',
             'RRA:AVERAGE:0.5:1:2016 RRA:AVERAGE:0.5:6:1440 RRA:AVERAGE:0.5:24:1440 RRA:AVERAGE:0.5:288:1440 ' .
@@ -128,6 +132,53 @@ class Rrd extends BaseDatastore
         if ($this->isAsyncRunning()) {
             $this->async_process->close('quit');
         }
+    }
+
+    public function record(DataGroup $data)
+    {
+        foreach ($data->getDataSets() as $ds) {
+            $rrd = $this->fileName($data, $ds);
+            if (! $this->checkRrdExists($rrd)) {
+                $dir = "$this->rrd_dir/" . $data->getName();
+                if (! file_exists($dir)) {
+                    mkdir($dir);
+                }
+                $this->command('create', $rrd, $this->genDef($ds));
+            }
+            $this->update($rrd, ['value' => $ds->getValue()]);
+//            dd($rrd, $ds->getValue());
+        }
+    }
+
+    private function fileName(DataGroup $dg, DataSet $ds)
+    {
+        $tags = [];
+        foreach ($dg->getTags() as $tag => $value) {
+            $tags[] = $tag . $value;
+        }
+
+        return $this->rrd_dir . '/' . $dg->getName() . '/' . $ds->getName() . '-' . implode('_', $tags) . '.rrd';
+    }
+
+    private function genDef(DataSet $ds)
+    {
+        $types = ['GAUGE', 'COUNTER', 'DERIVE', 'ABSOLUTE'];  // order matches enum values
+        $type = $types[$ds->getRateType()] ?? 'GAUGE';
+        $min = $ds->getMin() ?? 'U';
+        $max = $ds->getMax() ?? 'U';
+
+        $def = "--step $this->step DS:value";
+
+        // enable migration
+        $file = $ds->getOldRrdFile();
+        if ($file && $this->checkRrdExists($file)) {
+            $old = $ds->getOldDsName();
+            $def = "--source $file $def=$old";
+        }
+
+        $def .= ":$type:$this->heartbeat:$min:$max";
+
+        return "$def $this->rra";
     }
 
     /**

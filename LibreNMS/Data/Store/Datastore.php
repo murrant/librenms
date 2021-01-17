@@ -24,6 +24,7 @@
 
 namespace LibreNMS\Data\Store;
 
+use App\Data\DataGroup;
 use LibreNMS\Config;
 use LibreNMS\Interfaces\Data\Datastore as DatastoreContract;
 
@@ -117,6 +118,15 @@ class Datastore
             $temp_tags = $store->wantsRrdTags() ? $tags : $this->rrdTagFilter($tags);
 
             $store->put($device, $measurement, $temp_tags, $fields);
+        }
+    }
+
+    // TODO update contract
+    public function record(DataGroup $dg)
+    {
+        foreach ($this->stores as $store) {
+            /** @var DatastoreContract $store */
+            $store->record($dg);
         }
     }
 
