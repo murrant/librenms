@@ -152,7 +152,7 @@ class Rrd extends BaseDatastore
         }
     }
 
-    private function fileName(DataGroup $dg, DataSet $ds)
+    public function fileName(DataGroup $dg, DataSet $ds)
     {
         $tags = [];
         foreach ($dg->getTags() as $tag => $value) {
