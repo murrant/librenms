@@ -918,7 +918,7 @@ foreach ($ports as $port) {
         // End Update Database
 
         $portsData = \App\Data\Sets\PortPackets::make(\App\Models\Port::with('device')->find($port_id));
-        $portsData->fillData($polled, $this_port);
+        $portsData->setData($this_port, $polled);
         app('Datastore')->record($portsData);
     }
 
