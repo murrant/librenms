@@ -27,6 +27,7 @@ namespace LibreNMS\Data\Store;
 
 use App\Data\DataGroup;
 use InfluxDB\Client;
+use InfluxDB\Database;
 use InfluxDB\Driver\UDP;
 use InfluxDB\Point;
 use LibreNMS\Config;
@@ -38,7 +39,7 @@ class InfluxDB extends BaseDatastore
     /** @var \InfluxDB\Database */
     private $connection;
 
-    public function __construct(\InfluxDB\Database $influx)
+    public function __construct(Database $influx)
     {
         parent::__construct();
         $this->connection = $influx;
@@ -81,8 +82,8 @@ class InfluxDB extends BaseDatastore
                 null,
                 $tags,
                 $fields,
-                $dg->getTimestamp() * 1000000000,
-            )]);
+                $dg->getTimestamp(),
+            )], Database::PRECISION_SECONDS);
 
             $this->recordStatistic($stat->end());
         } catch (\Exception $e) {
@@ -108,7 +109,6 @@ class InfluxDB extends BaseDatastore
      */
     public function put($device, $measurement, $tags, $fields)
     {
-//        return; // no traditional storage
         $stat = Measurement::start('write');
         $tmp_fields = [];
         $tmp_tags['hostname'] = $device['hostname'];
@@ -207,5 +207,13 @@ class InfluxDB extends BaseDatastore
     public function wantsRrdTags()
     {
         return false;
+    }
+
+    /**
+     * @return \InfluxDB\Database
+     */
+    public function getConnection(): Database
+    {
+        return $this->connection;
     }
 }
