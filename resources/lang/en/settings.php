@@ -55,6 +55,7 @@ return [
         'poller' => [
             'availability' => 'Device Availability',
             'distributed' => 'Distributed Poller',
+            'datastores' => 'Datastores',
             'graphite' => 'Datastore: Graphite',
             'influxdb' => 'Datastore: InfluxDB',
             'opentsdb' => 'Datastore: OpenTSDB',
@@ -438,6 +439,12 @@ return [
         'device_perf_purge' => [
             'description' => 'Device performance entries older than (days)',
             'help' => 'Cleanup done by daily.sh',
+        ],
+        'datastores' => [
+            'annotations' => [
+                'description' => 'Enable extra annotations',
+                'help' => 'Enable this to add extra data to datastores, this will increase storage usage. Helpful for usage in other tools such as Grafana.',
+            ],
         ],
         'discovery_modules' => [
             'arp-table' => [
