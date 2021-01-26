@@ -53,4 +53,9 @@ class Application extends DeviceRelatedModel
     {
         return StringHelpers::niceCase($this->app_type);
     }
+
+    public function getMetrics()
+    {
+        return \DB::table('application_metrics')->where('app_id', $this->app_id)->pluck('value', 'metric');
+    }
 }

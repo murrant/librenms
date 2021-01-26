@@ -46,6 +46,7 @@
         "laravel/tinker": "^2.0",
         "laravel/ui": "^3.0",
         "librenms/laravel-vue-i18n-generator": "^0.1.46",
+        "livewire/livewire": "^2.3",
         "nunomaduro/laravel-console-summary": "^1.7",
         "oriceon/toastr-5-laravel": "dev-master",
         "pear/console_color2": "^0.1",

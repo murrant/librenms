@@ -52,7 +52,8 @@ class OverviewController implements DeviceTab
 
     public function data(Device $device): array
     {
-        return [];
+
+        return ['left' => '', 'right' => ''];
     }
 
     public static function setGraphWidth($graph = [])

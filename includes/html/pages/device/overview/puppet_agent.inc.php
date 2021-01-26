@@ -1,12 +1,16 @@
 <?php
 
-$app_id = \App\Models\Application::query()->where('device_id', $device['device_id'])->where('app_type', 'puppet-agent')->get('app_id')[0];
+/** @var \App\Models\Application $puppet */
+$puppet = DeviceCache::getPrimary()->applications()->where('app_type', 'puppet-agent')->first();
 
 // show only if Puppet Agent Application discovered
-if (count($app_id)) {
+if ($puppet) {
     $params = [];
     $sql = 'SELECT `metric`, `value` FROM `application_metrics` WHERE `app_id` =' . $app_id['app_id'];
-    $metrics = dbFetchKeyValue($sql, $params); ?><div class='row'>
+    $metrics = dbFetchKeyValue($sql, $params);
+    $metrics = $puppet->getMetrics();
+
+    ?><div class='row'>
           <div class='col-md-12'>
               <div class='panel panel-default panel-condensed device-overview'>
                   <div class='panel-heading'>

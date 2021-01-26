@@ -94,6 +94,7 @@
     <script type="text/javascript" src="{{ asset('js/toastr.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/boot.js') }}"></script>
     @yield('javascript')
+    @stack('javascript')
 </head>
 <body>
 @if(Auth::check())
