@@ -1,6 +1,7 @@
 <div class="grid-stack">
-    {{ dd(get_defined_vars()) }}
-    {{ $dashboard_content }}
+    @foreach($widgets as $widget)
+        @include("device.tabs.overview.$widget-stub")
+    @endforeach
 </div>
 
 @push('styles')

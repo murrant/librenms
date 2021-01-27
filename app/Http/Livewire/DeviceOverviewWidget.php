@@ -20,6 +20,6 @@ class DeviceOverviewWidget extends Component
 
     public function render()
     {
-        return view('livewire.device-overview-widget')->extends('components.dashboard-widget');
+        return view('livewire.device-overview-widget');
     }
 }
