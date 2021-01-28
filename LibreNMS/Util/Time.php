@@ -48,7 +48,7 @@ class Time
         return isset($conversion[$description]) ? $conversion[$description] : 0;
     }
 
-    public static function formatInterval($interval, $format = 'long')
+    public static function formatInterval($interval, $format = 'long', $exclude = [])
     {
         $result = '';
         $data = [
@@ -58,6 +58,7 @@ class Time
             'minutes' => 60,
             'seconds' => 1,
         ];
+        $data = array_diff_key($data, array_flip($exclude));
 
         foreach ($data as $k => $v) {
             if ($interval >= $v) {

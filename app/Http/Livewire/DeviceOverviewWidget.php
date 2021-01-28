@@ -22,6 +22,9 @@ class DeviceOverviewWidget extends Component
     public $os;
     public $contact;
     public $date_added;
+    public $last_discovered;
+    public $uptime;
+    public $uptime_descr;
 
     public function __construct($id = null)
     {
@@ -50,8 +53,16 @@ class DeviceOverviewWidget extends Component
         }
 
         $this->contact = $this->device->getAttrib('override_sysContact_bool') ? $this->device->getAttrib('override_sysContact_string') : $this->device->sysContact;
+        $this->date_added = $this->device->inserted ? trans('device.time_ago', ['time' => Time::formatInterval(time() - strtotime($this->device->inserted), 'long', ['seconds'])]) : null;
+        $this->last_discovered = $this->device->last_discovered ? trans('device.time_ago', ['time' => Time::formatInterval(time() - strtotime($this->device->last_discovered), 'long', ['seconds'])]) : trans('device.last_discovered.never');
 
-        $this->date_added = $this->device->inserted ? (Time::formatInterval(time() - strtotime($this->device->inserted)) . ' ' . __('ago')) : null;
+        if ($this->device->status) {
+            $this->uptime = Time::formatInterval($this->device->uptime);
+            $this->uptime_descr = trans('device.status.uptime');
+        } else {
+            $this->uptime = Time::formatInterval(time() - strtotime($this->device->last_polled));
+            $this->uptime_descr = trans('device.status.downtime');
+        }
     }
 
     public function render()

@@ -6,6 +6,7 @@ return [
         'hardware' => 'Hardware',
         'icon' => 'Icon',
         'inserted' => 'Device Added',
+        'last_discovered' => 'Last Discovered',
         'location' => 'Location',
         'os' => 'Operating System',
         'purpose' => 'Description',
@@ -20,4 +21,13 @@ return [
         'resolved' => 'Resolved IP',
         'assigned' => 'Assigned IP',
     ],
+    'last_discovered' => [
+        'never' => 'Never',
+        'time' => 'Last discovered :time',
+    ],
+    'status' => [
+        'uptime' => 'Uptime',
+        'downtime' => 'Downtime',
+    ],
+    'time_ago' => ':time ago',
 ];

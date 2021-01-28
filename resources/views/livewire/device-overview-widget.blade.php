@@ -62,6 +62,14 @@
                 <div class="col-sm-8">{{ $date_added }}</div>
             </div>
         @endif
+        <div class="row">
+            <div class="col-sm-4">@lang('device.attributes.last_discovered')</div>
+            <div class="col-sm-8" title="@lang('device.last_discovered.time', ['time' => $this->device->last_discovered])">{{ $last_discovered }}</div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">{{ $uptime_descr }}</div>
+            <div class="col-sm-8">{{ $uptime }}</div>
+        </div>
     </div>
 </div>
 </div>
