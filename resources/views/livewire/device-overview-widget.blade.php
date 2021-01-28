@@ -70,6 +70,18 @@
             <div class="col-sm-4">{{ $uptime_descr }}</div>
             <div class="col-sm-8">{{ $uptime }}</div>
         </div>
+        @if($device->location)
+            <div class="row">
+                <div class="col-sm-4">@lang('device.attributes.location')</div>
+                <div class="col-sm-8">{{ $device->location->display() }}
+                    @if($device->location->coordinatesValid())
+                        <div class="pull-right">
+                            <a href="https://maps.google.com/?q={{ $device->location->lat }},{{ $device->location->lng }}" target="_blank" class="btn btn-success btn-xs" role="button"><i class="fa fa-map-marker" aria-hidden="true"></i> @lang('device.map')</a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 </div>

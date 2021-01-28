@@ -25,6 +25,7 @@ class DeviceOverviewWidget extends Component
     public $last_discovered;
     public $uptime;
     public $uptime_descr;
+    public $location;
 
     public function __construct($id = null)
     {
@@ -39,39 +40,45 @@ class DeviceOverviewWidget extends Component
 
     protected function updateData(): void
     {
-        $this->device = DeviceCache::getPrimary();
+        $device = DeviceCache::getPrimary();
+        $this->device = $device;
 
-        if (! empty($this->device->overwrite_ip)) {
-            $this->ip = $this->device->overwrite_ip;
+        if (! empty($device->overwrite_ip)) {
+            $this->ip = $device->overwrite_ip;
             $this->ip_type = 'assigned';
-        } elseif (! empty($this->device->ip)) {
-            $this->ip = $this->device->ip;
+        } elseif (! empty($device->ip)) {
+            $this->ip = $device->ip;
             $this->ip_type = 'resolved';
         } elseif (Config::get('force_ip_to_sysname') === true) {
             try {
-                $this->ip = IP::parse($this->device->hostname);
+                $this->ip = IP::parse($device->hostname);
             } catch (InvalidIpException $e) {
                 // don't add an ip line
             }
         }
 
-        $this->hardware = Rewrite::ciscoHardware($this->device);
+        $this->hardware = Rewrite::ciscoHardware($device);
 
-        $this->os = Config::getOsSetting($this->device->os, 'text') . ' ' . $this->device->version;
-        if ($this->device->features) {
-            $this->os .= " ({$this->device->features})";
+        $this->os = Config::getOsSetting($device->os, 'text') . ' ' . $device->version;
+        if ($device->features) {
+            $this->os .= " ({$device->features})";
         }
 
-        $this->contact = $this->device->getAttrib('override_sysContact_bool') ? $this->device->getAttrib('override_sysContact_string') : $this->device->sysContact;
-        $this->date_added = $this->device->inserted ? trans('device.time_ago', ['time' => Time::formatInterval(time() - strtotime($this->device->inserted), 'long', ['seconds'])]) : null;
-        $this->last_discovered = $this->device->last_discovered ? trans('device.time_ago', ['time' => Time::formatInterval(time() - strtotime($this->device->last_discovered), 'long', ['seconds'])]) : trans('device.last_discovered.never');
+        $this->contact = $device->getAttrib('override_sysContact_bool') ? $device->getAttrib('override_sysContact_string') : $device->sysContact;
+        $this->date_added = $device->inserted ? trans('device.time_ago', ['time' => Time::formatInterval(time() - strtotime($device->inserted), 'long', ['seconds'])]) : null;
+        $this->last_discovered = $device->last_discovered ? trans('device.time_ago', ['time' => Time::formatInterval(time() - strtotime($device->last_discovered), 'long', ['seconds'])]) : trans('device.last_discovered.never');
 
-        if ($this->device->status) {
-            $this->uptime = Time::formatInterval($this->device->uptime);
+        if ($device->status) {
+            $this->uptime = Time::formatInterval($device->uptime);
             $this->uptime_descr = trans('device.status.uptime');
         } else {
-            $this->uptime = Time::formatInterval(time() - strtotime($this->device->last_polled));
+            $this->uptime = Time::formatInterval(time() - strtotime($device->last_polled));
             $this->uptime_descr = trans('device.status.downtime');
+        }
+
+        if ($device->location) {
+            $this->location = $device->location->display();
+
         }
     }
 }

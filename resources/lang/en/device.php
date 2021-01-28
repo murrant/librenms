@@ -25,6 +25,7 @@ return [
         'never' => 'Never',
         'time' => 'Last discovered :time',
     ],
+    'map' => 'Map',
     'status' => [
         'uptime' => 'Uptime',
         'downtime' => 'Downtime',
