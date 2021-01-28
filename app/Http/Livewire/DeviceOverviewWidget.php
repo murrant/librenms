@@ -29,6 +29,16 @@ class DeviceOverviewWidget extends Component
     public function __construct($id = null)
     {
         parent::__construct($id);
+        $this->updateData();
+    }
+
+    public function render()
+    {
+        return view('livewire.device-overview-widget');
+    }
+
+    protected function updateData(): void
+    {
         $this->device = DeviceCache::getPrimary();
 
         if (! empty($this->device->overwrite_ip)) {
@@ -63,10 +73,5 @@ class DeviceOverviewWidget extends Component
             $this->uptime = Time::formatInterval(time() - strtotime($this->device->last_polled));
             $this->uptime_descr = trans('device.status.downtime');
         }
-    }
-
-    public function render()
-    {
-        return view('livewire.device-overview-widget');
     }
 }
