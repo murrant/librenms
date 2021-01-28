@@ -25,7 +25,6 @@ class DeviceOverviewWidget extends Component
     public $last_discovered;
     public $uptime;
     public $uptime_descr;
-    public $location;
 
     public function __construct($id = null)
     {
@@ -74,11 +73,6 @@ class DeviceOverviewWidget extends Component
         } else {
             $this->uptime = Time::formatInterval(time() - strtotime($device->last_polled));
             $this->uptime_descr = trans('device.status.downtime');
-        }
-
-        if ($device->location) {
-            $this->location = $device->location->display();
-
         }
     }
 }
