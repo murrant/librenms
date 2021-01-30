@@ -25,10 +25,13 @@
 
 namespace LibreNMS\Data\Store;
 
+use App\Data\DataGroup;
+use App\Graphing\QueryBuilder;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Str;
 use LibreNMS\Config;
 use LibreNMS\Data\Measure\Measurement;
+use LibreNMS\Data\SeriesData;
 use Log;
 
 class Prometheus extends BaseDatastore
@@ -131,5 +134,15 @@ class Prometheus extends BaseDatastore
     public function wantsRrdTags()
     {
         return false;
+    }
+
+    public function record(DataGroup $dataGroup)
+    {
+        // TODO: Implement record() method.
+    }
+
+    public function fetch(QueryBuilder $query): SeriesData
+    {
+        // TODO: Implement fetch() method.
     }
 }
