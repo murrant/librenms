@@ -87,13 +87,23 @@ class Database extends BaseValidation
         $this->checkSchema($validator);
     }
 
-    private function checkVersion(Validator $validator)
+    /**
+     * Returns an array of the version and server comment, if the comment == 'MariaDB' it is MariaDB
+     * @return array [version, comment]
+     */
+    public static function getVersion(): array
     {
         $version = DB::selectOne('SELECT VERSION() as version')->version;
         $version = explode('-', $version);
+        return [$version[0], $version[1] ?? ''];
+    }
 
-        if (isset($version[1]) && $version[1] == 'MariaDB') {
-            if (version_compare($version[0], self::MARIADB_MIN_VERSION, '<=')) {
+    private function checkVersion(Validator $validator)
+    {
+        $version = self::getVersion();
+
+        if ($version[1] == 'MariaDB') {
+            if (version_compare($version[0], self::MARIADB_MIN_VERSION, '<')) {
                 $validator->fail(
                     'MariaDB version ' . self::MARIADB_MIN_VERSION . ' is the minimum supported version as of ' .
                     self::MARIADB_MIN_VERSION_DATE . '. We recommend you update MariaDB to a supported version ' .
@@ -101,7 +111,7 @@ class Database extends BaseValidation
                 );
             }
         } else {
-            if (version_compare($version[0], self::MYSQL_MIN_VERSION, '<=')) {
+            if (version_compare($version[0], self::MYSQL_MIN_VERSION, '<')) {
                 $validator->fail(
                     'MySQL version ' . self::MYSQL_MIN_VERSION . ' is the minimum supported version as of ' .
                     self::MYSQL_MIN_VERSION_DATE . '. We recommend you update MySQL to a supported version (' .

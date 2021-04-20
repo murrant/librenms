@@ -30,6 +30,7 @@ use Illuminate\Support\Arr;
 use LibreNMS\DB\Eloquent;
 use LibreNMS\DB\Schema;
 use LibreNMS\Interfaces\InstallerStep;
+use LibreNMS\Validations\Database;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DatabaseController extends InstallationController implements InstallerStep
@@ -70,6 +71,18 @@ class DatabaseController extends InstallationController implements InstallerStep
         try {
             $conn = Eloquent::DB('setup');
             $ok = $conn && ! is_null($conn->getPdo());
+
+            if ($ok) {
+                $version = Database::getVersion();
+                if ($version[1] == 'MariaDB' && version_compare($version[0], Database::MARIADB_MIN_VERSION, '>=')) {
+                    $ok = false;
+                    $message = 'MariaDB minimum version is ' . Database::MARIADB_MIN_VERSION . '.  Please upgrade.';
+                } elseif (version_compare($version[0], Database::MYSQL_MIN_VERSION, '<')) {
+                    $ok = false;
+                    $message = 'MySQL minimum version is ' . Database::MYSQL_MIN_VERSION . '.  Please upgrade.';
+                }
+            }
+
         } catch (\Exception $e) {
             $message = $e->getMessage();
         }
