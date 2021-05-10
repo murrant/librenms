@@ -327,16 +327,36 @@ class YamlDiscovery
         $skip_values = array_replace((array) ($group_options['skip_values'] ?? []), (array) ($yaml_item_data['skip_values'] ?? []));
 
         foreach ($skip_values as $skip_value) {
-            if (is_array($skip_value) && $pre_cache) {
+            if (is_array($skip_value)) {
                 // Dynamic skipping of data
                 $op = $skip_value['op'] ?? '!=';
-                $tmp_value = static::getValueFromData($skip_value['oid'], $index, $yaml_item_data, $pre_cache);
-                if (Str::contains($skip_value['oid'], '.')) {
-                    [$skip_value['oid'], $targeted_index] = explode('.', $skip_value['oid'], 2);
-                    $tmp_value = static::getValueFromData($skip_value['oid'], $targeted_index, $yaml_item_data, $pre_cache);
+
+                // match index if given
+                if ($skip_value['oid'] === 'index') {
+                    $values = Arr::wrap($skip_value['value']);
+
+                    // get the correct string to repair
+                    $subindexes = array_slice(explode('.', $index), 0, count($values));
+                    foreach ($values as $index => $value) {
+                        if ($value === null) {
+                            unset($subindexes[$index]);
+                            unset($values[$index]);
+                        }
+                    }
+
+                    return compare_var(implode('.', $subindexes), implode('.', $values), $op);
                 }
-                if (compare_var($tmp_value, $skip_value['value'], $op)) {
-                    return true;
+
+                // check data
+                if ($pre_cache) {
+                    $tmp_value = static::getValueFromData($skip_value['oid'], $index, $yaml_item_data, $pre_cache);
+                    if (Str::contains($skip_value['oid'], '.')) {
+                        [$skip_value['oid'], $targeted_index] = explode('.', $skip_value['oid'], 2);
+                        $tmp_value = static::getValueFromData($skip_value['oid'], $targeted_index, $yaml_item_data, $pre_cache);
+                    }
+                    if (compare_var($tmp_value, $skip_value['value'], $op)) {
+                        return true;
+                    }
                 }
             }
             if ($value == $skip_value) {
