@@ -233,11 +233,11 @@ class YamlDiscovery
             if (is_array($pre_cache[$name])) {
                 if (isset($pre_cache[$name][$index][$name])) {
                     return $pre_cache[$name][$index][$name];
-                } elseif (isset($pre_cache[$name][$index])) {
-                    return $pre_cache[$name][$index];
-                } elseif (count($pre_cache[$name]) === 1 && ! is_array(current($pre_cache[$name]))) {
-                    return current($pre_cache[$name]);
+                } elseif (count($pre_cache[$name]) === 1 && isset(current($pre_cache[$name])[$name]) && ! is_array(current($pre_cache[$name])[$name])) {
+                    // single value non-table oid
+                    return current($pre_cache[$name])[$name];
                 } elseif (isset($sub_indexes[$sub_index])) {
+                    // search for sub index matches.  Used when tables have different indexes.
                     if ($sub_index_end) {
                         $multi_sub_index = implode('.', array_slice($sub_indexes, $sub_index, $sub_index_end));
                         if (isset($pre_cache[$name][$multi_sub_index][$name])) {

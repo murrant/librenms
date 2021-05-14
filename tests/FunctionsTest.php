@@ -85,7 +85,7 @@ sdfsd <a href="ftp://192.168.1.1/help/me/now.php">ftp://192.168.1.1/help/me/now.
                 0 => ['first' => 5, 'second' => 6],
                 1 => ['first' => 7, 'second' => 8],
             ],
-            'single' => ['something' => 9],
+//            'single' => ['something' => 9],
             'oneoff' => 10,
             'singletable' => [
                 11 => ['singletable' => 'Pickle'],
@@ -110,9 +110,10 @@ sdfsd <a href="ftp://192.168.1.1/help/me/now.php">ftp://192.168.1.1/help/me/now.
         $this->assertSame(6, YamlDiscovery::getValueFromData('second', 0, $data, $pre_cache));
         $this->assertSame(8, YamlDiscovery::getValueFromData('second', 1, $data, $pre_cache));
 
-        $this->assertSame(9, YamlDiscovery::getValueFromData('single', 0, $data, $pre_cache));
+//        $this->assertSame(9, YamlDiscovery::getValueFromData('single', 0, $data, $pre_cache));
         $this->assertSame(10, YamlDiscovery::getValueFromData('oneoff', 3, $data, $pre_cache));
         $this->assertSame('Pickle', YamlDiscovery::getValueFromData('singletable', 11, $data, $pre_cache));
+        $this->assertSame('Pickle', YamlDiscovery::getValueFromData('singletable', 1, $data, $pre_cache));
         $this->assertSame('BBQ', YamlDiscovery::getValueFromData('doubletable', 13, $data, $pre_cache));
     }
 
