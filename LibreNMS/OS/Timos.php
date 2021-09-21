@@ -46,6 +46,8 @@ use LibreNMS\RRD\RrdDefinition;
 
 class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDiscovery
 {
+    use OS\Traits\Bgp;
+
     public function discoverOS(Device $device): void
     {
         parent::discoverOS($device); // yaml
