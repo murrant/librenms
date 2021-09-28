@@ -37,6 +37,8 @@ class InstallationController extends Controller
         'checks' => \App\Http\Controllers\Install\ChecksController::class,
         'database' => \App\Http\Controllers\Install\DatabaseController::class,
         'user' => \App\Http\Controllers\Install\MakeUserController::class,
+        'discover' => \App\Http\Controllers\Install\DiscoverController::class,
+        'ssl' => \App\Http\Controllers\Install\SslController::class,
         'finish' => \App\Http\Controllers\Install\FinalizeController::class,
     ];
 
@@ -107,6 +109,7 @@ class InstallationController extends Controller
 
     final protected function formatData($data = [])
     {
+        $this->filterActiveSteps();
         $data['steps'] = $this->hydrateControllers();
         $data['step'] = $this->step;
 
