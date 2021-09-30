@@ -102,7 +102,12 @@ class InstallationController extends Controller
         }
     }
 
-    final protected function stepCompleted(string $step)
+    final protected function stepInactiveOrComplete(string $step): bool
+    {
+        return $this->stepCompleted($step) || ! in_array($step, $this->getActiveSteps());
+    }
+
+    final protected function stepCompleted(string $step): bool
     {
         return (bool) session("install.$step");
     }
@@ -135,9 +140,7 @@ class InstallationController extends Controller
 
     protected function filterActiveSteps()
     {
-        if (is_string(config('librenms.install'))) {
-            $this->steps = array_intersect_key($this->steps, array_flip(explode(',', config('librenms.install'))));
-        }
+        $this->steps = array_intersect_key($this->steps, array_flip($this->getActiveSteps()));
 
         return $this->steps;
     }
@@ -161,5 +164,13 @@ class InstallationController extends Controller
                 'complete' => $controller->complete(),
             ];
         }, $this->steps);
+    }
+
+    private function getActiveSteps(): array
+    {
+        $active_steps = config('librenms.install');
+        return is_string($active_steps)
+            ? explode(',', $active_steps)
+            : array_keys($this->steps);
     }
 }

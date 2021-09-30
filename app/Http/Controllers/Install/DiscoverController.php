@@ -58,7 +58,7 @@ class DiscoverController extends InstallationController implements InstallerStep
     
     public function enabled(): bool
     {
-        return true;
+        return $this->stepInactiveOrComplete('database');
     }
 
     public function complete(): bool

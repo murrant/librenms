@@ -112,7 +112,7 @@ class MakeUserController extends InstallationController implements InstallerStep
 
     public function enabled(): bool
     {
-        return $this->stepCompleted('database');
+        return $this->stepInactiveOrComplete('database');
     }
 
     public function icon(): string
