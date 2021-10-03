@@ -35,6 +35,18 @@ class ChecksController extends InstallationController implements InstallerStep
 
     public function index()
     {
+        /**
+         * TODO
+         *
+         * Use sudoers.d/librenms to put more install processes into the webui
+         * Don't allow arguments on the allowed scripts
+         * Find secure way to pull .env into bash script, or maybe just pass env?
+         * morph checks into pre-install
+         * add options for distributed poller, such as entering APP_KEY
+         * ssl use sudoers too
+         * add tests for install process !!!!
+         */
+
         $this->initInstallStep();
 
         if ($this->complete()) {
