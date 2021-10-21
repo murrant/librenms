@@ -45,7 +45,7 @@
                 {{ $title }}
             </p>
             <p class="tw-mt-1 tw-text-base tw-leading-5 tw-text-gray-500">
-                {{ $envelope->getMessage() }}
+                {!! clean(stripslashes($envelope->getMessage())) !!}
             </p>
         </div>
     </div>

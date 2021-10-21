@@ -18,9 +18,10 @@ Auth::routes(['register' => false, 'reset' => false, 'verify' => false]);
 
 Route::get('/test', function ( ) {
     // TODO remove testing code :D
-    flasher()->success('Success')->flash();
     flasher()->warning('Warning : this is a longer message blah <a href="https://docs.librenms.org">docs</a> ajsdlfkjsdf')->flash();
+    flasher()->success('Success')->flash();
     flasher()->error('Error')->flash();
+    flasher()->info('Info')->flash();
 //    toastr()->title('Title')->success('Toastr')->flash();
 
     return view('layouts.librenmsv1');
