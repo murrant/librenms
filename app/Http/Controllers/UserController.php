@@ -31,6 +31,7 @@ use App\Models\AuthLog;
 use App\Models\Dashboard;
 use App\Models\User;
 use App\Models\UserPref;
+use Flasher\Prime\FlasherInterface;
 use Illuminate\Support\Str;
 use LibreNMS\Authentication\LegacyAuth;
 use LibreNMS\Config;
@@ -87,7 +88,7 @@ class UserController extends Controller
      * @param  StoreUserRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreUserRequest $request)
+    public function store(StoreUserRequest $request, FlasherInterface $flasher)
     {
         $user = $request->only(['username', 'realname', 'email', 'descr', 'level', 'can_modify_passwd']);
         $user['auth_type'] = LegacyAuth::getType();
@@ -100,12 +101,12 @@ class UserController extends Controller
         $this->updateDashboard($user, $request->get('dashboard'));
 
         if ($user->save()) {
-            flasher()->success(__('User :username created', ['username' => $user->username]))->flash();
+            $flasher->success(__('User :username created', ['username' => $user->username]))->flash();
 
             return redirect(route('users.index'));
         }
 
-        flasher()->error(__('Failed to create user'))->flash();
+        $flasher->error(__('Failed to create user'))->flash();
 
         return redirect()->back();
     }
@@ -163,7 +164,7 @@ class UserController extends Controller
      * @param  User  $user
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request, User $user, FlasherInterface $flasher)
     {
         if ($request->get('new_password') && $user->canSetPassword($request->user())) {
             $user->setPassword($request->new_password);
@@ -172,14 +173,14 @@ class UserController extends Controller
         $user->fill($request->all());
 
         if ($request->has('dashboard') && $this->updateDashboard($user, $request->get('dashboard'))) {
-            flasher()->success(__('Updated dashboard for :username', ['username' => $user->username]))->flash();
+            $flasher->success(__('Updated dashboard for :username', ['username' => $user->username]))->flash();
         }
 
         if ($user->isDirty()) {
             if ($user->save()) {
-                flasher()->success(__('User :username updated', ['username' => $user->username]))->flash();
+                $flasher->success(__('User :username updated', ['username' => $user->username]))->flash();
             } else {
-                flasher()->error(__('Failed to update user :username', ['username' => $user->username]))->flash();
+                $flasher->error(__('Failed to update user :username', ['username' => $user->username]))->flash();
 
                 return redirect()->back();
             }

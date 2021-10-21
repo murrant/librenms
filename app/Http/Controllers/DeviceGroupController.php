@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Device;
 use App\Models\DeviceGroup;
+use Flasher\Prime\FlasherInterface;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use LibreNMS\Alerting\QueryBuilderFilter;
@@ -54,7 +55,7 @@ class DeviceGroupController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+    public function store(Request $request, FlasherInterface $flasher)
     {
         $this->validate($request, [
             'name' => 'required|string|unique:device_groups',
@@ -72,7 +73,7 @@ class DeviceGroupController extends Controller
             $deviceGroup->devices()->sync($request->devices);
         }
 
-        flasher()->success(__('Device Group :name created', ['name' => $deviceGroup->name]))->flash();
+        $flasher->success(__('Device Group :name created', ['name' => $deviceGroup->name]))->flash();
 
         return redirect()->route('device-groups.index');
     }
@@ -115,7 +116,7 @@ class DeviceGroupController extends Controller
      * @param  \App\Models\DeviceGroup  $deviceGroup
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, DeviceGroup $deviceGroup)
+    public function update(Request $request, DeviceGroup $deviceGroup, FlasherInterface $flasher)
     {
         $this->validate($request, [
             'name' => [
@@ -148,9 +149,9 @@ class DeviceGroupController extends Controller
         if ($deviceGroup->isDirty() || $devices_updated) {
             try {
                 if ($deviceGroup->save() || $devices_updated) {
-                    flasher()->success(__('Device Group :name updated', ['name' => $deviceGroup->name]))->flash();
+                    $flasher->success(__('Device Group :name updated', ['name' => $deviceGroup->name]))->flash();
                 } else {
-                    flasher()->error(__('Failed to save'))->flash();
+                    $flasher->error(__('Failed to save'))->flash();
 
                     return redirect()->back()->withInput();
                 }
@@ -160,7 +161,7 @@ class DeviceGroupController extends Controller
                 ]);
             }
         } else {
-            flasher()->info(__('No changes made'))->flash();
+            $flasher->info(__('No changes made'))->flash();
         }
 
         return redirect()->route('device-groups.index');
