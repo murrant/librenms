@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 // Auth
 Auth::routes(['register' => false, 'reset' => false, 'verify' => false]);
 
-Route::get('/test', function ( ) {
+Route::get('/test', function () {
     // TODO remove testing code :D
     flasher()->warning('Warning : this is a longer message blah <a href="https://docs.librenms.org">docs</a> ajsdlfkjsdf')->flash();
     flasher()->success('Success')->flash();
