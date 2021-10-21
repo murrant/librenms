@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Service;
 use Illuminate\Http\Request;
-use Toastr;
 
 class ServiceController extends Controller
 {
@@ -45,7 +44,7 @@ class ServiceController extends Controller
         );
         $service->save();
 
-        Toastr::success(__('Service :name created', ['name' => $service->service_name]));
+        flasher()->success(__('Service :name created', ['name' => $service->service_name]))->flash();
 
         return redirect()->route('services.templates.index');
     }

@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use LibreNMS\Alerting\QueryBuilderFilter;
 use LibreNMS\Services;
-use Toastr;
 
 class ServiceTemplateController extends Controller
 {
@@ -105,7 +104,7 @@ class ServiceTemplateController extends Controller
         }
 
         $template->groups()->sync($request->groups);
-        Toastr::success(__('Service Template :name created', ['name' => $template->name]));
+        flasher()->success(__('Service Template :name created', ['name' => $template->name]))->flash();
 
         return redirect()->route('services.templates.index');
     }
@@ -214,9 +213,9 @@ class ServiceTemplateController extends Controller
         if ($template->isDirty() || $devices_updated || isset($device_groups_updated)) {
             try {
                 if ($template->save() || $devices_updated || isset($device_groups_updated)) {
-                    Toastr::success(__('Service Template :name updated', ['name' => $template->name]));
+                    flasher()->success(__('Service Template :name updated', ['name' => $template->name]))->flash();
                 } else {
-                    Toastr::error(__('Failed to save'));
+                    flasher()->error(__('Failed to save'))->flash();
 
                     return redirect()->back()->withInput();
                 }
@@ -226,7 +225,7 @@ class ServiceTemplateController extends Controller
                 ]);
             }
         } else {
-            Toastr::info(__('No changes made'));
+            flasher()->info(__('No changes made'))->flash();
         }
 
         return redirect()->route('services.templates.index');

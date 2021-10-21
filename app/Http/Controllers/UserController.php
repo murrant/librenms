@@ -34,7 +34,6 @@ use App\Models\UserPref;
 use Illuminate\Support\Str;
 use LibreNMS\Authentication\LegacyAuth;
 use LibreNMS\Config;
-use Toastr;
 use URL;
 
 class UserController extends Controller
@@ -101,12 +100,12 @@ class UserController extends Controller
         $this->updateDashboard($user, $request->get('dashboard'));
 
         if ($user->save()) {
-            Toastr::success(__('User :username created', ['username' => $user->username]));
+            flasher()->success(__('User :username created', ['username' => $user->username]))->flash();
 
             return redirect(route('users.index'));
         }
 
-        Toastr::error(__('Failed to create user'));
+        flasher()->error(__('Failed to create user'))->flash();
 
         return redirect()->back();
     }
@@ -173,14 +172,14 @@ class UserController extends Controller
         $user->fill($request->all());
 
         if ($request->has('dashboard') && $this->updateDashboard($user, $request->get('dashboard'))) {
-            Toastr::success(__('Updated dashboard for :username', ['username' => $user->username]));
+            flasher()->success(__('Updated dashboard for :username', ['username' => $user->username]))->flash();
         }
 
         if ($user->isDirty()) {
             if ($user->save()) {
-                Toastr::success(__('User :username updated', ['username' => $user->username]));
+                flasher()->success(__('User :username updated', ['username' => $user->username]))->flash();
             } else {
-                Toastr::error(__('Failed to update user :username', ['username' => $user->username]));
+                flasher()->error(__('Failed to update user :username', ['username' => $user->username]))->flash();
 
                 return redirect()->back();
             }

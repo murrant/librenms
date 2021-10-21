@@ -27,11 +27,10 @@ namespace App;
 
 use App\Models\Device;
 use App\Models\Notification;
+use Auth;
 use Cache;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use LibreNMS\Config;
-use Toastr;
 
 class Checks
 {
@@ -52,26 +51,32 @@ class Checks
         if ($user->isAdmin()) {
             $notifications = Notification::isUnread($user)->where('severity', '>', \LibreNMS\Enum\Alert::OK)->get();
             foreach ($notifications as $notification) {
-                Toastr::error("<a href='notifications/'>$notification->body</a>", $notification->title);
+                flasher()
+//                    ->title($notification->title)
+                    ->warning("<a href='notifications/'>$notification->body</a>")
+                    ->flash();
             }
 
             $warn_sec = Config::get('rrd.step', 300) * 3;
             if (Device::isUp()->where('last_polled', '<=', Carbon::now()->subSeconds($warn_sec))->exists()) {
                 $warn_min = $warn_sec / 60;
-                Toastr::warning('<a href="poller/log?filter=unpolled/">It appears as though you have some devices that haven\'t completed polling within the last ' . $warn_min . ' minutes, you may want to check that out :)</a>', 'Devices unpolled');
+                flasher()
+//                    ->title('Devices unpolled')
+                    ->warning('<a href="poller/log?filter=unpolled/">It appears as though you have some devices that haven\'t completed polling within the last ' . $warn_min . ' minutes, you may want to check that out :)</a>')
+                    ->flash();
             }
 
             // Directory access checks
             $rrd_dir = Config::get('rrd_dir');
             if (! is_dir($rrd_dir)) {
-                Toastr::error("RRD Directory is missing ($rrd_dir).  Graphing may fail. <a href=" . url('validate') . '>Validate your install</a>');
+                flasher()->error("RRD Directory is missing ($rrd_dir).  Graphing may fail. <a href=" . url('validate') . '>Validate your install</a>')->flash();
             }
 
             $temp_dir = Config::get('temp_dir');
             if (! is_dir($temp_dir)) {
-                Toastr::error("Temp Directory is missing ($temp_dir).  Graphing may fail. <a href=" . url('validate') . '>Validate your install</a>');
+                flasher()->error("Temp Directory is missing ($temp_dir).  Graphing may fail. <a href=" . url('validate') . '>Validate your install</a>')->flash();
             } elseif (! is_writable($temp_dir)) {
-                Toastr::error("Temp Directory is not writable ($temp_dir).  Graphing may fail. <a href='" . url('validate') . "'>Validate your install</a>");
+                flasher()->error("Temp Directory is not writable ($temp_dir).  Graphing may fail. <a href='" . url('validate') . "'>Validate your install</a>")->flash();
             }
         }
     }

@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use LibreNMS\Alerting\QueryBuilderFilter;
 use LibreNMS\Alerting\QueryBuilderFluentParser;
-use Toastr;
 
 class DeviceGroupController extends Controller
 {
@@ -73,7 +72,7 @@ class DeviceGroupController extends Controller
             $deviceGroup->devices()->sync($request->devices);
         }
 
-        Toastr::success(__('Device Group :name created', ['name' => $deviceGroup->name]));
+        flasher()->success(__('Device Group :name created', ['name' => $deviceGroup->name]))->flash();
 
         return redirect()->route('device-groups.index');
     }
@@ -149,9 +148,9 @@ class DeviceGroupController extends Controller
         if ($deviceGroup->isDirty() || $devices_updated) {
             try {
                 if ($deviceGroup->save() || $devices_updated) {
-                    Toastr::success(__('Device Group :name updated', ['name' => $deviceGroup->name]));
+                    flasher()->success(__('Device Group :name updated', ['name' => $deviceGroup->name]))->flash();
                 } else {
-                    Toastr::error(__('Failed to save'));
+                    flasher()->error(__('Failed to save'))->flash();
 
                     return redirect()->back()->withInput();
                 }
@@ -161,7 +160,7 @@ class DeviceGroupController extends Controller
                 ]);
             }
         } else {
-            Toastr::info(__('No changes made'));
+            flasher()->info(__('No changes made'))->flash();
         }
 
         return redirect()->route('device-groups.index');

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\PortGroup;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Toastr;
 
 class PortGroupController extends Controller
 {
@@ -48,7 +47,7 @@ class PortGroupController extends Controller
         $portGroup = PortGroup::make($request->only(['name', 'desc']));
         $portGroup->save();
 
-        Toastr::success(__('Port Group :name created', ['name' => $portGroup->name]));
+        flasher()->success(__('Port Group :name created', ['name' => $portGroup->name]))->flash();
 
         return redirect()->route('port-groups.index');
     }
@@ -90,9 +89,9 @@ class PortGroupController extends Controller
         $portGroup->fill($request->only(['name', 'desc']));
 
         if ($portGroup->save()) {
-            Toastr::success(__('Port Group :name updated', ['name' => $portGroup->name]));
+            flasher()->success(__('Port Group :name updated', ['name' => $portGroup->name]))->flash();
         } else {
-            Toastr::error(__('Failed to save'));
+            flasher()->error(__('Failed to save'))->flash();
 
             return redirect()->back()->withInput();
         }

@@ -35,7 +35,6 @@ use LibreNMS\Util\Debug;
 use Log;
 use Request;
 use Session;
-use Toastr;
 
 class LegacyUserProvider implements UserProvider
 {
@@ -137,7 +136,7 @@ class LegacyUserProvider implements UserProvider
             if (Debug::isEnabled()) {
                 $auth_message .= '<br /> ' . $ae->getFile() . ': ' . $ae->getLine();
             }
-            \Toastr::error($auth_message);
+            flasher()->error($auth_message)->flash();
 
             $username = $username ?? Session::get('username', $credentials['username']);
 
@@ -184,7 +183,7 @@ class LegacyUserProvider implements UserProvider
 
                 error_reporting(-1);
             } catch (AuthenticationException $ae) {
-                Toastr::error($ae->getMessage());
+                flasher()->error($ae->getMessage())->flash();
             }
 
             if (empty($new_user)) {
