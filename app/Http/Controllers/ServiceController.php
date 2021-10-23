@@ -44,7 +44,7 @@ class ServiceController extends Controller
         );
         $service->save();
 
-        flasher()->success(__('Service :name created', ['name' => $service->service_name]))->flash();
+        flash()->addSuccess(__('Service :name created', ['name' => $service->service_name]));
 
         return redirect()->route('services.templates.index');
     }

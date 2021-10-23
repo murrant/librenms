@@ -184,33 +184,31 @@ echo '<h3> SNMP Settings </h3>';
 if (isset($update_message)) {
     if (is_array($update_message)) {
         foreach ($update_message as $message) {
-            flasher()->success($message)->flash();
+            flash()->addSuccess($message);
         }
     }
 
     if (is_string($update_message)) {
-        flasher()->success($update_message)->flash();
+        flash()->addSuccess($update_message);
     }
 
     unset($message, $update_message);
 }
 
-// use flasher()->error to call attention to the problem; don't let it time out
+// use flash()->addError to call attention to the problem; don't let it time out
 if (isset($update_failed_message)) {
     if (is_array($update_failed_message)) {
         foreach ($update_failed_message as $error) {
-            flasher()
+            flash()
                 ->option('timeout', 30000)
-                ->error($error)
-                ->flash();
+                ->addError($error);
         }
     }
 
     if (is_string($update_failed_message)) {
-        flasher()
+        flash()
             ->option('timeout', 30000)
-            ->error($update_failed_message)
-            ->flash();
+            ->addError($update_failed_message);
     }
 
     unset($error, $update_failed_message);

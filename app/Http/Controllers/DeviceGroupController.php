@@ -73,7 +73,7 @@ class DeviceGroupController extends Controller
             $deviceGroup->devices()->sync($request->devices);
         }
 
-        $flasher->success(__('Device Group :name created', ['name' => $deviceGroup->name]))->flash();
+        $flasher->addSuccess(__('Device Group :name created', ['name' => $deviceGroup->name]));
 
         return redirect()->route('device-groups.index');
     }
@@ -149,9 +149,9 @@ class DeviceGroupController extends Controller
         if ($deviceGroup->isDirty() || $devices_updated) {
             try {
                 if ($deviceGroup->save() || $devices_updated) {
-                    $flasher->success(__('Device Group :name updated', ['name' => $deviceGroup->name]))->flash();
+                    $flasher->addSuccess(__('Device Group :name updated', ['name' => $deviceGroup->name]));
                 } else {
-                    $flasher->error(__('Failed to save'))->flash();
+                    $flasher->addError(__('Failed to save'));
 
                     return redirect()->back()->withInput();
                 }
@@ -161,7 +161,7 @@ class DeviceGroupController extends Controller
                 ]);
             }
         } else {
-            $flasher->info(__('No changes made'))->flash();
+            $flasher->addInfo(__('No changes made'));
         }
 
         return redirect()->route('device-groups.index');
