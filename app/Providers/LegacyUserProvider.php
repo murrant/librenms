@@ -136,7 +136,7 @@ class LegacyUserProvider implements UserProvider
             if (Debug::isEnabled()) {
                 $auth_message .= '<br /> ' . $ae->getFile() . ': ' . $ae->getLine();
             }
-            flasher()->error($auth_message)->flash();
+            flash()->addError($auth_message);
 
             $username = $username ?? Session::get('username', $credentials['username']);
 
@@ -183,7 +183,7 @@ class LegacyUserProvider implements UserProvider
 
                 error_reporting(-1);
             } catch (AuthenticationException $ae) {
-                flasher()->error($ae->getMessage())->flash();
+                flash()->addError($ae->getMessage());
             }
 
             if (empty($new_user)) {

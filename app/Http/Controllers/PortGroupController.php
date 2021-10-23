@@ -48,7 +48,7 @@ class PortGroupController extends Controller
         $portGroup = PortGroup::make($request->only(['name', 'desc']));
         $portGroup->save();
 
-        $flasher->success(__('Port Group :name created', ['name' => $portGroup->name]))->flash();
+        $flasher->addSuccess(__('Port Group :name created', ['name' => $portGroup->name]));
 
         return redirect()->route('port-groups.index');
     }
@@ -90,9 +90,9 @@ class PortGroupController extends Controller
         $portGroup->fill($request->only(['name', 'desc']));
 
         if ($portGroup->save()) {
-            $flasher->success(__('Port Group :name updated', ['name' => $portGroup->name]))->flash();
+            $flasher->addSuccess(__('Port Group :name updated', ['name' => $portGroup->name]));
         } else {
-            $flasher->error(__('Failed to save'))->flash();
+            $flasher->addError(__('Failed to save'));
 
             return redirect()->back()->withInput();
         }

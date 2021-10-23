@@ -54,7 +54,7 @@ class TwoFactorController extends Controller
             UserPref::forgetPref(auth()->user(), 'twofactor');
             $request->session()->forget(['twofactor', 'twofactorremove']);
 
-            flasher()->info(__('TwoFactor auth removed.'))->flash();
+            flash()->addInfo(__('TwoFactor auth removed.'));
 
             return redirect('preferences');
         }
@@ -192,7 +192,7 @@ class TwoFactorController extends Controller
 
         // notify if added
         if (Session::has('twofactoradd')) {
-            flasher()->success(__('TwoFactor auth added.'))->flash();
+            flash()->addSuccess(__('TwoFactor auth added.'));
             Session::forget('twofactoradd');
         }
 

@@ -105,7 +105,7 @@ class ServiceTemplateController extends Controller
         }
 
         $template->groups()->sync($request->groups);
-        $flasher->success(__('Service Template :name created', ['name' => $template->name]))->flash();
+        $flasher->addSuccess(__('Service Template :name created', ['name' => $template->name]));
 
         return redirect()->route('services.templates.index');
     }
@@ -214,9 +214,9 @@ class ServiceTemplateController extends Controller
         if ($template->isDirty() || $devices_updated || isset($device_groups_updated)) {
             try {
                 if ($template->save() || $devices_updated || isset($device_groups_updated)) {
-                    $flasher->success(__('Service Template :name updated', ['name' => $template->name]))->flash();
+                    $flasher->addSuccess(__('Service Template :name updated', ['name' => $template->name]));
                 } else {
-                    $flasher->error(__('Failed to save'))->flash();
+                    $flasher->addError(__('Failed to save'));
 
                     return redirect()->back()->withInput();
                 }
@@ -226,7 +226,7 @@ class ServiceTemplateController extends Controller
                 ]);
             }
         } else {
-            $flasher->info(__('No changes made'))->flash();
+            $flasher->addInfo(__('No changes made'));
         }
 
         return redirect()->route('services.templates.index');

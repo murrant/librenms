@@ -41,9 +41,9 @@ if ($_POST['editing']) {
 
         if ($device_model->isDirty()) {
             if ($device_model->save()) {
-                flasher()->success(__('Device record updated'))->flash();
+                flash()->addSuccess(__('Device record updated'));
             } else {
-                flasher()->error(__('Device record update error'))->flash();
+                flash()->addError(__('Device record update error'));
             }
         }
 
@@ -51,7 +51,7 @@ if ($_POST['editing']) {
             if (Auth::user()->hasGlobalAdmin()) {
                 $result = renamehost($device['device_id'], $_POST['hostname'], 'webui');
                 if ($result == '') {
-                    flasher()->success("Hostname updated from {$device['hostname']} to {$_POST['hostname']}")->flash();
+                    flash()->addSuccess("Hostname updated from {$device['hostname']} to {$_POST['hostname']}");
                     echo '
                         <script>
                             var loc = window.location;
@@ -59,10 +59,10 @@ if ($_POST['editing']) {
                         </script>
                     ';
                 } else {
-                    flasher()->error($result . '.  Does your web server have permission to modify the rrd files?')->flash();
+                    flash()->addError($result . '.  Does your web server have permission to modify the rrd files?');
                 }
             } else {
-                flasher()->error('Only administrative users may update the device hostname')->flash();
+                flash()->addError('Only administrative users may update the device hostname');
             }
         }
 

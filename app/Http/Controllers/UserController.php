@@ -101,12 +101,12 @@ class UserController extends Controller
         $this->updateDashboard($user, $request->get('dashboard'));
 
         if ($user->save()) {
-            $flasher->success(__('User :username created', ['username' => $user->username]))->flash();
+            $flasher->addSuccess(__('User :username created', ['username' => $user->username]));
 
             return redirect(route('users.index'));
         }
 
-        $flasher->error(__('Failed to create user'))->flash();
+        $flasher->addError(__('Failed to create user'));
 
         return redirect()->back();
     }
@@ -173,14 +173,14 @@ class UserController extends Controller
         $user->fill($request->all());
 
         if ($request->has('dashboard') && $this->updateDashboard($user, $request->get('dashboard'))) {
-            $flasher->success(__('Updated dashboard for :username', ['username' => $user->username]))->flash();
+            $flasher->addSuccess(__('Updated dashboard for :username', ['username' => $user->username]));
         }
 
         if ($user->isDirty()) {
             if ($user->save()) {
-                $flasher->success(__('User :username updated', ['username' => $user->username]))->flash();
+                $flasher->addSuccess(__('User :username updated', ['username' => $user->username]));
             } else {
-                $flasher->error(__('Failed to update user :username', ['username' => $user->username]))->flash();
+                $flasher->addError(__('Failed to update user :username', ['username' => $user->username]));
 
                 return redirect()->back();
             }

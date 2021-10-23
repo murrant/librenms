@@ -42,7 +42,7 @@
         </div>
         <div class="tw-ml-4 tw-w-0 tw-flex-1">
             <p class="tw-text-xl tw-leading-5 tw-font-medium tw-capitalize {{ $textColor }}">
-                {{ $title }}
+                {{ $envelope->getTitle() ?: $title }}
             </p>
             <p class="tw-mt-1 tw-text-base tw-leading-5 tw-text-gray-500">
                 {!! clean(stripslashes($envelope->getMessage())) !!}
