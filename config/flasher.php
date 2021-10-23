@@ -12,7 +12,9 @@ return [
                 'view' => 'layouts.flasher-notification',
                 'options' => [
                     'timeout' => 8000,
-                    'y_offset' => '55px',
+                    'style' => [
+                        'top' => '55px',
+                    ],
                 ],
             ],
         ],
