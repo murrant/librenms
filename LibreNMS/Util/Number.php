@@ -123,6 +123,7 @@ class Number
     }
 
     /**
+<<<<<<< HEAD
      * Extract the first number found from a string
      */
     public static function extract(mixed $string): float|int
@@ -165,7 +166,7 @@ class Number
 
         //B or no suffix
         if (is_numeric(substr($suffix, 0, 1))) {
-            return (int) $from;
+            return (int)$from;
         }
 
         $exponent = array_flip($units)[$suffix] ?? null;
@@ -173,6 +174,29 @@ class Number
             return null;
         }
 
-        return (int) ($number * (1024 ** $exponent));
+        return (int)($number * (1024 ** $exponent));
+    }
+
+    /**
+     * If a number is less than 0, assume it has overflowed 32bit INT_MAX
+     * And try to correct the value by adding INT_MAX
+     *
+     * @param int $value The value to correct
+     * @param  int|null  $max an upper bounds on the corrected value
+     * @return int
+     * @throws \Exception
+     */
+    public static function correctIntegerOverflow($value, ?int $max = null): int
+    {
+        $int_max = 4294967296;
+        if ($value < 0) {
+            // assume unsigned/signed issue
+            $value = $int_max + $value;
+            if (($max !== null && $value > $max) || $value > $int_max) {
+                throw new \Exception('Uncorrectable negative value');
+            }
+        }
+
+        return $value;
     }
 }
