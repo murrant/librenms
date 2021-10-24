@@ -36,6 +36,7 @@ use LibreNMS\Interfaces\Discovery\OSDiscovery;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\Interfaces\Discovery\StpInstanceDiscovery;
 use LibreNMS\Interfaces\Discovery\StpPortDiscovery;
+use LibreNMS\Interfaces\Discovery\StorageDiscovery;
 use LibreNMS\Interfaces\Polling\Netstats\IcmpNetstatsPolling;
 use LibreNMS\Interfaces\Polling\Netstats\IpForwardNetstatsPolling;
 use LibreNMS\Interfaces\Polling\Netstats\IpNetstatsPolling;
@@ -60,6 +61,7 @@ class OS implements
     MempoolsDiscovery,
     StpInstanceDiscovery,
     StpPortDiscovery,
+    StorageDiscovery,
     IcmpNetstatsPolling,
     IpNetstatsPolling,
     IpForwardNetstatsPolling,
