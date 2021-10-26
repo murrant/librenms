@@ -27,6 +27,7 @@ namespace App;
 
 use App\Models\Device;
 use App\Models\Notification;
+use App\Models\User;
 use Auth;
 use Cache;
 use Carbon\Carbon;
@@ -46,6 +47,7 @@ class Checks
 
         Cache::put('checks_popup_timeout', true, Config::get('checks_popup_timer', 5) * 60);
 
+        /** @var User $user */
         $user = Auth::user();
 
         if ($user->isAdmin()) {
