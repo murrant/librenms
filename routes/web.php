@@ -51,12 +51,6 @@ Flasher Test
     background-repeat: no-repeat;
 }
 
-#flasher-container-top-left > :hover {
-    -moz-box-shadow: 0 0 12px #000;
-    -webkit-box-shadow: 0 0 12px #000;
-    box-shadow: 0 0 12px #000;
-}
-
 #flasher-container-top-left > .toastr-warning {
     background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZD0iTTE2IDBBMTYgMTYgMCAwIDAgMCAxNmExNiAxNiAwIDAgMCAxNiAxNiAxNiAxNiAwIDAgMCAxNi0xNkExNiAxNiAwIDAgMCAxNiAwem0wIDYuMTU2YzEuMDE2IDAgMi4wMzIuNDkgMi41OTggMS40NjlsNi45MjcgMTJjMS4xMzEgMS45NTgtLjMzNiA0LjUtMi41OTcgNC41SDkuMDcyYy0yLjI2MSAwLTMuNzI4LTIuNTQyLTIuNTk3LTQuNWw2LjkyNy0xMmMuNTY2LS45NzkgMS41ODItMS40NjkgMi41OTgtMS40Njl6bTAgMS45MzhjLS4zMyAwLS42Ni4xNzctLjg2NS41MzFsLTYuOTMgMTJjLS40MDkuNzA4LjA0OSAxLjUuODY3IDEuNWgxMy44NTZjLjgxOCAwIDEuMjc2LS43OTIuODY3LTEuNWwtNi45My0xMmMtLjIwNC0uMzU0LS41MzQtLjUzMS0uODY1LS41MzF6bTAgNC4wMzFhMSAxIDAgMCAxIDEgMXYyYTEgMSAwIDAgMS0xIDEgMSAxIDAgMCAxLTEtMXYtMmExIDEgMCAwIDEgMS0xem0wIDZoLjAxYTEgMSAwIDAgMSAxIDEgMSAxIDAgMCAxLTEgMUgxNmExIDEgMCAwIDEtMS0xIDEgMSAwIDAgMSAxLTF6IiBmaWxsPSIjZDk3NzA2Ii8+PC9zdmc+");
     background-size: 32px;
@@ -117,7 +111,7 @@ body {
 </style>
 <script>
 toastr.options = {
-    toastClass: 'toastr-toast tw-rounded-md tw-bg-white tw-shadow-lg tw-border-l-8 tw-mt-2 tw-cursor-pointer tw-opacity-80 hover:tw-opacity-100',
+    toastClass: 'toastr-toast tw-rounded-md tw-bg-white tw-shadow-lg hover:tw-shadow-xl tw-border-l-8 tw-mt-2 tw-cursor-pointer tw-opacity-80 hover:tw-opacity-100',
     titleClass: 'tw-text-xl tw-leading-7 tw-font-semibold tw-capitalize',
     messageClass: 'tw-mt-1 tw-text-base tw-leading-5 tw-text-gray-500',
     iconClasses: {

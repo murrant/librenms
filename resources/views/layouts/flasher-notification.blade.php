@@ -35,7 +35,7 @@
             break;
     }
 ?>
-<div class="tw-bg-white tw-opacity-80 hover:tw-opacity-100 tw-rounded-md tw-shadow-lg tw-border-l-8 tw-mt-2 tw-cursor-pointer {{ $borderColor }}">
+<div class="tw-bg-white tw-opacity-80 hover:tw-opacity-100 tw-rounded-md tw-shadow-lg hover:tw-shadow-xl tw-border-l-8 tw-mt-2 tw-cursor-pointer {{ $borderColor }}">
     <div class="tw-flex tw-items-center tw-px-2 tw-py-3 tw-rounded-lg tw-shadow-lg tw-overflow-hidden">
         <div class="tw-inline-flex tw-opacity-80 hover:tw-opacity-100 tw-items-center mt-2 tw-p-1 tw-flex-shrink-0 tw-w-16 {{ $textColor }}">
             {!! $icon !!}
