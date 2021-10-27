@@ -35,17 +35,17 @@
             break;
     }
 ?>
-<div class="tw-bg-white opacity-80 tw-rounded-md tw-shadow-lg tw-border-l-8 tw-mt-2 tw-cursor-pointer {{ $borderColor }}">
+<div class="tw-bg-white tw-opacity-80 hover:tw-opacity-100 tw-rounded-md tw-shadow-lg tw-border-l-8 tw-mt-2 tw-cursor-pointer {{ $borderColor }}">
     <div class="tw-flex tw-items-center tw-px-2 tw-py-3 tw-rounded-lg tw-shadow-lg tw-overflow-hidden">
-        <div class="tw-inline-flex tw-items-center tw-p-2 tw-text-white tw-rounded-full tw-flex-shrink-0 {{ $textColor }}" style="width: 40px; height: 32px">
+        <div class="tw-inline-flex tw-opacity-80 hover:tw-opacity-100 tw-items-center mt-2 tw-p-1 tw-flex-shrink-0 tw-w-16 {{ $textColor }}">
             {!! $icon !!}
         </div>
-        <div class="tw-ml-4 tw-w-0 tw-flex-1">
+        <div class="tw-ml-4 tw-w-0 tw-flex-1 tw-my-2">
             <p class="tw-text-xl tw-leading-7 tw-font-semibold tw-capitalize {{ $textColor }}">
                 {{ $envelope->getTitle() ?: $title }}
             </p>
             <p class="tw-mt-1 tw-text-base tw-leading-5 tw-text-gray-500">
-                {!! clean(stripslashes($envelope->getMessage())) !!}
+                {!! clean(stripslashes($envelope->getMessage()), 'notifications') !!}
             </p>
         </div>
     </div>

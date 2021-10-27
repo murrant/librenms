@@ -30,6 +30,15 @@ return [
             'AutoFormat.AutoParagraph' => true,
             'AutoFormat.RemoveEmpty'   => true,
         ],
+        'notification' => [
+            'HTML.Allowed'    => 'a,b,i,ul,ol,li,h1,h2,h3,h4,br,p,pre',
+        ],
+        'widget' => [
+            'HTML.Allowed'    => 'b,iframe[frameborder|src|width|height],i,ul,ol,li,h1,h2,h3,h4,br,p,pre',
+            'HTML.Trusted'    => true,
+            'HTML.SafeIframe' => true,
+            'URI.SafeIframeRegexp' => '%^(https?:)?//%',
+        ],
         'test'    => [
             'Attr.EnableID' => 'true',
         ],
