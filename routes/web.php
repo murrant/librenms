@@ -17,17 +17,17 @@ use Illuminate\Support\Facades\Route;
 Auth::routes(['register' => false, 'reset' => false, 'verify' => false]);
 
 Route::get('/flasher', function () {
-    // TODO remove testing code :D
-    flash()->addWarning('Warning : this is a longer message blah <a href="https://docs.librenms.org">docs</a> ajsdlfkjsdf');
-    flash()->addSuccess('Success');
-    flash()->addError('Error');
-    flash()->addInfo('Info');
+    flash()
+        ->using('template.librenms')
+        ->title('Warning')
+        ->option('timeout', 0)
+        ->addWarning('Oops! Something went wrong!');
 
     flash()
         ->using('template.librenms')
-        ->title('Title')
-        ->options(['timeout' => 0])
-        ->addSuccess('Toastr');
+        ->options(['timeout' => 3000])
+        ->title('Login')
+        ->addInfo('Welcome back');
 
     return view(['template' => <<<'BLADE'
 @extends('layouts.librenmsv1')
