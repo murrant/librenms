@@ -11,7 +11,7 @@ return [
             'librenms' => [
                 'view' => 'layouts.flasher-notification',
                 'options' => [
-                    'timeout' => 800000,
+                    'timeout' => 8000,
                     'style' => [
                         'top' => '55px',
                     ],
