@@ -26,9 +26,144 @@ Route::get('/flasher', function () {
     flash()
         ->using('template.librenms')
         ->title('Title')
+        ->options(['timeout' => 0])
         ->addSuccess('Toastr');
 
-    return view('layouts.librenmsv1');
+    return view(['template' => <<<'BLADE'
+@extends('layouts.librenmsv1')
+
+@section('title', __('Flasher Test'))
+
+@section('content')
+Flasher Test
+<style>
+#flasher-container-top-left {
+    position: fixed;
+    z-index: 999999;
+    top: 55px;
+    left: 12px;
+}
+
+/*#flasher-container-top-left * {*/
+/*    -moz-box-sizing: border-box;*/
+/*    -webkit-box-sizing: border-box;*/
+/*    box-sizing: border-box;*/
+/*}*/
+
+#flasher-container-top-right > div {
+    opacity: .8;
+    -ms-filter: alpha(opacity=80);
+    filter: alpha(opacity=80);
+}
+
+#flasher-container-top-left > div.toastr-toast {
+    margin: 6px 0 0;
+    padding: 15px 15px 15px 50px;
+    width: 304px;
+    background-position: 10px center;
+    background-repeat: no-repeat;
+    opacity: .8;
+    -ms-filter: alpha(opacity=80);
+    filter: alpha(opacity=80);
+}
+
+#flasher-container-top-left > :hover {
+    -moz-box-shadow: 0 0 12px #000;
+    -webkit-box-shadow: 0 0 12px #000;
+    box-shadow: 0 0 12px #000;
+    opacity: 1;
+    -ms-filter: alpha(opacity=100);
+    filter: alpha(opacity=100);
+    cursor: pointer;
+}
+
+#flasher-container-top-right > :hover {
+    opacity: 1;
+    -ms-filter: alpha(opacity=100);
+    filter: alpha(opacity=100);
+    cursor: pointer;
+}
+
+#flasher-container-top-left > .toast-warning {
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZD0iTTE2IDBBMTYgMTYgMCAwIDAgMCAxNmExNiAxNiAwIDAgMCAxNiAxNiAxNiAxNiAwIDAgMCAxNi0xNkExNiAxNiAwIDAgMCAxNiAwem0wIDYuMTU2YzEuMDE2IDAgMi4wMzIuNDkgMi41OTggMS40NjlsNi45MjcgMTJjMS4xMzEgMS45NTgtLjMzNiA0LjUtMi41OTcgNC41SDkuMDcyYy0yLjI2MSAwLTMuNzI4LTIuNTQyLTIuNTk3LTQuNWw2LjkyNy0xMmMuNTY2LS45NzkgMS41ODItMS40NjkgMi41OTgtMS40Njl6bTAgMS45MzhjLS4zMyAwLS42Ni4xNzctLjg2NS41MzFsLTYuOTMgMTJjLS40MDkuNzA4LjA0OSAxLjUuODY3IDEuNWgxMy44NTZjLjgxOCAwIDEuMjc2LS43OTIuODY3LTEuNWwtNi45My0xMmMtLjIwNC0uMzU0LS41MzQtLjUzMS0uODY1LS41MzF6bTAgNC4wMzFhMSAxIDAgMCAxIDEgMXYyYTEgMSAwIDAgMS0xIDEgMSAxIDAgMCAxLTEtMXYtMmExIDEgMCAwIDEgMS0xem0wIDZoLjAxYTEgMSAwIDAgMSAxIDEgMSAxIDAgMCAxLTEgMUgxNmExIDEgMCAwIDEtMS0xIDEgMSAwIDAgMSAxLTF6IiBmaWxsPSIjZDk3NzA2Ii8+PC9zdmc+");
+    background-size: 32px;
+}
+#flasher-container-top-left > .toast-error {
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZD0iTTE2IDBBMTYgMTYgMCAwIDAgMCAxNmExNiAxNiAwIDAgMCAxNiAxNiAxNiAxNiAwIDAgMCAxNi0xNkExNiAxNiAwIDAgMCAxNiAwem0tNiA5YTEgMSAwIDAgMSAuNzA3LjI5M0wxNiAxNC41ODZsNS4yOTMtNS4yOTNhMSAxIDAgMCAxIDEuNDE0IDAgMSAxIDAgMCAxIDAgMS40MTRMMTcuNDE0IDE2bDUuMjkzIDUuMjkzYTEgMSAwIDAgMSAwIDEuNDE0IDEgMSAwIDAgMS0xLjQxNCAwTDE2IDE3LjQxNGwtNS4yOTMgNS4yOTNhMSAxIDAgMCAxLTEuNDE0IDAgMSAxIDAgMCAxIDAtMS40MTRMMTQuNTg2IDE2bC01LjI5My01LjI5M2ExIDEgMCAwIDEgMC0xLjQxNEExIDEgMCAwIDEgMTAgOXoiIGZpbGw9IiNmODcxNzEiIC8+PC9zdmc+");
+    background-size: 32px;
+}
+#flasher-container-top-left > .toast-info {
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZD0iTTE2IDBBMTYgMTYgMCAwIDAgMCAxNmExNiAxNiAwIDAgMCAxNiAxNiAxNiAxNiAwIDAgMCAxNi0xNkExNiAxNiAwIDAgMCAxNiAwem0wIDZjNS41MTEgMCAxMCA0LjQ4OSAxMCAxMHMtNC40ODkgMTAtMTAgMTBTNiAyMS41MTEgNiAxNiAxMC40ODkgNiAxNiA2em0wIDJjLTQuNDMgMC04IDMuNTctOCA4czMuNTcgOCA4IDggOC0zLjU3IDgtOC0zLjU3LTgtOC04em0wIDNhMSAxIDAgMCAxIDEgMXY0YTEgMSAwIDAgMS0xIDEgMSAxIDAgMCAxLTEtMXYtNGExIDEgMCAwIDEgMS0xem0wIDhoLjAxYTEgMSAwIDAgMSAxIDEgMSAxIDAgMCAxLTEgMUgxNmExIDEgMCAwIDEtMS0xIDEgMSAwIDAgMSAxLTF6IiBmaWxsPSIjMjU2M2ViIiAvPjwvc3ZnPg==");
+    background-size: 32px;
+}
+#flasher-container-top-left > .toast-success {
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZD0iTTE2IDBBMTYgMTYgMCAwIDAgMCAxNmExNiAxNiAwIDAgMCAxNiAxNiAxNiAxNiAwIDAgMCAxNi0xNkExNiAxNiAwIDAgMCAxNiAwem03IDEwYTEgMSAwIDAgMSAuNzA3LjI5MyAxIDEgMCAwIDEgMCAxLjQxNGwtMTAgMTBhMSAxIDAgMCAxLTEuNDE0IDBsLTQtNGExIDEgMCAwIDEgMC0xLjQxNCAxIDEgMCAwIDEgMS40MTQgMEwxMyAxOS41ODZsOS4yOTMtOS4yOTNBMSAxIDAgMCAxIDIzIDEweiIgZmlsbD0iIzA1OTY2OSIgLz48L3N2Zz4=");
+    background-size: 32px;
+}
+
+#flasher-container-top-left.toast-top-full-width > div, #flasher-container-top-left.toast-bottom-full-width > div {
+    width: 96%;
+    margin: auto
+}
+
+@media all and (max-width: 240px) {
+    #flasher-container-top-left > div {
+        padding: 8px 8px 8px 50px;
+        width: 11em
+    }
+
+    #flasher-container-top-left .toast-close-button {
+        right: -0.2em;
+        top: -0.2em
+    }
+}
+
+@media all and (min-width: 241px) and (max-width: 480px) {
+    #flasher-container-top-left > div {
+        padding: 8px 8px 8px 50px;
+        width: 18em
+    }
+
+    #flasher-container-top-left .toast-close-button {
+        right: -0.2em;
+        top: -0.2em
+    }
+}
+
+@media all and (min-width: 481px) and (max-width: 768px) {
+    #flasher-container-top-left > div {
+        padding: 15px 15px 15px 50px;
+        width: 25em
+    }
+}
+
+</style>
+<script>
+toastr.options = {
+    toastClass: 'toastr-toast tw-rounded-md tw-bg-white tw-shadow-lg tw-border-l-8 tw-mt-2 tw-cursor-pointer',
+    titleClass: 'tw-text-xl tw-leading-7 tw-font-semibold tw-capitalize',
+    messageClass: 'tw-mt-1 tw-text-base tw-leading-5 tw-text-gray-500',
+    iconClasses: {
+        error: 'toast-error tw-text-red-600 tw-border-red-600',
+        info: 'toast-info tw-text-blue-600 tw-border-blue-600',
+        success: 'toast-success tw-text-green-600 tw-border-green-600',
+        warning: 'toast-warning tw-text-yellow-600 tw-border-yellow-600'
+    },
+    timeOut: 0,
+    containerId: 'flasher-container-top-left'
+};
+
+toastr.success('Test Message', 'Title', {timeOut: 0})
+toastr.error('Test Message', 'Title', {timeOut: 0})
+toastr.info('Test Message', 'Title', {timeOut: 0})
+toastr.warning('Test Message', 'Title', {timeOut: 0})
+
+</script>
+@endsection
+
+BLADE
+]);
+
 });
 
 // WebUI
