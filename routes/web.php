@@ -44,8 +44,13 @@ Flasher Test
     right: 12px;
 }
 
+#flasher-container-top-right a {
+    font-weight: bold;
+}
+
 #flasher-container-top-right > div {
     width: 304px;
+    min-height: 50px;
     background-position: 10px center;
     background-repeat: no-repeat;
 }
@@ -123,10 +128,10 @@ toastr.options = {
     containerId: 'flasher-container-top-right'
 };
 
-toastr.success('Test Message', 'Title', {timeOut: 0})
-toastr.error('Test Message', 'Title')
-toastr.info('Test Message', 'Title', {timeOut: 0})
-toastr.warning('Test Message', 'Title', {timeOut: 0})
+toastr.success('Test Message', 'Success Title', {timeOut: 0})
+toastr.error('Test Message', null, {timeOut: 0})
+toastr.info('Test Message', 'Info')
+toastr.warning('Warning : this is a longer message blah <a href="https://docs.librenms.org">docs</a> ajsdlfkjsdf', 'Title', {timeOut: 0})
 
 </script>
 @endsection
