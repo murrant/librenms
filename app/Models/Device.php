@@ -630,6 +630,11 @@ class Device extends BaseModel
         return $this->hasMany(\App\Models\Component::class, 'device_id');
     }
 
+    public function credentials(): BelongsToMany
+    {
+        return $this->belongsToMany(Credential::class);
+    }
+
     public function hostResources(): HasMany
     {
         return $this->hasMany(HrDevice::class, 'device_id');
@@ -853,6 +858,11 @@ class Device extends BaseModel
     public function slas(): HasMany
     {
         return $this->hasMany(Sla::class, 'device_id');
+    }
+
+    public function snmpCredentials(): HasOne
+    {
+        return $this->hasOne(SnmpCredential::class, 'id', 'snmp_credential_id');
     }
 
     public function syslogs(): HasMany
