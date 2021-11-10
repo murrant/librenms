@@ -26,7 +26,6 @@ class SnmpCredential extends Credential
         'auth_pass',
         'crypto_algo',
         'crypto_pass',
-        'context',
     ];
 
     protected $hidden = [
@@ -83,12 +82,12 @@ class SnmpCredential extends Credential
         return $new;
     }
 
-    public function toNetSnmpOptions(&$options = []): array
+    public function toNetSnmpOptions($context = null): array
     {
         switch ($this->version) {
             case 'v3':
                 array_push($options, '-v3', '-l', $this->auth_level);
-                array_push($options, '-n', $this->context);
+                array_push($options, '-n', $context);
 
                 switch (strtolower($this->auth_level)) {
                     case 'authpriv':
@@ -109,7 +108,7 @@ class SnmpCredential extends Credential
             case 'v1':
                 // fallthrough
             case 'v2c':
-                array_push($options, '-' . $this->version, '-c', $this->context ? "{$this->community}@$this->context" : $this->community);
+                array_push($options, '-' . $this->version, '-c', $context ? "{$this->community}@$context" : $this->community);
                 return $options;
             default:
                 \Log::debug("Unsupported SNMP Version: {$this->version}");
@@ -217,16 +216,6 @@ class SnmpCredential extends Credential
     public function setCryptoPassAttribute($algo): void
     {
         $this->credentials['crypto_pass'] = $algo;
-    }
-
-    public function getContextAttribute(): string
-    {
-        return $this->credentials['context'] ?? '';
-    }
-
-    public function setContextAttribute($context): void
-    {
-        $this->credentials['context'] = $context;
     }
 
     // ---- Define Relationships ----
