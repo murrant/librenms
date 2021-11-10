@@ -239,9 +239,11 @@ class NetSnmpQuery implements SnmpQueryInterface
         }
 
         // authentication
-        $this->buildAuth($cmd);
+        /** @var \App\Models\SnmpCredential $credentials */
+        $credentials = $this->device->snmpCredentials;
+        $auth = $credentials->toNetSnmpOptions($this->context);
 
-        $cmd = array_merge($cmd, $this->defaultOptions, $this->options);
+        $cmd = array_merge($cmd, $auth, $this->defaultOptions, $this->options);
 
         $timeout = $this->device->timeout ?? Config::get('snmp.timeout');
         if ($timeout && $timeout !== 1) {
@@ -254,37 +256,9 @@ class NetSnmpQuery implements SnmpQueryInterface
         }
 
         $hostname = Rewrite::addIpv6Brackets((string) ($this->device->overwrite_ip ?: $this->device->hostname));
-        $cmd[] = ($this->device->transport ?? 'udp') . ':' . $hostname . ':' . $this->device->port;
+        $cmd[] = $credentials->transport . ':' . $hostname . ':' . $credentials->port;
 
         return array_merge($cmd, $oids);
-    }
-
-    private function buildAuth(array &$cmd): void
-    {
-        if ($this->device->snmpver === 'v3') {
-            array_push($cmd, '-v3', '-l', $this->device->authlevel);
-            array_push($cmd, '-n', $this->context);
-
-            switch (strtolower($this->device->authlevel)) {
-                case 'authpriv':
-                    array_push($cmd, '-x', $this->device->cryptoalgo);
-                    array_push($cmd, '-X', $this->device->cryptopass);
-                // fallthrough
-                case 'authnopriv':
-                    array_push($cmd, '-a', $this->device->authalgo);
-                    array_push($cmd, '-A', $this->device->authpass);
-                // fallthrough
-                case 'noauthnopriv':
-                    array_push($cmd, '-u', $this->device->authname ?: 'root');
-                    break;
-                default:
-                    Log::debug("Unsupported SNMPv3 AuthLevel: {$this->device->snmpver}");
-            }
-        } elseif ($this->device->snmpver === 'v2c' || $this->device->snmpver === 'v1') {
-            array_push($cmd, '-' . $this->device->snmpver, '-c', $this->context ? "{$this->device->community}@$this->context" : $this->device->community);
-        } else {
-            Log::debug("Unsupported SNMP Version: {$this->device->snmpver}");
-        }
     }
 
     private function exec(string $command, array $oids): SnmpResponse
