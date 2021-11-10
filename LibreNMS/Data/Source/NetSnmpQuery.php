@@ -318,9 +318,11 @@ class NetSnmpQuery implements SnmpQueryInterface
         }
 
         // authentication
-        $this->buildAuth($cmd);
+        /** @var \App\Models\SnmpCredential $credentials */
+        $credentials = $this->device->snmpCredentials;
+        $auth = $credentials->toNetSnmpOptions($this->context);
 
-        $cmd = array_merge($cmd, $this->options);
+        $cmd = array_merge($cmd, $auth, $this->options);
 
         $timeout = $this->device->timeout ?? LibrenmsConfig::get('snmp.timeout');
         if ($timeout && $timeout !== 1) {
@@ -333,7 +335,7 @@ class NetSnmpQuery implements SnmpQueryInterface
         }
 
         $hostname = Rewrite::addIpv6Brackets((string) ($this->device->overwrite_ip ?: $this->device->hostname));
-        $cmd[] = ($this->device->transport ?? 'udp') . ':' . $hostname . ':' . $this->device->port;
+        $cmd[] = $credentials->transport . ':' . $hostname . ':' . $credentials->port;
 
         return array_merge($cmd, $oids);
     }
