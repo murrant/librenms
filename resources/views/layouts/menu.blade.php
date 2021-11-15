@@ -543,6 +543,8 @@
                         @admin
                         <li><a href="{{ url('settings') }}"><i class="fa fa-cogs fa-fw fa-lg"
                                                                aria-hidden="true"></i> {{ __('Global Settings') }}</a></li>
+                        <li><a href="{{ route('credentials.index') }}"><i class="fa fa-key fa-fw fa-lg"
+                                                               aria-hidden="true"></i> {{ __('Manage Credentials') }}</a></li>
                         <li><a href="{{ url('validate') }}"><i class="fa fa-check-circle fa-fw fa-lg"
                                                                aria-hidden="true"></i> {{ __('Validate Config') }}</a></li>
                         <li role="presentation" class="divider"></li>

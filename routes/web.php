@@ -80,6 +80,8 @@ Route::group(['middleware' => ['auth'], 'guard' => 'auth'], function () {
         Route::put('settings/{name}', 'SettingsController@update')->name('settings.update');
         Route::delete('settings/{name}', 'SettingsController@destroy')->name('settings.destroy');
 
+        Route::resource('credentials', 'CredentialController');
+
         Route::post('alert/transports/{transport}/test', [\App\Http\Controllers\AlertTransportController::class, 'test'])->name('alert.transports.test');
 
         Route::get('plugin/settings', 'PluginAdminController')->name('plugin.admin');

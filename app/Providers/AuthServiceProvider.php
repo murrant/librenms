@@ -21,6 +21,9 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\PollerCluster::class => \App\Policies\PollerClusterPolicy::class,
         \App\Models\Port::class => \App\Policies\PortPolicy::class,
         \App\Models\ServiceTemplate::class => \App\Policies\ServiceTemplatePolicy::class,
+        \App\Models\Credential::class => \App\Policies\CredentialPolicy::class,
+        \App\Models\SnmpCredential::class => \App\Policies\CredentialPolicy::class,
+        \App\Models\IpmiCredential::class => \App\Policies\CredentialPolicy::class,
     ];
 
     /**

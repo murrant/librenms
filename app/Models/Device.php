@@ -922,6 +922,11 @@ class Device extends BaseModel
         return $this->hasMany(Sla::class, 'device_id');
     }
 
+    public function snmpCredentials(): HasOne
+    {
+        return $this->hasOne(SnmpCredential::class, 'id', 'snmp_credential_id');
+    }
+
     public function syslogs(): HasMany
     {
         return $this->hasMany(\App\Models\Syslog::class, 'device_id', 'device_id');
