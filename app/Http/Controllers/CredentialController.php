@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\CredentialsDataTable;
 use App\Models\Credential;
 use Illuminate\Http\Request;
 
@@ -17,11 +18,14 @@ class CredentialController extends Controller
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
      */
-    public function index()
+    public function index(CredentialsDataTable $dataTable)
     {
-        return view('credentials.index', [
-            'credentials' => Credential::all(),
-        ]);
+        /** @var \Illuminate\View\View $render */
+        $render = $dataTable->render('credentials.index');
+        /** @var \Yajra\DataTables\Html\Builder $dt */
+//        $dt = $render->getData()['dataTable'];
+
+        return $render;
     }
 
     /**

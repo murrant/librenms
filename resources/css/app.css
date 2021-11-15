@@ -4,6 +4,8 @@
 @source "../../includes/html/pages/**/*.php";
 @source "../../includes/html/**/*.inc.php";
 @import "../../html/css/bootstrap.min.css" layer(components);
+@import 'dataTables.css';
+
 @custom-variant dark (&:where(.dark, .dark *));
 @layer base {
     button:not(:disabled),

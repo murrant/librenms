@@ -67,7 +67,9 @@
     <script src="{{ asset('js/handlebars.min.js') }}"></script>
     <script data-pace-options='{ "eventLag": { "lagThreshold": 30 } }' src="{{ asset('js/pace.min.js') }}"></script>
     <script src="{{ asset('js/qrcode.min.js') }}"></script>
-    <script src="{{ asset('js/select2.full.min.js') }}"></script>
+    <script src="{{ asset('js/select2.min.js') }}"></script>
+    <script src="{{ asset('js/datatables.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/buttons.server-side.js') }}"></script>
     <script>
         $.ajaxSetup({
             headers: {
