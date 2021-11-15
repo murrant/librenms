@@ -11,6 +11,7 @@ use App\Http\Controllers\ApiAccessController;
 use App\Http\Controllers\Auth;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\AuthLogController;
+use App\Http\Controllers\CredentialController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardWidgetController;
 use App\Http\Controllers\Device;
@@ -238,6 +239,7 @@ Route::middleware(['auth'])->group(function (): void {
     Route::put('settings/{name}', [SettingsController::class, 'update'])->name('settings.update');
     Route::delete('settings/{name}', [SettingsController::class, 'destroy'])->name('settings.destroy');
 
+    Route::resource('credentials', CredentialController::class);
     Route::resource('roles', RoleController::class);
 
     Route::post('alert/transports/{transport}/test', [AlertTransportController::class, 'test'])->name('alert.transports.test');

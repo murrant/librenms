@@ -1376,6 +1376,11 @@ class Device extends BaseModel
         return $this->hasMany(Sla::class, 'device_id');
     }
 
+    public function snmpCredentials(): HasOne
+    {
+        return $this->hasOne(SnmpCredential::class, 'id', 'snmp_credential_id');
+    }
+
     /**
      * @return HasMany<SslCertificate, $this>
      */
