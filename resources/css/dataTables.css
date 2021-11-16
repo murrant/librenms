@@ -83,17 +83,10 @@ table.dataTable tbody td.dt-body-nowrap {
  * Table styles
  */
 table.dataTable {
-    width: 100%;
-    margin: 0 auto;
-    clear: both;
-    border-collapse: separate;
     border-spacing: 0;
-    /*
-     * Header and footer styles
-     */
-    /*
-     * Body styles
-     */
+    min-height: 200px;
+    @apply tw-my-0 tw-mx-auto tw-min-w-full tw-clear-both
+    tw-border-separate tw-divide-y tw-divide-gray-200;
 }
 table.dataTable thead th,
 table.dataTable tfoot th {
@@ -276,8 +269,10 @@ table.dataTable td {
  * Control feature layout
  */
 .dataTables_wrapper {
-    position: relative;
-    clear: both;
+    @apply tw-clear-both tw-relative
+    tw-shadow
+    tw-overflow-hidden
+    tw-border-b tw-border-gray-200 sm:tw-rounded-lg;
 }
 .dataTables_wrapper .dataTables_length {
     float: left;
@@ -289,7 +284,7 @@ table.dataTable td {
     padding: 4px;
 }
 .dataTables_wrapper .dataTables_filter {
-    @apply tw-flex tw-justify-end;
+    @apply tw-float-right tw-flex tw-justify-end;
 }
 .dataTables_wrapper .dataTables_filter input {
     @apply tw-m-1 tw-ml-2
@@ -304,19 +299,13 @@ table.dataTable td {
     focus:tw-outline-none focus:tw-ring
 }
 .dataTables_wrapper .dataTables_info {
-    clear: both;
-    float: left;
-    padding-top: 0.755em;
+    @apply tw-float-left tw-clear-both tw-flex tw-pt-3;
 }
 .dataTables_wrapper .dataTables_paginate {
-    float: right;
-    text-align: right;
-    padding-top: 0.25em;
+    @apply tw-float-right tw-flex tw-justify-end tw-pt-1
 }
 .dataTables_wrapper .dataTables_paginate .paginate_button {
     min-width: 1.5em;
-    /*margin-left: 2px;*/
-
     @apply tw-inline-block
     tw-box-border
     tw-text-purple-500
@@ -978,10 +967,6 @@ div.dtr-modal div.dtr-modal-background {
 
 
 /* custom */
-table.dataTable {
-    @apply tw-min-w-full tw-divide-y tw-divide-gray-200
-}
-
 table.dataTable>thead {
     @apply tw-bg-gray-50
 }
@@ -996,8 +981,4 @@ table.dataTable th {
 
 table.dataTable td {
     @apply tw-px-6 tw-py-4 tw-whitespace-nowrap
-}
-
-.dataTables_wrapper {
-    @apply tw-shadow tw-overflow-hidden tw-border-b tw-border-gray-200 sm:tw-rounded-lg
 }

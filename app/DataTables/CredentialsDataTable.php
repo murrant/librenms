@@ -55,6 +55,7 @@ class CredentialsDataTable extends DataTable
                     ->orderBy(1)
                     ->buttons(
                         Button::make('create'),
+                        Button::make('colvis'),
                         Button::make('export'),
                         Button::make('print'),
                         Button::make('reset'),
