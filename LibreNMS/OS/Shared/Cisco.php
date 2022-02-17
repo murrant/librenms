@@ -36,6 +36,7 @@ use LibreNMS\Interfaces\Discovery\MempoolsDiscovery;
 use LibreNMS\Interfaces\Discovery\OSDiscovery;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\Interfaces\Discovery\SlaDiscovery;
+use LibreNMS\Interfaces\Discovery\VrfDiscovery;
 use LibreNMS\Interfaces\Polling\NacPolling;
 use LibreNMS\Interfaces\Polling\SlaPolling;
 use LibreNMS\OS;
@@ -43,8 +44,16 @@ use LibreNMS\OS\Traits\YamlOSDiscovery;
 use LibreNMS\RRD\RrdDefinition;
 use LibreNMS\Util\IP;
 
-class Cisco extends OS implements OSDiscovery, SlaDiscovery, ProcessorDiscovery, MempoolsDiscovery, NacPolling, SlaPolling
+class Cisco extends OS implements
+    OSDiscovery,
+    SlaDiscovery,
+    ProcessorDiscovery,
+    MempoolsDiscovery,
+    NacPolling,
+    SlaPolling,
+    VrfDiscovery
 {
+    use OS\Traits\MplsStandardMibs;
     use YamlOSDiscovery {
         YamlOSDiscovery::discoverOS as discoverYamlOS;
     }
