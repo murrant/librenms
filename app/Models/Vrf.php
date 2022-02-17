@@ -25,9 +25,23 @@
 
 namespace App\Models;
 
-class Vrf extends DeviceRelatedModel
+use LibreNMS\Interfaces\Models\Keyable;
+
+class Vrf extends DeviceRelatedModel implements Keyable
 {
     public $timestamps = false;
     protected $table = 'vrfs';
     protected $primaryKey = 'vrf_id';
+    protected $fillable = [
+        'vrf_oid',
+        'vrf_name',
+        'bgpLocalAs',
+        'mplsVpnVrfRouteDistinguisher',
+        'mplsVpnVrfDescription',
+    ];
+
+    public function getCompositeKey()
+    {
+        return $this->vrf_name;
+    }
 }

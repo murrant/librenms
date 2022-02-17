@@ -2,10 +2,9 @@
 
 use LibreNMS\Config;
 
-//(new \LibreNMS\Modules\Vrf())->discover($os);
-//
-//
-//return;
+(new \LibreNMS\Modules\Vrf())->discover($os);
+
+return;
 
 if (Config::get('enable_vrfs')) {
     if (true) {
