@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Facades\DeviceCache;
 use App\Models\Device;
 use App\Models\PollerGroup;
-use App\Models\Port;
 use App\Models\UserPref;
 use App\Models\Vminfo;
 use Carbon\Carbon;
@@ -16,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Validation\Rule;
 use LibreNMS\Config;
+use LibreNMS\Enum\PortAssociationMode;
 use LibreNMS\Util\Debug;
 use LibreNMS\Util\Graph;
 use LibreNMS\Util\Url;
@@ -236,7 +236,7 @@ class DeviceController extends Controller
                 'port_association' => Config::get('default_port_association_mode'),
                 'default_poller_group' => Config::get('distributed_poller_group'),
             ],
-            'port_association_modes' => Port::associationModes(),
+            'port_association_modes' => PortAssociationMode::getModes(),
             'poller_groups' => PollerGroup::query()->orderBy('group_name')->pluck('group_name', 'id'),
         ]);
     }
@@ -266,7 +266,7 @@ class DeviceController extends Controller
             'os' => 'nullable|string',
             'hardware' => 'nullable|string',
             'poller_group' => 'nullable|integer',
-            'port_association' => ['required_unless:type,ping', Rule::in(Port::associationModes())],
+            'port_association' => ['required_unless:type,ping', Rule::in(PortAssociationMode::getModes())],
             'auth_level' => 'required_if:type,snmpv3|in:noAuthNoPriv,authNoPriv,authPriv',
             'auth_algo' => [Rule::requiredIf($v3auth), Rule::in(['MD5', 'SHA'])],
             'auth_name' => [Rule::requiredIf($v3auth), 'nullable', 'string'],
@@ -282,50 +282,5 @@ class DeviceController extends Controller
         } else {
             return response()->json($all, 422);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

@@ -3,6 +3,27 @@
 @section('title', __('Add Device'))
 
 @section('content')
+    <div class="tw-max-w-screen-lg tw-mx-auto tw-px-5" x-data="{
+    data: {{ str_replace('"', '\'', json_encode($data)) }},
+    test: 'testing',
+}">
+        <x-panel class="">
+            <x-slot name="title">
+                <div class="tw-flex tw-justify-between">
+                <div>
+                    @lang('Add Device')
+                </div>
+                <div>
+                    <x-toggle></x-toggle>
+                    @lang('Advanced')
+                </div>
+                </div>
+            </x-slot>
+            <ul>
+{{--                <li x-for="(value, key) in data" x-text="key + ': ' + value"></li>--}}
+            </ul>
+        </x-panel>
+    </div>
     <div class="container">
         <div id="app">
             <add-device :data="{{ json_encode($data) }}" inline-template>
