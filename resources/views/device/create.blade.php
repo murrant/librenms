@@ -3,10 +3,12 @@
 @section('title', __('Add Device'))
 
 @section('content')
-    <div class="tw-max-w-screen-lg tw-mx-auto tw-px-5" x-data="{
-    data: {{ str_replace('"', '\'', json_encode($data)) }},
-    test: 'testing',
-}">
+    <div class="tw-max-w-screen-lg tw-mx-auto tw-px-5" x-data='{
+    advanced: @json($advanced),
+    port_association: @json($port_association),
+    default_poller_group: @json($default_poller_group),
+    test: "testing",
+}'>
         <x-panel class="">
             <x-slot name="title">
                 <div class="tw-flex tw-justify-between">
@@ -14,11 +16,13 @@
                     @lang('Add Device')
                 </div>
                 <div>
-                    <x-toggle></x-toggle>
+                    <x-toggle x-model="advanced"></x-toggle>
                     @lang('Advanced')
                 </div>
                 </div>
             </x-slot>
+            <div x-text="(advanced ? 'advanced' : 'simple')"></div>
+            <x-radio-button-group x-data="{names: }"></x-radio-button-group>
             <ul>
 {{--                <li x-for="(value, key) in data" x-text="key + ': ' + value"></li>--}}
             </ul>
@@ -26,7 +30,7 @@
     </div>
     <div class="container">
         <div id="app">
-            <add-device :data="{{ json_encode($data) }}" inline-template>
+            <add-device :data="{{ json_encode(compact('advanced', 'port_association', 'default_poller_group')) }}" inline-template>
                 <div class="row">
                     <div class="col-md-offset-1 col-md-10">
                         <div class="panel panel-default">
@@ -52,7 +56,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group" v-show="advanced" @if(!$data['advanced']) style="display:none" @endif>
+                                    <div class="form-group" v-show="advanced" @if(!$advanced) style="display:none" @endif>
                                         <label for="override_ip" class="col-sm-3 control-label">@lang('Override IP')</label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
@@ -63,14 +67,14 @@
                                     </div>
 
                                     @config('distributed_poller')
-                                    <div class="form-group" v-show="advanced" @if(!$data['advanced']) style="display:none" @endif>
+                                    <div class="form-group" v-show="advanced" @if(!$advanced) style="display:none" @endif>
                                         <label for="poller_group" class="col-sm-3 control-label">@lang('Poller Group')</label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
                                                 <select name="poller_group" id="poller_group" class="form-control input-sm" v-model.number="poller_group">
                                                     <option value="0"> Default poller group</option>
                                                     @foreach($poller_groups as $id => $group)
-                                                        <option value="{{ $id }}" @if($id == $data['default_poller_group']) selected @endif>{{ $group }}</option>
+                                                        <option value="{{ $id }}" @if($id == $default_poller_group) selected @endif>{{ $group }}</option>
                                                     @endforeach
                                                 </select>
                                                 <span class="input-group-addon"><i class="fa fa-fw fa-lg fa-question-circle has-tooltip"></i></span>
@@ -154,7 +158,7 @@
 
                                     <!-- SNMP Common Options -->
 
-                                    <div class="form-group" v-show="advanced && type !== 'ping'" @if(!$data['advanced']) style="display:none" @endif>
+                                    <div class="form-group" v-show="advanced && type !== 'ping'" @if(!$advanced) style="display:none" @endif>
                                         <label class="col-sm-3 control-label">@lang('Transport')</label>
 
                                         <div class="col-sm-3">
@@ -181,7 +185,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group" v-show="advanced && type !== 'ping'" @if(!$data['advanced']) style="display:none" @endif>
+                                    <div class="form-group" v-show="advanced && type !== 'ping'" @if(!$advanced) style="display:none" @endif>
                                         <label for="port_association" class="col-sm-3 control-label">Port Association</label>
                                         <div class="col-sm-3">
                                             <div class="input-group">

@@ -231,11 +231,9 @@ class DeviceController extends Controller
         $user = auth()->user();
 
         return view('device.create', [
-            'data' => [
-                'advanced' => UserPref::getPref($user, 'device_add_advanced'),
-                'port_association' => Config::get('default_port_association_mode'),
-                'default_poller_group' => Config::get('distributed_poller_group'),
-            ],
+            'advanced' => UserPref::getPref($user, 'device_add_advanced'),
+            'port_association' => Config::get('default_port_association_mode'),
+            'default_poller_group' => Config::get('distributed_poller_group'),
             'port_association_modes' => PortAssociationMode::getModes(),
             'poller_groups' => PollerGroup::query()->orderBy('group_name')->pluck('group_name', 'id'),
         ]);
