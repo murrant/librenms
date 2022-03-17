@@ -1,15 +1,15 @@
 <div x-data="{selectedButton: null, first: null, last: null}"
      x-modelable="selectedButton"
-     x-init="
-     $nextTick(() => {
-         if (typeof buttons === 'object' && buttons.length > 0) {
+     x-effect="
+         if (typeof buttons === 'object') {
             const keys = Object.keys(buttons);
-            first = keys[0];
-            last = keys[keys.length];
+            if (keys.length) {
+                first = keys[0];
+                last = keys[keys.length - 1];
+            }
          } else {
             console.log('You must define buttons object')
          }
-     })
      "
      {{ $attributes }}
      >
