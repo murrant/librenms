@@ -1,6 +1,6 @@
 <div x-data="{toggleEnabled : false}"
      x-modelable="toggleEnabled"
-     x-bind:class="{ 'tw-bg-green-400': toggleEnabled}"
+     x-bind:class="{'!tw-bg-green-400': toggleEnabled}"
      class="tw-w-20 tw-h-9 tw-inline-flex tw-items-center tw-bg-gray-300 tw-rounded-full tw-mx-1 tw-px-1 tw-transition-colors tw-duration-300"
      x-on:click="toggleEnabled = ! toggleEnabled"
      {{ $attributes }}>

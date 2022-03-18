@@ -1,26 +1,13 @@
 <div x-data="{selectedButton: null, first: null, last: null}"
      x-modelable="selectedButton"
-     x-effect="
-         if (typeof buttons === 'object') {
-            const keys = Object.keys(buttons);
-            if (keys.length) {
-                first = keys[0];
-                last = keys[keys.length - 1];
-            }
-         } else {
-            console.log('You must define buttons object')
-         }
-     "
      {{ $attributes }}
      >
     <div class="tw-flex tw-items-center tw-justify-center">
         <div class="tw-inline-flex" role="group">
-            <template x-for="(name, key) in buttons">
+            @foreach($buttons as $key => $name)
                 <button type="button"
-                        x-text="name"
-                        x-on:click="selectedButton = key"
+                        x-on:click="selectedButton = {{ is_int($key) ? $key : "'$key'" }}"
                         class="
-        tw-rounded-l
         tw-px-6
         tw-py-2
         tw-border-t tw-border-b tw-border-r tw-border-gray-200 dark:tw-border-dark-gray-200
@@ -31,13 +18,14 @@
         hover:tw-bg-opacity-5
         focus:tw-outline-none focus:tw-ring-0
         tw-transition tw-duration-150 tw-ease-in-out
+        @if ($loop->first) tw-border-l tw-rounded-l @endif
+        @if ($loop->last) tw-rounded-r @endif
       "
                         x-bind:class="{
-                        'tw-border-l tw-rounded-l': key === first,
-                        'tw-rounded-r': key === last,
-                        'tw-text-gray-700 dark:tw-text-dark-white-100 tw-shadow-inner tw-bg-opacity-5': key === selectedButton
+                        'tw-text-gray-700 dark:tw-text-dark-white-100 tw-shadow-inner tw-bg-opacity-5': {{ is_int($key) ? $key : "'$key'" }} === selectedButton
 }"
-                ></button>
+                >{{ $name }}</button>
+                @endforeach
             </template>
     </div>
 </div>

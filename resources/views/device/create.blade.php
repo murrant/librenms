@@ -9,7 +9,6 @@
     default_poller_group: @json($default_poller_group),
     type: "v2c",
     test: "testing",
-    buttons: {v1: "SNMP v1", v2c: "SNMP v2c", v3: "SNMP v3", ping: "PING"}
 }'>
         <x-panel class="">
             <x-slot name="title">
@@ -24,7 +23,7 @@
                 </div>
             </x-slot>
             <div x-text="(advanced ? 'advanced' : 'simple')"></div>
-                <x-radio-button-group x-model="type"></x-radio-button-group>
+                <x-radio-button-group x-model="type" :buttons="$types"></x-radio-button-group>
             <ul>
 {{--                <li x-for="(value, key) in data" x-text="key + ': ' + value"></li>--}}
             </ul>
