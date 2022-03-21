@@ -1,12 +1,12 @@
 <div x-data="{selectedButton: null, first: null, last: null}"
      x-modelable="selectedButton"
-     {{ $attributes }}
+     {{ $attributes->except('buttons') }}
      >
     <div class="tw-flex tw-items-center tw-justify-center">
         <div class="tw-inline-flex" role="group">
             @foreach($buttons as $key => $name)
                 <button type="button"
-                        x-on:click="selectedButton = {{ is_int($key) ? $key : "'$key'" }}"
+                        x-on:click='selectedButton = @json($key, JSON_HEX_APOS)'
                         class="
         tw-px-6
         tw-py-2
@@ -21,11 +21,11 @@
         @if ($loop->first) tw-border-l tw-rounded-l @endif
         @if ($loop->last) tw-rounded-r @endif
       "
-                        x-bind:class="{
-                        'tw-text-gray-700 dark:tw-text-dark-white-100 tw-shadow-inner tw-bg-opacity-5': {{ is_int($key) ? $key : "'$key'" }} === selectedButton
-}"
+                        x-bind:class='{
+                        "tw-text-gray-700 dark:tw-text-dark-white-100 tw-shadow-inner tw-bg-opacity-5": @json($key, JSON_HEX_APOS) === selectedButton
+}'
                 >{{ $name }}</button>
                 @endforeach
-            </template>
+            </div>
     </div>
 </div>

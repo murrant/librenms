@@ -4,11 +4,11 @@
 
 @section('content')
     <div class="tw-max-w-screen-lg tw-mx-auto tw-px-5" x-data='{
-    advanced: @json($advanced),
-    port_association: @json($port_association),
-    default_poller_group: @json($default_poller_group),
-    type: "v2c",
-    test: "testing",
+    advanced: @json($advanced, JSON_HEX_APOS),
+    port_association: @json($port_association, JSON_HEX_APOS),
+    default_poller_group: @json($default_poller_group, JSON_HEX_APOS),
+    hostname: "initial",
+    type: "v2c"
 }'>
         <x-panel class="">
             <x-slot name="title">
@@ -23,10 +23,10 @@
                 </div>
             </x-slot>
             <div x-text="(advanced ? 'advanced' : 'simple')"></div>
-                <x-radio-button-group x-model="type" :buttons="$types"></x-radio-button-group>
-            <ul>
-{{--                <li x-for="(value, key) in data" x-text="key + ': ' + value"></li>--}}
-            </ul>
+            <x-radio-button-group x-model="type" :buttons="$types"></x-radio-button-group>
+
+            <x-input name="hostname" value="test" label="Hostname or IP" x-model="hostname" placeholder="Hostname"></x-input>
+
         </x-panel>
     </div>
     <div class="container">
