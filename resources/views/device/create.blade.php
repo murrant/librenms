@@ -8,8 +8,24 @@
     port_association: @json($port_association, JSON_HEX_APOS),
     default_poller_group: @json($default_poller_group, JSON_HEX_APOS),
     hostname: "initial",
-    type: "v2c"
-}'>
+    type: "v2c",
+    community: "",
+    display: "",
+    ip_regex: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$|^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/,
+    update_advanced: function(enabled) {
+        fetch("{{ route('preferences.store') }}", {
+        method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-Token": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({pref: "device_add_advanced", value: enabled})
+        })
+        .then(response => {
+        if (! response.ok) console.log("Failed to toggle advanced persistent preference")
+        })
+    }
+    }'
         <x-panel class="">
             <x-slot name="title">
                 <div class="tw-flex tw-justify-between">
@@ -17,15 +33,17 @@
                     @lang('Add Device')
                 </div>
                 <div>
-                    <x-toggle x-model="advanced"></x-toggle>
+                    <x-toggle x-model="advanced" x-on:toggled="update_advanced($event.detail)"></x-toggle>
                     @lang('Advanced')
                 </div>
                 </div>
             </x-slot>
             <div x-text="(advanced ? 'advanced' : 'simple')"></div>
+            <x-input name="hostname" label="Hostname or IP" x-model="hostname" placeholder="Hostname"></x-input>
+            <x-input name="display" label="Display Name" x-model="display" x-show="advanced || hostname.match(ip_regex)" placeholder="Display Name" help="Helpful when adding by IP. Explicit display name or simple template using replacements: @{{ $hostname }}, @{{ $sysName }}, @{{ $sysName_fallback }}, @{{ $ip }}"></x-input>
             <x-radio-button-group x-model="type" :buttons="$types"></x-radio-button-group>
+            <x-input name="community" label="SNMP Community" x-model="community" placeholder="Community" x-show="type==='v2c' || type==='v1'"></x-input>
 
-            <x-input name="hostname" value="test" label="Hostname or IP" x-model="hostname" placeholder="Hostname"></x-input>
 
         </x-panel>
     </div>
