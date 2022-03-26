@@ -236,7 +236,8 @@ class DeviceController extends Controller
             'default_poller_group' => Config::get('distributed_poller_group'),
             'port_association_modes' => PortAssociationMode::getModes(),
             'poller_groups' => PollerGroup::query()->orderBy('group_name')->pluck('group_name', 'id'),
-            'types' => ['v1' => 'SNMP v1', 'v2c' => 'SNMP v2c', 'v3' => 'SNMP v3', 'ping' => 'Ping']
+            'types' => trans('device.add.types'),
+            'levels' => trans('device.add.v3auth'),
         ]);
     }
 
