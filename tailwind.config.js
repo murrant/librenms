@@ -1,5 +1,4 @@
 module.exports = {
-  mode: 'jit',
   prefix: 'tw-',
   content: [
       './storage/framework/views/*.php',
