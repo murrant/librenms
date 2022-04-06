@@ -236,8 +236,10 @@ class DeviceController extends Controller
             'default_poller_group' => Config::get('distributed_poller_group'),
             'port_association_modes' => PortAssociationMode::getModes(),
             'poller_groups' => PollerGroup::query()->orderBy('group_name')->pluck('group_name', 'id'),
-            'types' => trans('device.add.types'),
-            'levels' => trans('device.add.v3auth'),
+            'types' => trans('device.options.types'),
+            'levels' => trans('device.options.v3auth'),
+            'ip_family' => trans('device.options.ip_family'),
+            'protocol' => trans('device.options.protocol'),
         ]);
     }
 

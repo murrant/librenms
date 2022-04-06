@@ -13,12 +13,15 @@ return [
         'icon' => 'Icon',
         'location' => 'Location',
         'os' => 'Device OS',
+        'port' => 'Port',
+        'port_association_mode' => 'Port Association',
         'serial' => 'Serial',
         'sysName' => 'sysName',
+        'transport' => 'Transport',
         'version' => 'OS Version',
         'type' => 'Device type',
     ],
-    'add' => [
+    'options' => [
         'types' => [
             'v1' => 'SNMP v1',
             'v2c' => 'SNMP v2c',
@@ -29,6 +32,15 @@ return [
             'noAuthNoPriv' => 'None',
             'authNoPriv' => 'Password',
             'authPriv' => 'Encrypted',
+        ],
+        'ip_family' => [
+            'auto' => 'Auto',
+            'ipv4' => 'IPv4',
+            'ipv6' => 'IPv6',
+        ],
+        'protocol' => [
+            'udp' => 'UDP',
+            'tcp' => 'TCP',
         ],
     ],
 ];

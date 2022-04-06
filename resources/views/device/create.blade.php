@@ -15,31 +15,41 @@
     authname: "root",
     authpass: "",
     cryptopass: "",
+    ip_family: "auto",
+    protocol: "udp",
+    port: "",
     ip_regex: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$|^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/
-    }'
+    }'>
         <x-panel class="">
             <x-slot name="title">
                 <div class="tw-flex tw-justify-between">
                 <div>
-                    @lang('Add Device')
+                    {{ __('Add Device') }}
                 </div>
                 <div>
                     <x-toggle x-model="advanced" x-on:toggled="updateDeviceAddAdvancedPref($event.detail)"></x-toggle>
-                    @lang('Advanced')
+                    {{ __('Advanced') }}
                 </div>
                 </div>
             </x-slot>
             <div x-text="(advanced ? 'advanced' : 'simple')"></div>
             <x-input name="hostname" label="{{ trans('device.attributes.hostname') }}" x-model="hostname" placeholder="Hostname"></x-input>
-            <x-input name="display" label="{{ trans('device.attributes.display') }}" x-model="display" x-show="advanced || hostname.match(ip_regex)" placeholder="Display Name" help="Helpful when adding by IP. Explicit display name or simple template using replacements: @{{ $hostname }}, @{{ $sysName }}, @{{ $sysName_fallback }}, @{{ $ip }}"></x-input>
+            <x-input name="display" label="{{ trans('device.attributes.display') }}" x-model="display" x-show="advanced || hostname" placeholder="Display Name" help="Helpful when adding by IP. Explicit display name or simple template using replacements: @{{ $hostname }}, @{{ $sysName }}, @{{ $sysName_fallback }}, @{{ $ip }}"></x-input>
             <x-radio-button-group x-model="type" :buttons="$types"></x-radio-button-group>
             <x-input name="community" label="{{ trans('device.attributes.community') }}" x-model="community" placeholder="Community" x-show="type==='v2c' || type==='v1'"></x-input>
             <x-radio-button-group x-model="authlevel" :buttons="$levels" x-show="type==='v3'"></x-radio-button-group>
             <x-input name="authname" label="{{ trans('device.attributes.authname') }}" x-model="authname" placeholder="" x-show="type==='v3' && authlevel !== 'noAuthNoPriv'"></x-input>
             <x-input name="authpass" label="{{ trans('device.attributes.authpass') }}" x-model="authpass" placeholder="" x-show="type==='v3' && authlevel !== 'noAuthNoPriv'"></x-input>
             <x-input name="cryptopass" label="{{ trans('device.attributes.cryptopass') }}" x-model="cryptopass" placeholder="" x-show="type==='v3' && authlevel === 'authPriv'"  ></x-input>
+            <x-input name="transport" label="{{ trans('device.attributes.transport') }}" x-model="transport" placeholder="" x-show="advanced"></x-input>
+            <div class="tw-flex" x-show="advanced">
+                <x-radio-button-group x-model="ip_family" :buttons="$ip_family" class="tw-pl2"></x-radio-button-group>
+                <x-radio-button-group x-model="protocol" :buttons="$protocol" class="tw-pl2"></x-radio-button-group>
+                <x-input name="port" x-model="port" placeholder="{{ trans('device.attributes.port') }}" class="tw-pl2"></x-input>
+            </div>
+            <x-select name="port_association_mode" label="{{ trans('device.attributes.port_association_mode') }}" x-model="port_association_modes" :options="$port_association_modes" x-show="advanced"></x-select>
 
-
+            <button class="btn btn-primary">Add Device</button>
         </x-panel>
     </div>
     <div class="container">
