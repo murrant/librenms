@@ -18,25 +18,9 @@
  *      DS:dispersion:GAUGE:'.\LibreNMS\Config::get('rrd.heartbeat').':0:U
  */
 
-use LibreNMS\Config;
 use LibreNMS\OS;
 
 if (! $os instanceof OS) {
     $os = OS::make($device);
 }
 (new \LibreNMS\Modules\Ntp())->poll($os);
-
-return;
-
-if (isset($device['os_group']) && file_exists(Config::get('install_dir') . "/includes/polling/ntp/{$device['os_group']}.inc.php")) {
-    include Config::get('install_dir') . "/includes/polling/ntp/{$device['os_group']}.inc.php";
-}
-
-if ($device['os'] == 'awplus') {
-    include 'includes/polling/ntp/awplus.inc.php';
-}
-
-unset(
-    $cntpPeersVarEntry,
-    $atNtpAssociationEntry
-);

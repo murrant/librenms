@@ -25,20 +25,9 @@
  * )
  */
 
-use LibreNMS\Config;
 use LibreNMS\OS;
 
 if (! $os instanceof OS) {
     $os = OS::make($device);
 }
 (new \LibreNMS\Modules\Ntp())->discover($os);
-
-return;
-
-if (isset($device['os_group']) && file_exists(Config::get('install_dir') . "/includes/discovery/ntp/{$device['os_group']}.inc.php")) {
-    include Config::get('install_dir') . "/includes/discovery/ntp/{$device['os_group']}.inc.php";
-}
-
-if ($device['os'] == 'awplus') {
-    include 'includes/discovery/ntp/awplus.inc.php';
-}
