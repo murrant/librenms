@@ -168,6 +168,7 @@ Route::group(['middleware' => ['auth'], 'guard' => 'auth'], function () {
         // jquery bootgrid data controllers
         Route::group(['prefix' => 'table', 'namespace' => 'Table'], function () {
             Route::post('alert-schedule', 'AlertScheduleController');
+            Route::post('app-ntp', 'AppNtpController');
             Route::post('customers', 'CustomersController');
             Route::post('device', 'DeviceController');
             Route::post('edit-ports', 'EditPortsController');

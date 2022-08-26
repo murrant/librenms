@@ -33,11 +33,11 @@ use LibreNMS\Validator;
 
 class Database extends BaseValidation
 {
-    public const MYSQL_MIN_VERSION = '5.7.7';
+    public const MYSQL_MIN_VERSION = '5.7.8';
     public const MYSQL_MIN_VERSION_DATE = 'March, 2021';
     public const MYSQL_RECOMMENDED_VERSION = '8.0';
 
-    public const MARIADB_MIN_VERSION = '10.2.2';
+    public const MARIADB_MIN_VERSION = '10.2.3';
     public const MARIADB_MIN_VERSION_DATE = 'March, 2021';
     public const MARIADB_RECOMMENDED_VERSION = '10.5';
 

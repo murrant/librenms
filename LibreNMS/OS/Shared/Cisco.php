@@ -39,11 +39,13 @@ use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\Interfaces\Discovery\SlaDiscovery;
 use LibreNMS\Interfaces\Discovery\StpInstanceDiscovery;
 use LibreNMS\Interfaces\Polling\NacPolling;
+use LibreNMS\Interfaces\Polling\NtpPolling;
 use LibreNMS\Interfaces\Polling\SlaPolling;
 use LibreNMS\OS;
 use LibreNMS\OS\Traits\YamlOSDiscovery;
 use LibreNMS\RRD\RrdDefinition;
 use LibreNMS\Util\IP;
+use SnmpQuery;
 
 class Cisco extends OS implements
     OSDiscovery,
@@ -52,6 +54,7 @@ class Cisco extends OS implements
     ProcessorDiscovery,
     MempoolsDiscovery,
     NacPolling,
+    NtpPolling,
     SlaPolling
 {
     use YamlOSDiscovery {
@@ -543,6 +546,27 @@ class Cisco extends OS implements
         return $instances;
     }
 
+    public function fetchNtpStratum(): int
+    {
+        return (int) SnmpQuery::get('CISCO-NTP-MIB::cntpSysStratum.0')->value();
+    }
+
+    public function fetchNtpPeers(): Collection
+    {
+        return SnmpQuery::walk('CISCO-NTP-MIB::cntpPeersVarTable')->mapTable(function ($peer, $peer_id) {
+            return [
+                'UID' => $peer_id,
+                'peer' => $peer['CISCO-NTP-MIB::cntpPeersPeerAddress'],
+                'port' => $peer['CISCO-NTP-MIB::cntpPeersPeerPort'],
+                'stratum' => $peer['CISCO-NTP-MIB::cntpPeersStratum'],
+                'peerref' => (string) IP::fromHexString($peer['CISCO-NTP-MIB::cntpPeersRefId'], true),
+                'offset' => $peer['CISCO-NTP-MIB::cntpPeersOffset'],
+                'delay' => $peer['CISCO-NTP-MIB::cntpPeersDelay'],
+                'dispersion' => $peer['CISCO-NTP-MIB::cntpPeersDispersion'],
+            ];
+        });
+    }
+
     protected function getMainSerial()
     {
         $serial_output = snmp_get_multi($this->getDeviceArray(), ['entPhysicalSerialNum.1', 'entPhysicalSerialNum.1001'], '-OQUs', 'ENTITY-MIB:OLD-CISCO-CHASSIS-MIB');
@@ -557,5 +581,16 @@ class Cisco extends OS implements
         }
 
         return null;
+    }
+
+    protected function decodeNtpSignedTimeValue(string $value): int
+    {
+        if (preg_match('/^[0 ]*$/', $value)) {
+            return 0;
+        }
+        dump($value, snmp_hexstring($value));
+
+
+        return hexdec($value);
     }
 }

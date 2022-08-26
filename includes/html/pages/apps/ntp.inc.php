@@ -11,19 +11,13 @@
  * the source code distribution for details.
  */
 
-$component = new LibreNMS\Component();
-$options = [];
-$options['filter']['ignore'] = ['=', 0];
-$options['type'] = 'ntp';
-$components = $component->getComponents(null, $options);
-
 print_optionbar_start();
 
 $view_options = [
     'all'       => 'All',
     'error'     => 'Error',
 ];
-if (! $vars['view']) {
+if (empty($vars['view'])) {
     $vars['view'] = 'all';
 }
 
@@ -96,11 +90,10 @@ print_optionbar_end();
         post: function ()
         {
             return {
-                id: "app_ntp",
                 view: '<?php echo $vars['view']; ?>',
                 graph: '<?php echo $vars['graph']; ?>',
             };
         },
-        url: "ajax_table.php",
+        url: "<?php echo url('/ajax/table/app-ntp'); ?>",
     });
 </script>

@@ -1,10 +1,6 @@
 <?php
 
-$component = new LibreNMS\Component();
-$options = [];
-$options['filter']['ignore'] = ['=', 0];
-$options['type'] = 'ntp';
-$components = $component->getComponents(null, $options);
+$apps = \App\Models\Application::with('device')->where('app_type', 'ntp')->get();
 
 $first = $vars['current'] - 1;           // Which record do we start on.
 $last = $first + $vars['rowCount'];    // Which record do we end on.

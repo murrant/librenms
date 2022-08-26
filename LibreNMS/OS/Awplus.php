@@ -26,11 +26,14 @@
 namespace LibreNMS\OS;
 
 use App\Models\Device;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use LibreNMS\Interfaces\Discovery\OSDiscovery;
+use LibreNMS\Interfaces\Polling\NtpPolling;
 use LibreNMS\OS;
+use SnmpQuery;
 
-class Awplus extends OS implements OSDiscovery
+class Awplus extends OS implements OSDiscovery, NtpPolling
 {
     public function discoverOS(Device $device): void
     {
@@ -66,5 +69,26 @@ class Awplus extends OS implements OSDiscovery
         $device->serial = $serial;
         $device->hardware = $hardware;
         $device->features = $features ?? null;
+    }
+
+    public function fetchNtpStratum(): int
+    {
+        return (int) SnmpQuery::get('AT-NTP-MIB::atNtpSysStratum.0')->value();
+    }
+
+    public function fetchNtpPeers(): Collection
+    {
+        return SnmpQuery::walk('AT-NTP-MIB::atNtpAssociationTable')->mapTable(function ($peer, $peer_id) {
+            return [
+                'UID' => $peer_id,
+                'peer' => $peer['AT-NTP-MIB::atNtpAssociationPeerAddr'],
+                'port' => 123, // awplus only supports default NTP Port.
+                'stratum' => $peer['AT-NTP-MIB::atNtpAssociationStratum'],
+                'peerref' => $peer['AT-NTP-MIB::atNtpAssociationRefClkAddr'],
+                'offset' => $peer['AT-NTP-MIB::atNtpAssociationOffset'] / 1000,
+                'delay' => $peer['AT-NTP-MIB::atNtpAssociationDelay'] / 1000,
+                'dispersion' => $peer['AT-NTP-MIB::atNtpAssociationDisp'] / 1000,
+            ];
+        });
     }
 }

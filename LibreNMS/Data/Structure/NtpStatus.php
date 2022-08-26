@@ -1,6 +1,6 @@
 <?php
-/**
- * Applications.php
+/*
+ * NtpStatus.php
  *
  * -Description-
  *
@@ -15,36 +15,34 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @link       https://www.librenms.org
- *
- * @copyright  2018 Tony Murray
+ * @package    LibreNMS
+ * @link       http://librenms.org
+ * @copyright  2022 Tony Murray
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace App\Models;
+namespace LibreNMS\Data\Structure;
 
-use LibreNMS\Util\StringHelpers;
+use Illuminate\Support\Collection;
 
-class Application extends DeviceRelatedModel
+class NtpStatus
 {
-    public $timestamps = false;
-    protected $primaryKey = 'app_id';
-    protected $fillable = ['app_state', 'app_status', 'data'];
-    protected $casts = [
-        'data' => 'array',
-    ];
+    /** @var int */
+    public $stratum;
 
-    // ---- Helper Functions ----
+    /** @var \Illuminate\Support\Collection<\LibreNMS\Data\Structure\NtpPeer> */
+    public $peers;
 
-    public function displayName()
+    public function __construct(int $stratum = -1, ?Collection $peers = null)
     {
-        return StringHelpers::niceCase($this->app_type);
+        $this->stratum = $stratum;
+        $this->peers = $peers ?? new Collection;
     }
 
-    public function getShowNameAttribute()
+    public function addPeer(NtpPeer $peer)
     {
-        return $this->displayName();
+        $this->peers->push($peer);
     }
 }

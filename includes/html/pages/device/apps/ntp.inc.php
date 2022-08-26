@@ -11,12 +11,6 @@
  * the source code distribution for details.
  */
 
-$component = new LibreNMS\Component();
-$options = [];
-$options['filter']['ignore'] = ['=', 0];
-$options['type'] = 'ntp';
-$components = $component->getComponents($device['device_id'], $options);
-$components = $components[$device['device_id']];
 
 ?>
 <table id='table' class='table table-condensed table-responsive table-striped'>
@@ -29,20 +23,19 @@ $components = $components[$device['device_id']];
     </tr>
     </thead>
 <?php
-foreach ($components as $peer) {
-    $string = $peer['peer'] . ':' . $peer['port'];
+foreach ($app->data as $peer) {
     if ($peer['status'] == 2) {
         $status = $peer['error'];
-        $error = 'class="danger"';
+        $error_class = 'class="danger"';
     } else {
         $status = 'Ok';
-        $error = '';
+        $error_class = '';
     } ?>
-<tr <?php echo $error; ?>>
-<td><?php echo $string; ?></td>
-<td><?php echo $peer['stratum']; ?></td>
-<td><?php echo $peer['peerref']; ?></td>
-<td><?php echo $status; ?></td>
+<tr <?php echo $error_class; ?>>
+<td><?php echo htmlentities($peer['label'] ?? $peer['peer'] . ':' . $peer['port']) ?></td>
+<td><?php echo htmlentities($peer['stratum']); ?></td>
+<td><?php echo htmlentities($peer['peerref']); ?></td>
+<td><?php echo htmlentities($status); ?></td>
 </tr>
     <?php
 }
