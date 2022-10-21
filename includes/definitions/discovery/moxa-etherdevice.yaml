@@ -47,7 +47,7 @@ modules:
             - MOXA-EDSG516E-MIB::serialNumber.0
             - MOXA-EDSG512E8POE-MIB::serialNumber
     sensors:
-        pre-cache:
+        fetch:
             data:
                 -
                     oid:

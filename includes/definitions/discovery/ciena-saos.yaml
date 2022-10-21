@@ -2,7 +2,7 @@ mib: NORTEL-OPTICAL-PM-MIB
 modules:
     os:
         sysDescr_regex: '/(?<hardware>.*)SW:(?<version>\S+)/'
-    pre-cache:
+    fetch:
         data:
             -
                 oid: nnOpticalPmRecentTable
@@ -98,4 +98,3 @@ modules:
                             op: 'regex'
                             value: (.*(LOW|HIGH).*)
                     group: nnOpticalPmRecentIfIndexDescr
-                                    

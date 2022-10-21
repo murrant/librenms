@@ -1240,7 +1240,7 @@ function cache_peeringdb()
         if ($cached == 0) {
             $rand = rand(3, 30);
             echo "No cached PeeringDB data found, sleeping for $rand seconds" . PHP_EOL;
-            sleep($rand);
+
             $peer_keep = [];
             $ix_keep = [];
             foreach (dbFetchRows('SELECT `bgpLocalAs` FROM `devices` WHERE `disabled` = 0 AND `ignore` = 0 AND `bgpLocalAs` > 0 AND (`bgpLocalAs` < 64512 OR `bgpLocalAs` > 65535) AND `bgpLocalAs` < 4200000000 GROUP BY `bgpLocalAs`') as $as) {
@@ -1248,6 +1248,7 @@ function cache_peeringdb()
                 $get = Http::withOptions(['proxy' => Proxy::forGuzzle()])->get($peeringdb_url . '/net?depth=2&asn=' . $asn);
                 $json_data = $get->body();
                 $data = json_decode($json_data);
+                dump($peeringdb_url . '/net?depth=2&asn=' . $asn, $data);
                 $ixs = $data->{'data'}[0]->{'netixlan_set'};
                 foreach ($ixs ?? [] as $ix) {
                     $ixid = $ix->{'ix_id'};

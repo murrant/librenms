@@ -14,7 +14,7 @@ modules:
                 index: 'ionSysCpuUsage.{{ $index }}'
                 value: ionSysCpuUsage
     sensors:
-        pre-cache:
+        fetch:
             data:
                 -
                     oid:

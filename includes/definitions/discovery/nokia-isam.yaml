@@ -1,7 +1,7 @@
 mib: ASAM-SYSTEM-MIB:ASAM-EQUIP-MIB
 modules:
     mempools:
-        pre-cache:
+        fetch:
             oids:
                 - ASAM-EQUIP-MIB::eqptBoardTable
         data:

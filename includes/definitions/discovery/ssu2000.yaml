@@ -10,7 +10,7 @@ modules:
        features: SSU2000-MIB::inFeature.1
        features_template: 'NTP {{ SSU2000-MIB::inFeature.1 }}'
     sensors:
-       pre-cache:
+       fetch:
             data:
                 -
                     oid:

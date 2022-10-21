@@ -20,7 +20,7 @@ modules:
                         op: '!='
                         value: 3
     sensors:
-        pre-cache:
+        fetch:
             data:
                 -
                     oid:

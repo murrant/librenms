@@ -3,7 +3,7 @@ modules:
     os:
         sysDescr_regex: '/(?<hardware>.*)\sSwOS\s(?<version>.*)/'        
     sensors:
-        pre-cache:
+        fetch:
             data:
                 -
                     oid:

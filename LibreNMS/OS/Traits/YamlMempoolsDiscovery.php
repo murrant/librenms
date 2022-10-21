@@ -45,8 +45,9 @@ trait YamlMempoolsDiscovery
         $mempools = collect();
         $mempools_yaml = $this->getDiscovery('mempools');
 
-        foreach ($mempools_yaml['pre-cache']['oids'] ?? [] as $oid) {
-            $options = $mempools_yaml['pre-cache']['snmp_flags'] ?? '-OQUb';
+        $fetch = $mempools_yaml['fetch'] ?? $mempools_yaml['pre-cache'] ?? [];
+        foreach ($fetch['oids'] ?? [] as $oid) {
+            $options = $fetch['snmp_flags'] ?? '-OQUb';
             $this->mempoolsPrefetch = snmpwalk_cache_oid($this->getDeviceArray(), $oid, $this->mempoolsPrefetch, null, null, $options);
         }
 

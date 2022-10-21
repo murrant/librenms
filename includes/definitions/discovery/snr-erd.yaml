@@ -1,6 +1,6 @@
 mib: SNR-ERD-4
 modules:
-    pre-cache:
+    fetch:
         data:
             -
                 oid:

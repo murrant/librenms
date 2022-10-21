@@ -60,7 +60,7 @@ class YamlDiscovery
         d_echo($yaml_data);
 
         foreach ($yaml_data as $first_key => $first_yaml) {
-            if ($first_key == 'pre-cache') {
+            if ($first_key == 'fetch' || $first_key == 'pre-cache') {
                 continue;
             }
 

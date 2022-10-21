@@ -16,7 +16,7 @@ modules:
             - NMS-CHASSIS::nmscardSerial.0
             - NMS-CHASSIS::nmscardSerial.1
         sysDescr_regex: '/BDCOM\(tm\) (?<hardware>[A-Z0-9]+) Software, Version (?<version>.*)\nCompiled: .*\n.*,Serial num:(?<serial>[0-9]+)/'
-    pre-cache:
+    fetch:
         data:
             -
                 oid:

@@ -5,7 +5,7 @@ modules:
         serial: TELTONIKA-RUTX-MIB::serial.0
         version: TELTONIKA-RUTX-MIB::fwVersion.0
     sensors:
-        pre-cache:
+        fetch:
             data:
                 -
                     oid:

@@ -6,7 +6,7 @@ modules:
         hardware: '.1.3.6.1.4.1.7501.1.2.116.1.2.1.2.50'
 
     sensors:
-        pre-cache:
+        fetch:
             data:
                 -
                     oid:

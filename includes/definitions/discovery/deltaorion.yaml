@@ -3,7 +3,7 @@ modules:
     os:
         version: ORION-BASE-MIB::dcSoftwareVersion.0
     sensors:
-        pre-cache:
+        fetch:
             data:
                 -
                     oid:

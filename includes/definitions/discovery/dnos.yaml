@@ -1,7 +1,7 @@
 mib: DELL-NETWORKING-CHASSIS-MIB:DELL-NETWORKING-IF-EXTENSION-MIB:DELL-NETWORKING-VIRTUAL-LINK-TRUNK-MIB
 modules:
     mempools:
-        pre-cache:
+        fetch:
             snmp_flags: '-OQUs'
             oids:
                 - DELL-NETWORKING-CHASSIS-MIB::dellNetProcessorTable

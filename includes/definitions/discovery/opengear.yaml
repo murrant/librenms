@@ -7,7 +7,7 @@ modules:
         version_regex: '/(?<version>\S+)/'
         serial: OG-STATUSv2-MIB::ogSerialNumber
     sensors:
-        pre-cache:
+        fetch:
             data:
                 -
                     oid:
