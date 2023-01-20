@@ -3601,6 +3601,13 @@
             "order": 4,
             "type": "text"
         },
+        "http_auth_guest": {
+            "default": null,
+            "group": "auth",
+            "section": "general",
+            "order": 5,
+            "type": "text"
+        },
         "html_dir": {
             "type": "directory"
         },
