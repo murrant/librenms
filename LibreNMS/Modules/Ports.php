@@ -25,6 +25,7 @@
 
 namespace LibreNMS\Modules;
 
+use App\Facades\Rrd;
 use App\Models\Device;
 use App\Models\ModuleConfig;
 use App\Models\Port;
@@ -33,7 +34,10 @@ use LibreNMS\Config;
 use LibreNMS\Data\Source\SnmpResponse;
 use LibreNMS\DB\SyncsModels;
 use LibreNMS\Enum\PortAssociationMode;
+use LibreNMS\Enum\PortDisable;
 use LibreNMS\OS;
+use LibreNMS\RRD\RrdDefinition;
+use Log;
 use SnmpQuery;
 
 class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
@@ -113,6 +117,24 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         'ifAdminStatus',
     ];
 
+    public const DS_FIELD_MAP = [
+        'INOCTETS' => 'ifInOctets',
+        'OUTOCTETS' => 'ifOutOctets',
+        'INERRORS' => 'ifInErrors',
+        'OUTERRORS' => 'ifOutErrors',
+        'INUCASTPKTS' => 'ifInUcastPkts',
+        'OUTUCASTPKTS' => 'ifOutUcastPkts',
+        'INNUCASTPKTS' => 'ifInNUcastPkts',
+        'OUTNUCASTPKTS' => 'ifOutNUcastPkts',
+        'INDISCARDS' => 'ifInDiscards',
+        'OUTDISCARDS' => 'ifOutDiscards',
+        'INUNKNOWNPROTOS' => 'ifInUnknownProtos',
+        'INBROADCASTPKTS' => 'ifInBroadcastPkts',
+        'OUTBROADCASTPKTS' => 'ifOutBroadcastPkts',
+        'INMULTICASTPKTS' => 'ifInMulticastPkts',
+        'OUTMULTICASTPKTS' => 'ifOutMulticastPkts',
+    ];
+
     public const BASE_PORT_STATS_FIELDS = [
         'ifInErrors',
         'ifOutErrors',
@@ -152,8 +174,8 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
     public function discover(OS $os): void
     {
         if ($this->version != 2) {
-           parent::discover($os);
-           return;
+            parent::discover($os);
+            return;
         }
         $device_id = $os->getDeviceId();
 
@@ -166,6 +188,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         $module_config->config = [
             'field_alias' => $this->field_alias,
             'per_port_polling' => Config::getOsSetting($os->getName(), 'polling.selected_ports') || $os->getDevice()->getAttrib('selected_ports') == 'true',
+            'etherlike' => $this->field_alias['ifDuplex'] == 'EtherLike-MIB::dot3StatsDuplexStatus'
         ];
         $module_config->save();
 
@@ -177,8 +200,10 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             $port = new \App\Models\Port;
             $port->ifIndex = $ifIndex;
             $port->device_id = $device_id;
+            $this->fillPortFields($port, $data, $this->discovery_base_fields);
+            $port->disabled = $this->shouldDisablePort($port)->value;
 
-            return $this->fillPortFields($port, $data, $this->discovery_base_fields);
+            return $port;
         });
 
 
@@ -194,8 +219,8 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             parent::poll($os);
             return;
         }
-        $device_id = $os->getDeviceId();
-        $os->getDevice()->load('ports', 'ports.statistics'); // eager load all ports and statistics
+        $device = $os->getDevice();
+        $device->load('ports', 'ports.statistics'); // eager load all ports and statistics
 
         // load the config TODO move to the poller code.
         $config = ModuleConfig::firstWhere(['module' => 'ports', 'device_id' => $os->getDeviceId()])->config;
@@ -204,17 +229,17 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         $this->field_alias = $config['field_alias'];
 
         // collect snmp data from the device and save the time it was collected
-        $data = $config['per_port_polling'] ? $this->pollPortsWithGets($os->getDevice(), $fields) : $this->pollPortsWithWalks($fields);
+        $data = $config['per_port_polling'] ? $this->pollPortsWithGets($device, $fields) : $this->pollPortsWithWalks($fields);
         $poll_time = time();
 
         // filter the stats fields they go in the ports_stats table
         $port_model_fields = array_diff($fields, self::PORT_STATS_FIELDS);
 
         // fill the data into port objects
-        $new_ports = $data->mapTable(function ($data, $ifIndex) use ($port_model_fields, $device_id, $poll_time) {
+        $new_ports = $data->mapTable(function ($data, $ifIndex) use ($port_model_fields, $device, $poll_time) {
             $port = new \App\Models\Port;
             $port->ifIndex = $ifIndex;
-            $port->device_id = $device_id;
+            $port->device_id = $device->device_id;
             $port->poll_time = $poll_time;
 
             return $this->fillPortFields($port, $data, $port_model_fields);
@@ -224,7 +249,11 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
 
         // update the ports_statistics table too
         $statistics_data = $data->table(1);
-        $ports->each(function (Port $port) use ($statistics_data, $poll_time) {
+        $ports->each(function (Port $port) use ($statistics_data, $os, $poll_time) {
+            if ($port->disabled) {
+                return; // skip disabled ports
+            }
+
             // if statistics entry doesn't exist, create a new one
             if ($port->statistics === null) {
                 $port_stats = new PortStatistic(['port_id' => $port->port_id]);
@@ -238,6 +267,25 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             }
 
             $port->statistics->save();
+
+            // update RRD
+            $rrd_name = $this->rrdName($port);
+            $rrd_max = 12500000000;
+            if ($this->shouldRrdTune($port)) {
+                Rrd::tune('port', $rrd_name, $port->ifSpeed);
+                $rrd_max = $port->ifSpeed;
+            }
+            $rrd_def = RrdDefinition::make();
+            foreach (self::DS_FIELD_MAP as $ds => $field) {
+                $rrd_def->addDataset($ds, 'DERIVE', 0, $rrd_max);
+            }
+            $fields = array_map(function ($field) use ($port, $statistics_data) {
+                return $statistics_data[$port->ifIndex][$this->field_alias[$field]];
+            }, self::DS_FIELD_MAP);
+            $tags = $port->only(['ifName', 'ifDescr', 'ifIndex']);
+            $tags['rrd_name'] = $rrd_name;
+            $tags['rrd_def'] = $rrd_def;
+            app('Datastore')->put($os->getDeviceArray(), 'ports', $tags, $fields);
         });
     }
 
@@ -272,30 +320,30 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
     }
 
     // TODO create interface and move to OS
-    protected function getFieldAlias(array $defaults)
+    protected function getFieldAlias(array $defaults): array
     {
         // tests
         $mib_tests = SnmpQuery::next([
             'IF-MIB::ifAlias',
             'IF-MIB::ifHCOutOctets',
             'IF-MIB::ifHighSpeed',
-            'EtherLike-MIB::dot3StatsIndex',
             'EtherLike-MIB::dot3StatsDuplexStatus',
             'Q-BRIDGE-MIB::dot1qPvid',
         ]);
 
         foreach ($mib_tests->values() as $oid => $value) {
             preg_match('/^.+::[a-zA-Z0-9]+/', $oid, $oid_matches);
-            $field = match($oid_matches[0]) {
+            $field = match ($oid_matches[0]) {
                 'IF-MIB::ifAlias' => 'ifAlias',
                 'IF-MIB::ifHighSpeed' => 'ifSpeed',
                 'IF-MIB::ifHCOutOctets' => 'ifOutOctets',
                 'Q-BRIDGE-MIB::dot1qPvid' => 'ifVlan',
+                'EtherLike-MIB::dot3StatsDuplexStatus' => 'ifDuplex',
                 default => false,
             };
 
             // if not a matched field and the value is >= 0 (if numeric)
-            if ($field && (! is_numeric($value) || $value >= 0)) {
+            if ($field && (!is_numeric($value) || $value >= 0)) {
                 $defaults[$field] = $oid_matches[0];
             }
         }
@@ -322,5 +370,76 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         }
 
         return $port;
+    }
+
+    private function shouldDisablePort(Port $port): PortDisable
+    {
+        // check empty values first
+        if (empty($port->ifDescr)) {
+            // If these are all empty, we are just going to show blank names in the ui
+            if (empty($port->ifAlias) && empty($port->ifName)) {
+                Log::debug("ignored: empty ifDescr, ifAlias and ifName\n");
+
+                return PortDisable::empty;
+            }
+
+            // ifDescr should not be empty unless it is explicitly allowed
+            if (! Config::getOsSetting($port->device->os, 'empty_ifdescr')) {
+                Log::debug("ignored: empty ifDescr\n");
+
+                return PortDisable::empty_ifdescr;
+            }
+        }
+
+        foreach (Config::getOsSetting($port->device->os, 'bad_ifdescr_regexp') as $bir) {
+            if (preg_match($bir . 'i', $port->ifDescr)) {
+                Log::debug("ignored by ifDescr: $port->ifDescr (matched: $bir)\n");
+
+                return PortDisable::bad_ifdescr_regexp;
+            }
+        }
+
+        foreach (Config::getOsSetting($port->device->os, 'bad_ifname_regexp') as $bnr) {
+            if (preg_match($bnr . 'i', $port->ifName)) {
+                Log::debug("ignored by ifName: $port->ifName (matched: $bnr)\n");
+
+                return PortDisable::bad_ifname_regexp;
+            }
+        }
+
+        foreach (Config::getOsSetting($port->device->os, 'bad_ifalias_regexp') as $bar) {
+            if (preg_match($bar . 'i', $port->ifAlias)) {
+                Log::debug("ignored by ifName: $port->ifAlias (matched: $bar)\n");
+
+                return PortDisable::bad_ifalias_regexp;
+            }
+        }
+
+        foreach (Config::getOsSetting($port->device->os, 'bad_iftype_regexp') as $bt) {
+            if (preg_match($bt . 'i', $port->ifType)) {
+                Log::debug("ignored by ifType: $port->ifType (matched: $bt )\n");
+
+                return PortDisable::bad_iftype_regexp;
+            }
+        }
+
+        return PortDisable::enable;
+    }
+
+    private function shouldRrdTune(Port $port): bool
+    {
+        $port_tune = $port->device->getAttrib('ifName_tune:' . $port->ifName);
+        $device_tune = $port->device->getAttrib('override_rrdtool_tune');
+
+        return $port_tune == 'true' ||
+        ($device_tune == 'true' && $port_tune != 'false') ||
+        (Config::get('rrdtool_tune') && $port_tune != 'false' && $device_tune != 'false');
+    }
+
+    private function rrdName(Port $port, ?string $suffix = null)
+    {
+        $file_name = "port-id{$port->port_id}" . (empty($suffix) ? '' : '-' . $suffix);
+
+        return Rrd::name($port->device->hostname, $file_name);
     }
 }

@@ -277,7 +277,7 @@ class Port extends DeviceRelatedModel implements Keyable
     {
         return $query->where([
             [$this->qualifyColumn('deleted'), '=', 0],
-            [$this->qualifyColumn('disabled'), '=', 1],
+            [$this->qualifyColumn('disabled'), '!=', 0],
         ]);
     }
 
