@@ -2,56 +2,52 @@
 
 namespace App\Models;
 
-use DB;
+use App\Facades\DeviceCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
+use LibreNMS\Enum\PortAssociationMode;
+use LibreNMS\Interfaces\Models\Keyable;
 use LibreNMS\Util\Rewrite;
 use Permissions;
 
-class Port extends DeviceRelatedModel
+class Port extends DeviceRelatedModel implements Keyable
 {
     use HasFactory;
 
     public $timestamps = false;
     protected $primaryKey = 'port_id';
-
-    /**
-     * Initialize this class
-     */
-    public static function boot()
-    {
-        parent::boot();
-
-        static::deleting(function (Port $port) {
-            // delete related data
-            $port->adsl()->delete();
-            $port->vdsl()->delete();
-            $port->fdbEntries()->delete();
-            $port->ipv4()->delete();
-            $port->ipv6()->delete();
-            $port->macAccounting()->delete();
-            $port->macs()->delete();
-            $port->nac()->delete();
-            $port->ospfNeighbors()->delete();
-            $port->ospfPorts()->delete();
-            $port->pseudowires()->delete();
-            $port->statistics()->delete();
-            $port->stp()->delete();
-            $port->vlans()->delete();
-
-            // dont have relationships yet
-            DB::table('juniAtmVp')->where('port_id', $port->port_id)->delete();
-            DB::table('ports_perms')->where('port_id', $port->port_id)->delete();
-            DB::table('links')->where('local_port_id', $port->port_id)->orWhere('remote_port_id', $port->port_id)->delete();
-            DB::table('ports_stack')->where('port_id_low', $port->port_id)->orWhere('port_id_high', $port->port_id)->delete();
-
-            \Rrd::purge(optional($port->device)->hostname, \Rrd::portName($port->port_id)); // purge all port rrd files
-        });
-    }
+    protected $fillable = [
+        'ifIndex',
+        'device_id',
+        'ifDescr',
+        'ifName',
+        'ifIndex',
+        'ifSpeed',
+        'ifConnectorPresent',
+        'ifOperStatus',
+        'ifAdminStatus',
+        'ifDuplex',
+        'ifMtu',
+        'ifType',
+        'ifAlias',
+        'ifPhysAddress',
+        'ifLastChange',
+        'ifVlan',
+        'ifTrunk',
+        'ifVrf',
+        'poll_time',
+        'ifInErrors',
+        'ifOutErrors',
+        'ifInUcastPkts',
+        'ifOutUcastPkts',
+        'ifInOctets',
+        'ifOutOctets',
+    ];
 
     // ---- Helper Functions ----
 
@@ -340,9 +336,9 @@ class Port extends DeviceRelatedModel
         return $this->hasMany(Pseudowire::class, 'port_id');
     }
 
-    public function statistics(): HasMany
+    public function statistics(): HasOne
     {
-        return $this->hasMany(PortStatistic::class, 'port_id');
+        return $this->hasOne(PortStatistic::class, 'port_id');
     }
 
     public function stp(): HasMany
@@ -359,5 +355,16 @@ class Port extends DeviceRelatedModel
     public function vlans(): HasMany
     {
         return $this->hasMany(PortVlan::class, 'port_id');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCompositeKey()
+    {
+        $device = $this->relationLoaded('device') ? $this->device : DeviceCache::get($this->device_id);
+        $port_assoc_mode = $device->port_association_mode ? PortAssociationMode::getName($device->port_association_mode) : \LibreNMS\Config::get('default_port_association_mode');
+
+        return $this->device_id . '-' . $this->$port_assoc_mode;
     }
 }

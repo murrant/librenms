@@ -176,13 +176,6 @@ if (! empty($port_adsl->adslLineCoding)) {
         echo '-';
     }
 
-    echo '<br />';
-    if (! empty($ifHardType)) {
-        echo '<span class=box-desc>' . $ifHardType . '</span>';
-    } else {
-        echo '-';
-    }
-
     echo "</td><td width=150 onclick=\"location.href='" . generate_port_url($port) . "'\" >";
     if ($port['ifPhysAddress'] && $port['ifPhysAddress'] != '') {
         echo '<span class=box-desc>' . $port->ifPhysAddress . '</span>';

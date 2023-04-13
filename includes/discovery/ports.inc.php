@@ -1,5 +1,10 @@
 <?php
 
+if (\LibreNMS\Config::get('modules.ports.version') == 2) {
+    (new \LibreNMS\Modules\Ports())->discover($os);
+    return;
+}
+
 // Build SNMP Cache Array
 use App\Models\PortGroup;
 use LibreNMS\Config;
@@ -62,6 +67,7 @@ d_echo($port_stats);
 // or maybe other means in the future. The default port association mode still is ifIndex for
 // compatibility reasons.
 $port_association_mode = Config::get('default_port_association_mode');
+dd($device);
 if ($device['port_association_mode']) {
     $port_association_mode = PortAssociationMode::getName($device['port_association_mode']);
 }
