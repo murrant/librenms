@@ -316,7 +316,7 @@ class Port extends DeviceRelatedModel
     {
         return $query->where([
             [$this->qualifyColumn('deleted'), '=', 0],
-            [$this->qualifyColumn('disabled'), '=', 1],
+            [$this->qualifyColumn('disabled'), '!=', 0],
         ]);
     }
 
