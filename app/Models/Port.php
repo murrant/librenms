@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Facades\DeviceCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,15 +13,44 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use LibreNMS\Enum\PortAssociationMode;
+use LibreNMS\Interfaces\Models\Keyable;
 use LibreNMS\Util\Rewrite;
 use Permissions;
 
-class Port extends DeviceRelatedModel
+class Port extends DeviceRelatedModel implements Keyable
 {
     use HasFactory;
 
     public $timestamps = false;
     protected $primaryKey = 'port_id';
+    protected $fillable = [
+        'ifIndex',
+        'device_id',
+        'ifDescr',
+        'ifName',
+        'ifIndex',
+        'ifSpeed',
+        'ifConnectorPresent',
+        'ifOperStatus',
+        'ifAdminStatus',
+        'ifDuplex',
+        'ifMtu',
+        'ifType',
+        'ifAlias',
+        'ifPhysAddress',
+        'ifLastChange',
+        'ifVlan',
+        'ifTrunk',
+        'ifVrf',
+        'poll_time',
+        'ifInErrors',
+        'ifOutErrors',
+        'ifInUcastPkts',
+        'ifOutUcastPkts',
+        'ifInOctets',
+        'ifOutOctets',
+    ];
 
     /**
      * Initialize this class
@@ -511,9 +541,9 @@ class Port extends DeviceRelatedModel
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\PortStatistic, $this>
      */
-    public function statistics(): HasMany
+    public function statistics(): HasOne
     {
-        return $this->hasMany(PortStatistic::class, 'port_id');
+        return $this->hasOne(PortStatistic::class, 'port_id');
     }
 
     /**
@@ -555,5 +585,16 @@ class Port extends DeviceRelatedModel
     public function vrf(): HasOne
     {
         return $this->hasOne(Vrf::class, 'vrf_id', 'ifVrf');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCompositeKey(): string
+    {
+        $device = $this->relationLoaded('device') ? $this->device : DeviceCache::get($this->device_id);
+        $port_assoc_mode = $device->port_association_mode ? PortAssociationMode::getName($device->port_association_mode) : \LibreNMS\Config::get('default_port_association_mode');
+
+        return $this->device_id . '-' . $this->$port_assoc_mode;
     }
 }

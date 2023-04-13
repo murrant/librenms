@@ -167,6 +167,8 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Package::observe(\App\Observers\PackageObserver::class);
         \App\Models\Qos::observe(\App\Observers\QosObserver::class);
         Sensor::observe(\App\Observers\SensorObserver::class);
+        \App\Models\Port::observe(\App\Observers\PortObserver::class);
+        \App\Models\PortStatistic::observe(\App\Observers\PortStatisticObserver::class);
         \App\Models\Service::observe(\App\Observers\ServiceObserver::class);
         \App\Models\Storage::observe(\App\Observers\StorageObserver::class);
         \App\Models\Stp::observe(\App\Observers\StpObserver::class);
