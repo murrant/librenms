@@ -37,6 +37,7 @@ use LibreNMS\Enum\PortAssociationMode;
 use LibreNMS\Enum\PortDisable;
 use LibreNMS\OS;
 use LibreNMS\RRD\RrdDefinition;
+use LibreNMS\Util\StringHelpers;
 use Log;
 use SnmpQuery;
 
@@ -58,7 +59,6 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         'ifDuplex' => 'IF-MIB::ifDuplex',
         'ifTrunk' => 'IF-MIB::ifTrunk',
         'ifVlan' => 'IF-MIB::ifVlan',
-        'ifPromiscuousMode' => 'IF-MIB::ifPromiscuousMode',
         'ifInOctets' => 'IF-MIB::ifInOctets',
         'ifInUcastPkts' => 'IF-MIB::ifInUcastPkts',
         'ifInNUcastPkts' => 'IF-MIB::ifInNUcastPkts', // deprecated
@@ -108,7 +108,6 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         'ifTrunk',
         'ifVlan',
         'ifPhysAddress',
-        'ifPromiscuousMode',
     ];
 
     protected array $poller_base_fields = [
@@ -177,17 +176,17 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             parent::discover($os);
             return;
         }
-        $device_id = $os->getDeviceId();
+        $device = $os->getDevice();
 
         $this->field_alias = $this->getFieldAlias($this->field_alias);
 
         $module_config = ModuleConfig::firstOrCreate([
-            'device_id' => $os->getDeviceId(),
+            'device_id' => $device->device_id,
             'module' => 'ports',
         ]);
         $module_config->config = [
             'field_alias' => $this->field_alias,
-            'per_port_polling' => Config::getOsSetting($os->getName(), 'polling.selected_ports') || $os->getDevice()->getAttrib('selected_ports') == 'true',
+            'per_port_polling' => Config::getOsSetting($os->getName(), 'polling.selected_ports') || $device->getAttrib('selected_ports') == 'true',
             'etherlike' => $this->field_alias['ifDuplex'] == 'EtherLike-MIB::dot3StatsDuplexStatus'
         ];
         $module_config->save();
@@ -196,10 +195,10 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         $base_data = SnmpQuery::enumStrings()->walk($base_oids);
 
 
-        $ports = $base_data->mapTable(function ($data, $ifIndex) use ($device_id) {
+        $ports = $base_data->mapTable(function ($data, $ifIndex) use ($device) {
             $port = new \App\Models\Port;
             $port->ifIndex = $ifIndex;
-            $port->device_id = $device_id;
+            $port->device_id = $device->device_id;
             $this->fillPortFields($port, $data, $this->discovery_base_fields);
             $port->disabled = $this->shouldDisablePort($port)->value;
 
@@ -207,7 +206,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         });
 
 
-        $this->syncModels($os->getDevice(), 'ports', $ports); // TODO soft delete
+        $this->syncModels($device, 'ports', $ports); // TODO soft delete
     }
 
     /**
@@ -223,8 +222,8 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         $device->load('ports', 'ports.statistics'); // eager load all ports and statistics
 
         // load the config TODO move to the poller code.
-        $config = ModuleConfig::firstWhere(['module' => 'ports', 'device_id' => $os->getDeviceId()])->config;
-        $port_assoc_mode = PortAssociationMode::getName($os->getDevice()->port_association_mode);
+        $config = ModuleConfig::firstWhere(['module' => 'ports', 'device_id' => $device->device_id])->config;
+        $port_assoc_mode = PortAssociationMode::getName($device->port_association_mode);
         $fields = array_merge($this->poller_base_fields, self::BASE_PORT_STATS_FIELDS, self::PORT_STATS_FIELDS, [$port_assoc_mode]); // collect all expected fields
         $this->field_alias = $config['field_alias'];
 
@@ -241,51 +240,24 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             $port->ifIndex = $ifIndex;
             $port->device_id = $device->device_id;
             $port->poll_time = $poll_time;
+            // TODO handle ifAdminStatus and ifOperStatus skipping
+            $this->fillPortFields($port, $data, $port_model_fields);
+            $this->runPortDescrParser($port);
 
-            return $this->fillPortFields($port, $data, $port_model_fields);
+            return $port;
         });
 
-        $ports = $this->syncModels($os->getDevice(), 'ports', $new_ports); // TODO soft delete
+        $ports = $this->syncModels($device, 'ports', $new_ports); // TODO soft delete
 
-        // update the ports_statistics table too
+        // update the ports_statistics and others
         $statistics_data = $data->table(1);
         $ports->each(function (Port $port) use ($statistics_data, $os, $poll_time) {
             if ($port->disabled) {
                 return; // skip disabled ports
             }
-
-            // if statistics entry doesn't exist, create a new one
-            if ($port->statistics === null) {
-                $port_stats = new PortStatistic(['port_id' => $port->port_id]);
-                $port_stats->setRelation('port', $port); // prevent extra sql query
-                $port->setRelation('statistics', $port_stats);
-            }
-
-            // fill the new data
-            foreach (self::PORT_STATS_FIELDS as $field) {
-                $port->statistics->$field = $statistics_data[$port->ifIndex][$this->field_alias[$field]];
-            }
-
-            $port->statistics->save();
-
-            // update RRD
-            $rrd_name = $this->rrdName($port);
-            $rrd_max = 12500000000;
-            if ($this->shouldRrdTune($port)) {
-                Rrd::tune('port', $rrd_name, $port->ifSpeed);
-                $rrd_max = $port->ifSpeed;
-            }
-            $rrd_def = RrdDefinition::make();
-            foreach (self::DS_FIELD_MAP as $ds => $field) {
-                $rrd_def->addDataset($ds, 'DERIVE', 0, $rrd_max);
-            }
-            $fields = array_map(function ($field) use ($port, $statistics_data) {
-                return $statistics_data[$port->ifIndex][$this->field_alias[$field]];
-            }, self::DS_FIELD_MAP);
-            $tags = $port->only(['ifName', 'ifDescr', 'ifIndex']);
-            $tags['rrd_name'] = $rrd_name;
-            $tags['rrd_def'] = $rrd_def;
-            app('Datastore')->put($os->getDeviceArray(), 'ports', $tags, $fields);
+            $this->savePortStatistics($port, $statistics_data[$port->ifIndex]);
+            $this->updatePortRrd($port, $statistics_data[$port->ifIndex], $os);
+            $this->updatePortPoe($port, $statistics_data[$port->ifIndex], $os);
         });
     }
 
@@ -359,14 +331,27 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
     private function fillPortFields(Port $port, array $data, array $fields): Port
     {
         foreach ($fields as $field) {
-            $oid = $this->field_alias[$field];
-            $value = $data[$oid];
+            $port->setAttribute($field, $data[$this->field_alias[$field]]);
+        }
 
-            if ($field == 'ifSpeed' && $oid == 'IF-MIB::ifHighSpeed') {
-                $value = $value * 1000;
-            }
+        // data tweaks
+        if ($this->field_alias['ifSpeed'] == 'IF-MIB::ifHighSpeed') {
+            $port->ifSpeed = $port->ifSpeed * 1000;
+        }
 
-            $port->setAttribute($field, $value);
+        if (str_contains($port->ifPhysAddress, ':')) {
+            $mac_split = explode(':', $port->ifPhysAddress);
+            $port->ifPhysAddress = zeropad($mac_split[0]) . zeropad($mac_split[1]) . zeropad($mac_split[2]) . zeropad($mac_split[3]) . zeropad($mac_split[4] ?? '') . zeropad($mac_split[5] ?? '');
+        }
+
+        if (! $port->device->getAttrib('ifName:' . $port->ifName)) {
+            $port->getOriginal('ifAlias');
+        } else {
+            $port->ifAlias = StringHelpers::inferEncoding($port->ifAlias);
+        }
+
+        if (! $port->device->getAttrib('ifSpeed:' . $port->ifName)) {
+            $port->ifSpeed = $port->getOriginal('ifSpeed');
         }
 
         return $port;
@@ -438,8 +423,77 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
 
     private function rrdName(Port $port, ?string $suffix = null)
     {
-        $file_name = "port-id{$port->port_id}" . (empty($suffix) ? '' : '-' . $suffix);
+        $parts = ['port', "id$port->port_id",];
+        if ($suffix) {
+            $parts[] = $suffix;
+        }
 
-        return Rrd::name($port->device->hostname, $file_name);
+        return Rrd::name($port->device->hostname, $parts);
+    }
+
+    private function runPortDescrParser(Port $port)
+    {
+        // TODO
+    }
+
+    private function savePortStatistics(Port $port, array $port_statistics): void
+    {
+// if statistics entry doesn't exist, create a new one
+        if ($port->statistics === null) {
+            $port_stats = new PortStatistic(['port_id' => $port->port_id]);
+            $port_stats->setRelation('port', $port); // prevent extra sql query
+            $port->setRelation('statistics', $port_stats);
+        }
+
+        // fill the new data
+        foreach (self::PORT_STATS_FIELDS as $field) {
+            $port->statistics->$field = $port_statistics[$this->field_alias[$field]];
+        }
+
+        $port->statistics->save();
+    }
+
+
+    private function updatePortRrd(Port $port, array $port_stats, OS $os): void
+    {
+        $rrd_name = $this->rrdName($port);
+        $rrd_max = 12500000000;
+        if ($this->shouldRrdTune($port)) {
+            Rrd::tune('port', $rrd_name, $port->ifSpeed);
+            $rrd_max = $port->ifSpeed;
+        }
+        $rrd_def = RrdDefinition::make();
+        foreach (self::DS_FIELD_MAP as $ds => $field) {
+            $rrd_def->addDataset($ds, 'DERIVE', 0, $rrd_max);
+        }
+        $fields = array_map(function ($field) use ($port, $port_stats) {
+            return $port_stats[$this->field_alias[$field]] ?? null;
+        }, self::DS_FIELD_MAP);
+        $tags = $port->only(['ifName', 'ifDescr', 'ifIndex']);
+        $tags['rrd_name'] = $rrd_name;
+        $tags['rrd_def'] = $rrd_def;
+        app('Datastore')->put($os->getDeviceArray(), 'ports', $tags, $fields);
+    }
+
+    private function updatePortPoe(Port $port, array $port_stats, OS $os): void
+    {
+        // TODO actually supply data
+        $poe_alias = array_intersect_key($this->field_alias, ['PortPwrAllocated' => 1, 'PortPwrAvailable' => 1, 'PortConsumption' => 1, 'PortMaxPwrDrawn' => 1]);
+        if (empty($poe_alias)) {
+            return;
+        }
+
+        $rrd_def = RrdDefinition::make();
+        $fields = [];
+        foreach ($poe_alias as $field => $oid) {
+            $rrd_def->addDataset($field, 'GAUGE', 0);
+            $fields[$field] = $port_stats[$oid];
+        }
+
+        app('Datastore')->put($os->getDeviceArray(), 'poe', [
+            'ifName' => $port->ifName,
+            'rrd_name' => $this->rrdName($port, 'poe'),
+            'rrd_def' => $rrd_def,
+        ], $fields);
     }
 }
