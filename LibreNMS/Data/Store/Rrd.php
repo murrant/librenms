@@ -30,6 +30,7 @@ use Illuminate\Support\Str;
 use LibreNMS\Config;
 use LibreNMS\Exceptions\FileExistsException;
 use LibreNMS\Exceptions\RrdGraphException;
+use LibreNMS\Modules\Ports;
 use LibreNMS\Proc;
 use LibreNMS\Util\Debug;
 use LibreNMS\Util\Rewrite;
@@ -234,24 +235,9 @@ class Rrd extends BaseDatastore
                 return false;
             }
             $max = $max / 8;
-            $fields = [
-                'INOCTETS',
-                'OUTOCTETS',
-                'INERRORS',
-                'OUTERRORS',
-                'INUCASTPKTS',
-                'OUTUCASTPKTS',
-                'INNUCASTPKTS',
-                'OUTNUCASTPKTS',
-                'INDISCARDS',
-                'OUTDISCARDS',
-                'INUNKNOWNPROTOS',
-                'INBROADCASTPKTS',
-                'OUTBROADCASTPKTS',
-                'INMULTICASTPKTS',
-                'OUTMULTICASTPKTS',
-            ];
+            $fields = array_keys(Ports::DS_FIELD_MAP);
         }
+
         if (count($fields) > 0) {
             $options = '--maximum ' . implode(":$max --maximum ", $fields) . ":$max";
             $this->command('tune', $filename, $options);

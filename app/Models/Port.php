@@ -222,7 +222,7 @@ class Port extends DeviceRelatedModel implements Keyable
     {
         return $query->where([
             ['deleted', '=', 0],
-            ['disabled', '=', 1],
+            ['disabled', '!=', 0],
         ]);
     }
 

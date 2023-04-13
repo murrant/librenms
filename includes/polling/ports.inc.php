@@ -550,7 +550,7 @@ foreach ($ports as $port) {
     $port_info_string = 'Port ' . $port['ifName'] . ': ' . $port['ifDescr'] . " ($ifIndex / #$port_id) ";
 
     /* We don't care for disabled ports, go on */
-    if ($port['disabled'] == 1) {
+    if ($port['disabled']) {
         echo "{$port_info_string}disabled.\n";
         continue;
     }
