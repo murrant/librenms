@@ -37,9 +37,11 @@ use LibreNMS\Enum\PortAssociationMode;
 use LibreNMS\Enum\PortDisable;
 use LibreNMS\OS;
 use LibreNMS\RRD\RrdDefinition;
+use LibreNMS\Util\Number;
 use LibreNMS\Util\StringHelpers;
 use Log;
 use SnmpQuery;
+use Symfony\Component\Console\Helper\Table;
 
 class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
 {
@@ -259,6 +261,8 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             $this->updatePortRrd($port, $statistics_data[$port->ifIndex], $os);
             $this->updatePortPoe($port, $statistics_data[$port->ifIndex], $os);
         });
+
+        $this->printPorts($ports);
     }
 
     protected function pollPortsWithWalks(array $fields): SnmpResponse
@@ -460,7 +464,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         $rrd_max = 12500000000;
         if ($this->shouldRrdTune($port)) {
             Rrd::tune('port', $rrd_name, $port->ifSpeed);
-            $rrd_max = $port->ifSpeed;
+            $rrd_max = max($port->ifSpeed, $rrd_max);
         }
         $rrd_def = RrdDefinition::make();
         foreach (self::DS_FIELD_MAP as $ds => $field) {
@@ -495,5 +499,29 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             'rrd_name' => $this->rrdName($port, 'poe'),
             'rrd_def' => $rrd_def,
         ], $fields);
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection $ports
+     * @return void
+     */
+    private function printPorts(\Illuminate\Support\Collection $ports): void
+    {
+        $out = new \Symfony\Component\Console\Output\ConsoleOutput();
+        $table = new Table($out);
+        $table->setHeaders(['Port', 'VLAN', 'Speed', 'MTU', 'Bits In', 'Bits Out']);
+        foreach ($ports as $port) {
+            dump($port->ifSpeed);
+            /** @var Port $port */
+            $table->addRow([
+                $port->getShortLabel(),
+                $port->ifVlan,
+                Number::formatSi($port->ifSpeed, 2, 3, 'bps'),
+                $port->ifMtu,
+                Number::formatSi($port->ifInOctets_rate * 8, 2, 3, 'bps'),
+                Number::formatSi($port->ifOutOctets_rate * 8, 2, 3, 'bps'),
+            ]);
+        }
+        $table->render();
     }
 }
