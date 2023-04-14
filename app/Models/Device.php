@@ -1344,6 +1344,11 @@ class Device extends BaseModel
     /**
      * @return HasMany<MplsLsp, $this>
      */
+    public function moduleConfigs(): HasMany
+    {
+        return $this->hasMany(\App\Models\ModuleConfig::class, 'device_id');
+    }
+
     public function mplsLsps(): HasMany
     {
         return $this->hasMany(MplsLsp::class, 'device_id');
