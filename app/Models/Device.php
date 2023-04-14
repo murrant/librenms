@@ -873,6 +873,11 @@ class Device extends BaseModel
         return $this->hasMany(\App\Models\Mempool::class, 'device_id');
     }
 
+    public function moduleConfigs(): HasMany
+    {
+        return $this->hasMany(\App\Models\ModuleConfig::class, 'device_id');
+    }
+
     public function mplsLsps(): HasMany
     {
         return $this->hasMany(\App\Models\MplsLsp::class, 'device_id');

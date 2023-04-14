@@ -18,8 +18,9 @@ class CreateModuleConfigsTable extends Migration
             $table->bigInteger('device_id');
             $table->string('module', 32);
             $table->text('config');
+            $table->boolean('poll_enabled')->default(1);
             $table->timestamps();
-            $table->unique(['module', 'device_id']);
+            $table->unique(['device_id', 'module']);
         });
     }
 
