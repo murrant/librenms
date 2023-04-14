@@ -1185,6 +1185,11 @@ class Device extends BaseModel
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MplsLsp, $this>
      */
+    public function moduleConfigs(): HasMany
+    {
+        return $this->hasMany(\App\Models\ModuleConfig::class, 'device_id');
+    }
+
     public function mplsLsps(): HasMany
     {
         return $this->hasMany(MplsLsp::class, 'device_id');

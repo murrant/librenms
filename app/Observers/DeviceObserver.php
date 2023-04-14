@@ -120,6 +120,7 @@ class DeviceObserver
         $device->macs()->delete();
         $device->mefInfo()->delete();
         $device->mempools()->delete();
+        $device->moduleConfigs()->delete();
         $device->mplsLsps()->delete();
         $device->mplsLspPaths()->delete();
         $device->mplsSaps()->delete();
