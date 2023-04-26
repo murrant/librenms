@@ -89,9 +89,25 @@ class Device
      */
     public function getByHostname($hostname): \App\Models\Device
     {
-        $device_id = array_column($this->devices, 'device_id', 'hostname')[$hostname] ?? 0;
+        return $this->getByField('hostname', $hostname);
+    }
 
-        return $this->devices[$device_id] ?? $this->load($hostname, 'hostname');
+    /**
+     * Get device by any device field or a number of fields
+     * Slower than by device_id, but attempts to prevent an sql query
+     */
+    public function getByField(string|array $fields, mixed $value): \App\Models\Device
+    {
+        $fields = (array)$fields;
+
+        foreach ($fields as $field) {
+            $device_id = array_column($this->devices, 'device_id', $field)[$value] ?? 0;
+            if ($device_id) {
+                break;
+            }
+        }
+
+        return $this->devices[$device_id] ?? $this->load($value, $fields);
     }
 
     /**
@@ -123,14 +139,46 @@ class Device
         return isset($this->devices[$device_id]);
     }
 
-    private function load(mixed $value, string $field = 'device_id'): \App\Models\Device
+    private function load(mixed $value, string|array $field = ['device_id']): \App\Models\Device
     {
-        $device = \App\Models\Device::query()->where($field, $value)->first();
+        $query = \App\Models\Device::query();
+        foreach ((array) $field as $column) {
+            if ($column == 'ip') {
+                $value = inet_pton($value); // convert IP to binary for query
+                if ($value === false) {
+                    continue;  // not an IP, skip the ip field
+                }
+            }
+
+            $query->orWhere($column, $value);
+        }
+
+        $device = $query->first();
 
         if (! $device) {
             return new \App\Models\Device;
         }
 
+        $this->devices[$device->device_id] = $device;
+
+        return $device;
+    }
+
+    /**
+     * Insert a fake device into the cache to avoid database lookups
+     * Will not work with relationships unless they are pre-populated (and not using a relationship based query)
+     */
+    public function fake(\App\Models\Device $device): \App\Models\Device
+    {
+        if (empty($device->device_id)) {
+            // find a free device_id
+            $device->device_id = 1;
+            while (isset($this->devices[$device->device_id])) {
+                $device->device_id++;
+            }
+        }
+
+        $device->exists = true; // fake that device is saved to database
         $this->devices[$device->device_id] = $device;
 
         return $device;

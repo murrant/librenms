@@ -2937,9 +2937,10 @@ function post_syslogsink(Illuminate\Http\Request $request)
     }
 
     $logs = array_is_list($json) ? $json : [$json];
+    $syslog = new \LibreNMS\Syslog;
 
     foreach ($logs as $entry) {
-        process_syslog($entry, 1);
+        $syslog->process($entry);
     }
 
     return api_success_noresult(200, 'Syslog received: ' . count($logs));

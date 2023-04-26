@@ -32,7 +32,7 @@ source s_net {
 };
 
 destination d_librenms {
-        program("/opt/librenms/syslog.php" template ("$HOST||$FACILITY||$PRIORITY||$LEVEL||$TAG||$R_YEAR-$R_MONTH-$R_DAY $R_HOUR:$R_MIN:$R_SEC||$MSG||$PROGRAM\n") template-escape(yes));
+        program("/opt/librenms/lnms handle:syslog" template ("$HOST||$FACILITY||$PRIORITY||$LEVEL||$TAG||$R_YEAR-$R_MONTH-$R_DAY $R_HOUR:$R_MIN:$R_SEC||$MSG||$PROGRAM\n") template-escape(yes));
 };
 
 log {
@@ -103,7 +103,7 @@ Create a file called `/etc/rsyslog.d/30-librenms.conf`and add the following depe
             type="string"
             string= "%fromhost%||%syslogfacility%||%syslogpriority%||%syslogseverity%||%syslogtag%||%$year%-%$month%-%$day% %timegenerated:8:25%||%msg%||%programname%\n")
             action(type="omprog"
-            binary="/opt/librenms/syslog.php"
+            binary="/opt/librenms/lnms handle:syslog"
             template="librenms")
 
     & stop
@@ -116,7 +116,7 @@ Create a file called `/etc/rsyslog.d/30-librenms.conf`and add the following depe
 
     $template librenms,"%fromhost%||%syslogfacility%||%syslogpriority%||%syslogseverity%||%syslogtag%||%$year%-%$month%-%$day% %timegenerated:8:25%||%msg%||%programname%\n"
 
-    *.* action(type="omprog" binary="/opt/librenms/syslog.php" template="librenms")
+    *.* action(type="omprog" binary="/opt/librenms/lnms handle:syslog" template="librenms")
 
     & stop
 
@@ -128,7 +128,7 @@ Create a file called `/etc/rsyslog.d/30-librenms.conf`and add the following depe
     $ModLoad omprog
     $template librenms,"%FROMHOST%||%syslogfacility-text%||%syslogpriority-text%||%syslogseverity%||%syslogtag%||%$YEAR%-%$MONTH%-%$DAY%    %timegenerated:8:25%||%msg%||%programname%\n"
 
-    $ActionOMProgBinary /opt/librenms/syslog.php
+    $ActionOMProgBinary /opt/librenms/lnms handle:syslog
     *.* :omprog:;librenms
     ```
 
@@ -164,7 +164,7 @@ syslog {
 
 output {
         exec {
-        command => "echo `echo %{host},,,,%{facility},,,,%{priority},,,,%{severity},,,,%{facility_label},,,,``date --date='%{timestamp}' '+%Y-%m-%d %H:%M:%S'``echo ',,,,%{message}'``echo ,,,,%{program} | sed 's/\x25\x7b\x70\x72\x6f\x67\x72\x61\x6d\x7d/%{facility_label}/'` | sed 's/,,,,/||/g' | /opt/librenms/syslog.php &"
+        command => "echo `echo %{host},,,,%{facility},,,,%{priority},,,,%{severity},,,,%{facility_label},,,,``date --date='%{timestamp}' '+%Y-%m-%d %H:%M:%S'``echo ',,,,%{message}'``echo ,,,,%{program} | sed 's/\x25\x7b\x70\x72\x6f\x67\x72\x61\x6d\x7d/%{facility_label}/'` | sed 's/,,,,/||/g' | /opt/librenms/lnms handle:syslog &"
         }
         elasticsearch {
         hosts => ["10.10.10.10:9200"]

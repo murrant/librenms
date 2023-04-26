@@ -34,4 +34,14 @@ class Syslog extends DeviceRelatedModel
     protected $table = 'syslog';
     protected $primaryKey = 'seq';
     public $timestamps = false;
+    protected $fillable = [
+        'device_id',
+        'program',
+        'facility',
+        'priority',
+        'level',
+        'tag',
+        'msg',
+        'timestamp',
+    ];
 }
