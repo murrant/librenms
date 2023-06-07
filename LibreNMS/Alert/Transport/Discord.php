@@ -107,7 +107,7 @@ class Discord extends Transport
         foreach ($fields as $field) {
             $result[] = [
                 'name' => $this->embedFieldTranslations[$field] ?? ucfirst($field),
-		'value' => $alert_data[$field] ?? 'Error: Invalid Field',
+                'value' => $alert_data[$field] ?? 'Error: Invalid Field',
                 'inline' => $this->config['discord-inline-fields'] ? true : false,
             ];
         }
