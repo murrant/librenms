@@ -26,6 +26,7 @@
 namespace LibreNMS;
 
 use App\Models\Callback;
+use App\Models\Eventlog;
 use App\Models\GraphType;
 use Exception;
 use Illuminate\Database\QueryException;
@@ -39,6 +40,19 @@ use Log;
 class Config
 {
     private static $config;
+
+    public const deprecated = [
+        ['rrdgraph_real_95th', 'rrdgraph_real_percentile'],
+        ['fping_options.millisec', 'fping_options.interval'],
+        ['discovery_modules.cisco-vrf', 'discovery_modules.vrf'],
+        ['discovery_modules.toner', 'discovery_modules.printer-supplies'],
+        ['poller_modules.toner', 'poller_modules.printer-supplies'],
+        ['discovery_modules.cisco-sla', 'discovery_modules.slas'],
+        ['poller_modules.cisco-sla', 'poller_modules.slas'],
+        ['oxidized.group', 'oxidized.maps.group'],
+        ['force_hostname_to_sysname', 'device_display_default', false],
+        ['force_ip_to_sysname', 'device_display_default', false],
+    ];
 
     /**
      * Load the config, if the database connected, pull in database settings.
@@ -439,14 +453,9 @@ class Config
 //        self::setDefault('email_from', '"%s" <%s@' . php_uname('n') . '>', ['project_name', 'email_user']);  // FIXME email_from set because alerting config
 
         // deprecated variables
-        self::deprecatedVariable('rrdgraph_real_95th', 'rrdgraph_real_percentile');
-        self::deprecatedVariable('fping_options.millisec', 'fping_options.interval');
-        self::deprecatedVariable('discovery_modules.cisco-vrf', 'discovery_modules.vrf');
-        self::deprecatedVariable('discovery_modules.toner', 'discovery_modules.printer-supplies');
-        self::deprecatedVariable('poller_modules.toner', 'poller_modules.printer-supplies');
-        self::deprecatedVariable('discovery_modules.cisco-sla', 'discovery_modules.slas');
-        self::deprecatedVariable('poller_modules.cisco-sla', 'poller_modules.slas');
-        self::deprecatedVariable('oxidized.group', 'oxidized.maps.group');
+//        foreach (self::deprecated as $deprecated) {
+//            self::deprecatedVariable(...$deprecated);
+//        }
 
         // migrate device display
         if (! self::has('device_display_default')) {
@@ -508,13 +517,16 @@ class Config
      * @param  string  $old
      * @param  string  $new
      */
-    private static function deprecatedVariable($old, $new)
+    private static function deprecatedVariable($old, $new, $copy = true)
     {
         if (self::has($old)) {
-            if (Debug::isEnabled()) {
-                echo "Copied deprecated config $old to $new\n";
+            $message = "Deprecated setting '$old' in use, migrate to '$new'";
+            Log::alert($message);
+            Eventlog::log($message);
+
+            if ($copy) {
+                self::set($new, self::get($old));
             }
-            self::set($new, self::get($old));
         }
     }
 

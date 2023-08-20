@@ -53,6 +53,17 @@ class Configuration extends BaseValidation
             $validator->warn('You have no devices.', 'Consider adding a device such as localhost: ' . $validator->getBaseURL() . '/addhost');
         }
 
+        foreach (Config::deprecated as [$old, $new]) {
+            if (Config::has($old)) {
+                $fix = "lnms tinker --execute=\"\App\Models\Config::where('config_name', '$old')->delete()\"";
+                if (\App\Models\Config::where('config_name', $old)->exists()) {
+                $fix = "Delete \$config['']";
+                }
+
+                $validator->fail("Deprecated configuration setting $old is use, migrate to $new", $fix);
+            }
+        }
+
         if (Config::has('validation.encryption.test')) {
             try {
                 if (\Crypt::decryptString(Config::get('validation.encryption.test')) !== 'librenms') {
