@@ -33,7 +33,7 @@
                  "value": "array",
                  "value.*": "string"
              }
-        },	
+        },
         "alert_colour.ok": {
             "default": "#00ff00",
             "type": "color"
@@ -149,10 +149,6 @@
             "type": "array"
         },
         "alerts.email.default_only": {
-            "type": "boolean"
-        },
-        "alerts.email.enable": {
-            "default": false,
             "type": "boolean"
         },
         "alert_rule.severity": {

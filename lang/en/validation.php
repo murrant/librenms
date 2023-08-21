@@ -217,6 +217,29 @@ return [
                 'ok' => 'rrd_dir is writable',
             ],
         ],
+        'configuration' => [
+            'CheckAppKeyDecryption' => [
+                'fail' => 'APP_KEY does not match key used to encrypt data. APP_KEY must be the same on all nodes.',
+                'fix' => 'If you rotated APP_KEY, run lnms key:rotate to resolve.',
+                'ok' => '',
+            ],
+            'CheckDebugDisabled' => [
+                'fail' => 'Debug enabled.  This is a security risk.',
+                'ok' => 'Debug is disabled in production',
+            ],
+            'CheckDeprecatedSettings' => [
+                'fail' => 'Deprecated settings found, migrate and remove them.',
+                'fail_migrate' => 'Deprecated configuration setting \':old\' is in use, migrate to \':new\'.',
+                'fail_remove' => 'Deprecated configuration setting \':old\' is no longer used and should be removed.',
+                'fix_delete' => 'Remove the setting from your config.php file. It may look something like this: :setting',
+                'ok' => 'No deprecated settings found.',
+            ],
+            'CheckDevicesExist' => [
+                'warn' => 'You have no devices.',
+                'fix' => 'Consider adding a device such as localhost: :url',
+                'ok' => 'Devices exist. Happy Monitoring!',
+            ],
+        ],
         'database' => [
             'CheckDatabaseTableNamesCase' => [
                 'fail' => 'You have lower_case_table_names set to 1 or true in mysql config.',

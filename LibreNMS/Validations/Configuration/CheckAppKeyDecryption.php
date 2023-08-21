@@ -25,10 +25,41 @@
 
 namespace LibreNMS\Validations\Configuration;
 
+use Illuminate\Contracts\Encryption\DecryptException;
+use LibreNMS\Config;
 use LibreNMS\Interfaces\Validation;
-use LibreNMS\Interfaces\ValidationFixer;
+use LibreNMS\ValidationResult;
 
-class CheckAppKeyDecryption implements Validation, ValidationFixer
+class CheckAppKeyDecryption implements Validation
 {
 
+    public function validate(): ValidationResult
+    {
+        if (Config::has('validation.encryption.test')) {
+            try {
+                if (\Crypt::decryptString(Config::get('validation.encryption.test')) !== 'librenms') {
+                    return $this->failKeyChanged();
+                }
+            } catch (DecryptException $e) {
+                return $this->failKeyChanged();
+            }
+        } else {
+            Config::persist('validation.encryption.test', \Crypt::encryptString('librenms'));
+        }
+
+        return ValidationResult::ok(trans('validation.validations.configuration.CheckAppKeyDecryption.ok'));
+    }
+
+    private function failKeyChanged(): ValidationResult
+    {
+        return ValidationResult::fail(
+            trans('validation.validations.configuration.CheckAppKeyDecryption.fail'),
+            trans('validation.validations.configuration.CheckAppKeyDecryption.fix')
+        );
+    }
+
+    public function enabled(): bool
+    {
+        return true;
+    }
 }

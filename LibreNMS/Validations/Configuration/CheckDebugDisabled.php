@@ -26,8 +26,21 @@
 namespace LibreNMS\Validations\Configuration;
 
 use LibreNMS\Interfaces\Validation;
+use LibreNMS\ValidationResult;
 
 class CheckDebugDisabled implements Validation
 {
+    public function validate(): ValidationResult
+    {
+        if (config('app.debug')) {
+            return ValidationResult::warn(trans('validation.validations.configuration.CheckDebugDisabled.fail'));
+        }
 
+        return ValidationResult::ok(trans('validation.validations.configuration.CheckDebugDisabled.ok'));
+    }
+
+    public function enabled(): bool
+    {
+        return true;
+    }
 }

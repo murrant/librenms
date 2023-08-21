@@ -25,9 +25,28 @@
 
 namespace LibreNMS\Validations\Configuration;
 
+use Illuminate\Support\Facades\DB;
+use LibreNMS\DB\Eloquent;
 use LibreNMS\Interfaces\Validation;
+use LibreNMS\ValidationResult;
 
 class CheckDevicesExist implements Validation
 {
 
+    public function validate(): ValidationResult
+    {
+        if (DB::table('devices')->exists()) {
+            return ValidationResult::ok(trans('validation.validations.configuration.CheckDevicesExist.ok'));
+        }
+
+        return ValidationResult::warn(
+            trans('validation.validations.configuration.CheckDevicesExist.warn'),
+            trans('validation.validations.configuration.CheckDevicesExist.fix', ['url' => url('/addhost')])
+        );
+    }
+
+    public function enabled(): bool
+    {
+        return Eloquent::isConnected();
+    }
 }

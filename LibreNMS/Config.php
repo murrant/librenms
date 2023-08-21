@@ -41,19 +41,6 @@ class Config
 {
     private static $config;
 
-    public const deprecated = [
-        ['rrdgraph_real_95th', 'rrdgraph_real_percentile'],
-        ['fping_options.millisec', 'fping_options.interval'],
-        ['discovery_modules.cisco-vrf', 'discovery_modules.vrf'],
-        ['discovery_modules.toner', 'discovery_modules.printer-supplies'],
-        ['poller_modules.toner', 'poller_modules.printer-supplies'],
-        ['discovery_modules.cisco-sla', 'discovery_modules.slas'],
-        ['poller_modules.cisco-sla', 'poller_modules.slas'],
-        ['oxidized.group', 'oxidized.maps.group'],
-        ['force_hostname_to_sysname', 'device_display_default', false],
-        ['force_ip_to_sysname', 'device_display_default', false],
-    ];
-
     /**
      * Load the config, if the database connected, pull in database settings.
      *
@@ -453,21 +440,6 @@ class Config
 //        self::setDefault('email_from', '"%s" <%s@' . php_uname('n') . '>', ['project_name', 'email_user']);  // FIXME email_from set because alerting config
 
         // deprecated variables
-//        foreach (self::deprecated as $deprecated) {
-//            self::deprecatedVariable(...$deprecated);
-//        }
-
-        // migrate device display
-        if (! self::has('device_display_default')) {
-            $display_value = '{{ $hostname }}';
-            if (self::get('force_hostname_to_sysname')) {
-                $display_value = '{{ $sysName }}';
-            } elseif (self::get('force_ip_to_sysname')) {
-                $display_value = '{{ $sysName_fallback }}';
-            }
-
-            self::persist('device_display_default', $display_value);
-        }
 
         // make sure we have full path to binaries in case PATH isn't set
         foreach (['fping', 'fping6', 'snmpgetnext', 'rrdtool', 'traceroute'] as $bin) {
