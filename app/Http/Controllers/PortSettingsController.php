@@ -1,8 +1,8 @@
 <?php
 /*
- * PortController.php
+ * PortSettingsController.php
  *
- * -Description-
+ * Manage port settings
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,11 +26,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Port;
+use DeviceCache;
 use Illuminate\Support\Facades\Validator;
 use LibreNMS\Enum\Severity;
 
-class PortController extends Controller
+class PortSettingsController extends Controller
 {
+    public function index(\App\Models\Device $device)
+    {
+        return view('port.settings.index', [
+            'device' => $device,
+        ]);
+    }
+
     public function update(\Illuminate\Http\Request $request, Port $port)
     {
         $validated = Validator::make($request->json()->all(), [

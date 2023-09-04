@@ -41,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('device-groups', 'DeviceGroupController');
     Route::any('inventory', \App\Http\Controllers\InventoryController::class)->name('inventory');
     Route::get('inventory/purge', [\App\Http\Controllers\InventoryController::class, 'purge'])->name('inventory.purge');
-    Route::resource('port', 'PortController')->only('update');
+    Route::resource('settings/port', \App\Http\Controllers\PortSettingsController::class)->only('update');
     Route::prefix('poller')->group(function () {
         Route::get('', 'PollerController@pollerTab')->name('poller.index');
         Route::get('log', 'PollerController@logTab')->name('poller.log');
@@ -69,6 +69,10 @@ Route::middleware(['auth'])->group(function () {
     // Device Tabs
     Route::prefix('device/{device}')->namespace('Device\Tabs')->name('device.')->group(function () {
         Route::put('notes', 'NotesController@update')->name('notes.update');
+    });
+    // Device Settings Tabs
+    Route::prefix('device/{device}/edit')->name('device.')->group(function () {
+        Route::resource('ports', \App\Http\Controllers\PortSettingsController::class)->only('index');
     });
 
     Route::match(['get', 'post'], 'device/{device}/{tab?}/{vars?}', 'DeviceController@index')
