@@ -186,7 +186,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('alert-schedule', 'AlertScheduleController');
             Route::post('customers', 'CustomersController');
             Route::post('device', 'DeviceController');
-            Route::post('edit-ports', 'EditPortsController');
+            Route::post('edit-ports', 'EditPortsController')->name('table.edit-ports');
             Route::post('eventlog', 'EventlogController');
             Route::post('fdb-tables', 'FdbTablesController');
             Route::post('graylog', 'GraylogController');

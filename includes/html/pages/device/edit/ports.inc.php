@@ -28,36 +28,24 @@
 <script>
 
 //$("[name='override_config']").bootstrapSwitch('offColor','danger');
-    $(document).on('blur', "[name='if-alias']", function (){
+    $(document).on('blur keyup', "[name='if-alias']", function (e){
+        if (e.type === 'keyup' && e.keyCode !== 13) return;
         var $this = $(this);
         var descr = $this.val();
-        var device_id = $this.data('device_id');
         var port_id = $this.data('port_id');
-        var ifName = $this.data('ifname');
         $.ajax({
-            type: 'POST',
-            url: 'ajax_form.php',
-            data: {type: "update-ifalias", descr: descr, ifName: ifName, port_id: port_id, device_id: device_id},
+            type: 'PUT',
+            url: '<?php echo route('port.update', '?'); ?>'.replace('?', port_id),
+            data: JSON.stringify({descr: descr}),
             dataType: "json",
             success: function (data) {
-                if (data.status == 'ok') {
-                    $this.closest('.form-group').addClass('has-success');
-                    $this.next().addClass('fa-check');
-                    setTimeout(function(){
-                        $this.closest('.form-group').removeClass('has-success');
-                        $this.next().removeClass('fa-check');
-                    }, 2000);
-                } else if (data.status == 'na') {
-
-                } else {
-                    $(this).closest('.form-group').addClass('has-error');
-                    $this.next().addClass('fa-times');
-                    setTimeout(function(){
-                        $this.closest('.form-group').removeClass('has-error');
-                        $this.next().removeClass('fa-times');
-                    }, 2000);
-                }
-            },
+                $this.closest('.form-group').addClass('has-success');
+                $this.next().addClass('fa-check');
+                setTimeout(function(){
+                    $this.closest('.form-group').removeClass('has-success');
+                    $this.next().removeClass('fa-check');
+                }, 2000);
+              },
             error: function () {
                 $(this).closest('.form-group').addClass('has-error');
                 $this.next().addClass('fa-times');
@@ -71,39 +59,30 @@
     $(document).on('blur keyup', "[name='if-speed']", function (e){
         if (e.type === 'keyup' && e.keyCode !== 13) return;
         var $this = $(this);
-        var speed = $this.val().replace(/[^0-9]/gi, '');
+        var speed = $this.val().replace(/[^0-9]/gi, '') || null;
         var port_id = $this.data('port_id');
         $.ajax({
-            type: 'POST',
-            url: 'ajax_form.php',
-            data: {type: "update-ifspeed", speed: speed, port_id: port_id},
+            type: 'PUT',
+            url: '<?php echo route('port.update', '?'); ?>'.replace('?', port_id),
+            data: JSON.stringify({speed: speed}),
             dataType: "json",
             success: function (data) {
-                if (data.status == 'ok') {
-                    $this.closest('.form-group').addClass('has-success');
-                    $this.next().children().first().addClass('fa-check');
-                    $this.val(speed);
-                    setTimeout(function(){
-                        $this.closest('.form-group').removeClass('has-success');
-                        $this.next().children().first().removeClass('fa-check');
-                    }, 2000);
-                } else if (data.status == 'na') {
-
-                } else {
-                    $(this).closest('.form-group').addClass('has-error');
-                    $this.next().children().first().addClass('fa-times');
-                    setTimeout(function(){
-                        $this.closest('.form-group').removeClass('has-error');
-                        $this.next().children().first().removeClass('fa-times');
-                    }, 2000);
-                }
+                $this.closest('.form-group').addClass('has-success');
+                $this.next().children().first().addClass('fa-check');
+                $this.val(speed);
+                setTimeout(function(){
+                    $this.closest('.form-group').removeClass('has-success');
+                    $this.next().children().first().removeClass('fa-check');
+                }, 2000);
             },
             error: function () {
-                $(this).closest('.form-group').addClass('has-error');
+                $this.closest('.form-group').addClass('has-error');
                 $this.next().children().first().addClass('fa-times');
                 setTimeout(function(){
                    $this.closest('.form-group').removeClass('has-error');
                    $this.next().children().first().removeClass('fa-times');
+                   console.log($this.data());
+                   $this.val($this.data('ifSpeed'));
                 }, 2000);
             }
         });
@@ -111,27 +90,22 @@
     $(document).ready(function() {
         $('#disable-toggle').on("click", function (event) {
             // invert selection on all disable buttons
-            event.preventDefault();
             $('input[name^="disabled_"]').trigger('click');
         });
         $('#ignore-toggle').on("click", function (event) {
             // invert selection on all ignore buttons
-            event.preventDefault();
             $('input[name^="ignore_"]').trigger('click');
         });
         $('#disable-select').on("click", function (event) {
             // select all disable buttons
-            event.preventDefault();
             $('.disable-check').bootstrapSwitch('state', true);
         });
         $('#ignore-select').on("click", function (event) {
             // select all ignore buttons
-            event.preventDefault();
             $('.ignore-check').bootstrapSwitch('state', true);
         });
         $('#down-select').on("click", function (event) {
             // select ignore buttons for all ports which are down
-            event.preventDefault();
             $('[id^="operstatus_"]').each(function () {
                 var name = $(this).attr('id');
                 var text = $(this).text();
@@ -145,7 +119,6 @@
         });
         $('#alerted-toggle').on("click", function (event) {
             // toggle ignore buttons for all ports which are in class red
-            event.preventDefault();
             $('.red').each(function () {
                 var name = $(this).attr('id');
                 if (name) {
@@ -158,12 +131,10 @@
         });
         $('#form-reset').on("click", function (event) {
             // reset objects in the form to their previous values
-            event.preventDefault();
             $('#ignoreport')[0].reset();
         });
         $('#save-form').on("click", function (event) {
             // reset objects in the form to their previous values
-            event.preventDefault();
             $.ajax({
                 type: "POST",
                 url: "ajax_form.php",
@@ -181,10 +152,6 @@
                 }
             });
         });
-
-        $('form#ignoreport').on("submit", function (event) {
-            event.preventDefault();
-        });
     });
 
     var grid = $("#edit-ports").bootgrid({
@@ -195,18 +162,18 @@
                         <div class="col-sm-8 actionBar header_actions">\
                             <span class="pull-left">\
                                 <span class="action_group">Disable polling\
-                                <button type="submit" value="Toggle" class="btn btn-default btn-sm" id="disable-toggle" title="Toggle polling for all ports">Toggle</button>\
-                                <button type="submit" value="Select" class="btn btn-default btn-sm" id="disable-select" title="Disable polling on all ports">Disable All</button>\
+                                <button type="button" value="Toggle" class="btn btn-default btn-sm" id="disable-toggle" title="Toggle polling for all ports">Toggle</button>\
+                                <button type="button" value="Select" class="btn btn-default btn-sm" id="disable-select" title="Disable polling on all ports">Disable All</button>\
                                 </span>\
                                 <span class="action_group">Ignore alerts\
-                                <button type="submit" value="Alerted" class="btn btn-default btn-sm" id="alerted-toggle" title="Toggle alerting on all currently-alerted ports">Alerted</button>\
-                                <button type="submit" value="Down" class="btn btn-default btn-sm" id="down-select" title="Disable alerting on all currently-down ports">Down</button>\
-                                <button type="submit" value="Toggle" class="btn btn-default btn-sm" id="ignore-toggle" title="Toggle alert tag for all ports">Toggle</button>\
-                                <button type="submit" value="Select" class="btn btn-default btn-sm" id="ignore-select" title="Disable alert tag on all ports">Ignore All</button></span>\
+                                <button type="button" value="Alerted" class="btn btn-default btn-sm" id="alerted-toggle" title="Toggle alerting on all currently-alerted ports">Alerted</button>\
+                                <button type="button" value="Down" class="btn btn-default btn-sm" id="down-select" title="Disable alerting on all currently-down ports">Down</button>\
+                                <button type="button" value="Toggle" class="btn btn-default btn-sm" id="ignore-toggle" title="Toggle alert tag for all ports">Toggle</button>\
+                                <button type="button" value="Select" class="btn btn-default btn-sm" id="ignore-select" title="Disable alert tag on all ports">Ignore All</button></span>\
                                 </span>\
                                 <span class="action_group">\
-                                <button id="save-form" type="submit" value="Save" class="btn btn-success btn-sm" title="Save current port disable/ignore settings">Save Toggles</button>\
-                                <button type="submit" value="Reset" class="btn btn-danger btn-sm" id="form-reset" title="Reset form to previously-saved settings">Reset</button>\
+                                <button id="save-form" type="button" value="Save" class="btn btn-success btn-sm" title="Save current port disable/ignore settings">Save Toggles</button>\
+                                <button type="button" value="Reset" class="btn btn-danger btn-sm" id="form-reset" title="Reset form to previously-saved settings">Reset</button>\
                                 </span>\
                             </span>\
                         </div>\
@@ -219,7 +186,7 @@
                 device_id: "<?php echo $device['device_id']; ?>"
             };
         },
-        url: "<?php echo url('/ajax/table/edit-ports/'); ?>"
+        url: "<?php echo route('table.edit-ports'); ?>"
     }).on("loaded.rs.jquery.bootgrid", function() {
         $("[type='checkbox']").bootstrapSwitch();
         $("[name='override_config']").bootstrapSwitch('offColor','danger');
@@ -244,7 +211,7 @@
 
             $.ajax({
                 type: "PUT",
-                url: "<?php echo url('port'); ?>/" + port_id,
+                url: '<?php echo route('port.update', '?'); ?>'.replace('?', port_id),
                 data: groups,
                 success: function(data) {
                     toastr.success(data.message)
