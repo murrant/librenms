@@ -10,9 +10,7 @@
  * the source code distribution for details.
  */
 $pagetitle[] = 'Notes';
-$port_id_notes = 'port_id_notes:' . $port['port_id'];
-$device_id = $device['device_id'];
-$data = get_dev_attrib($device, $port_id_notes) ?? '';
+$data = get_dev_attrib($device, 'port_id_notes:' . $port['port_id']) ?? '';
 ?>
 
 <form class="form-horizontal" action="" method="post">
@@ -38,20 +36,17 @@ $data = get_dev_attrib($device, $port_id_notes) ?? '';
 <script>
 $("[name='btn-update-notes']").on('click', function(event) {
     event.preventDefault();
-    var $this = $(this);
-    var device_id = "<?php echo $device_id; ?>";
-    var port_id_notes = "<?php echo $port_id_notes; ?>";
-    var notes = $("#port-notes").val();
+    const notes = $("#port-notes").val();
     $.ajax({
-        type: 'POST',
-        url: 'ajax_form.php',
-        data: { type: "update-port-notes", notes: notes, port_id_notes: port_id_notes, device_id: device_id },
-        dataType: "html",
+        type: 'PUT',
+        url: '<?php echo route('port.update', $port['port_id']) ?>',
+        data: JSON.stringify({ notes: notes }),
+        dataType: "json",
         success: function(data){
-            toastr.success('Saved');
+            toastr.success(data.message);
         },
-        error:function(){
-            toastr.error('Error');
+        error:function(data){
+            toastr.error(data.message);
         }
     });
 });

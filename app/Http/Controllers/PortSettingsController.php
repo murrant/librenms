@@ -64,7 +64,7 @@ class PortSettingsController extends Controller
             'disabled' => 'sometimes|bool',
             'ignore' => 'sometimes|bool',
             'port_tune' => 'sometimes|bool',
-
+            'notes' => 'sometimes|string',
         ])->validate();
 
         if (empty($validated)) {
@@ -83,6 +83,10 @@ class PortSettingsController extends Controller
             if ($descr) {
                 $port->ifAlias = $descr;
             }
+        }
+
+        if (array_key_exists('notes', $validated)) {
+            $messages[] = $this->updateAttrib($port, $validated['notes'], 'port_id_notes', 'port_id');
         }
 
         if (array_key_exists('port_tune', $validated)) {
@@ -150,7 +154,7 @@ class PortSettingsController extends Controller
     /**
      * @throws AjaxUpdateException
      */
-    private function updateAttrib(Port $port, int|string|bool $value, string $attribPrefix): string
+    private function updateAttrib(Port $port, int|string|bool $value, string $attribPrefix, string $key = 'ifName'): string
     {
         if (empty($port->ifName)) {
             throw new AjaxUpdateException(trans('port.' . $attribPrefix . '.ifName_missing'));
@@ -164,11 +168,11 @@ class PortSettingsController extends Controller
         if (is_bool($value)) {
             $value = $value ? 'true' : 'false';
         }
-        $name = $attribPrefix . ':' . $port->ifName;
+        $name = $attribPrefix . ':' . $port->$key;
 
         if ($value === '' || $value === '0' || $value === 0) {
             $port->device->forgetAttrib($name);
-            $message = trans('port.' . $attribPrefix . '.cleared', ['name' => $port->ifName]);
+            $message = trans('port.' . $attribPrefix . '.cleared', $translate_data);
             Eventlog::log($message, $port->device, 'interface', Severity::Notice, $port->port_id);
 
             return $message;
@@ -185,6 +189,6 @@ class PortSettingsController extends Controller
             return $message;
         }
 
-        throw new AjaxUpdateException(trans('port.' . $attribPrefix . '.no_change', ['name' => $port->ifName]));
+        throw new AjaxUpdateException(trans('port.' . $attribPrefix . '.no_change', $translate_data));
     }
 }
