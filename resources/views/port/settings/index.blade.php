@@ -1,15 +1,17 @@
-</form>
+@extends('layouts.librenmsv1')
+
+@section('title', __('settings.title'))
+
+@section('content')
+
+<x-device-settings-bar :device="$device" selected="ports"></x-device-settings-bar>
 
 <h1>{{ $device->displayName() }}</h1>
 
 <span id="message"></span>
 
-<form id='ignoreport' name='ignoreport' method='post' action='' role='form' class='form-inline'>
-    <?php echo csrf_field() ?>
-    <input type='hidden' name='ignoreport' value='yes'>
-    <input type='hidden' name='type' value='update-ports'>
-    <input type='hidden' name='device' value='<?php echo $device['device_id']; ?>'>
-    <div class='table-responsive'>
+
+<div class='table-responsive'>
     <table id='edit-ports' class='table table-striped'>
         <thead>
             <tr>
@@ -17,17 +19,17 @@
                 <th data-column-id='ifName'>Name</th>
                 <th data-column-id='ifAdminStatus'>Admin</th>
                 <th data-column-id='ifOperStatus'>Operational</th>
-                <th data-column-id='disabled' data-sortable='false'>Disable polling</th>
-                <th data-column-id='ignore' data-sortable='false'>Ignore alert tag</th>
+                <th data-column-id='disabled' data-searchable='false' data-formatter="toggle">Disable polling</th>
+                <th data-column-id='ignore' data-searchable='false' data-formatter="toggle">Ignore alert tag</th>
                 <th data-column-id='ifSpeed'>ifSpeed (bits/s)</th>
                 <th data-column-id='portGroup' data-sortable='false' data-searchable='false'>Port Group</th>
-                <th data-column-id='port_tune' data-sortable='false' data-searchable='false'>RRD Tune</th>
+                <th data-column-id='port_tune' data-searchable='false' data-formatter="toggle">RRD Tune</th>
                 <th data-column-id='ifAlias'>Description</th>
             </tr>
         </thead>
     </table>
-    </div>
-</form>
+</div>
+
 <script>
 
 //$("[name='override_config']").bootstrapSwitch('offColor','danger');
@@ -73,6 +75,7 @@
                 $this.closest('.form-group').addClass('has-success');
                 $this.next().children().first().addClass('fa-check');
                 $this.val(speed);
+                toastr.success(data.message);
                 setTimeout(function(){
                     $this.closest('.form-group').removeClass('has-success');
                     $this.next().children().first().removeClass('fa-check');
@@ -84,7 +87,7 @@
                 setTimeout(function(){
                    $this.closest('.form-group').removeClass('has-error');
                    $this.next().children().first().removeClass('fa-times');
-                   console.log($this.data());
+                   toastr.error(data.message);
                    $this.val($this.data('ifSpeed'));
                 }, 2000);
             }
@@ -132,106 +135,112 @@
                 }
             });
         });
-        $('#form-reset').on("click", function (event) {
-            // reset objects in the form to their previous values
-            $('#ignoreport')[0].reset();
-        });
-        $('#save-form').on("click", function (event) {
-            // reset objects in the form to their previous values
-            $.ajax({
-                type: "POST",
-                url: "ajax_form.php",
-                data: $('form#ignoreport').serialize(),
-                dataType: "json",
-                success: function(data){
-                    if (data.status == 'ok') {
-                        $("#message").html('<div class="alert alert-info">' + data.message + '</div>')
-                    } else {
-                        $("#message").html('<div class="alert alert-danger">' + data.message + '</div>');
-                    }
-                },
-                error: function(){
-                    $("#message").html('<div class="alert alert-danger">Error creating config item</div>');
-                }
-            });
-        });
     });
 
-    var grid = $("#edit-ports").bootgrid({
-        ajax: true,
-        rowCount: [50, 100, 250, -1],
-        templates: {
-            header: '<div id="@{{ctx.id}}" class="@{{css.header}}"><div class="row">\
-                        <div class="col-sm-8 actionBar header_actions">\
+
+</script>
+@endsection
+
+@push('style')
+    <style>
+        .header_actions {
+            text-align: left !important;
+        }
+        .action_group {
+            margin-right: 20px;
+            white-space: nowrap;
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <script>
+        function update_port_toggle(event, state) {
+            let $this = $(event.target);
+            let data = {};
+            data[$this.data('field')] = state;
+            let port_id = $this.data('port_id');
+
+            $.ajax({
+                type: 'PATCH',
+                url: '{{ route('port.update', '?') }}'.replace('?', port_id),
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function(data) {
+                    toastr.success(data.message);
+                },
+                error: function(data) {
+                    toastr.error(data.message);
+                }
+            });
+        }
+
+        let grid = $("#edit-ports").bootgrid({
+            ajax: true,
+            rowCount: [2, 50, 100, 250, -1],
+            formatters: {
+                "toggle": function (column, row) {
+                    return `<input type="checkbox" class="port-toggle" data-size="small" data-port_id="${row.port_id}" data-field="${column.id}" name="${column.id}_${row.port_id}" data-off-color="danger" ${row[column.id] ? 'checked' : ''}>`
+                }
+            },
+            templates: {
+                header: '<div id="@{{ctx.id}}" class="@{{css.header}}"><div class="row">\
+                            <div class="col-sm-8 actionBar header_actions">\
                             <span class="pull-left">\
                                 <span class="action_group">Disable polling\
+                                <div class="btn-group">\
                                 <button type="button" value="Toggle" class="btn btn-default btn-sm" id="disable-toggle" title="Toggle polling for all ports">Toggle</button>\
                                 <button type="button" value="Select" class="btn btn-default btn-sm" id="disable-select" title="Disable polling on all ports">Disable All</button>\
+                                </div>\
                                 </span>\
-                                <span class="action_group">Ignore alerts\
+                                <span class="action_group tw-ml-3">Ignore alerts\
+                                <div class="btn-group">\
                                 <button type="button" value="Alerted" class="btn btn-default btn-sm" id="alerted-toggle" title="Toggle alerting on all currently-alerted ports">Alerted</button>\
                                 <button type="button" value="Down" class="btn btn-default btn-sm" id="down-select" title="Disable alerting on all currently-down ports">Down</button>\
                                 <button type="button" value="Toggle" class="btn btn-default btn-sm" id="ignore-toggle" title="Toggle alert tag for all ports">Toggle</button>\
                                 <button type="button" value="Select" class="btn btn-default btn-sm" id="ignore-select" title="Disable alert tag on all ports">Ignore All</button></span>\
-                                </span>\
-                                <span class="action_group">\
-                                <button id="save-form" type="button" value="Save" class="btn btn-success btn-sm" title="Save current port disable/ignore settings">Save Toggles</button>\
-                                <button type="button" value="Reset" class="btn btn-danger btn-sm" id="form-reset" title="Reset form to previously-saved settings">Reset</button>\
+                                </div>\
                                 </span>\
                             </span>\
                         </div>\
                         <div class="col-sm-4 actionBar"><p class="@{{css.search}}"></p><p class="@{{css.actions}}"></p></div>\
                     </div></div>'
-        },
-        post: function ()
-        {
-            return {
-                device_id: "<?php echo $device['device_id']; ?>"
-            };
-        },
-        url: "<?php echo route('table.edit-ports'); ?>"
-    }).on("loaded.rs.jquery.bootgrid", function() {
-        $("[type='checkbox']").bootstrapSwitch();
-        $("[name='override_config']").bootstrapSwitch('offColor','danger');
-        $('input[name="override_config"]').on('switchChange.bootstrapSwitch',  function(event, state) {
-            override_config(event,state,$(this));
-        });
+            },
+            post: function () {
+                return {
+                    device_id: "<?php echo $device['device_id']; ?>"
+                };
+            },
+            url: "{{ route('table.edit-ports') }}"
+        }).on("loaded.rs.jquery.bootgrid", function () {
+            $(".port-toggle").bootstrapSwitch().on('switchChange.bootstrapSwitch', update_port_toggle);
 
-        init_select2('.port_group_select', 'port-group', {}, null, 'No Group');
-        var last_port_group_change;
-        $('.port_group_select').on('change', function (e) {
-            var $target = $(e.target);
-            var port_id = $target.data('port_id');
-            var groups = JSON.stringify({"groups": $target.val()});
+            init_select2('.port_group_select', 'port-group', {}, null, 'No Group');
+            var last_port_group_change;
+            $('.port_group_select').on('change', function (e) {
+                let $target = $(e.target);
+                let port_id = $target.data('port_id');
+                let groups = JSON.stringify({"groups": $target.val()});
 
-            console.log(last_port_group_change, (port_id + groups));
-            // don't send the same update multiple times... silly select2
-            if (last_port_group_change === (port_id + groups)) {
-                return;
-            }
-
-            last_port_group_change = port_id + groups;
-
-            $.ajax({
-                type: "PUT",
-                url: '<?php echo route('port.update', '?'); ?>'.replace('?', port_id),
-                data: groups,
-                success: function(data) {
-                    toastr.success(data.message)
-                },
-                error: function(data) {
-                    toastr.error(data.responseJSON.message)
+                // don't send the same update multiple times... silly select2
+                if (last_port_group_change === (port_id + groups)) {
+                    return;
                 }
+
+                last_port_group_change = port_id + groups;
+
+                $.ajax({
+                    type: "PUT",
+                    url: '<?php echo route('port.update', '?'); ?>'.replace('?', port_id),
+                    data: groups,
+                    success: function (data) {
+                        toastr.success(data.message)
+                    },
+                    error: function (data) {
+                        toastr.error(data.responseJSON.message)
+                    }
+                });
             });
         });
-    });
-</script>
-<style>
-    .header_actions {
-        text-align: left !important;
-    }
-    .action_group {
-        margin-right: 20px;
-        white-space: nowrap;
-    }
-</style>
+    </script>
+@endpush

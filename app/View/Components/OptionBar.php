@@ -6,41 +6,17 @@ use Illuminate\View\Component;
 
 class OptionBar extends Component
 {
-    /**
-     * Name of the option bar
-     *
-     * @var string
-     */
-    public $name;
-    /**
-     * Entries to show on the option bar
-     * [
-     *   'name' => ['text' => 'Display Text', 'link' => 'https://...'],
-     * ]
-     *
-     * @var array
-     */
-    public $options;
-    /**
-     * Selected option
-     *
-     * @var mixed
-     */
-    public $selected;
 
     /**
-     * Create a new component instance.
-     *
-     * @param  string  $name
-     * @param  array  $options
-     * @param  mixed  $selected
+     * @param string $name Name of the option bar
+     * @param array $options Options to show. Format: ['Name' => ['text' => 'Display Text', 'link' => 'https://...']]
+     * @param int|string|null $selected Name of selected option.  Key from options array
      */
-    public function __construct(string $name = '', array $options = [], $selected = null)
-    {
-        $this->name = $name;
-        $this->options = $options;
-        $this->selected = $selected;
-    }
+    public function __construct(
+        public string $name = '',
+        public array $options = [],
+        public int|string|null $selected = null,
+    ) {}
 
     /**
      * Get the view / contents that represent the component.
