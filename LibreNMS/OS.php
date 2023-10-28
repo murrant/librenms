@@ -28,15 +28,16 @@ namespace LibreNMS;
 use App\Models\Device;
 use App\Models\DeviceGraph;
 use DeviceCache;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use LibreNMS\Device\WirelessSensor;
 use LibreNMS\Device\YamlDiscovery;
 use LibreNMS\Interfaces\Discovery\MempoolsDiscovery;
 use LibreNMS\Interfaces\Discovery\OSDiscovery;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
+use LibreNMS\Interfaces\Discovery\StorageDiscovery;
 use LibreNMS\Interfaces\Discovery\StpInstanceDiscovery;
 use LibreNMS\Interfaces\Discovery\StpPortDiscovery;
-use LibreNMS\Interfaces\Discovery\StorageDiscovery;
 use LibreNMS\Interfaces\Polling\Netstats\IcmpNetstatsPolling;
 use LibreNMS\Interfaces\Polling\Netstats\IpForwardNetstatsPolling;
 use LibreNMS\Interfaces\Polling\Netstats\IpNetstatsPolling;
@@ -74,6 +75,7 @@ class OS implements
     use HostResources {
         HostResources::discoverProcessors as discoverHrProcessors;
         HostResources::discoverMempools as discoverHrMempools;
+        HostResources::discoverStorage as discoverHrStorage;
     }
     use UcdResources {
         UcdResources::discoverProcessors as discoverUcdProcessors;
@@ -81,6 +83,7 @@ class OS implements
     }
     use YamlOSDiscovery;
     use YamlMempoolsDiscovery;
+    use YamlStorageDiscovery;
     use NetstatsPolling;
     use ResolvesPortIds;
     use BridgeMib;
@@ -343,6 +346,15 @@ class OS implements
         }
 
         return $this->discoverUcdMempools();
+    }
+
+    public function discoverStorage(): Collection
+    {
+        if ($this->hasYamlDiscovery('storage')) {
+            return $this->discoverYamlMempools();
+        }
+
+        return $this->discoverHrMempools();
     }
 
     public function getDiscovery($module = null)

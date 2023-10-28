@@ -126,7 +126,7 @@ class Number
     }
 
     /**
-<<<<<<< HEAD
+     * <<<<<<< HEAD
      * Extract the first number found from a string
      */
     public static function extract(mixed $string): float|int
@@ -169,7 +169,7 @@ class Number
 
         //B or no suffix
         if (is_numeric(substr($suffix, 0, 1))) {
-            return (int)$from;
+            return (int) $from;
         }
 
         $exponent = array_flip($units)[$suffix] ?? null;
@@ -177,16 +177,17 @@ class Number
             return null;
         }
 
-        return (int)($number * (1024 ** $exponent));
+        return (int) ($number * (1024 ** $exponent));
     }
 
     /**
      * If a number is less than 0, assume it has overflowed 32bit INT_MAX
      * And try to correct the value by adding INT_MAX
      *
-     * @param int|null $value The value to correct
-     * @param  int|null  $max an upper bounds on the corrected value
+     * @param  int|null  $value  The value to correct
+     * @param  int|null  $max  an upper bounds on the corrected value
      * @return int|null
+     *
      * @throws UncorrectableNegativeException
      */
     public static function correctIntegerOverflow(mixed $value, ?int $max = null): int|null
@@ -209,6 +210,7 @@ class Number
 
     /**
      * Supply a minimum of two of the four values and the others will be filled.
+     *
      * @throws InsufficientDataException
      */
     public static function fillMissingRatio(mixed $total = null, mixed $used = null, mixed $available = null, mixed $used_percent = null, int $precision = 2, int|float $multiplier = 1): array
@@ -262,7 +264,6 @@ class Number
             round($used_percent, $precision),
         ];
     }
-
 
     /**
      * Handle a value that should be a percent, but is > 100 and assume it is off by some factor of 10
