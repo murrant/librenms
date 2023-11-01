@@ -32,12 +32,22 @@ class Oid
 {
     public static function isNumeric(string $oid): bool
     {
-        return (bool) preg_match('/^[.\d]+$/', $oid);
+        return (bool) preg_match('/^\.?1(\.\d+)+$/', $oid);
+    }
+
+    public static function isFullTextualOid(string $oid): bool
+    {
+        return (bool) preg_match('/[-_A-Za-z0-9]+::[-_A-Za-z0-9]+', $oid);
     }
 
     public static function hasNumericRoot(string $oid): bool
     {
         return (bool) preg_match('/^\.?1/', $oid);
+    }
+
+    public static function isValid(string $oid): bool
+    {
+        return self::isFullTextualOid($oid) || self::isNumeric($oid);
     }
 
     public static function hasNumeric(array $oids): bool

@@ -407,11 +407,12 @@ class NetSnmpQuery implements SnmpQueryInterface
     private function exec(string $command, array $oids): SnmpResponse
     {
         // use runtime(array) cache if requested. The 'null' driver will simply return the value without caching
-        $driver = $this->cache ? 'array' : 'null';
-        $key = $this->cache ? $this->getCacheKey($command, $oids) : '';
+        // can only hit cache if cache is enabled
+        [$driver, $key, $cache_hit] = $this->cache ? ['array', $this->getCacheKey($command, $oids), true] : ['null', '', false];
 
-        return Cache::driver($driver)->rememberForever($key, function () use ($command, $oids) {
-            $measure = Measurement::start($command);
+        $measure = Measurement::start($command);
+        $response = Cache::driver($driver)->rememberForever($key, function () use ($command, $oids, $measure, &$cache_hit) {
+            $cache_hit = false;
             $proc = new Process($this->buildCli($command, $oids));
             $proc->setTimeout(Config::get('snmp.exec_timeout', 1200));
 
@@ -426,10 +427,18 @@ class NetSnmpQuery implements SnmpQueryInterface
             $this->checkExitCode($exitCode, $stderr);
             $this->logOutput($output, $stderr);
 
-            $measure->manager()->recordSnmp($measure->end());
-
             return new SnmpResponse($output, $stderr, $exitCode);
         });
+        $measure->end();
+
+        if ($cache_hit) {
+            // if cache hit, record time under a different type.
+            $measure = Measurement::make('cache_hit', $measure->getDuration());
+        }
+
+        $measure->manager()->recordSnmp($measure);
+
+        return $response;
     }
 
     private function initCommand(string $binary, array $oids): array
