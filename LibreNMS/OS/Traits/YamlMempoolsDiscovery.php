@@ -52,7 +52,7 @@ trait YamlMempoolsDiscovery
             'type' => new YamlDiscoveryField('type', 'mempool_type', $this->getName()),
             'class' => new YamlDiscoveryField('class', 'mempool_class', 'system'),
             'precision' => new YamlDiscoveryField('precision', 'mempool_precision', 1),
-            'descr' => new YamlDiscoveryField('descr', 'mempool_descr', 'Memory', callback: fn($value) => ucwords($value)),
+            'descr' => new YamlDiscoveryField('descr', 'mempool_descr', 'Memory', callback: fn ($value) => ucwords($value)),
             'used' => new YamlDiscoveryField('used', 'mempool_used', fetch: true, oid_column: 'mempool_used_oid'),
             'free' => new YamlDiscoveryField('free', 'mempool_free', fetch: true), // oid filled below if appropriate
             'total' => new YamlDiscoveryField('total', 'mempool_total', fetch: true),
@@ -61,7 +61,7 @@ trait YamlMempoolsDiscovery
         ], callback: function (Mempool $mempool, $fields, $yaml, $index) {
             // only use "free" if we have both used and total FIXME comment does not match code?
             if ($fields['used']->value === null || $fields['total']->value === null) {
-                $mempool->mempool_free_oid =  Oid::toNumeric($yaml['free']) . '.' . $index;
+                $mempool->mempool_free_oid = Oid::toNumeric($yaml['free']) . '.' . $index;
             }
 
             $mempool->fillUsage(

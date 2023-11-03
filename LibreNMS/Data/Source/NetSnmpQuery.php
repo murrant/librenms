@@ -411,7 +411,7 @@ class NetSnmpQuery implements SnmpQueryInterface
         [$driver, $key, $cache_hit] = $this->cache ? ['array', $this->getCacheKey($command, $oids), true] : ['null', '', false];
 
         $measure = Measurement::start($command);
-        $response = Cache::driver($driver)->rememberForever($key, function () use ($command, $oids, $measure, &$cache_hit) {
+        $response = Cache::driver($driver)->rememberForever($key, function () use ($command, $oids, &$cache_hit) {
             $cache_hit = false;
             $proc = new Process($this->buildCli($command, $oids));
             $proc->setTimeout(Config::get('snmp.exec_timeout', 1200));

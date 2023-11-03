@@ -415,10 +415,10 @@ class YamlDiscovery
     }
 
     /**
-     * @param array $yaml
-     * @param string $model
-     * @param array $fields<\LibreNMS\Polling\DiscoveryItem>
-     * @param array $attributes
+     * @param  array  $yaml
+     * @param  string  $model
+     * @param  array  $fields<\LibreNMS\Polling\DiscoveryItem>
+     * @param  array  $attributes
      * @return Collection
      */
     public static function from(array $yaml, string $model, array $fields, array $attributes = [], callable $callback = null): Collection
