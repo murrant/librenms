@@ -1391,6 +1391,13 @@
             "default": false,
             "type": "boolean"
         },
+        "discovery_modules.transceivers": {
+            "order": 322,
+            "group": "discovery",
+            "section": "discovery_modules",
+            "default": false,
+            "type": "boolean"
+        },
         "discovery_modules.entity-physical": {
             "order": 110,
             "group": "discovery",
@@ -5185,6 +5192,13 @@
         },
         "poller_modules.xdsl": {
             "order": 345,
+            "group": "poller",
+            "section": "poller_modules",
+            "default": false,
+            "type": "boolean"
+        },
+        "poller_modules.transceivers": {
+            "order": 322,
             "group": "poller",
             "section": "poller_modules",
             "default": false,
