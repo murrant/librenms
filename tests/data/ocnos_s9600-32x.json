@@ -1350,7 +1350,7 @@
                     "ddm": 1,
                     "encoding": "enc-nrz",
                     "distance": 40000,
-                    "connector": "lc",
+                    "connector": "LC",
                     "channels": 4,
                     "ifIndex": null
                 },
@@ -1366,7 +1366,7 @@
                     "ddm": 1,
                     "encoding": "enc-nrz",
                     "distance": 40000,
-                    "connector": "lc",
+                    "connector": "LC",
                     "channels": 4,
                     "ifIndex": null
                 },
@@ -1382,7 +1382,7 @@
                     "ddm": 1,
                     "encoding": "enc-nrz",
                     "distance": 10000,
-                    "connector": "lc",
+                    "connector": "LC",
                     "channels": 4,
                     "ifIndex": null
                 },
@@ -1398,7 +1398,7 @@
                     "ddm": 1,
                     "encoding": "enc-nrz",
                     "distance": 10000,
-                    "connector": "lc",
+                    "connector": "LC",
                     "channels": 4,
                     "ifIndex": null
                 },
@@ -1414,7 +1414,7 @@
                     "ddm": 1,
                     "encoding": "enc-nrz",
                     "distance": 10000,
-                    "connector": "lc",
+                    "connector": "LC",
                     "channels": 4,
                     "ifIndex": null
                 },
@@ -1430,7 +1430,7 @@
                     "ddm": 1,
                     "encoding": "enc-nrz",
                     "distance": 50,
-                    "connector": "mpo-12",
+                    "connector": "MPO-12",
                     "channels": 4,
                     "ifIndex": null
                 },
@@ -1446,7 +1446,7 @@
                     "ddm": 1,
                     "encoding": "enc-nrz",
                     "distance": 50,
-                    "connector": "mpo-12",
+                    "connector": "MPO-12",
                     "channels": 4,
                     "ifIndex": null
                 },
@@ -1462,7 +1462,7 @@
                     "ddm": 1,
                     "encoding": "enc-nrz",
                     "distance": 50,
-                    "connector": "mpo-12",
+                    "connector": "MPO-12",
                     "channels": 4,
                     "ifIndex": null
                 },
@@ -1478,7 +1478,7 @@
                     "ddm": 1,
                     "encoding": "enc-64b-or-66b",
                     "distance": 50,
-                    "connector": "mpo-12",
+                    "connector": "MPO-12",
                     "channels": 4,
                     "ifIndex": null
                 },
@@ -1494,7 +1494,7 @@
                     "ddm": 1,
                     "encoding": "enc-64b-or-66b",
                     "distance": 30,
-                    "connector": "lc",
+                    "connector": "LC",
                     "channels": 1,
                     "ifIndex": null
                 },
@@ -1526,7 +1526,7 @@
                     "ddm": 1,
                     "encoding": "enc-nrz",
                     "distance": 80000,
-                    "connector": "lc",
+                    "connector": "LC",
                     "channels": 4,
                     "ifIndex": null
                 }
