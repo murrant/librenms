@@ -1204,7 +1204,7 @@
             "order": 322,
             "group": "discovery",
             "section": "discovery_modules",
-            "default": false,
+            "default": true,
             "type": "boolean"
         },
         "discovery_modules.entity-physical": {
@@ -4972,7 +4972,7 @@
             "order": 322,
             "group": "poller",
             "section": "poller_modules",
-            "default": false,
+            "default": true,
             "type": "boolean"
         },
         "poller_modules.customoid": {
