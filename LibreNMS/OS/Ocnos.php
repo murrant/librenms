@@ -273,7 +273,7 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
                 foreach ($module_data as $channel => $channel_data) {
                     // temp
                     if (isset($channel_data['IPI-CMM-CHASSIS-MIB::cmmTransTemperature']) && $channel_data['IPI-CMM-CHASSIS-MIB::cmmTransTemperature'] != '-100001') {
-                        $metrics->push($this->getTransceiverMetric($transceiver, 2, $chassis, $module, $channel, $channel_data, 'voltage', 'TransTemperature', 'TransTemp'));
+                        $metrics->push($this->getTransceiverMetric($transceiver, 2, $chassis, $module, $channel, $channel_data, 'temperature', 'TransTemperature', 'TransTemp'));
                     }
 
                     // voltage
@@ -322,10 +322,10 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
             'oid' => ".1.3.6.1.4.1.36673.100.1.2.3.1.$snmp_field_index.$chassis.$module.$channel",
             'value' => $value ? $value / $divisor : null,
             'divisor' => $divisor,
-            'threshold_min_critical' => $min_crit ? $min_crit / $divisor : null,
-            'threshold_min_warning' => $min_warn ? $min_warn / $divisor : null,
-            'threshold_max_warning' => $max_warn ? $max_warn / $divisor : null,
-            'threshold_max_critical' => $max_crit ? $max_crit / $divisor : null,
+            'threshold_min_critical' => isset($min_crit) ? $min_crit / $divisor : null,
+            'threshold_min_warning' => isset($min_warn) ? $min_warn / $divisor : null,
+            'threshold_max_warning' => isset($max_warn) ? $max_warn / $divisor : null,
+            'threshold_max_critical' => isset($max_crit) ? $max_crit / $divisor : null,
         ]);
     }
 }
