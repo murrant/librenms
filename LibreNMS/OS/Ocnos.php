@@ -95,6 +95,7 @@ class Ocnos extends OS implements TransceiverDiscovery
                 'ddm' => isset($data['IPI-CMM-CHASSIS-MIB::cmmTransDDMSupport']) && $data['IPI-CMM-CHASSIS-MIB::cmmTransDDMSupport'] == 'yes',
                 'encoding' => $data['IPI-CMM-CHASSIS-MIB::cmmTransEncoding'] ?? 'missing',
                 'distance' => $distance,
+                'wavelength' => isset($data['IPI-CMM-CHASSIS-MIB::cmmTransWavelength']) && $data['IPI-CMM-CHASSIS-MIB::cmmTransWavelength'] !== '-100002' ? $data['IPI-CMM-CHASSIS-MIB::cmmTransWavelength'] : null,
                 'connector' => $connector,
                 'channels' => $data['IPI-CMM-CHASSIS-MIB::cmmTransNoOfChannels'] ?? 'missing',
             ]);
@@ -163,7 +164,6 @@ class Ocnos extends OS implements TransceiverDiscovery
         return new TransceiverMetric([
             'transceiver_id' => $transceiver->id,
             'channel' => $channel,
-            'description' => "$chassis/$module.$channel",
             'type' => $type,
             'oid' => ".1.3.6.1.4.1.36673.100.1.2.3.1.$snmp_field_index.$chassis.$module.$channel",
             'value' => $value ? $value / $divisor : null,
