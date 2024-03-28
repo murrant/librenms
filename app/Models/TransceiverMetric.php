@@ -23,6 +23,7 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
         'threshold_max_warning',
         'threshold_max_critical',
     ];
+    protected $attributes = ['channel' => 0];
 
     public function transceiver(): BelongsTo
     {

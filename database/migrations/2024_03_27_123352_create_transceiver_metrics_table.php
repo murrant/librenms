@@ -18,7 +18,6 @@ return new class extends Migration
             $table->bigInteger('transceiver_id');
             $table->smallInteger('channel')->default(0);
             $table->string('type', 16);
-            $table->string('description', 32);
             $table->string('oid');
             $table->float('value')->nullable();
             $table->float('value_prev')->nullable();
