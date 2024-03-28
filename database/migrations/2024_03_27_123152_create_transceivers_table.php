@@ -17,18 +17,19 @@ return new class extends Migration
             $table->bigInteger('device_id');
             $table->bigInteger('port_id');
             $table->string('index');
-            $table->string('type', 16);
-            $table->string('vendor', 16);
-            $table->string('oui', 16);
-            $table->string('model', 16);
-            $table->string('revision', 4);
-            $table->string('serial', 16);
-            $table->date('date');
+            $table->string('type', 16)->nullable();
+            $table->string('vendor', 16)->nullable();
+            $table->string('oui', 16)->nullable();
+            $table->string('model', 16)->nullable();
+            $table->string('revision', 4)->nullable();
+            $table->string('serial', 16)->nullable();
+            $table->date('date')->nullable();
             $table->boolean('ddm')->default(0);
-            $table->string('encoding', 16);
-            $table->integer('distance');
-            $table->string('connector', 16);
-            $table->smallInteger('channels');
+            $table->string('encoding', 16)->nullable();
+            $table->integer('distance')->nullable();
+            $table->integer('wavelength')->nullable();
+            $table->string('connector', 16)->nullable();
+            $table->smallInteger('channels')->default(1);
         });
     }
 
