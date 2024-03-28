@@ -18,6 +18,7 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
         'value',
         'multiplier',
         'divisor',
+        'transform_function',
         'threshold_min_critical',
         'threshold_min_warning',
         'threshold_max_warning',

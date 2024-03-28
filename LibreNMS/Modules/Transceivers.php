@@ -88,9 +88,21 @@ class Transceivers implements Module
         /** @var TransceiverMetric $metric */
         foreach ($metrics as $metric) {
             $metric->value_prev = $metric->value;
-            $metric->value = ! empty($data[$metric->oid]) ? $data[$metric->oid] * $metric->multiplier / $metric->divisor : null;
+            $metric->value = null;
+
+            // transform the value to the proper scale
+            if (! empty($data[$metric->oid])) {
+                $value = $data[$metric->oid] * $metric->multiplier / $metric->divisor;
+                if (isset($metric->transform_function) && is_callable($metric->transform_function)) {
+                    dump($data[$metric->oid], $value, call_user_func($metric->transform_function, $value));
+                    $value = call_user_func($metric->transform_function, $value);
+                }
+
+                $metric->value = $value;
+            }
             $metric->save();
-            Log::info("$metric->description $metric->type: $metric->value");
+
+            Log::info($metric->transceiver->index . " $metric->type: $metric->value");
 
             $datastore->put($os->getDeviceArray(), 'transceiver-metric', [
                 'type' => $metric->type,

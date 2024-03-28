@@ -23,6 +23,7 @@ return new class extends Migration
             $table->float('value_prev')->nullable();
             $table->integer('multiplier')->default(1);
             $table->integer('divisor')->default(1);
+            $table->string('transform_function')->nullable();
             $table->float('threshold_min_critical')->nullable();
             $table->float('threshold_min_warning')->nullable();
             $table->float('threshold_max_warning')->nullable();
