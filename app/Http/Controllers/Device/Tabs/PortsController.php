@@ -53,7 +53,7 @@ class PortsController implements DeviceTab
     public function data(Device $device): array
     {
         $tab = \Request::segment(4);
-        $data = match($tab) {
+        $data = match ($tab) {
             'links' => $this->linksData($device),
             'xdsl' => $this->xdslData($device),
             default => $this->portData($device, $tab == 'detail'),
@@ -82,9 +82,7 @@ class PortsController implements DeviceTab
             if (Config::get('enable_port_relationship')) {
                 $relationships[] = 'pseudowires';
             }
-
         }
-
 
         return [
             'ports' => $device->ports()->with($relationships)->paginate(),
@@ -92,7 +90,7 @@ class PortsController implements DeviceTab
                 'bits' => [['type' => 'port_bits', 'title' => trans('Traffic'), 'vars' => [['from' => '-1d'], ['from' => '-7d'], ['from' => '-30d'], ['from' => '-1y']]]],
                 'upkts' => [['type' => 'port_upkts', 'title' => trans('Packets (Unicast)'), 'vars' => [['from' => '-1d'], ['from' => '-7d'], ['from' => '-30d'], ['from' => '-1y']]]],
                 'errors' => [['type' => 'port_errors', 'title' => trans('Errors'), 'vars' => [['from' => '-1d'], ['from' => '-7d'], ['from' => '-30d'], ['from' => '-1y']]]],
-            ]
+            ],
         ];
     }
 
@@ -135,7 +133,6 @@ class PortsController implements DeviceTab
 
         return ['links' => $device->links];
     }
-
 
     private function getTabs(Device $device): array
     {
