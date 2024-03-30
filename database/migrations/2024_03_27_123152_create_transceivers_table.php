@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('vendor', 16)->nullable();
             $table->string('oui', 16)->nullable();
             $table->string('model', 16)->nullable();
-            $table->string('revision', 4)->nullable();
+            $table->string('revision', 16)->nullable();
             $table->string('serial', 16)->nullable();
             $table->date('date')->nullable();
             $table->boolean('ddm')->default(0);
