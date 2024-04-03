@@ -61,12 +61,11 @@ class PortsController implements DeviceTab
     {
         $tab = \Request::segment(4);
         $this->detail = empty($tab) || $tab == 'detail';
-        $data = match($tab) {
+        $data = match ($tab) {
             'links' => $this->linksData($device),
             'xdsl' => $this->xdslData($device),
             default => $this->portData($device),
         };
-
 
         return array_merge([
             'tab' => $tab,
@@ -96,10 +95,10 @@ class PortsController implements DeviceTab
 
         $ports = $device->ports()->isUp()->orderBy('ifIndex')
             ->hasAccess(Auth::user())->with($relationships)->get(); // TODO paginate
-        $neighbors = $ports->keyBy('port_id')->map(fn($port) => $this->findPortNeighbors($port));
+        $neighbors = $ports->keyBy('port_id')->map(fn ($port) => $this->findPortNeighbors($port));
         $neighbor_ports = Port::with('device')
             ->hasAccess(Auth::user())
-            ->whereIn('port_id', $neighbors->map(fn($a) => array_keys($a))->flatten())
+            ->whereIn('port_id', $neighbors->map(fn ($a) => array_keys($a))->flatten())
             ->get()->keyBy('port_id');
 
         return [
@@ -137,7 +136,7 @@ class PortsController implements DeviceTab
             // IPv4 + IPv6 subnet if detailed
             // fa-arrow-right green portlink on devicelink
             if ($port->ipv4Networks->isNotEmpty()) {
-                $ids = $port->ipv4Networks->map(fn($net) => $net->ipv4->pluck('port_id'))->flatten();
+                $ids = $port->ipv4Networks->map(fn ($net) => $net->ipv4->pluck('port_id'))->flatten();
                 foreach ($ids as $port_id) {
                     if ($port_id !== $port->port_id) {
                         $this->addPortNeighbor($neighbors, 'ipv4_network', $port_id);
@@ -146,7 +145,7 @@ class PortsController implements DeviceTab
             }
 
             if ($port->ipv6Networks->isNotEmpty()) {
-                $ids = $port->ipv6Networks->map(fn($net) => $net->ipv6->pluck('port_id'))->flatten();
+                $ids = $port->ipv6Networks->map(fn ($net) => $net->ipv6->pluck('port_id'))->flatten();
                 foreach ($ids as $port_id) {
                     if ($port_id !== $port->port_id) {
                         $this->addPortNeighbor($neighbors, 'ipv6_network', $port_id);
@@ -170,7 +169,7 @@ class PortsController implements DeviceTab
         // fa-expand portlink: local is low port
         // fa-compress portlink: local is high portPort
         $stacks = \DB::table('ports_stack')->where('device_id', $port->device_id)
-            ->where(fn($q) => $q->where('port_id_high', $port->port_id)->orWhere('port_id_low', $port->port_id))->get();
+            ->where(fn ($q) => $q->where('port_id_high', $port->port_id)->orWhere('port_id_low', $port->port_id))->get();
         foreach ($stacks as $stack) {
             if ($stack->port_id_low) {
                 $this->addPortNeighbor($neighbors, 'stack_low', $stack->port_id_low);
@@ -190,7 +189,6 @@ class PortsController implements DeviceTab
                 $this->addPortNeighbor($neighbors, 'pagp', $port->pagpParent->port_id);
             }
         }
-
 
         return $neighbors;
     }
@@ -223,7 +221,6 @@ class PortsController implements DeviceTab
 
         return ['links' => $device->links];
     }
-
 
     private function getTabs(Device $device): array
     {
