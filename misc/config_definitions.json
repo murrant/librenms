@@ -1731,10 +1731,6 @@
             "default": false,
             "type": "boolean"
         },
-        "enable_port_relationship": {
-            "default": true,
-            "type": "boolean"
-        },
         "enable_ports_adsl": {
             "default": true,
             "type": "boolean"
