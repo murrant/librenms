@@ -26,12 +26,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('test', function (\App\Http\Interfaces\ToastInterface $toast) {
     toast()->error('farfel');
-    toast()->warning('Warning Title', "THIS IS A WARNING!!", ['timeOut' => 500000]);
+    toast()->warning('Warning Title', 'THIS IS A WARNING!!', ['timeOut' => 500000]);
     $toast->error('external_url', '<a href="http://google.com">Link Message</a>');
     $toast->info('internal_url', '<a href="http://librenms.local/test">Link Message</a>');
     $toast->success('relative_url', '<a href="/test">Link Message</a>');
 
-    return Blade::render(<<<EOF
+    return Blade::render(<<<'EOF'
 @extends('layouts.librenmsv1')
 
 @section('content')
@@ -41,7 +41,7 @@ Testing
 
 @endsection
 EOF
-);
+    );
 });
 
 // Auth
