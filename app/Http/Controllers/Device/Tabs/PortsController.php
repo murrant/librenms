@@ -344,10 +344,10 @@ class PortsController implements DeviceTab
 
         return $device->ports()
             ->isNotDeleted()
-            ->when(!$request->input('disabled'), fn(Builder $q, $disabled) => $q->where('disabled', 0))
-            ->when(!$request->input('ignore'), fn(Builder $q, $disabled) => $q->where('ignore', 0))
-            ->when($request->input('admin') != 'any', fn(Builder $q, $admin) => $q->where('ifAdminStatus', $request->input('admin', 'up')))
-            ->when($request->input('status', 'any') != 'any', fn(Builder $q, $admin) => $q->where('ifOperStatus', $request->input('status')))
+            ->when(! $request->input('disabled'), fn (Builder $q, $disabled) => $q->where('disabled', 0))
+            ->when(! $request->input('ignore'), fn (Builder $q, $disabled) => $q->where('ignore', 0))
+            ->when($request->input('admin') != 'any', fn (Builder $q, $admin) => $q->where('ifAdminStatus', $request->input('admin', 'up')))
+            ->when($request->input('status', 'any') != 'any', fn (Builder $q, $admin) => $q->where('ifOperStatus', $request->input('status')))
             ->orderBy($orderBy, $this->sortOrder)
             ->hasAccess(Auth::user())->with($relationships);
     }
