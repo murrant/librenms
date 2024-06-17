@@ -28,27 +28,24 @@ class Grafana extends Transport
 
     public function deliverAlert(array $alert_data): bool
     {
-        $device = DeviceCache::get($alert_data['device_id']);
-
         $graph_args = [
             'type' => 'device_bits', // FIXME use graph url related to alert
-            'device' => $device['device_id'],
+            'device' => $alert_data['device_id'],
             'height' => 150,
             'width' => 300,
             'legend' => 'no',
             'title' => 'yes',
         ];
 
-        //$graph_url = url('graph.php') . '?' . http_build_query($graph_args);
         // FIXME - workaround for https://github.com/grafana/oncall/issues/3031
-        $graph_url = url('graph.php') . '/' . str_replace('&', '/', http_build_query($graph_args));
+        $graph_url = str_replace('&', '%26', route('graph', $graph_args));
 
         $data = [
             'alert_uid' => $alert_data['id'] ?: $alert_data['uid'],
             'title' => $alert_data['title'] ?? null,
             'message' => $alert_data['msg'],
             'image_url' => $graph_url,
-            'link_to_upstream_details' => Url::deviceUrl($device),
+            'link_to_upstream_details' => Url::deviceUrl($alert_data['device_id']),
             'state' => ($alert_data['state'] == AlertState::ACTIVE) ? 'alerting' : 'ok',
         ];
 

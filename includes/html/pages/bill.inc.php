@@ -165,7 +165,7 @@ if (bill_permitted($bill_id)) {
             $unit = 'MB';
             $total_data = round($total_data, 2);
             $background = \LibreNMS\Util\Color::percentage($percent, null);
-            $type = '&amp;ave=yes'; ?>
+            $type = 'ave'; ?>
         <td>
             <?php echo Billing::formatBytes($total_data) ?> of <?php echo Billing::formatBytes($bill_data['bill_quota']) . ' (' . $percent . '%)' ?>
             - Average rate <?php echo Number::formatSi($rate_average, 2, 3, 'bps') ?>
@@ -185,7 +185,7 @@ if (bill_permitted($bill_id)) {
             $rate_95th = round($rate_95th, 2);
             $percent = Number::calculatePercent($rate_95th, $cdr);
             $background = \LibreNMS\Util\Color::percentage($percent, null);
-            $type = '&amp;95th=yes'; ?>
+            $type = '95th'; ?>
         <td>
             <?php echo Number::formatSi($rate_95th, 2, 3, '') . 'bps' ?> of <?php echo Number::formatSi($cdr, 2, 3, '') . 'bps (' . $percent . '%)' ?> (95th%ile)
         </td>
@@ -214,41 +214,90 @@ if (bill_permitted($bill_id)) {
         $rightnow = date('U');
 
         if ($vars['view'] == 'accurate') {
-            $bi = "<img src='billing-graph.php?bill_id=" . $bill_id . '&amp;bill_code=' . htmlspecialchars($_GET['bill_code']);
-            $bi .= '&amp;from=' . $unixfrom . '&amp;to=' . $unixto;
-            $bi .= '&amp;x=1190&amp;y=250';
-            $bi .= "$type'>";
+            $bi = "<img src='" . route('graph', [
+                    'type' => 'bill_historicbits',
+                    'id' => $bill_id,
+                    'from' => $unixfrom,
+                    'to' => $unixto,
+                    'width' => 1190,
+                    'height' => 250,
+                    $type => 'yes',
+                ]) . "'>";
 
-            $li = "<img src='billing-graph.php?bill_id=" . $bill_id . '&amp;bill_code=' . $_GET['bill_code'];
-            $li .= '&amp;from=' . $unix_prev_from . '&amp;to=' . $unix_prev_to;
-            $li .= '&amp;x=1190&amp;y=250';
-            $li .= "$type'>";
+            $li = "<img src='" . route('graph', [
+                    'type' => 'bill_historicbits',
+                    'id' => $bill_id,
+                    'from' => $unix_prev_from,
+                    'to' => $unix_prev_to,
+                    'width' => 1190,
+                    'height' => 250,
+                    $type => 'yes',
+                ]) . "'>";
 
-            $di = "<img src='billing-graph.php?bill_id=" . $bill_id . '&amp;bill_code=' . htmlspecialchars($_GET['bill_code']);
-            $di .= '&amp;from=' . \LibreNMS\Config::get('time.day') . '&amp;to=' . \LibreNMS\Config::get('time.now');
-            $di .= '&amp;x=1190&amp;y=250';
-            $di .= "$type'>";
+            $di = "<img src='" . route('graph', [
+                    'type' => 'bill_historicbits',
+                    'id' => $bill_id,
+                    'from' => \LibreNMS\Config::get('time.day'),
+                    'to' => \LibreNMS\Config::get('time.now'),
+                    'width' => 1190,
+                    'height' => 250,
+                    $type => 'yes',
+                ]) . "'>";
 
-            $mi = "<img src='billing-graph.php?bill_id=" . $bill_id . '&amp;bill_code=' . htmlspecialchars($_GET['bill_code']);
-            $mi .= '&amp;from=' . $lastmonth . '&amp;to=' . $rightnow;
-            $mi .= '&amp;x=1190&amp;y=250';
-            $mi .= "$type'>";
+            $mi = "<img src='" . route('graph', [
+                    'type' => 'bill_historicbits',
+                    'id' => $bill_id,
+                    'from' => $lastmonth,
+                    'to' => $rightnow,
+                    'width' => 1190,
+                    'height' => 250,
+                    $type => 'yes',
+                ]) . "'>";
         } else {
-            $bi = "<img src='graph.php?type=bill_bits&amp;id=" . $bill_id;
-            $bi .= '&amp;from=' . $unixfrom . '&amp;to=' . $unixto;
-            $bi .= '&amp;width=1000&amp;height=200&amp;total=1&amp;dir=' . $dir_95th . "'>";
+            $bi = "<img src='" . route('graph', [
+                    'type' => 'bill_bits',
+                    'id' => $bill_id,
+                    'from' => $unixfrom,
+                    'to' => $unixto,
+                    'width' => 1000,
+                    'height' => 200,
+                    'total' => 1,
+                    'dir' => $dir_95th,
+                ]) . "'>";
 
-            $li = "<img src='graph.php?type=bill_bits&amp;id=" . $bill_id;
-            $li .= '&amp;from=' . $unix_prev_from . '&amp;to=' . $unix_prev_to;
-            $li .= '&amp;width=1000&amp;height=200&amp;total=1&amp;dir=' . $dir_95th . "'>";
+            $li = "<img src='" . route('graph', [
+                    'type' => 'bill_bits',
+                    'id' => $bill_id,
+                    'from' => $unix_prev_from,
+                    'to' => $unix_prev_to,
+                    'width' => 1000,
+                    'height' => 200,
+                    'total' => 1,
+                    'dir' => $dir_95th,
+                ]) . "'>";
 
-            $di = "<img src='graph.php?type=bill_bits&amp;id=" . $bill_id;
-            $di .= '&amp;from=' . \LibreNMS\Config::get('time.day') . '&amp;to=' . \LibreNMS\Config::get('time.now');
-            $di .= '&amp;width=1000&amp;height=200&amp;total=1&amp;dir=' . $dir_95th . "'>";
+            $di = "<img src='" . route('graph', [
+                    'type' => 'bill_bits',
+                    'id' => $bill_id,
+                    'from' => \LibreNMS\Config::get('time.day'),
+                    'to' => \LibreNMS\Config::get('time.now'),
+                    'width' => 1000,
+                    'height' => 200,
+                    'total' => 1,
+                    'dir' => $dir_95th,
+                ]) . "'>";
 
-            $mi = "<img src='graph.php?type=bill_bits&amp;id=" . $bill_id;
-            $mi .= '&amp;from=' . $lastmonth . '&amp;to=' . $rightnow;
-            $mi .= '&amp;width=1000&amp;height=200&amp;total=1&amp;dir=' . $dir_95th . "'>";
+
+            $li = "<img src='" . route('graph', [
+                    'type' => 'bill_bits',
+                    'id' => $bill_id,
+                    'from' => $lastmonth,
+                    'to' => $rightnow,
+                    'width' => 1000,
+                    'height' => 200,
+                    'total' => 1,
+                    'dir' => $dir_95th,
+                ]) . "'>";
         }//end if
 
         ?>

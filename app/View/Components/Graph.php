@@ -135,7 +135,7 @@ class Graph extends Component
 
     private function getSrc(): string
     {
-        return url('graph.php') . '?' . http_build_query($this->vars + [
+        return route('graph', $this->vars + [
             'type' => $this->type,
             'legend' => $this->legend,
             'absolute_size' => $this->absolute_size,
@@ -149,7 +149,7 @@ class Graph extends Component
     private function getLink(): string
     {
         if ($this->link === true) {
-            $url = url('graphs') . '/' . http_build_query($this->vars + [
+            $url = route('graphs', $this->vars + [
                 'type' => $this->type,
                 'from' => $this->from,
                 'to' => $this->to,

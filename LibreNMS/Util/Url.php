@@ -292,13 +292,21 @@ class Url
         return self::portImage($graph_array);
     }
 
-    public static function portImage($args)
+    public static function portImage($args): string
     {
         if (empty($args['bg'])) {
             $args['bg'] = 'FFFFFF00';
         }
 
-        return '<img src="' . url('graph.php') . '?type=' . $args['graph_type'] . '&amp;id=' . $args['port_id'] . '&amp;from=' . $args['from'] . '&amp;to=' . $args['to'] . '&amp;width=' . $args['width'] . '&amp;height=' . $args['height'] . '&amp;bg=' . $args['bg'] . '">';
+        return '<img src="' . route('graph', [
+                'type' => $args['graph_type'],
+                'id' => $args['port_id'],
+                'from' => $args['from'],
+                'to' => $args['to'],
+                'width' => $args['width'],
+                'height' => $args['height'],
+                'bg' => $args['bg'],
+            ]) . '">';
     }
 
     public static function generate($vars, $new_vars = [])
@@ -351,12 +359,7 @@ class Url
      */
     public static function graphTag($args)
     {
-        $urlargs = [];
-        foreach ($args as $key => $arg) {
-            $urlargs[] = $key . '=' . ($arg === null ? '' : urlencode($arg));
-        }
-
-        return '<img src="' . url('graph.php') . '?' . implode('&amp;', $urlargs) . '" style="border:0;" />';
+        return '<img src="' . route('graph', $args) . '" style="border:0;" />';
     }
 
     public static function graphPopup($args, $content = null, $link = null)
@@ -390,13 +393,7 @@ class Url
 
     public static function lazyGraphTag($args)
     {
-        $urlargs = [];
-
-        foreach ($args as $key => $arg) {
-            $urlargs[] = $key . '=' . ($arg === null ? '' : urlencode($arg));
-        }
-
-        $tag = '<img class="img-responsive" src="' . url('graph.php') . '?' . implode('&amp;', $urlargs) . '" style="border:0;"';
+        $tag = '<img class="img-responsive" src="' . route('graph', $args) . '" style="border:0;"';
 
         if (Config::get('enable_lazy_load', true)) {
             return $tag . ' loading="lazy" />';
@@ -460,9 +457,18 @@ class Url
      */
     public static function minigraphImage($device, $start, $end, $type, $legend = 'no', $width = 275, $height = 100, $sep = '&amp;', $class = 'minigraph-image', $absolute_size = 0)
     {
-        $vars = ['device=' . $device->device_id, "from=$start", "to=$end", "width=$width", "height=$height", "type=$type", "legend=$legend", "absolute=$absolute_size"];
+        $vars = [
+            'device' => $device->device_id,
+            'from' => $start,
+            'to' => $end,
+            'width' => $width,
+            'height' => $height,
+            'type' => $type,
+            'legend' => $legend,
+            'absolute' => $absolute_size,
+        ];
 
-        return '<img class="' . $class . '" width="' . $width . '" height="' . $height . '" src="' . url('graph.php') . '?' . implode($sep, $vars) . '">';
+        return '<img class="' . $class . '" width="' . $width . '" height="' . $height . '" src="' . route('graph', $vars) . '">';
     }
 
     /**
