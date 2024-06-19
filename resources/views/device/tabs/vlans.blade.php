@@ -16,24 +16,23 @@
                 <td>{{ $vlan_number }}</td>
                 <td>{{ $vlans->first()->vlan_name }}</td>
                 <td>
-                @foreach($vlans as $port)
-                    @if(!$port->port)
+                @foreach($vlans as $vlan)
+                    @if(!$vlan->port)
                         @continue;
                     @endif
 
                     @if(!$vars)
                         <span class="tw-inline-flex">
-                            <x-port-link :port="$port->port">{{ $port->port->getShortLabel() }}</x-port-link>
-                            @if($port->untagged)<span>&nbsp;(U)</span>@endif
+                            <x-port-link :port="$vlan->port">{{ $vlan->port->getShortLabel() }}</x-port-link>
+                            @if($vlan->untagged)<span>&nbsp;(U)</span>@endif
                             @if(!$loop->last)<span>,</span>@endif
                         </span>
                     @else
-                        <div style="display: block; padding: 2px; margin: 2px; min-width: 139px; max-width:139px; min-height:85px; max-height:85px; text-align: center; float: left; background-color: {{ \LibreNMS\Config::get('list_colour.odd_alt2') }}">
-                            <div style="font-weight: bold;">{{ $port->port->ifDescr }}</div>
-                            <a href="{{ route('device', ['device' => $device->device_id, 'tab' => 'port', 'vars' => 'port='.$port->port->port_id]) }}" onmouseover="return overlib('<div style=\'font-size: 16px; padding:5px; font-weight: bold; color: #e5e5e5;\'>{{ $device->hostname }}-{{ $port->port->ifDescr }}</div>{{ $port->port->ifAlias }}<img src=\'{{ url('graph.php') }}?type=port_{{ $vars }}&amp;id={{ $port->port->port_id }}&amp;from={{ \LibreNMS\Config::get('time.twoday') }}&amp;to={{ \LibreNMS\Config::get('time.now') }}&amp;width=450&amp;height=150\'>', CENTER, LEFT, FGCOLOR, '#e5e5e5', BGCOLOR, '#e5e5e5', WIDTH, 400, HEIGHT, 150);" onmouseout="return nd();">
-                                <img src="{{ url('graph.php') }}?type=port_{{ $vars }}&amp;id={{ $port->port->port_id }}&amp;from={{ \LibreNMS\Config::get('time.twoday') }}&amp;to={{ \LibreNMS\Config::get('time.now') }}&amp;width=132&amp;height=40&amp;legend=no">
-                            </a>
-                            <div style="font-size: 9px;">{{ $port->port->ifAlias }}</div>
+                        <div class="minigraph-div">
+                            <x-port-link :port="$vlan->port" :graphs="[['type' => $data['graph_type']]]">
+                                <div class="tw-font-bold">{{ $vlan->port->getShortLabel() }}</div>
+                                <x-graph :port="$vlan->port" :type="$data['graph_type']" :from="$data['from']" width="132" height="48" legend="no"></x-graph>
+                            </x-port-link>
                         </div>
                     @endif
                 @endforeach
