@@ -299,14 +299,14 @@ class Url
         }
 
         return '<img src="' . route('graph', [
-                'type' => $args['graph_type'],
-                'id' => $args['port_id'],
-                'from' => $args['from'],
-                'to' => $args['to'],
-                'width' => $args['width'],
-                'height' => $args['height'],
-                'bg' => $args['bg'],
-            ]) . '">';
+            'type' => $args['graph_type'],
+            'id' => $args['port_id'],
+            'from' => $args['from'],
+            'to' => $args['to'],
+            'width' => $args['width'],
+            'height' => $args['height'],
+            'bg' => $args['bg'],
+        ]) . '">';
     }
 
     public static function generate($vars, $new_vars = [])
