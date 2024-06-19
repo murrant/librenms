@@ -8,7 +8,7 @@ foreach ($processors as $proc) {
     $id = 'id';
     $val = $proc['processor_id'];
     $proc_url = 'graphs/' . $id . '=' . $val . '/type=processor_usage/';
-    $base_url = 'graph.php?' . $id . '=' . $val . '&amp;type=processor_usage&amp;from=' . \LibreNMS\Config::get('time.day') . '&amp;to=' . \LibreNMS\Config::get('time.now');
+    $base_url = route('graph', [$id => $val, 'type' => 'processor_usage', 'from' => '-1d']);
     $mini_url = $base_url . '&amp;width=80&amp;height=20&amp;bg=f4f4f4';
 
     $text_descr = rewrite_entity_descr($proc['processor_descr']);

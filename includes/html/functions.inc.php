@@ -195,7 +195,7 @@ function generate_dynamic_graph_tag($args)
         $urlargs[] = $key . '=' . $value;
     }
 
-    return '<img style="width:' . $width . 'px;height:100%" class="graph img-responsive" data-src-template="graph.php?' . implode('&amp;', $urlargs) . '" border="0" />';
+    return '<img style="width:' . $width . 'px;height:100%" class="graph img-responsive" data-src-template="' . route('graph', $urlargs) . '" border="0" />';
 }//end generate_dynamic_graph_tag()
 
 function generate_dynamic_graph_js($args)
@@ -429,7 +429,7 @@ function generate_port_image($args)
         $args['bg'] = 'FFFFFF00';
     }
 
-    return "<img src='graph.php?type=" . $args['graph_type'] . '&amp;id=' . $args['port_id'] . '&amp;from=' . $args['from'] . '&amp;to=' . $args['to'] . '&amp;width=' . $args['width'] . '&amp;height=' . $args['height'] . '&amp;bg=' . $args['bg'] . "'>";
+    return "<img src='" . route('graph', ['type' => $args['graph_type'], 'id' => $args['port_id'], 'from' => $args['from'], 'to' => $args['to'], 'width' => $args['width'], 'height' => $args['height'], 'bg' => $args['bg']]) . "'>";
 }//end generate_port_image()
 
 /**

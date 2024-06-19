@@ -149,13 +149,11 @@ class Graph extends Component
     private function getLink(): string
     {
         if ($this->link === true) {
-            $url = route('graphs', $this->vars + [
+            return url('graphs', $this->vars + [
                 'type' => $this->type,
                 'from' => $this->from,
                 'to' => $this->to,
             ], '', '/');
-
-            return $url;
         }
 
         if ($this->link === false) {

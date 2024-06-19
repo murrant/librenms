@@ -7,10 +7,7 @@ $pagetitle[] = 'Historical Usage';
 // $url         = $PHP_SELF."/bill/".$bill_id."/history/";
 $i = 0;
 
-$img['his'] = '<img src="graph.php?id=' . $bill_id;
-$img['his'] .= '&amp;type=bill_historicmonthly';
-$img['his'] .= '&amp;width=1190&amp;height=250';
-$img['his'] .= '" style="margin: 15px 5px 25px 5px;" />';
+$img['his'] = '<img src="' . route('graph', ['id' => $bill_id, 'type' => 'bill_historicmonthly', 'width' => 1190, 'height' => 250]) . '" style="margin: 15px 5px 25px 5px;" />';
 ?>
 
 <h3>Historical Usage</h3>
@@ -26,21 +23,18 @@ $img['his'] .= '" style="margin: 15px 5px 25px 5px;" />';
 
 function showDetails($bill_id, $imgtype, $bill_hist_id)
 {
-    $res = '<img src="graph.php?id=' . $bill_id;
-
+    $params = ['id' => $bill_id, 'width' => 1190, 'height' => 250];
     if ($imgtype == 'bitrate') {
-        $res .= '&amp;type=bill_historicbits';
+        $params['type'] = 'bill_historicbits';
     } else {
-        $res .= '&amp;type=bill_historictransfer';
-        $res .= '&amp;imgtype=' . $imgtype;
+        $params['type'] = 'bill_historictransfer';
+        $params['imgtype'] = $imgtype;
     }
-    $res .= '&amp;width=1190&amp;height=250';
     if (is_numeric($bill_hist_id)) {
-        $res .= '&amp;bill_hist_id=' . $bill_hist_id;
+        $params['bill_hist_id'] = $bill_hist_id;
     }
-    $res .= '" style="margin: 15px 5px 25px 5px;" />';
 
-    return $res;
+    return '<img src="' . route('graph', $params) . '" style="margin: 15px 5px 25px 5px;" />';
 }//end showDetails()
 
 // $url        = generate_url($vars, array('detail' => 'yes'));

@@ -128,17 +128,17 @@ foreach (dbFetchRows($sql, $param) as $sensor) {
     ];
 
     if ($vars['view'] == 'graphs') {
-        $daily_graph = 'graph.php?id=' . $sensor['sensor_id'] . '&amp;type=' . $graph_type . '&amp;from=' . Config::get('time.day') . '&amp;to=' . Config::get('time.now') . '&amp;width=211&amp;height=100';
-        $daily_url = 'graph.php?id=' . $sensor['sensor_id'] . '&amp;type=' . $graph_type . '&amp;from=' . Config::get('time.day') . '&amp;to=' . Config::get('time.now') . '&amp;width=400&amp;height=150';
+        $daily_graph = route('graph', ['id' => $sensor['sensor_id'], 'type' => $graph_type, 'from' => '-1d', 'width' => 211, 'height' => 100]);
+        $daily_url = route('graph', ['id' => $sensor['sensor_id'], 'type' => $graph_type, 'from' => '-1d', 'width' => 400, 'height' => 150]);
 
-        $weekly_graph = 'graph.php?id=' . $sensor['sensor_id'] . '&amp;type=' . $graph_type . '&amp;from=' . Config::get('time.week') . '&amp;to=' . Config::get('time.now') . '&amp;width=211&amp;height=100';
-        $weekly_url = 'graph.php?id=' . $sensor['sensor_id'] . '&amp;type=' . $graph_type . '&amp;from=' . Config::get('time.week') . '&amp;to=' . Config::get('time.now') . '&amp;width=400&amp;height=150';
+        $weekly_graph = route('graph', ['id' => $sensor['sensor_id'], 'type' => $graph_type, 'from' => '-7d', 'width' => 211, 'height' => 100]);
+        $weekly_url = route('graph', ['id' => $sensor['sensor_id'], 'type' => $graph_type, 'from' => '-7d', 'width' => 400, 'height' => 150]);
 
-        $monthly_graph = 'graph.php?id=' . $sensor['sensor_id'] . '&amp;type=' . $graph_type . '&amp;from=' . Config::get('time.month') . '&amp;to=' . Config::get('time.now') . '&amp;width=211&amp;height=100';
-        $monthly_url = 'graph.php?id=' . $sensor['sensor_id'] . '&amp;type=' . $graph_type . '&amp;from=' . Config::get('time.month') . '&amp;to=' . Config::get('time.now') . '&amp;width=400&amp;height=150';
+        $monthly_graph = route('graph', ['id' => $sensor['sensor_id'], 'type' => $graph_type, 'from' => '-31d', 'width' => 211, 'height' => 100]);
+        $monthly_url = route('graph', ['id' => $sensor['sensor_id'], 'type' => $graph_type, 'from' => '-31d', 'width' => 400, 'height' => 150]);
 
-        $yearly_graph = 'graph.php?id=' . $sensor['sensor_id'] . '&amp;type=' . $graph_type . '&amp;from=' . Config::get('time.year') . '&amp;to=' . Config::get('time.now') . '&amp;width=211&amp;height=100';
-        $yearly_url = 'graph.php?id=' . $sensor['sensor_id'] . '&amp;type=' . $graph_type . '&amp;from=' . Config::get('time.year') . '&amp;to=' . Config::get('time.now') . '&amp;width=400&amp;height=150';
+        $yearly_graph = route('graph', ['id' => $sensor['sensor_id'], 'type' => $graph_type, 'from' => '-1y', 'width' => 211, 'height' => 100]);
+        $yearly_url = route('graph', ['id' => $sensor['sensor_id'], 'type' => $graph_type, 'from' => '-1y', 'width' => 400, 'height' => 150]);
 
         $response[] = [
             'hostname' => "<a onmouseover=\"return overlib('<img src=\'$daily_url\'>', LEFT);\" onmouseout=\"return nd();\">

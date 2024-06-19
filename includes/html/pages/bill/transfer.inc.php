@@ -162,23 +162,9 @@ function showPercent($per)
 
 
 <?php
-$bi = "<img src='graph.php?type=bill_historictransfer&id=" . $bill_id;
-$bi .= '&amp;from=' . $unixfrom . '&amp;to=' . $unixto;
-$bi .= '&amp;imgtype=day';
-$bi .= '&amp;width=1190&amp;height=250';
-$bi .= "'>";
-
-$di = "<img src='graph.php?type=bill_historictransfer&id=" . $bill_id;
-$di .= '&amp;from=' . \LibreNMS\Config::get('time.day') . '&amp;to=' . \LibreNMS\Config::get('time.now');
-$di .= '&amp;imgtype=hour';
-$di .= '&amp;width=1190&amp;height=250';
-$di .= "'>";
-
-$mi = "<img src='graph.php?type=bill_historictransfer&id=" . $bill_id;
-$mi .= '&amp;from=' . $lastmonth . '&amp;to=' . $rightnow;
-$mi .= '&amp;&imgtype=day';
-$mi .= '&amp;width=1190&amp;height=250';
-$mi .= "'>";
+$bi ="<img src='" . route('graph', ['type' => 'bill_historictransfer', 'id' => $bill_id, 'from' => $unixfrom, 'to' => $unixto, 'imgtype' => 'day', 'width' => 1190, 'height' => 250]) . "'>";
+$di ="<img src='" . route('graph', ['type' => 'bill_historictransfer', 'id' => $bill_id, 'from' => \LibreNMS\Config::get('time.day'), 'to' => \LibreNMS\Config::get('time.now'), 'imgtype' => 'hour', 'width' => 1190, 'height' => 250]) . "'>";
+$mi ="<img src='" . route('graph', ['type' => 'bill_historictransfer', 'id' => $bill_id, 'from' => $lastmonth, 'to' => $rightnow, 'imgtype' => 'day', 'width' => 1190, 'height' => 250]) . "'>";
 ?>
 
 <div class="panel panel-default">

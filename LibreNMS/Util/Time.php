@@ -86,9 +86,9 @@ class Time
 
     /**
      * Parse a time string into a timestamp including signed relative times using:
-     * m - month
-     * d - day
+     * m - minute
      * h - hour
+     * d - day
      * y - year
      */
     public static function parseAt(string|int $time): int
