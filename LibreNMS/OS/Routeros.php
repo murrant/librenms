@@ -509,6 +509,7 @@ class Routeros extends OS implements
 
         return \SnmpQuery::cache()->walk('MIKROTIK-MIB::mtxrOpticalTable')->mapTable(function ($data, $ifIndex) use ($ifIndexToPortId) {
             $wavelength = $data['MIKROTIK-MIB::mtxrOpticalWavelength'] ?? null;
+
             return new Transceiver([
                 'port_id' => $ifIndexToPortId->get($ifIndex),
                 'index' => $ifIndex,
