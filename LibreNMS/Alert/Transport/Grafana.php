@@ -15,7 +15,6 @@
 
 namespace LibreNMS\Alert\Transport;
 
-use App\Facades\DeviceCache;
 use LibreNMS\Alert\Transport;
 use LibreNMS\Enum\AlertState;
 use LibreNMS\Exceptions\AlertTransportDeliveryException;
