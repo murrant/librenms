@@ -36,6 +36,7 @@ class DeviceController extends Controller
         'vm' => \App\Http\Controllers\Device\Tabs\VmInfoController::class,
         'mef' => \App\Http\Controllers\Device\Tabs\MefController::class,
         'tnmsne' => \App\Http\Controllers\Device\Tabs\TnmsneController::class,
+        'transceivers' => \App\Http\Controllers\Device\Tabs\TransceiversController::class,
         'loadbalancer' => \App\Http\Controllers\Device\Tabs\LoadBalancerController::class,
         'routing' => \App\Http\Controllers\Device\Tabs\RoutingController::class,
         'pseudowires' => \App\Http\Controllers\Device\Tabs\PseudowiresController::class,
