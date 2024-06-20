@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Http\Controllers\Device\Tabs;
+
+use App\Models\Device;
+use Illuminate\Http\Request;
+use LibreNMS\Interfaces\UI\DeviceTab;
+
+class TransceiversController implements DeviceTab
+{
+
+    public function visible(Device $device): bool
+    {
+        return $device->transceivers()->exists();
+    }
+
+    public function slug(): string
+    {
+        return 'transceivers';
+    }
+
+    public function icon(): string
+    {
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" style="line-height:1;height:1em;width:1em;display:inline-block;"><path style="fill:currentColor" d="m49.74.22-5.42 5.42-1.1-1.11a4.47 4.47 0 0 0-6.26 0L1.54 39.94a4.47 4.47 0 0 0 0 6.26l16.34 16.33a4.47 4.47 0 0 0 6.25 0l35.41-35.41a4.47 4.47 0 0 0 0-6.26l-1.1-1.11 5.41-5.42zM40.08 8.6 55.48 24 21 58.47l-1.98-1.98 2.62-2.62-3.91-3.9-2.62 2.61-3.62-3.62 2.62-2.62-3.9-3.9-2.62 2.62-1.98-1.99z"/><path style="stroke:currentColor;stroke-width:3.50264;stroke-linecap:round" d="m40.26 17.46-1.69 1.68M46.62 23.82l-1.69 1.68"/></svg>';
+    }
+
+    public function name(): string
+    {
+        return __('Transceivers');
+    }
+
+    public function data(Device $device, Request $request): array
+    {
+        $device->load(['transceivers.port', 'transceivers.metrics']);
+        return [
+            'transceivers' => $device->transceivers,
+        ];
+    }
+}
