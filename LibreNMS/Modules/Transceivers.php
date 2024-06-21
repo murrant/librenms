@@ -102,12 +102,14 @@ class Transceivers implements Module
             }
             $metric->save();
 
-            Log::info($metric->transceiver->index . " $metric->type: $metric->value");
+            Log::info($metric->transceiver->index . ":$metric->channel $metric->type: $metric->value");
 
-            $datastore->put($os->getDeviceArray(), 'transceiver-metric', [
+            $datastore->put($os->getDeviceArray(), 'transceiver', [
                 'type' => $metric->type,
+                'index' => $metric->transceiver->index,
+                'channel' => $metric->channel,
                 'rrd_def' => RrdDefinition::make()->addDataset('value', 'GAUGE'),
-                'rrd_name' => ['transceiver-metric', $metric->type, $metric->transceiver->index],
+                'rrd_name' => ['transceiver', $metric->type, $metric->transceiver->index, $metric->channel],
             ], [
                 'value' => $metric->value,
             ]);
