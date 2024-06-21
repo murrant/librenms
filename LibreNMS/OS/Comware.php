@@ -116,7 +116,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
     {
         $ifIndexToPortId = $this->getDevice()->ports()->pluck('port_id', 'ifIndex');
 
-        return \SnmpQuery::enumStrings()->cache()->walk('HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver')->mapTable(function ($data, $ifIndex) use ($ifIndexToPortId) {
+        return \SnmpQuery::enumStrings()->cache()->walk('HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverInfoTable')->mapTable(function ($data, $ifIndex) use ($ifIndexToPortId) {
             return new Transceiver([
                 'port_id' => $ifIndexToPortId->get($ifIndex),
                 'index' => $ifIndex,
@@ -124,6 +124,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                 'vendor' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverVendorName'] ?? null,
                 'oui' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverVendorOUI'] ?? null,
                 'revision' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverRevisionNumber'] ?? null,
+                'model' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverPartNumber'] ?? null,
                 'serial' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverSerialNumber'] ?? null,
                 'ddm' => isset($data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverDiagnostic']) && $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverDiagnostic'] == 'true',
                 'distance' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverTransferDistance'] ?? null,
@@ -137,7 +138,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
     {
         $metrics = new Collection;
 
-        $xcData = \SnmpQuery::enumStrings()->cache()->walk('HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver')->table(1);
+        $xcData = \SnmpQuery::enumStrings()->cache()->walk('HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverInfoTable')->table(1);
         $channelData = \SnmpQuery::walk('HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelTable')->table(2);
 
         foreach ($xcData as $ifIndex => $transceiver) {

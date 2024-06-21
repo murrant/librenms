@@ -4,40 +4,44 @@
     @foreach($data['transceivers'] as $transceiver)
         <x-panel>
             <x-slot name="heading">
-                <x-port-link :port="$transceiver->port"></x-port-link>
-                <h4>
-                    {{ $transceiver->vendor }} {{ $transceiver->type }}
-
-                </h4>
-                PN:{{ $transceiver->model }} SN:{{ $transceiver->serial }}
-            </x-slot>
-            <div>
-                @foreach($transceiver->metrics->groupBy('channel')->map->keyBy('type') as $channel => $channelMetrics)
+                <div class="tw-flex tw-flex-row">
                     <div>
-                        Channel {{ $channel }}
-
-                        @php($rxpower = $channelMetrics->pull('power-rx'))
-                        <div>
-                            Rx Power: {{ $rxpower->value }} dBm
-                        </div>
-
-                        @php($txpower = $channelMetrics->pull('power-tx'))
-                        <div>
-                            Rx Power: {{ $rxpower->value }} dBm
-                        </div>
-
-                    @foreach($channelMetrics as $type => $metric)
-                   <div>
-                       Metric: {{ $type }}
-                       <div>
-                       {!! json_encode($metric) !!}}
-
-                       </div>
-                   </div>
-                    @endforeach
+                        <x-port-link :port="$transceiver->port"></x-port-link>
+                        @if($transceiver->vendor || $transceiver->type)<h4>{{ $transceiver->vendor }} {{ $transceiver->type }}</h4>@endif
+                        @if($transceiver->model)<p>PN:{{ $transceiver->model }}</p>@endif
+                        @if($transceiver->serial)<p>SN:{{ $transceiver->serial }}</p>@endif
                     </div>
+                    <div class="tw-pl-2">
+                        <p>@if($transceiver->revision)Rev: {{ $transceiver->revision }}@endif @if($transceiver->date)Date: {{ $transceiver->date }}@endif</p>
+                        @if($transceiver->distance)<p>Distance: {{ $transceiver->distance }}m</p>@endif
+                        @if($transceiver->wavelength)<p>Wavelength: {{ $transceiver->wavelength }}</p>@endif
+                        @if($transceiver->channels > 1)<p>Channels: {{ $transceiver->channels }}</p>@endif
+                    </div>
+                </div>
+            </x-slot>
+                @foreach($transceiver->metrics->groupBy('type') as $type => $metrics)
+                    @if($loop->first)
+                    <div class="tw-grid tw-grid-cols-2 tw-grid-cols-[min-content_1fr] tw-gap-x-4">
+                    @endif
+                       <div class="tw-whitespace-nowrap">
+                           {{  trans_choice('port.transceivers.metrics.' . $type, 0) }}:
+                           {{ $metrics->firstWhere('channel', 0)?->value ?? $metrics->avg('value') }} {{ __('port.transceivers.units.' . $type) }}
+                       </div>
+                       <div>
+                           <x-popup>
+                               <div class="tw-border-2">
+                                   <x-graph :type="'port_transceiver_' . $type" :port="$transceiver->port" legend="yes" width="100" height="20"></x-graph>
+                               </div>
+                               <x-slot name="title">{{ $transceiver->port->getLabel() }}</x-slot>
+                               <x-slot name="body">
+                                   <x-graph-row loading="lazy" :type="'port_transceiver_' . $type" :port="$transceiver->port" legend="yes"></x-graph-row>
+                               </x-slot>
+                           </x-popup>
+                       </div>
+                    @if($loop->last)
+                    </div>
+                    @endif
                 @endforeach
-            </div>
         </x-panel>
     @endforeach
 @endsection

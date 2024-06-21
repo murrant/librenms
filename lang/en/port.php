@@ -25,6 +25,22 @@ return [
         'links' => 'Neighbors',
         'xdsl' => 'xDSL',
     ],
+    'transceivers' => [
+        'metrics' => [
+            'power-tx' => '{0} Tx Power|[1,*] Channel :channel Tx Power',
+            'power-rx' => '{0} Rx Power|[1,*] Channel :channel Rx Power',
+            'bias' => '{0} Bias|[1,*] Channel :channel Bias',
+            'temperature' => '{0} Temperature|[1,*] Channel :channel Temperature',
+            'voltage' => '{0} Voltage|[1,*] Channel :channel Voltage',
+        ],
+        'units' => [
+            'power-tx' => 'dBm',
+            'power-rx' => 'dBm',
+            'bias' => 'mA',
+            'temperature' => '°C',
+            'voltage' => 'V',
+        ]
+    ],
     'unknown_port' => 'Unknown Port',
     'vlan_count' => 'VLANs: :count',
     'vlan_label' => 'VLAN: :label',
