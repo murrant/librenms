@@ -32,6 +32,7 @@ class TransceiversController implements DeviceTab
     public function data(Device $device, Request $request): array
     {
         $device->load(['transceivers.port', 'transceivers.metrics']);
+
         return [
             'transceivers' => $device->transceivers,
         ];
