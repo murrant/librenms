@@ -39,7 +39,7 @@ return [
             'bias' => 'mA',
             'temperature' => '°C',
             'voltage' => 'V',
-        ]
+        ],
     ],
     'unknown_port' => 'Unknown Port',
     'vlan_count' => 'VLANs: :count',

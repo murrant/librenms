@@ -8,7 +8,6 @@ use LibreNMS\Interfaces\UI\DeviceTab;
 
 class TransceiversController implements DeviceTab
 {
-
     public function visible(Device $device): bool
     {
         return $device->transceivers()->exists();
