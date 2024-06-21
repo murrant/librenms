@@ -4,14 +4,14 @@
     @foreach($data['transceivers'] as $transceiver)
         <x-panel>
             <x-slot name="heading">
-                <div class="tw-flex tw-flex-row">
-                    <div>
+                <div class="tw-flex sm:tw-flex-row tw-flex-col">
+                    <div class="tw-pr-8">
                         <x-port-link :port="$transceiver->port"></x-port-link>
                         @if($transceiver->vendor || $transceiver->type)<h4>{{ $transceiver->vendor }} {{ $transceiver->type }}</h4>@endif
                         @if($transceiver->model)<p>PN:{{ $transceiver->model }}</p>@endif
                         @if($transceiver->serial)<p>SN:{{ $transceiver->serial }}</p>@endif
                     </div>
-                    <div class="tw-pl-6">
+                    <div>
                         <p>@if($transceiver->revision)Rev: {{ $transceiver->revision }}@endif @if($transceiver->date)Date: {{ $transceiver->date }}@endif</p>
                         @if($transceiver->distance)<p>Distance: {{ $transceiver->distance }}m</p>@endif
                         @if($transceiver->wavelength)<p>Wavelength: {{ $transceiver->wavelength }}</p>@endif
@@ -21,7 +21,7 @@
             </x-slot>
                 @foreach($transceiver->metrics->groupBy('type') as $type => $metrics)
                     @if($loop->first)
-                    <div class="tw-grid tw-grid-cols-2 tw-grid-cols-[min-content_1fr] tw-gap-x-4">
+                    <div class="tw-grid tw-grid-cols-[min-content_1fr] tw-gap-x-4">
                     @endif
                        <div class="tw-whitespace-nowrap">
                            {{  trans_choice('port.transceivers.metrics.' . $type, 0) }}:
