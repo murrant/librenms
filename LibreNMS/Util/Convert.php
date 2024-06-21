@@ -41,6 +41,7 @@ class Convert
     {
         return $microWatt == 0 ? -60 : 10 * log10($microWatt / 1000);
     }
+
     public static function mwToDbm(int|float|string|null $milliWatt): float|int
     {
         return $milliWatt == 0 ? -60 : 10 * log10($milliWatt);
