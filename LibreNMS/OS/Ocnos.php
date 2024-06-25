@@ -34,7 +34,6 @@ use SnmpQuery;
 
 class Ocnos extends OS implements TransceiverDiscovery
 {
-
     public function discoverTransceivers(): Collection
     {
         return SnmpQuery::enumStrings()->walk('IPI-CMM-CHASSIS-MIB::cmmTransEEPROMTable')->mapTable(function ($data, $cmmStackUnitIndex, $cmmTransIndex) {
@@ -45,7 +44,7 @@ class Ocnos extends OS implements TransceiverDiscovery
                 $distance = $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthKmtrs'] * 1000;
             } elseif (! empty($data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM4']) && $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM4'] !== '-100002') {
                 $distance = (int) $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM4'];
-            } elseif (! empty($data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM3'] )&& $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM3'] !== '-100002') {
+            } elseif (! empty($data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM3']) && $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM3'] !== '-100002') {
                 $distance = (int) $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM3'];
             } elseif (! empty($data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM2']) && $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM2'] !== '-100002') {
                 $distance = (int) $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM2'];
@@ -147,7 +146,6 @@ class Ocnos extends OS implements TransceiverDiscovery
 
         return $metrics;
     }
-
 
     private function getTransceiverMetric(Transceiver $transceiver, int $snmp_field_index, string $chassis, string $module, string $channel, array $data, string $type, string $slug, string $threshold_slug = null): TransceiverMetric
     {
