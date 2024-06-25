@@ -200,7 +200,7 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
                 $distance = $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthKmtrs'] * 1000;
             } elseif (! empty($data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM4']) && $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM4'] !== '-100002') {
                 $distance = (int) $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM4'];
-            } elseif (! empty($data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM3'] )&& $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM3'] !== '-100002') {
+            } elseif (! empty($data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM3']) && $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM3'] !== '-100002') {
                 $distance = (int) $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM3'];
             } elseif (! empty($data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM2']) && $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM2'] !== '-100002') {
                 $distance = (int) $data['IPI-CMM-CHASSIS-MIB::cmmTransLengthOM2'];

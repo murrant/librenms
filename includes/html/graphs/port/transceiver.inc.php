@@ -2,11 +2,8 @@
 
 use App\Models\Port;
 
-
 /** @var Port $port */
 /** @var \App\Models\Device $device */
-
-
 $port = $port instanceof Port ? $port : Port::find($port['port_id']);
 $rrd_list = [];
 
