@@ -23,6 +23,7 @@ return [
         'arp' => 'ARP Table',
         'fdb' => 'FDB Table',
         'links' => 'Neighbors',
+        'transceivers' => 'Transceivers',
         'xdsl' => 'xDSL',
     ],
     'transceivers' => [

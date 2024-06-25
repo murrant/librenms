@@ -24,6 +24,7 @@ class Transceiver extends PortRelatedModel implements Keyable
         'ddm',
         'encoding',
         'distance',
+        'wavelength',
         'connector',
         'channels',
     ];
