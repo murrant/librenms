@@ -23,7 +23,6 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-
 use LibreNMS\OS;
 
 if (! $os instanceof OS) {

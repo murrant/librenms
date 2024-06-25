@@ -390,13 +390,12 @@ class Junos extends \LibreNMS\OS implements SlaDiscovery, OSPolling, SlaPolling,
                     'oid' => ".1.3.6.1.4.1.2636.3.60.1.1.1.1.6.$ifIndex",
                     'value' => $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltage'] / 1000,
                     'divisor' => 1000,
-                    'threshold_min_critical' => isset($data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentLowAlarmThreshold'])    ? $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentLowAlarmThreshold'] / 1000 : null,
-                    'threshold_min_warning'  => isset($data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentLowWarningThreshold'])  ? $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentLowWarningThreshold'] / 1000 : null,
-                    'threshold_max_warning'  => isset($data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentHighWarningThreshold']) ? $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentHighWarningThreshold'] / 1000 : null,
-                    'threshold_max_critical' => isset($data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentHighAlarmThreshold'])   ? $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentHighAlarmThreshold'] / 1000 : null,
+                    'threshold_min_critical' => isset($data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentLowAlarmThreshold']) ? $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentLowAlarmThreshold'] / 1000 : null,
+                    'threshold_min_warning' => isset($data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentLowWarningThreshold']) ? $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentLowWarningThreshold'] / 1000 : null,
+                    'threshold_max_warning' => isset($data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentHighWarningThreshold']) ? $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentHighWarningThreshold'] / 1000 : null,
+                    'threshold_max_critical' => isset($data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentHighAlarmThreshold']) ? $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleVoltageCurrentHighAlarmThreshold'] / 1000 : null,
                 ]));
             }
-
         }
 
         return $metrics;

@@ -151,7 +151,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                     'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.9.$ifIndex",
                     'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverCurTXPower'] / 100, // dBm
                     'divisor' => 100,
-                ]), $transceiver, 'PwrOut', fn($v) => Convert::uwToDbm($v / 10)));
+                ]), $transceiver, 'PwrOut', fn ($v) => Convert::uwToDbm($v / 10)));
             }
 
             // RX Power
@@ -162,7 +162,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                     'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.12.$ifIndex",
                     'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverCurRXPower'] / 100,
                     'divisor' => 100,
-                ]), $transceiver, 'RcvPwr', fn($v) => Convert::uwToDbm($v / 10)));
+                ]), $transceiver, 'RcvPwr', fn ($v) => Convert::uwToDbm($v / 10)));
             }
 
             // Temperature
@@ -194,7 +194,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                     'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.17.$ifIndex",
                     'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverVoltage'],
                     'divisor' => 100,
-                ]), $transceiver, 'Vcc', fn($v) => $v / 10000));
+                ]), $transceiver, 'Vcc', fn ($v) => $v / 10000));
             }
 
             // Channels
@@ -221,7 +221,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                             'oid' => ".1.3.6.1.4.1.25506.2.70.1.2.1.2.$ifIndex.$channel",
                             'value' => $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelCurTXPower'] / 100,
                             'divisor' => 100,
-                        ]), $transceiver, 'PwrOut', fn($v) => Convert::uwToDbm($v / 10)));
+                        ]), $transceiver, 'PwrOut', fn ($v) => Convert::uwToDbm($v / 10)));
                     }
 
                     // RX Power
@@ -233,7 +233,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                             'oid' => ".1.3.6.1.4.1.25506.2.70.1.2.1.3.$ifIndex.$channel",
                             'value' => $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelCurTXPower'] / 100,
                             'divisor' => 100,
-                        ]), $transceiver, 'RcvPwr', fn($v) => Convert::uwToDbm($v / 10)));
+                        ]), $transceiver, 'RcvPwr', fn ($v) => Convert::uwToDbm($v / 10)));
                     }
 
                     // Bias Current
@@ -256,10 +256,10 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
 
     private function setTransceiverThresholds(TransceiverMetric $metric, array $data, string $slug, callable $transform = null): TransceiverMetric
     {
-        $transform ??= fn($v) => $v; // default do nothing transform
+        $transform ??= fn ($v) => $v; // default do nothing transform
         $metric->threshold_min_critical = ! empty($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}LoAlarm"]) ? $transform($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}LoAlarm"]) : null;
-        $metric->threshold_min_warning  = ! empty($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}LoWarn"])  ? $transform($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}LoWarn"]) : null;
-        $metric->threshold_max_warning  = ! empty($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}HiWarn"])  ? $transform($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}HiWarn"]) : null;
+        $metric->threshold_min_warning = ! empty($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}LoWarn"]) ? $transform($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}LoWarn"]) : null;
+        $metric->threshold_max_warning = ! empty($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}HiWarn"]) ? $transform($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}HiWarn"]) : null;
         $metric->threshold_max_critical = ! empty($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}HiAlarm"]) ? $transform($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}HiAlarm"]) : null;
 
         return $metric;
