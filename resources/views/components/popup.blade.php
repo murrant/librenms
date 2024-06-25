@@ -30,10 +30,11 @@
  x-on:click.away="hide(0)"
  x-on:librenms-popup-shown.window="() => hide(0)"
 >
-    <div class="tw-inline-block" x-ref="targetRef" x-on:mouseenter='show(100)' x-on:mouseleave="hide(delay)">
+    <span x-ref="targetRef" x-on:mouseenter='show(100)' x-on:mouseleave="hide(delay)">
         {{ $slot }}
-    </div>
-    <div x-ref="popupRef"
+    </span>
+    <div x-cloak
+          x-ref="popupRef"
           x-on:mouseenter="clearTimeout(hideTimeout)"
           x-on:mouseleave="hide(delay)"
           x-bind:class="{'tw-hidden': !popupShow, 'tw-block': popupShow}"
@@ -46,7 +47,7 @@
             </div>
         @endisset
         @isset($body)
-        <div class="tw-p-3">
+        <div {{ $body->attributes->class(['tw-p-3' => $body->attributes->isEmpty()]) }}>
             {{ $body }}
         </div>
         @endisset
