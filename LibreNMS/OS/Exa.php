@@ -94,7 +94,7 @@ class Exa extends OS implements OSDiscovery, TransceiverDiscovery
                             'type' => 'bias',
                             'oid' => ".1.3.6.1.4.1.6321.1.2.2.2.1.6.2.1.6.$index",
                             'value' => $portData['E7-Calix-MIB::e7OltPonPortTxBias'] / 1000,
-                            'divisor' => 1000
+                            'divisor' => 1000,
                         ]));
                     }
 
