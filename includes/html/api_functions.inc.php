@@ -1132,6 +1132,7 @@ function get_network_ip_addresses(Illuminate\Http\Request $request)
 function get_port_transceiver(Illuminate\Http\Request $request)
 {
     $port_id = $request->route('portid');
+
     return check_port_permission($port_id, null, function ($port_id) {
         $transceivers = Port::find($port_id)->transceivers()->with(['metrics' => function ($query) {
             return $query->select(['transceiver_id', 'channel', 'type', 'value', 'value_prev', 'threshold_min_critical', 'threshold_min_warning', 'threshold_max_warning', 'threshold_max_critical']);
