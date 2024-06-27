@@ -94,7 +94,6 @@ class Transceivers implements Module
             if (! empty($data[$metric->oid])) {
                 $value = $data[$metric->oid] * $metric->multiplier / $metric->divisor;
                 if (isset($metric->transform_function) && is_callable($metric->transform_function)) {
-                    dump($data[$metric->oid], $value, call_user_func($metric->transform_function, $value));
                     $value = call_user_func($metric->transform_function, $value);
                 }
 

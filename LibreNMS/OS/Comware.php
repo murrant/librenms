@@ -172,7 +172,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                     'type' => 'temperature',
                     'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.15.$ifIndex",
                     'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverTemperature'],
-                ]), $transceiver, 'Temp'));
+                ]), $transceiver, 'Temp', fn ($v) => $v / 1000));
             }
 
             // Bias Current
@@ -183,16 +183,16 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                     'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.17.$ifIndex",
                     'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverBiasCurrent'] / 100,
                     'divisor' => 100,
-                ]), $transceiver, 'Bias'));
+                ]), $transceiver, 'Bias', fn ($v) => $v / 1000));
             }
 
             // Voltage
             if (isset($transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverVoltage']) && $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverVoltage'] != 2147483647) {
                 $metrics->push($this->setTransceiverThresholds(new TransceiverMetric([
                     'transceiver_id' => $transceiver_id,
-                    'type' => 'bias',
-                    'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.17.$ifIndex",
-                    'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverVoltage'],
+                    'type' => 'voltage',
+                    'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.16.$ifIndex",
+                    'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverVoltage'] / 100,
                     'divisor' => 100,
                 ]), $transceiver, 'Vcc', fn ($v) => $v / 10000));
             }
@@ -209,7 +209,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                             'type' => 'temperature',
                             'oid' => ".1.3.6.1.4.1.25506.2.70.1.2.1.4.$ifIndex.$channel",
                             'value' => $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelTemperature'],
-                        ]), $transceiver, 'Temp'));
+                        ]), $transceiver, 'Temp', fn ($v) => $v / 1000));
                     }
 
                     // TX Power
@@ -245,7 +245,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                             'oid' => ".1.3.6.1.4.1.25506.2.70.1.2.1.5.$ifIndex.$channel",
                             'value' => $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelBiasCurrent'] / 100,
                             'divisor' => 100,
-                        ]), $transceiver, 'Bias'));
+                        ]), $transceiver, 'Bias', fn ($v) => $v / 1000));
                     }
                 }
             }
