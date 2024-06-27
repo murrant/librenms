@@ -14,6 +14,7 @@ use SnmpQuery;
 class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
 {
     private bool $sfpSeen = false;
+    private ?Collection $ifNamePortIdMap = null;
 
     public function discoverEntityPhysical(): Collection
     {
@@ -237,10 +238,11 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
                 $date = $year . '-' . $date_matches[2] . '-' . $date_matches[3];
             }
 
+            $cmmTransType = $data['IPI-CMM-CHASSIS-MIB::cmmTransType'] ?? 'missing';
             return new Transceiver([
-                'port_id' => 0,
+                'port_id' => $this->guessPortId($cmmTransIndex, $cmmTransType),
                 'index' => "$cmmStackUnitIndex.$cmmTransIndex",
-                'type' => $data['IPI-CMM-CHASSIS-MIB::cmmTransType'] ?? 'missing',
+                'type' => $cmmTransType,
                 'vendor' => $data['IPI-CMM-CHASSIS-MIB::cmmTransVendorName'] ?? 'missing',
                 'oui' => $data['IPI-CMM-CHASSIS-MIB::cmmTransVendorOUI'] ?? 'missing',
                 'model' => $data['IPI-CMM-CHASSIS-MIB::cmmTransVendorPartNumber'] ?? 'missing',
