@@ -1129,6 +1129,18 @@ function get_network_ip_addresses(Illuminate\Http\Request $request)
     return api_success(array_merge($ipv4, $ipv6), 'addresses');
 }
 
+function get_port_transceiver(Illuminate\Http\Request $request)
+{
+    $port_id = $request->route('portid');
+    return check_port_permission($port_id, null, function ($port_id) {
+        $transceivers = Port::find($port_id)->transceivers()->with(['metrics' => function ($query) {
+            return $query->select(['transceiver_id', 'channel', 'type', 'value', 'value_prev', 'threshold_min_critical', 'threshold_min_warning', 'threshold_max_warning', 'threshold_max_critical']);
+        }])->get();
+
+        return api_success($transceivers, 'transceivers');
+    });
+}
+
 function get_port_info(Illuminate\Http\Request $request)
 {
     $port_id = $request->route('portid');
@@ -2708,6 +2720,23 @@ function get_fdb(Illuminate\Http\Request $request)
 
         return api_error(404, 'Device does not exist');
     });
+}
+
+function get_transceivers(Illuminate\Http\Request $request)
+{
+    $hostname = $request->route('hostname');
+
+    if (empty($hostname)) {
+        return api_error(500, 'No hostname has been provided');
+    }
+
+    $device = DeviceCache::get($hostname);
+
+    if (! $device) {
+        return api_error(404, "Device $hostname not found");
+    }
+
+    return api_success($device->transceivers()->hasAccess($request->user())->get(), 'transceivers');
 }
 
 function list_fdb(Illuminate\Http\Request $request)
