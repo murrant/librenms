@@ -34,6 +34,7 @@ return [
             'revision' => 'Rev: :revision',
             'date' => 'Date: :date',
             'distance' => 'Distance: :distance',
+            'encoding' => 'Encoding: :encoding',
             'wavelength' => 'Wavelength: :wavelength',
             'connector' => 'Connector: :connector',
             'channels' => 'Channels: :channels',
