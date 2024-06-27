@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use LibreNMS\Enum\Severity;
+use LibreNMS\Enum\Status;
 use LibreNMS\Interfaces\Models\Keyable;
 
 class TransceiverMetric extends DeviceRelatedModel implements Keyable
@@ -26,13 +28,42 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
     ];
     protected $attributes = ['channel' => 0];
 
+    public function getStatus(): Severity
+    {
+        $value = $this->attributes['value'];
+
+        if ($value <= $this->attributes['threshold_min_critical'] || $value >= $this->attributes['threshold_max_critical']) {
+            return Severity::Error;
+        }
+
+        if ($value <= $this->attributes['threshold_min_warning'] || $value >= $this->attributes['threshold_max_warning']) {
+            return Severity::Warning;
+        }
+
+        return Severity::Ok;
+    }
+
     public function transceiver(): BelongsTo
     {
         return $this->belongsTo(Transceiver::class);
     }
 
-    public function getCompositeKey()
+    public function getCompositeKey(): string
     {
         return $this->transceiver_id . '|' . $this->channel . '|' . $this->type;
+    }
+
+    public function defaultOrder(): int
+    {
+        $channelMod = $this->attributes['channel'] * 10;
+
+        return $channelMod + match($this->attributes['type']) {
+            'power-rx' => 0,
+            'power-tx' => 1,
+            'temperature' => 2,
+            'bias' => 3,
+            'voltage' => 4,
+            default => 9,
+        };
     }
 }
