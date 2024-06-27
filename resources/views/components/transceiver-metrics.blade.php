@@ -13,7 +13,7 @@
             <div class="tw-border-2">
                 <x-graph :type="'port_transceiver_' . $type" :port="$transceiver->port" legend="yes" width="100" height="20"></x-graph>
             </div>
-            <x-slot name="title">{{ $transceiver->port->getLabel() }}</x-slot>
+            <x-slot name="title">{{ $transceiver->port?->getLabel() }}</x-slot>
             <x-slot name="body">
                 <x-graph-row loading="lazy" :type="'port_transceiver_' . $type" :port="$transceiver->port" legend="yes"></x-graph-row>
             </x-slot>
