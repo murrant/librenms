@@ -118,7 +118,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
 
         return \SnmpQuery::enumStrings()->cache()->walk('HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverInfoTable')->mapTable(function ($data, $ifIndex) use ($ifIndexToPortId) {
             return new Transceiver([
-                'port_id' => $ifIndexToPortId->get($ifIndex),
+                'port_id' => $ifIndexToPortId->get($ifIndex, 0),
                 'index' => $ifIndex,
                 'type' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverType'] ?? null,
                 'vendor' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverVendorName'] ?? null,
