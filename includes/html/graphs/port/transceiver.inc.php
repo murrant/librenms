@@ -7,11 +7,15 @@ use App\Models\Port;
 $port = $port instanceof Port ? $port : Port::find($port['port_id']);
 $rrd_list = [];
 
-//    dd(array_keys(get_defined_vars()));
 foreach ($port->transceivers as $transceiver) {
-    foreach ($transceiver->metrics as $metric) {
+    $metrics = $transceiver->metrics()
+        ->when($metric_type ?? null, fn($q, $type) => $q->where('type', $type))
+        ->when($vars['channel'] ?? null, fn($q, $channel) => $q->where('channel', $channel))
+        ->get();
+
+    foreach ($metrics as $metric) {
         $rrd_filename = Rrd::name($device['hostname'], ['transceiver', $metric->type, $transceiver->index, $metric->channel]);
-        if ((empty($metric_type) || $metric->type == $metric_type) && Rrd::checkRrdExists($rrd_filename)) {
+        if (Rrd::checkRrdExists($rrd_filename)) {
             $rrd_list[] = [
                 'filename' => $rrd_filename,
                 'descr' => trans_choice('port.transceivers.metrics.' . $metric->type, $metric->channel, ['channel' => $metric->channel]),
