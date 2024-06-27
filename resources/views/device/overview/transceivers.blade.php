@@ -9,11 +9,13 @@
             @foreach($transceivers as $transceiver)
                 <x-panel body-class="!tw-p-0">
                     <x-slot name="heading">
+                        @if($transceiver->port)
                         <x-port-link :port="$transceiver->port"></x-port-link>
+                        @endif
                         <x-icons.transceiver></x-icons.transceiver> {{ $transceiver->vendor }} {{ $transceiver->type }}
                     </x-slot>
                     <table class="table table-hover table-condensed table-striped !tw-mb-0">
-                        @foreach($transceiver->metrics->sort(fn($a, $b) => $a->defaultOrder() <=> $b->defaultOrder()) as $metric)
+                        @foreach($transceiver->metrics->filter(fn($m) => $m->type == 'power-rx') as $metric)
                             <tr>
                                 <td>{{ trans_choice('port.transceivers.metrics.' . $metric->type, $metric->channel, ['channel' => $metric->channel]) }}</td>
                                 <td><x-graph loading="lazy" :port="$transceiver->port" type="port_transceiver_{{ $metric->type }}" width="80" height="20"></x-graph></td>
