@@ -45,6 +45,7 @@ use LibreNMS\Interfaces\Discovery\TransceiverDiscovery;
 use LibreNMS\Interfaces\Polling\OSPolling;
 use LibreNMS\OS;
 use LibreNMS\RRD\RrdDefinition;
+use LibreNMS\Util\Number;
 
 class Routeros extends OS implements
     OSPolling,
@@ -508,7 +509,7 @@ class Routeros extends OS implements
         $ifIndexToPortId = $this->getDevice()->ports()->pluck('port_id', 'ifIndex');
 
         return \SnmpQuery::cache()->walk('MIKROTIK-MIB::mtxrOpticalTable')->mapTable(function ($data, $ifIndex) use ($ifIndexToPortId) {
-            $wavelength = $data['MIKROTIK-MIB::mtxrOpticalWavelength'] ?? null;
+            $wavelength = isset($data['MIKROTIK-MIB::mtxrOpticalWavelength']) && $data['MIKROTIK-MIB::mtxrOpticalWavelength'] != '.00' ? Number::cast($data['MIKROTIK-MIB::mtxrOpticalWavelength']) : null;
 
             return new Transceiver([
                 'port_id' => $ifIndexToPortId->get($ifIndex),
@@ -531,7 +532,7 @@ class Routeros extends OS implements
                 $metrics->push(new TransceiverMetric([
                     'transceiver_id' => $transceivers->get($ifIndex)->id,
                     'type' => 'temperature',
-                    'value' => $module['MIKROTIK-MIB::mtxrOpticalTemperature'],
+                    'value' => Number::cast($module['MIKROTIK-MIB::mtxrOpticalTemperature']),
                     'oid' => ".1.3.6.1.4.1.14988.1.1.19.1.1.6.$ifIndex",
                 ]));
             }
@@ -541,7 +542,7 @@ class Routeros extends OS implements
                 $metrics->push(new TransceiverMetric([
                     'transceiver_id' => $transceivers->get($ifIndex)->id,
                     'type' => 'voltage',
-                    'value' => $module['MIKROTIK-MIB::mtxrOpticalSupplyVoltage'],
+                    'value' => Number::cast($module['MIKROTIK-MIB::mtxrOpticalSupplyVoltage']),
                     'divisor' => 1000,
                     'oid' => ".1.3.6.1.4.1.14988.1.1.19.1.1.7.$ifIndex",
                 ]));
@@ -552,7 +553,7 @@ class Routeros extends OS implements
                 $metrics->push(new TransceiverMetric([
                     'transceiver_id' => $transceivers->get($ifIndex)->id,
                     'type' => 'bias',
-                    'value' => $module['MIKROTIK-MIB::mtxrOpticalTxBiasCurrent'],
+                    'value' => Number::cast($module['MIKROTIK-MIB::mtxrOpticalTxBiasCurrent']),
                     'oid' => ".1.3.6.1.4.1.14988.1.1.19.1.1.8.$ifIndex",
                 ]));
             }
@@ -562,7 +563,7 @@ class Routeros extends OS implements
                 $metrics->push(new TransceiverMetric([
                     'transceiver_id' => $transceivers->get($ifIndex)->id,
                     'type' => 'power-tx',
-                    'value' => $module['MIKROTIK-MIB::mtxrOpticalTxPower'],
+                    'value' => Number::cast($module['MIKROTIK-MIB::mtxrOpticalTxPower']),
                     'divisor' => 1000,
                     'oid' => ".1.3.6.1.4.1.14988.1.1.19.1.1.9.$ifIndex",
                 ]));
@@ -573,7 +574,7 @@ class Routeros extends OS implements
                 $metrics->push(new TransceiverMetric([
                     'transceiver_id' => $transceivers->get($ifIndex)->id,
                     'type' => 'power-rx',
-                    'value' => $module['MIKROTIK-MIB::mtxrOpticalRxPower'],
+                    'value' => Number::cast($module['MIKROTIK-MIB::mtxrOpticalRxPower']),
                     'divisor' => 1000,
                     'oid' => ".1.3.6.1.4.1.14988.1.1.19.1.1.10.$ifIndex",
                 ]));
