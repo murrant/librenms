@@ -27,6 +27,16 @@ return [
         'xdsl' => 'xDSL',
     ],
     'transceivers' => [
+        'fields' => [
+            'model' => 'PN: :model',
+            'serial' => 'SN: :serial',
+            'revision' => 'Rev: :revision',
+            'date' => 'Date: :date',
+            'distance' => 'Distance: :distance',
+            'wavelength' => 'Wavelength: :wavelength',
+            'connector' => 'Connector: :connector',
+            'channels' => 'Channels: :channels',
+        ],
         'metrics' => [
             'power-tx' => '{0} Tx Power|[1,*] Channel :channel Tx Power',
             'power-rx' => '{0} Rx Power|[1,*] Channel :channel Rx Power',
