@@ -149,7 +149,7 @@ class Ocnos extends OS implements TransceiverDiscovery
 
     private function getTransceiverMetric(Transceiver $transceiver, int $snmp_field_index, string $chassis, string $module, string $channel, array $data, string $type, string $slug, string $threshold_slug = null): TransceiverMetric
     {
-        $divisor = 100;
+        $divisor = $type == 'temperature' ? 100 : 1000;
         $threshold_slug ??= $slug;
 
         // be safe against missing data
