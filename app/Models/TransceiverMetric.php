@@ -32,6 +32,11 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
     {
         $value = $this->attributes['value'];
 
+        // no thresholds
+        if (empty($this->attributes['threshold_min_critical']) && empty($this->attributes['threshold_max_critical']) && empty($this->attributes['threshold_min_warning']) && empty($this->attributes['threshold_max_warning'])) {
+            return Severity::Unknown;
+        }
+
         if ($value <= $this->attributes['threshold_min_critical'] || $value >= $this->attributes['threshold_max_critical']) {
             return Severity::Error;
         }
