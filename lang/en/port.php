@@ -26,6 +26,7 @@ return [
         'transceivers' => 'Transceivers',
         'xdsl' => 'xDSL',
     ],
+    'transceiver' => 'Transceiver',
     'transceivers' => [
         'fields' => [
             'model' => 'PN: :model',
