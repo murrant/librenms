@@ -1,6 +1,6 @@
 @props(['transceiver'])
 
-@foreach($transceiver->metrics->groupBy('type') as $type => $metrics)
+@foreach($transceiver->metrics->sort(fn($a, $b) => $a->defaultOrder() <=> $b->defaultOrder())->groupBy('type') as $type => $metrics)
     @if($loop->first)
         <div class="tw-grid tw-grid-cols-[min-content_1fr] tw-gap-x-4"  {{ $attributes }}>
     @endif
