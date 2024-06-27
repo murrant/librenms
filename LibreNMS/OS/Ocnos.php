@@ -34,6 +34,9 @@ use SnmpQuery;
 
 class Ocnos extends OS implements TransceiverDiscovery
 {
+    private ?Collection $ifNamePortIdMap = null;
+    private bool $sfpSeen = false;
+
     public function discoverTransceivers(): Collection
     {
         return SnmpQuery::enumStrings()->walk('IPI-CMM-CHASSIS-MIB::cmmTransEEPROMTable')->mapTable(function ($data, $cmmStackUnitIndex, $cmmTransIndex) {
@@ -81,10 +84,11 @@ class Ocnos extends OS implements TransceiverDiscovery
                 $date = $year . '-' . $date_matches[2] . '-' . $date_matches[3];
             }
 
+            $cmmTransType = $data['IPI-CMM-CHASSIS-MIB::cmmTransType'] ?? 'missing';
             return new Transceiver([
-                'port_id' => 0,
+                'port_id' => $this->guessPortId($cmmTransIndex, $cmmTransType),
                 'index' => "$cmmStackUnitIndex.$cmmTransIndex",
-                'type' => $data['IPI-CMM-CHASSIS-MIB::cmmTransType'] ?? 'missing',
+                'type' => $cmmTransType,
                 'vendor' => $data['IPI-CMM-CHASSIS-MIB::cmmTransVendorName'] ?? 'missing',
                 'oui' => $data['IPI-CMM-CHASSIS-MIB::cmmTransVendorOUI'] ?? 'missing',
                 'model' => $data['IPI-CMM-CHASSIS-MIB::cmmTransVendorPartNumber'] ?? 'missing',
@@ -171,5 +175,39 @@ class Ocnos extends OS implements TransceiverDiscovery
             'threshold_max_warning' => isset($max_warn) ? $max_warn / $divisor : null,
             'threshold_max_critical' => isset($max_crit) ? $max_crit / $divisor : null,
         ]);
+    }
+
+    private function guessPortId($cmmTransIndex, $cmmTransType): int
+    {
+        // IP Infusion has no reliable way of mapping a transceiver to a port it varies by hardware
+
+        $prefix = match($cmmTransType) {
+            'sfp' => 'xe',
+            'qsfp' => 'ce',
+            default => 'ge',
+        };
+
+        // Handle UfiSpace S9600 10G breakout, which is optionally enabled
+        if ($cmmTransType == 'sfp') {
+            $this->sfpSeen = true;
+        }
+
+        $portName = match($this->getDevice()->hardware) {
+            'Ufi Space S9600-32X-R' => $prefix . ($this->sfpSeen ? ($cmmTransType == 'qsfp' ? $cmmTransIndex - 5 : $cmmTransIndex - 2) : $cmmTransIndex - 1),
+            'Ufi Space S9510-28DC-B' => $prefix . ($cmmTransIndex - 1),
+            'Ufi Space S9500-30XS-P' => $prefix . ($cmmTransType == 'qsfp' ? $cmmTransIndex - 29 : $cmmTransIndex - 1),
+            default => null, // no port map, so we can't guess
+        };
+
+        if ($portName === null) {
+            return 0; // give up
+        }
+
+        // load port name to port_id map
+        if ($this->ifNamePortIdMap == null) {
+            $this->ifNamePortIdMap = $this->getDevice()->ports()->pluck('port_id', 'ifName');
+        }
+
+        return $this->ifNamePortIdMap->get($portName, 0);
     }
 }
