@@ -43,7 +43,7 @@ if (Rrd::checkRrdExists(get_port_rrdfile_path($device['hostname'], $port['port_i
     echo '</div></div>';
 
     foreach (\App\Models\Transceiver::where('port_id', $port['port_id'])->with('metrics')->get() as $transceiver) {
-        foreach ($transceiver->metrics->sort(fn($a, $b) => $a->defaultOrder() <=> $b->defaultOrder())->keyBy('type')->keys() as $metric_type) {
+        foreach ($transceiver->metrics->sort(fn ($a, $b) => $a->defaultOrder() <=> $b->defaultOrder())->keyBy('type')->keys() as $metric_type) {
             echo '<div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">' . __('port.transceiver') . ' ' . trans_choice('port.transceivers.metrics.' . $metric_type, 0) . '</h3>
