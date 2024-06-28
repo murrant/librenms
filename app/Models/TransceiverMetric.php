@@ -27,6 +27,14 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
         'threshold_max_critical',
     ];
     protected $attributes = ['channel' => 0];
+    protected $casts = [
+        'value' => 'double',
+        'value_prev' => 'double',
+        'threshold_min_critical' => 'double',
+        'threshold_min_warning' => 'double',
+        'threshold_max_warning' => 'double',
+        'threshold_max_critical' => 'double',
+    ];
 
     public function getStatus(): Severity
     {
