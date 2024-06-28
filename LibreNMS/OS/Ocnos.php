@@ -100,7 +100,7 @@ class Ocnos extends OS implements TransceiverDiscovery
                 'distance' => $distance,
                 'wavelength' => isset($data['IPI-CMM-CHASSIS-MIB::cmmTransWavelength']) && $data['IPI-CMM-CHASSIS-MIB::cmmTransWavelength'] !== '-100002' ? $data['IPI-CMM-CHASSIS-MIB::cmmTransWavelength'] : null,
                 'connector' => $connector,
-                'channels' => $data['IPI-CMM-CHASSIS-MIB::cmmTransNoOfChannels'] ?? 'missing',
+                'channels' => $data['IPI-CMM-CHASSIS-MIB::cmmTransNoOfChannels'] ?? 0,
             ]);
         });
     }

@@ -68,15 +68,13 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
 
     public function defaultOrder(): int
     {
-        $channelMod = $this->attributes['channel'] * 10;
-
-        return $channelMod + match($this->attributes['type']) {
-            'power-rx' => 0,
-            'power-tx' => 1,
-            'temperature' => 2,
-            'bias' => 3,
-            'voltage' => 4,
-            default => 9,
+        return $this->attributes['channel'] + match($this->attributes['type']) {
+            'power-rx' => 100,
+            'power-tx' => 200,
+            'temperature' => 300,
+            'bias' => 400,
+            'voltage' => 500,
+            default => 900,
         };
     }
 }
