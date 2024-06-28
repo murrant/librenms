@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use LibreNMS\Enum\Severity;
-use LibreNMS\Enum\Status;
 use LibreNMS\Interfaces\Models\Keyable;
 
 class TransceiverMetric extends DeviceRelatedModel implements Keyable
@@ -68,7 +67,7 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
 
     public function defaultOrder(): int
     {
-        return $this->attributes['channel'] + match($this->attributes['type']) {
+        return $this->attributes['channel'] + match ($this->attributes['type']) {
             'power-rx' => 100,
             'power-tx' => 200,
             'temperature' => 300,
