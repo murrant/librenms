@@ -22,7 +22,6 @@
  * @copyright  2024 Tony Murray
  * @author     Tony Murray <murraytony@gmail.com>
  */
-
 if (DeviceCache::get($device['device_id'])->transceivers->isNotEmpty()) {
     DeviceCache::get($device['device_id'])->transceivers->load(['port', 'metrics']);
     echo view('device.overview.transceivers', ['transceivers' => DeviceCache::get($device['device_id'])->transceivers]);
