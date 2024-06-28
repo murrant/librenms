@@ -3,7 +3,7 @@
         <x-panel class="device-overview panel-condensed">
             <x-slot name="heading" class="tw-mb-6">
                 <x-icons.transceiver></x-icons.transceiver>
-                <strong>{{ __('port.tabs.transceivers') }}</strong>
+                <strong><a href="{{ route('device', ['device' => $transceivers->first()->device_id, 'tab' => 'ports', 'vars' => 'transceivers']) }}">{{ __('port.tabs.transceivers') }}</a></strong>
             </x-slot>
 
             @foreach($transceivers as $transceiver)
