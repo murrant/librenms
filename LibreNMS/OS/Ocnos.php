@@ -239,6 +239,7 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
             }
 
             $cmmTransType = $data['IPI-CMM-CHASSIS-MIB::cmmTransType'] ?? 'missing';
+
             return new Transceiver([
                 'port_id' => $this->guessPortId($cmmTransIndex, $cmmTransType),
                 'index' => "$cmmStackUnitIndex.$cmmTransIndex",

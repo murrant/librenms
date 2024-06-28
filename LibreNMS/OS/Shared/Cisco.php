@@ -640,8 +640,8 @@ class Cisco extends OS implements
                 return new Collection;
             }
 
-            $sfpCages = $snmpData->filter(fn($ent) => $ent['ENTITY-MIB::entPhysicalVendorType'] == 'CISCO-ENTITY-VENDORTYPE-OID-MIB::cevContainerSFP');
-            $data = $snmpData->filter(fn($ent) => $sfpCages->has($ent['ENTITY-MIB::entPhysicalContainedIn'] ?? null));
+            $sfpCages = $snmpData->filter(fn ($ent) => $ent['ENTITY-MIB::entPhysicalVendorType'] == 'CISCO-ENTITY-VENDORTYPE-OID-MIB::cevContainerSFP');
+            $data = $snmpData->filter(fn ($ent) => $sfpCages->has($ent['ENTITY-MIB::entPhysicalContainedIn'] ?? null));
         }
         $ifIndexToPortId = $this->getDevice()->ports()->pluck('port_id', 'ifIndex');
 
@@ -673,14 +673,14 @@ class Cisco extends OS implements
         $metrics = new Collection;
 
         foreach ($transceivers as $transceiver) {
-            $metrics = $metrics->merge($data->filter(fn($ent) => $ent['entPhysicalContainedIn'] == $transceiver->index)
+            $metrics = $metrics->merge($data->filter(fn ($ent) => $ent['entPhysicalContainedIn'] == $transceiver->index)
                 ->map(function ($ent, $index) use ($transceiver, $values) {
                     $sensorValues = $values[$index];
                     $divisor = pow(10, $sensorValues['CISCO-ENTITY-SENSOR-MIB::entSensorPrecision'] ?? 0);
 
                     return new TransceiverMetric([
                         'transceiver_id' => $transceiver->id,
-                        'type' => match($ent['entPhysicalVendorType']) {
+                        'type' => match ($ent['entPhysicalVendorType']) {
                             'cevSensorTransceiverRxPwr' => 'power-rx',
                             'cevSensorTransceiverTxPwr' => 'power-tx',
                             'cevSensorTransceiverCurrent' => 'bias',
@@ -692,7 +692,7 @@ class Cisco extends OS implements
                         'value' => $sensorValues['CISCO-ENTITY-SENSOR-MIB::entSensorValue'] / $divisor,
                         'divisor' => $divisor,
                     ]);
-            }));
+                }));
         }
 
         return $metrics;
