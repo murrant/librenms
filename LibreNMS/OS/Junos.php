@@ -223,13 +223,13 @@ class Junos extends \LibreNMS\OS implements SlaDiscovery, OSPolling, SlaPolling,
         foreach ($xcData as $ifIndex => $data) {
             $transceiver_id = $transceivers->get($ifIndex)?->id ?? 0;
             if ($transceiver_id === 0) {
-               continue; // no transceiver
+                continue; // no transceiver
             }
 
             // RX Power
             if (isset($channelData[$ifIndex])) {
                 // lanes
-                foreach($channelData[$ifIndex] as $laneIndex => $lane) {
+                foreach ($channelData[$ifIndex] as $laneIndex => $lane) {
                     $metrics->push(new TransceiverMetric([
                         'transceiver_id' => $transceiver_id,
                         'type' => 'power-rx',
@@ -260,7 +260,7 @@ class Junos extends \LibreNMS\OS implements SlaDiscovery, OSPolling, SlaPolling,
             // TX Power
             if (isset($channelData[$ifIndex])) {
                 // lanes
-                foreach($channelData[$ifIndex] as $laneIndex => $lane) {
+                foreach ($channelData[$ifIndex] as $laneIndex => $lane) {
                     $metrics->push(new TransceiverMetric([
                         'transceiver_id' => $transceiver_id,
                         'type' => 'power-tx',
@@ -291,7 +291,7 @@ class Junos extends \LibreNMS\OS implements SlaDiscovery, OSPolling, SlaPolling,
             // Bias Current
             if (isset($channelData[$ifIndex])) {
                 // lanes
-                foreach($channelData[$ifIndex] as $laneIndex => $lane) {
+                foreach ($channelData[$ifIndex] as $laneIndex => $lane) {
                     $metrics->push(new TransceiverMetric([
                         'transceiver_id' => $transceiver_id,
                         'type' => 'bias',
@@ -322,7 +322,7 @@ class Junos extends \LibreNMS\OS implements SlaDiscovery, OSPolling, SlaPolling,
             // Temperature
             if (isset($channelData[$ifIndex])) {
                 // lanes
-                foreach($channelData[$ifIndex] as $laneIndex => $lane) {
+                foreach ($channelData[$ifIndex] as $laneIndex => $lane) {
                     $metrics->push(new TransceiverMetric([
                         'transceiver_id' => $transceiver_id,
                         'type' => 'temperature',

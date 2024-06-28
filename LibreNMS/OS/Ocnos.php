@@ -85,6 +85,7 @@ class Ocnos extends OS implements TransceiverDiscovery
             }
 
             $cmmTransType = $data['IPI-CMM-CHASSIS-MIB::cmmTransType'] ?? 'missing';
+
             return new Transceiver([
                 'port_id' => $this->guessPortId($cmmTransIndex, $cmmTransType),
                 'index' => "$cmmStackUnitIndex.$cmmTransIndex",
@@ -181,7 +182,7 @@ class Ocnos extends OS implements TransceiverDiscovery
     {
         // IP Infusion has no reliable way of mapping a transceiver to a port it varies by hardware
 
-        $prefix = match($cmmTransType) {
+        $prefix = match ($cmmTransType) {
             'sfp' => 'xe',
             'qsfp' => 'ce',
             default => 'ge',
@@ -192,7 +193,7 @@ class Ocnos extends OS implements TransceiverDiscovery
             $this->sfpSeen = true;
         }
 
-        $portName = match($this->getDevice()->hardware) {
+        $portName = match ($this->getDevice()->hardware) {
             'Ufi Space S9600-32X-R' => $prefix . ($this->sfpSeen ? ($cmmTransType == 'qsfp' ? $cmmTransIndex - 5 : $cmmTransIndex - 2) : $cmmTransIndex - 1),
             'Ufi Space S9510-28DC-B' => $prefix . ($cmmTransIndex - 1),
             'Ufi Space S9500-30XS-P' => $prefix . ($cmmTransType == 'qsfp' ? $cmmTransIndex - 29 : $cmmTransIndex - 1),
