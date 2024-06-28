@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use LibreNMS\Enum\Severity;
-use LibreNMS\Enum\Status;
 use LibreNMS\Interfaces\Models\Keyable;
 
 class TransceiverMetric extends DeviceRelatedModel implements Keyable
@@ -70,7 +69,7 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
     {
         $channelMod = $this->attributes['channel'] * 10;
 
-        return $channelMod + match($this->attributes['type']) {
+        return $channelMod + match ($this->attributes['type']) {
             'power-rx' => 0,
             'power-tx' => 1,
             'temperature' => 2,
