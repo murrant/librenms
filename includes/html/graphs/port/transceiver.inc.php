@@ -9,8 +9,8 @@ $rrd_list = [];
 
 foreach ($port->transceivers as $transceiver) {
     $metrics = $transceiver->metrics()
-        ->when($metric_type ?? null, fn($q, $type) => $q->where('type', $type))
-        ->when($vars['channel'] ?? null, fn($q, $channel) => $q->where('channel', $channel))
+        ->when($metric_type ?? null, fn ($q, $type) => $q->where('type', $type))
+        ->when($vars['channel'] ?? null, fn ($q, $channel) => $q->where('channel', $channel))
         ->get();
 
     foreach ($metrics as $metric) {

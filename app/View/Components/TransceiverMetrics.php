@@ -21,7 +21,7 @@ class TransceiverMetrics extends Component
         public Transceiver $transceiver,
     ) {
         $this->groupedMetrics = $transceiver->metrics
-            ->sort(fn($a, $b) => $a->defaultOrder() <=> $b->defaultOrder())
+            ->sort(fn ($a, $b) => $a->defaultOrder() <=> $b->defaultOrder())
             ->groupBy('type');
     }
 
@@ -46,6 +46,6 @@ class TransceiverMetrics extends Component
     {
         $value = $metrics->firstWhere('channel', 0)?->value ?? $metrics->avg('value');
 
-        return round($value, 3) . ' ' .__('port.transceivers.units.' . $metrics->first()->type);
+        return round($value, 3) . ' ' . __('port.transceivers.units.' . $metrics->first()->type);
     }
 }
