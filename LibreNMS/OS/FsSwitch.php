@@ -25,11 +25,15 @@
 
 namespace LibreNMS\OS;
 
-use LibreNMS\Device\Processor;
-use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
+use App\Models\Transceiver;
+use App\Models\TransceiverMetric;
+use Illuminate\Support\Collection;
+use LibreNMS\Interfaces\Discovery\TransceiverDiscovery;
 use LibreNMS\OS;
+use LibreNMS\Util\Number;
+use SnmpQuery;
 
-class FsSwitch extends OS implements ProcessorDiscovery
+class FsSwitch extends OS implements TransceiverDiscovery
 {
     public static function normalizeTransceiverValues($value): float
     {
@@ -77,5 +81,167 @@ class FsSwitch extends OS implements ProcessorDiscovery
         }
 
         return $processors;
+    }
+
+    public function discoverTransceivers(): Collection
+    {
+        $ifIndexToPortId = $this->getDevice()->ports()->pluck('port_id', 'ifIndex');
+
+        return SnmpQuery::cache()->walk('FS-SWITCH-V2-MIB::transbasicinformationTable')->mapTable(function ($data, $ifIndex) use ($ifIndexToPortId) {
+            if ($data['FS-SWITCH-V2-MIB::transceiveStatus'] == 'inactive') {
+                return null;
+            }
+
+            $distance = null;
+            $connector = null;
+            if (isset($data['FS-SWITCH-V2-MIB::link9SinglemodeLengthKm']) && $data['FS-SWITCH-V2-MIB::link9SinglemodeLengthKm'] != 0) {
+                $distance = $data['FS-SWITCH-V2-MIB::link9SinglemodeLengthKm'] * 1000;
+                $connector = 'SM';
+            } elseif (isset($data['FS-SWITCH-V2-MIB::link9SinglemodeLengthM']) && $data['FS-SWITCH-V2-MIB::link9SinglemodeLengthM'] != 0) {
+                $distance = $data['FS-SWITCH-V2-MIB::link9SinglemodeLengthM'];
+                $connector = 'SM';
+            } elseif (isset($data['FS-SWITCH-V2-MIB::link50MultimodeLength']) && $data['FS-SWITCH-V2-MIB::link50MultimodeLength'] != 0) {
+                $distance = $data['FS-SWITCH-V2-MIB::link50MultimodeLength'];
+                $connector = 'MM';
+            } elseif (isset($data['FS-SWITCH-V2-MIB::link62MultimodeLength']) && $data['FS-SWITCH-V2-MIB::link62MultimodeLength'] != 0) {
+                $distance = $data['FS-SWITCH-V2-MIB::link62MultimodeLength'];
+                $connector = 'MM';
+            } elseif (isset($data['FS-SWITCH-V2-MIB::linkCopperLength']) && $data['FS-SWITCH-V2-MIB::linkCopperLength'] != 0) {
+                $distance = $data['FS-SWITCH-V2-MIB::linkCopperLength'];
+                $connector = 'Copper';
+            }
+
+            return new Transceiver([
+                'port_id' => $ifIndexToPortId->get($ifIndex),
+                'index' => $ifIndex,
+                'vendor' => $data['FS-SWITCH-V2-MIB::transceiveVender'] ?? null,
+                'type' => $data['FS-SWITCH-V2-MIB::transceiveType'] ?? null,
+                'model' => $data['FS-SWITCH-V2-MIB::transceivePartNumber'] ?? null,
+                'serial' => $data['FS-SWITCH-V2-MIB::transceiveSerialNumber'] ?? null,
+                'distance' => $distance,
+                'wavelength' => $data['FS-SWITCH-V2-MIB::transceiveWaveLength'] ?? null,
+                'connector' => $connector,
+            ]);
+        })->filter();
+    }
+
+    public function discoverTransceiverMetrics(Collection $transceivers): Collection
+    {
+        $metrics = new Collection;
+
+        $data = SnmpQuery::walk('FS-SWITCH-V2-MIB::transReceivePowerTable')->table(1);
+        if (empty($data)) {
+            return $metrics;
+        }
+        SnmpQuery::walk('FS-SWITCH-V2-MIB::transTransmitPowerTable')->table(1, $data);
+        SnmpQuery::walk('FS-SWITCH-V2-MIB::transTemperinformationTable')->table(1, $data);
+        SnmpQuery::walk('FS-SWITCH-V2-MIB::transBiasinformationTable')->table(1, $data);
+        SnmpQuery::walk('FS-SWITCH-V2-MIB::transVoltageinformationTable')->table(1, $data);
+
+        foreach ($transceivers as $transceiver) {
+            $ifIndex = $transceiver->index;
+            $current = $data[$ifIndex];
+
+            // power-rx
+            if (! empty($current['FS-SWITCH-V2-MIB::receivepowerCurrent']) && $current['FS-SWITCH-V2-MIB::receivepowerCurrent'] !== '0.00') {
+                $values = explode(',', $current['FS-SWITCH-V2-MIB::receivepowerCurrent']);
+                $transceiver->channels = count($values); // infer channel count
+                $transceiver->save();
+
+                foreach ($values as $channel => $value) {
+                    $metrics->push(new TransceiverMetric([
+                        'transceiver_id' => $transceiver->id,
+                        'channel' => $channel,
+                        'type' => 'power-rx',
+                        'oid' => ".1.3.6.1.4.1.52642.1.37.1.10.6.1.5.$ifIndex",
+                        'value' => Number::cast($value),
+                        'transform_function' => '\LibreNMS\OS\FsSwitch::parseChannelValue',
+                        'threshold_min_critical' => $current['FS-SWITCH-V2-MIB::receivepowerLowAlarmThreshold'] ?? null,
+                        'threshold_min_warning' => $current['FS-SWITCH-V2-MIB::receivepowerLowWarnThreshold'] ?? null,
+                        'threshold_max_warning' => $current['FS-SWITCH-V2-MIB::receivepowerHighWarnThreshold'] ?? null,
+                        'threshold_max_critical' => $current['FS-SWITCH-V2-MIB::receivepowerHighAlarmThreshold'] ?? null,
+                    ]));
+                }
+            }
+
+            // power-tx
+            if (! empty($current['FS-SWITCH-V2-MIB::transpowerCurrent']) && $current['FS-SWITCH-V2-MIB::transpowerCurrent'] !== '0.00') {
+                foreach (explode(',', $current['FS-SWITCH-V2-MIB::transpowerCurrent']) as $channel => $value) {
+                    $metrics->push(new TransceiverMetric([
+                        'transceiver_id' => $transceiver->id,
+                        'channel' => $channel,
+                        'type' => 'power-tx',
+                        'oid' => ".1.3.6.1.4.1.52642.1.37.1.10.5.1.5.$ifIndex",
+                        'value' => Number::cast($value),
+                        'transform_function' => '\LibreNMS\OS\FsSwitch::parseChannelValue',
+                        'threshold_min_critical' => $current['FS-SWITCH-V2-MIB::transpowerLowAlarmThreshold'] ?? null,
+                        'threshold_min_warning' => $current['FS-SWITCH-V2-MIB::transpowerLowWarnThreshold'] ?? null,
+                        'threshold_max_warning' => $current['FS-SWITCH-V2-MIB::transpowerHighWarnThreshold'] ?? null,
+                        'threshold_max_critical' => $current['FS-SWITCH-V2-MIB::transpowerHighAlarmThreshold'] ?? null,
+                    ]));
+                }
+            }
+
+            // temperature
+            if (! empty($current['FS-SWITCH-V2-MIB::temperCurrent']) && $current['FS-SWITCH-V2-MIB::temperCurrent'] !== '0.00') {
+                foreach (explode(',', $current['FS-SWITCH-V2-MIB::temperCurrent']) as $channel => $value) {
+                    $metrics->push(new TransceiverMetric([
+                        'transceiver_id' => $transceiver->id,
+                        'channel' => $channel,
+                        'type' => 'temperature',
+                        'oid' => ".1.3.6.1.4.1.52642.1.37.1.10.2.1.5.$ifIndex",
+                        'value' => Number::cast($value),
+                        'transform_function' => '\LibreNMS\OS\FsSwitch::parseChannelValue',
+                        'threshold_min_critical' => $current['FS-SWITCH-V2-MIB::temperLowAlarmThreshold'] ?? null,
+                        'threshold_min_warning' => $current['FS-SWITCH-V2-MIB::temperLowWarnThreshold'] ?? null,
+                        'threshold_max_warning' => $current['FS-SWITCH-V2-MIB::temperHighWarnThreshold'] ?? null,
+                        'threshold_max_critical' => $current['FS-SWITCH-V2-MIB::temperHighAlarmThreshold'] ?? null,
+                    ]));
+                }
+            }
+
+            // bias
+            if (! empty($current['FS-SWITCH-V2-MIB::biasCurrent']) && $current['FS-SWITCH-V2-MIB::biasCurrent'] !== '0.00') {
+                foreach (explode(',', $current['FS-SWITCH-V2-MIB::biasCurrent']) as $channel => $value) {
+                    $metrics->push(new TransceiverMetric([
+                        'transceiver_id' => $transceiver->id,
+                        'channel' => $channel,
+                        'type' => 'bias',
+                        'oid' => ".1.3.6.1.4.1.52642.1.37.1.10.4.1.5.$ifIndex",
+                        'value' => Number::cast($value),
+                        'transform_function' => '\LibreNMS\OS\FsSwitch::parseChannelValue',
+                        'threshold_min_critical' => $current['FS-SWITCH-V2-MIB::biasLowAlarmThreshold'] ?? null,
+                        'threshold_min_warning' => $current['FS-SWITCH-V2-MIB::biasLowWarnThreshold'] ?? null,
+                        'threshold_max_warning' => $current['FS-SWITCH-V2-MIB::biasHighWarnThreshold'] ?? null,
+                        'threshold_max_critical' => $current['FS-SWITCH-V2-MIB::biasHighAlarmThreshold'] ?? null,
+                    ]));
+                }
+            }
+
+            // voltage
+            if (! empty($current['FS-SWITCH-V2-MIB::voltageCurrent']) && $current['FS-SWITCH-V2-MIB::voltageCurrent'] !== '0.00') {
+                foreach (explode(',', $current['FS-SWITCH-V2-MIB::voltageCurrent']) as $channel => $value) {
+                    $metrics->push(new TransceiverMetric([
+                        'transceiver_id' => $transceiver->id,
+                        'channel' => $channel,
+                        'type' => 'voltage',
+                        'oid' => ".1.3.6.1.4.1.52642.1.37.1.10.3.1.5.$ifIndex",
+                        'value' => Number::cast($value),
+                        'transform_function' => '\LibreNMS\OS\FsSwitch::parseChannelValue',
+                        'threshold_min_critical' => $current['FS-SWITCH-V2-MIB::voltageLowAlarmThreshold'] ?? null,
+                        'threshold_min_warning' => $current['FS-SWITCH-V2-MIB::voltageLowWarnThreshold'] ?? null,
+                        'threshold_max_warning' => $current['FS-SWITCH-V2-MIB::voltageHighWarnThreshold'] ?? null,
+                        'threshold_max_critical' => $current['FS-SWITCH-V2-MIB::voltageHighAlarmThreshold'] ?? null,
+                    ]));
+                }
+            }
+        }
+
+        return $metrics;
+    }
+
+    public static function parseChannelValue(string $value, TransceiverMetric $metric): float
+    {
+        return Number::cast(explode(',', $value)[$metric->channel] ?? '');
     }
 }

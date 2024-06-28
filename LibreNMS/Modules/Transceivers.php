@@ -92,9 +92,13 @@ class Transceivers implements Module
 
             // transform the value to the proper scale
             if (! empty($data[$metric->oid])) {
-                $value = $data[$metric->oid] * $metric->multiplier / $metric->divisor;
+                $value = $data[$metric->oid];
+                if (is_numeric($value)) {
+                    $value = $value * $metric->multiplier / $metric->divisor;
+                }
+
                 if (isset($metric->transform_function) && is_callable($metric->transform_function)) {
-                    $value = call_user_func($metric->transform_function, $value);
+                    $value = call_user_func($metric->transform_function, $value, $metric);
                 }
 
                 $metric->value = $value;
