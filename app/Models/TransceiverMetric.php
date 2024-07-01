@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use LibreNMS\Enum\Severity;
@@ -35,6 +36,22 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
         'threshold_max_critical' => 'double',
     ];
 
+    protected static function boot() {
+        parent::boot();
+
+        // default order
+        static::addGlobalScope('order', function (Builder $builder) {
+            $builder->orderByRaw("(CASE `transceiver_metrics`.`type`
+                WHEN 'power-rx' THEN 100 + `transceiver_metrics`.`channel`
+                WHEN 'power-tx' THEN 200 + `transceiver_metrics`.`channel`
+                WHEN 'temperature' THEN 300 + `transceiver_metrics`.`channel`
+                WHEN 'bias' THEN 400 + `transceiver_metrics`.`channel`
+                WHEN 'voltage' THEN 500 + `transceiver_metrics`.`channel`
+                ELSE 900 + `transceiver_metrics`.`channel`
+                END)");
+        });
+    }
+
     public function getStatus(): Severity
     {
         $value = $this->attributes['value'];
@@ -63,17 +80,5 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
     public function getCompositeKey(): string
     {
         return $this->transceiver_id . '|' . $this->channel . '|' . $this->type;
-    }
-
-    public function defaultOrder(): int
-    {
-        return $this->attributes['channel'] + match ($this->attributes['type']) {
-            'power-rx' => 100,
-            'power-tx' => 200,
-            'temperature' => 300,
-            'bias' => 400,
-            'voltage' => 500,
-            default => 900,
-        };
     }
 }

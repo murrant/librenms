@@ -21,7 +21,6 @@ class TransceiverMetrics extends Component
         public Transceiver $transceiver,
     ) {
         $this->groupedMetrics = $transceiver->metrics
-            ->sort(fn ($a, $b) => $a->defaultOrder() <=> $b->defaultOrder())
             ->groupBy('type');
     }
 
