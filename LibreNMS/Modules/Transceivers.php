@@ -136,7 +136,7 @@ class Transceivers implements Module
                 ->orderBy('type')->orderBy('transceivers.index')->orderBy('channel')
                 ->leftJoin('transceivers', 'transceivers.id', 'transceiver_metrics.transceiver_id')
                 ->select(['transceiver_metrics.*', 'index'])
-                ->get()->map->makeHidden(['id', 'created_at', 'updated_at', 'device_id', 'transceiver_id', 'value_prev', 'oid', 'description']),
+                ->get()->map->makeHidden(['id', 'created_at', 'updated_at', 'device_id', 'transceiver_id', 'value_prev']),
         ];
     }
 }
