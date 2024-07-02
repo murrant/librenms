@@ -5,7 +5,7 @@
         <div class="tw-grid tw-grid-cols-[min-content_min-content_1fr] tw-gap-x-4"  {{ $attributes }}>
     @endif
     <div class="tw-whitespace-nowrap tw-text-right">
-        {{  trans_choice('port.transceivers.metrics.' . $type, 0) }}:
+        {{  trans_choice('port.transceivers.metrics.' . $type, 1) }}:
     </div>
     <div>
         <x-label :status="$status($metrics)">{{ $value($metrics) }}</x-label>

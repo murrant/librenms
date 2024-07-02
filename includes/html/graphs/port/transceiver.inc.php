@@ -18,7 +18,7 @@ foreach ($port->transceivers as $transceiver) {
         if (Rrd::checkRrdExists($rrd_filename)) {
             $rrd_list[] = [
                 'filename' => $rrd_filename,
-                'descr' => trans_choice('port.transceivers.metrics.' . $metric->type, $metric->channel, ['channel' => $metric->channel]),
+                'descr' => trans_choice('port.transceivers.metrics.' . $metric->type, $transceiver->channels, ['channel' => $metric->channel]),
                 'ds' => 'value',
             ];
         }
