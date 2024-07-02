@@ -22,7 +22,7 @@
                     {{ $transceiver->vendor }} {{ $transceiver->model }}
                 </td>
                 <td>
-                    {{ trans_choice('port.transceivers.metrics.' . $metric->type,  $metric->channel, ['channel' => $metric->channel]) }}
+                    {{ trans_choice('port.transceivers.metrics.' . $metric->type,  $transceiver->channels, ['channel' => $metric->channel]) }}
                 </td>
                 <td class="tw-whitespace-nowrap">
                     <x-label :status="$metric->getStatus()" x-bind:class="{

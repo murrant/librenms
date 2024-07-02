@@ -40,11 +40,11 @@ return [
             'channels' => 'Channels: :channels',
         ],
         'metrics' => [
-            'power-tx' => '{0} Tx Power|[1,*] Channel :channel Tx Power',
-            'power-rx' => '{0} Rx Power|[1,*] Channel :channel Rx Power',
-            'bias' => '{0} Bias|[1,*] Channel :channel Bias',
-            'temperature' => '{0} Temperature|[1,*] Channel :channel Temperature',
-            'voltage' => '{0} Voltage|[1,*] Channel :channel Voltage',
+            'power-tx' => 'Tx Power|Channel :channel Tx Power',
+            'power-rx' => 'Rx Power|Channel :channel Rx Power',
+            'bias' => 'Bias|Channel :channel Bias',
+            'temperature' => 'Temperature|Channel :channel Temperature',
+            'voltage' => 'Voltage|Channel :channel Voltage',
         ],
         'units' => [
             'power-tx' => 'dBm',

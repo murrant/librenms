@@ -209,7 +209,7 @@ class Junos extends \LibreNMS\OS implements SlaDiscovery, OSPolling, SlaPolling,
                 'model' => $ent['ENTITY-MIB::entPhysicalModelName'] ?? null,
                 'revision' => $ent['ENTITY-MIB::entPhysicalHardwareRev'] ?? null,
                 'serial' => $ent['ENTITY-MIB::entPhysicalSerialNum'] ?? null,
-                'channels' => $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleLaneCount'] ?? null,
+                'channels' => $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleLaneCount'] ?? 0,
             ]);
         })->filter();
     }
