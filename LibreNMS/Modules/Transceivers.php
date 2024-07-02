@@ -28,6 +28,7 @@ namespace LibreNMS\Modules;
 use App\Models\Device;
 use App\Models\TransceiverMetric;
 use App\Observers\ModuleModelObserver;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use LibreNMS\DB\SyncsModels;
 use LibreNMS\Interfaces\Data\DataStorageInterface;
@@ -72,6 +73,8 @@ class Transceivers implements Module
             // save metrics
             ModuleModelObserver::observe(\App\Models\TransceiverMetric::class);
             $this->syncModels($os->getDevice(), 'transceiverMetrics', $metrics);
+
+            $this->verifyTransceiverChannelCounts($metrics, $transceivers);
 
             echo "\n";
         }
@@ -138,5 +141,18 @@ class Transceivers implements Module
                 ->select(['transceiver_metrics.*', 'index'])
                 ->get()->map->makeHidden(['id', 'created_at', 'updated_at', 'device_id', 'transceiver_id', 'value_prev']),
         ];
+    }
+
+    private function verifyTransceiverChannelCounts(Collection $metrics, Collection $transceivers): void
+    {
+        $groupBy = $metrics->groupBy(['transceiver_id', 'type']);
+        $transceiversById = $transceivers->keyBy('id');
+        foreach ($groupBy as $transceiver_id => $metrics) {
+            $transceiver = $transceiversById->get($transceiver_id);
+            $transceiver->channels = $metrics->map->count()->max(); // get the maximum count of any type of metric for this transceiver, set as channels
+            if ($transceiver->save()) {
+                Log::debug("Updated channels for transciever $transceiver_id from " . $transceiver->getOriginal('channels') . ' to ' . $transceiver->channels);
+            }
+        }
     }
 }

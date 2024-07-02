@@ -145,8 +145,6 @@ class FsSwitch extends OS implements TransceiverDiscovery
             // power-rx
             if (! empty($current['FS-SWITCH-V2-MIB::receivepowerCurrent']) && $current['FS-SWITCH-V2-MIB::receivepowerCurrent'] !== '0.00') {
                 $values = explode(',', $current['FS-SWITCH-V2-MIB::receivepowerCurrent']);
-                $transceiver->channels = count($values); // infer channel count
-                $transceiver->save();
 
                 foreach ($values as $channel => $value) {
                     $metrics->push(new TransceiverMetric([
