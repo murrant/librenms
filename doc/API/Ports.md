@@ -422,6 +422,7 @@ Output:
             "channels": 1,
             "metrics": [
                 {
+                    "id": 4,
                     "transceiver_id": 13,
                     "channel": 0,
                     "type": "power-tx",
@@ -433,6 +434,7 @@ Output:
                     "threshold_max_critical": 0
                 },
                 {
+                    "id": 5,
                     "transceiver_id": 13,
                     "channel": 0,
                     "type": "power-rx",
@@ -444,6 +446,7 @@ Output:
                     "threshold_max_critical": 0
                 },
                 {
+                    "id": 6,
                     "transceiver_id": 13,
                     "channel": 0,
                     "type": "temperature",
@@ -455,6 +458,7 @@ Output:
                     "threshold_max_critical": 78000
                 },
                 {
+                    "id": 6,
                     "transceiver_id": 13,
                     "channel": 0,
                     "type": "bias",
@@ -468,6 +472,45 @@ Output:
             ]
         }
     ]
+}
+```
+
+### `update_transceiver_metric_thresholds`
+
+Update the thesholds for a transceiver metric.  You will need to supply the metric id, which can by found
+by the get_port_transceiver api endpoint.
+
+Route: `/api/v0/ports/transceiver/metric/:transceiver_metric_id`
+
+Input (JSON):
+
+- threshold_min_critical: The minimum critical value (numeric)
+- threshold_min_warning: The minimum warning value (numeric)
+- threshold_max_warning: The maximum warning value (numeric)
+- threshold_max_critical: The maximum critical value (numeric)
+
+Example:
+
+```curl
+curl -X PATCH -d '{"threshold_min_critical": -30}' -H 'X-Auth-Token: YOURAPITOKENHERE' https://librenms.org/api/v0/ports/transceiver/metric/4
+```
+
+Output:
+```json
+{
+    "status": "ok",
+    "transceiver_metric": {
+        "id": 4,
+        "transceiver_id": 102,
+        "channel": 0,
+        "type": "power-tx",
+        "value": -2.2,
+        "value_prev": -2.2,
+        "threshold_min_critical": -30,
+        "threshold_min_warning": null,
+        "threshold_max_warning": null,
+        "threshold_max_critical": null
+    }
 }
 ```
 
