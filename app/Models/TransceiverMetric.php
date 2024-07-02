@@ -36,7 +36,8 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
         'threshold_max_critical' => 'double',
     ];
 
-    protected static function boot() {
+    protected static function boot()
+    {
         parent::boot();
 
         // default order
