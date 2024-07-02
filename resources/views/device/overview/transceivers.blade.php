@@ -17,7 +17,7 @@
                     <table class="table table-hover table-condensed table-striped !tw-mb-0">
                         @foreach($filterMetrics($transceiver->metrics) as $metric)
                             <tr>
-                                <td>{{ trans_choice('port.transceivers.metrics.' . $metric->type, $metric->channel, ['channel' => $metric->channel]) }}</td>
+                                <td>{{ trans_choice('port.transceivers.metrics.' . $metric->type, $transceiver->channels, ['channel' => $metric->channel]) }}</td>
                                 <td><x-graph loading="lazy" :port="$transceiver->port" type="port_transceiver_{{ $metric->type }}" width="100" height="24" :vars="['channel' => $metric->channel]"></x-graph></td>
                                 <td><x-label :status="$metric->getStatus()">{{ $metric->value }} {{ __('port.transceivers.units.' . $metric->type) }}</x-label></td>
                             </tr>

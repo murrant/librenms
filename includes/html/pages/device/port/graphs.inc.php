@@ -46,7 +46,7 @@ if (Rrd::checkRrdExists(get_port_rrdfile_path($device['hostname'], $port['port_i
         foreach ($transceiver->metrics->keyBy('type')->keys() as $metric_type) {
             echo '<div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">' . __('port.transceiver') . ' ' . trans_choice('port.transceivers.metrics.' . $metric_type, 0) . '</h3>
+                <h3 class="panel-title">' . __('port.transceiver') . ' ' . trans_choice('port.transceivers.metrics.' . $metric_type, 1) . '</h3>
             </div><div class="panel-body">';
             $graph_type = 'port_transceiver_' . $metric_type;
             include 'includes/html/print-interface-graphs.inc.php';
