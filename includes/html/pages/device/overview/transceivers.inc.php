@@ -27,6 +27,6 @@ if (DeviceCache::get($device['device_id'])->transceivers->isNotEmpty()) {
     echo view('device.overview.transceivers', [
         'transceivers' => DeviceCache::get($device['device_id'])->transceivers,
         'transceivers_link' => route('device', ['device' => $device['device_id'], 'tab' => 'ports', 'vars' => 'transceivers']),
-        'filterMetrics' => fn ($metrics) => $metrics->filter(fn ($m) => in_array($m->type, ['power-rx', 'temperature']))->sort(fn ($a, $b) => $a->defaultOrder() <=> $b->defaultOrder()),
+        'filterMetrics' => fn ($metrics) => $metrics->filter(fn ($m) => in_array($m->type, ['power-rx', 'temperature'])),
     ]);
 }
