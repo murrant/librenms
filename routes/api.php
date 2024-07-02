@@ -138,6 +138,7 @@ Route::prefix('v0')->namespace('\App\Api\Controllers')->group(function () {
         Route::get('{portid}', 'LegacyApiController@get_port_info')->name('get_port_info');
         Route::get('{portid}/ip', 'LegacyApiController@get_port_ip_addresses')->name('get_port_ip_info');
         Route::get('{portid}/transceiver', 'LegacyApiController@get_port_transceiver')->name('get_port_transceiver');
+        Route::patch('transceiver/metric/{metric}', 'LegacyApiController@update_transceiver_metric_thresholds')->name('update_transceiver_metric_thresholds');
         Route::get('search/{field}/{search?}', 'LegacyApiController@search_ports')->name('search_ports')->where('search', '.*');
         Route::get('mac/{search}', 'LegacyApiController@search_by_mac')->name('search_mac');
         Route::get('', 'LegacyApiController@get_all_ports')->name('get_all_ports');
