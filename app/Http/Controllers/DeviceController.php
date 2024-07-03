@@ -170,7 +170,7 @@ class DeviceController extends Controller
                 } elseif ($this->editTabExists($matches[1] . 's')) {
                     $current_tab = $matches[1] . 's';
                 }
-            } elseif(preg_match('#device/\d+/ports/transceivers#', $path)) {
+            } elseif (preg_match('#device/\d+/ports/transceivers#', $path)) {
                 $current_tab = 'transceivers';
             }
 
