@@ -28,6 +28,7 @@ namespace LibreNMS\OS;
 use App\Models\Transceiver;
 use App\Models\TransceiverMetric;
 use Illuminate\Support\Collection;
+use LibreNMS\Device\Processor;
 use LibreNMS\Interfaces\Discovery\TransceiverDiscovery;
 use LibreNMS\OS;
 use LibreNMS\Util\Number;
