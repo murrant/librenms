@@ -779,9 +779,10 @@ Output:
             "date": null,
             "ddm": true,
             "encoding": null,
+            "cable": "SM",
             "distance": 20000,
             "wavelength": 1330,
-            "connector": "SM",
+            "connector": "LC",
             "channels": 1
         },
         {
@@ -800,9 +801,10 @@ Output:
             "date": null,
             "ddm": true,
             "encoding": null,
+            "cable": "SM",
             "distance": 300,
             "wavelength": 850,
-            "connector": "MM",
+            "connector": "LC",
             "channels": 1
         }
     ]

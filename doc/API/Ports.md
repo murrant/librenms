@@ -416,9 +416,10 @@ Output:
             "date": null,
             "ddm": true,
             "encoding": null,
+            "cable": "MM",
             "distance": 300,
             "wavelength": 850,
-            "connector": "MM",
+            "connector": "LC",
             "channels": 1,
             "metrics": [
                 {
