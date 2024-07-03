@@ -56,17 +56,25 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
     {
         $value = $this->attributes['value'];
 
-        // no thresholds
-        if (empty($this->attributes['threshold_min_critical']) && empty($this->attributes['threshold_max_critical']) && empty($this->attributes['threshold_min_warning']) && empty($this->attributes['threshold_max_warning'])) {
-            return Severity::Unknown;
-        }
-
-        if ($value <= $this->attributes['threshold_min_critical'] || $value >= $this->attributes['threshold_max_critical']) {
+        if (isset($this->attributes['threshold_min_critical']) && $value <= $this->attributes['threshold_min_critical']) {
             return Severity::Error;
         }
 
-        if ($value <= $this->attributes['threshold_min_warning'] || $value >= $this->attributes['threshold_max_warning']) {
+        if (isset($this->attributes['threshold_max_critical']) && $value >= $this->attributes['threshold_max_critical']) {
+            return Severity::Error;
+        }
+
+        if (isset($this->attributes['threshold_min_warning']) && $value <= $this->attributes['threshold_min_warning']) {
             return Severity::Warning;
+        }
+
+        if (isset($this->attributes['threshold_max_warning']) && $value >= $this->attributes['threshold_max_warning']) {
+            return Severity::Warning;
+        }
+
+        // no thresholds
+        if (empty($this->attributes['threshold_min_critical']) && empty($this->attributes['threshold_max_critical']) && empty($this->attributes['threshold_min_warning']) && empty($this->attributes['threshold_max_warning'])) {
+            return Severity::Unknown;
         }
 
         return Severity::Ok;
