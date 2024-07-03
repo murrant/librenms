@@ -127,9 +127,9 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                 'model' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverPartNumber'] ?? null,
                 'serial' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverSerialNumber'] ?? null,
                 'ddm' => isset($data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverDiagnostic']) && $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverDiagnostic'] == 'true',
+                'cable' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverHardwareType'] ?? null,
                 'distance' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverTransferDistance'] ?? null,
                 'wavelength' => isset($data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverWaveLength']) && $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverWaveLength'] != 2147483647 ? $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverWaveLength'] : null,
-                'connector' => $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverHardwareType'] ?? null,
             ]);
         });
     }

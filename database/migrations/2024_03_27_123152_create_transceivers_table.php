@@ -26,6 +26,7 @@ return new class extends Migration
             $table->date('date')->nullable();
             $table->boolean('ddm')->default(0);
             $table->string('encoding', 16)->nullable();
+            $table->string('cable', 16)->nullable();
             $table->integer('distance')->nullable();
             $table->integer('wavelength')->nullable();
             $table->string('connector', 16)->nullable();
