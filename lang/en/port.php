@@ -36,6 +36,7 @@ return [
             'distance' => 'Distance: :distance',
             'encoding' => 'Encoding: :encoding',
             'cable' => 'Cable: :cable',
+            'ddm' => 'DDM: :ddm',
             'wavelength' => 'Wavelength: :wavelength',
             'connector' => 'Connector: :connector',
             'channels' => 'Channels: :channels',

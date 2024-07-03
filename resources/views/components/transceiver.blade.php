@@ -7,6 +7,7 @@
         @if($transceiver->model)<p>{{ __('port.transceivers.fields.model', $transceiver->only('model')) }}</p>@endif
         @if($transceiver->serial)<p>{{ __('port.transceivers.fields.serial', $transceiver->only('serial')) }}</p>@endif
         <p>@if($transceiver->revision){{ __('port.transceivers.fields.revision', $transceiver->only('revision')) }}@endif @if($transceiver->date){{ __('port.transceivers.fields.date', $transceiver->only('date')) }}@endif</p>
+        @if($transceiver->ddm !== null){{ __('port.transceivers.fields.ddm', ['ddm' => $transceiver->ddm ? __('Yes') : __('No')]) }}@endif
     </div>
     <div>
         @if($transceiver->cable)<p>{{ __('port.transceivers.fields.cable', $transceiver->only('cable')) }}</p>@endif
