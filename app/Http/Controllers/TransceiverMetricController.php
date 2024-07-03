@@ -11,7 +11,7 @@ class TransceiverMetricController extends Controller
     {
         $this->validate($request, [
             'field' => 'required|in:threshold_min_critical,threshold_min_warning,threshold_max_warning,threshold_max_critical',
-            'value' => 'nullable|numeric'
+            'value' => 'nullable|numeric',
         ]);
 
         $field = $request->input('field');
