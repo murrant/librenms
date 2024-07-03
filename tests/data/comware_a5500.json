@@ -7279,9 +7279,10 @@
                     "date": null,
                     "ddm": 1,
                     "encoding": null,
+                    "cable": "SM",
                     "distance": 10000,
                     "wavelength": 1310,
-                    "connector": "SM",
+                    "connector": null,
                     "channels": 1,
                     "ifIndex": 26
                 }

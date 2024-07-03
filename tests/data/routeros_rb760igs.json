@@ -2631,6 +2631,7 @@
                     "date": null,
                     "ddm": 0,
                     "encoding": null,
+                    "cable": null,
                     "distance": null,
                     "wavelength": null,
                     "connector": null,
