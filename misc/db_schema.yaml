@@ -2192,7 +2192,7 @@ transceivers:
     - { Field: oui, Type: varchar(16), 'Null': true, Extra: '' }
     - { Field: model, Type: varchar(16), 'Null': true, Extra: '' }
     - { Field: revision, Type: varchar(16), 'Null': true, Extra: '' }
-    - { Field: serial, Type: varchar(16), 'Null': true, Extra: '' }
+    - { Field: serial, Type: varchar(32), 'Null': true, Extra: '' }
     - { Field: date, Type: date, 'Null': true, Extra: '' }
     - { Field: ddm, Type: tinyint, 'Null': false, Extra: '', Default: '0' }
     - { Field: encoding, Type: varchar(16), 'Null': true, Extra: '' }
