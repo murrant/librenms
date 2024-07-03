@@ -93,22 +93,22 @@ class FsSwitch extends OS implements TransceiverDiscovery
             }
 
             $distance = null;
-            $connector = null;
+            $cable = null;
             if (isset($data['FS-SWITCH-V2-MIB::link9SinglemodeLengthKm']) && $data['FS-SWITCH-V2-MIB::link9SinglemodeLengthKm'] != 0) {
                 $distance = $data['FS-SWITCH-V2-MIB::link9SinglemodeLengthKm'] * 1000;
-                $connector = 'SM';
+                $cable = 'SM';
             } elseif (isset($data['FS-SWITCH-V2-MIB::link9SinglemodeLengthM']) && $data['FS-SWITCH-V2-MIB::link9SinglemodeLengthM'] != 0) {
                 $distance = $data['FS-SWITCH-V2-MIB::link9SinglemodeLengthM'];
-                $connector = 'SM';
+                $cable = 'SM';
             } elseif (isset($data['FS-SWITCH-V2-MIB::link50MultimodeLength']) && $data['FS-SWITCH-V2-MIB::link50MultimodeLength'] != 0) {
                 $distance = $data['FS-SWITCH-V2-MIB::link50MultimodeLength'];
-                $connector = 'MM';
+                $cable = 'MM';
             } elseif (isset($data['FS-SWITCH-V2-MIB::link62MultimodeLength']) && $data['FS-SWITCH-V2-MIB::link62MultimodeLength'] != 0) {
                 $distance = $data['FS-SWITCH-V2-MIB::link62MultimodeLength'];
-                $connector = 'MM';
+                $cable = 'MM';
             } elseif (isset($data['FS-SWITCH-V2-MIB::linkCopperLength']) && $data['FS-SWITCH-V2-MIB::linkCopperLength'] != 0) {
                 $distance = $data['FS-SWITCH-V2-MIB::linkCopperLength'];
-                $connector = 'Copper';
+                $cable = 'Copper';
             }
 
             return new Transceiver([
@@ -118,9 +118,9 @@ class FsSwitch extends OS implements TransceiverDiscovery
                 'type' => $data['FS-SWITCH-V2-MIB::transceiveType'] ?? null,
                 'model' => $data['FS-SWITCH-V2-MIB::transceivePartNumber'] ?? null,
                 'serial' => $data['FS-SWITCH-V2-MIB::transceiveSerialNumber'] ?? null,
+                'cable' => $cable,
                 'distance' => $distance,
                 'wavelength' => $data['FS-SWITCH-V2-MIB::transceiveWaveLength'] ?? null,
-                'connector' => $connector,
             ]);
         })->filter();
     }

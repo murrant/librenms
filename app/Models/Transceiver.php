@@ -13,20 +13,21 @@ class Transceiver extends PortRelatedModel implements Keyable
     protected $fillable = [
         'device_id',
         'port_id',
-        'index',
-        'type',
-        'vendor',
-        'oui',
-        'model',
-        'revision',
-        'serial',
-        'date',
-        'ddm',
-        'encoding',
-        'distance',
-        'wavelength',
-        'connector',
-        'channels',
+        'index', // sfp index to identify this sfp uniquely by snmp data
+        'type', // module type sfp, xfp, sfp+, qsfp, sfp28, etc or more detailed info like 10G_BASE_SR_SFP
+        'vendor', // vendor name
+        'oui', // vendor oui
+        'model', // model number or name
+        'revision', // hardware revision
+        'serial', // serial number
+        'date', // date of manufacture
+        'ddm', // if the module supports DDM or DOM
+        'encoding', // data encoding method
+        'cable', // SM, MM, Copper, etc
+        'distance', // Max distance or measured distance
+        'wavelength', // Middle Wavelength in nanometers
+        'connector', // LC, SM, RJ45, etc physical connector type, See Ocnos for some normalized connectors
+        'channels', // number of channels or lanes
     ];
     protected $casts = ['ddm' => 'boolean'];
 

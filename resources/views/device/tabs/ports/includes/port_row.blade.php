@@ -12,7 +12,7 @@
                 <x-popup>
                     <span class="tw-ml-3 tw-text-3xl"><x-icons.transceiver/></span>
                     <x-slot name="body" class="tw-p-0">
-                        @if(array_filter($transceiver->only(['type', 'vendor', 'model', 'revision', 'serial', 'data', 'ddm', 'encoding', 'distance', 'wavelength', 'connector'])))
+                        @if(array_filter($transceiver->only(['type', 'vendor', 'model', 'revision', 'serial', 'data', 'ddm', 'encoding', 'cable', 'distance', 'wavelength', 'connector'])))
                             <div class="tw-opacity-90 tw-p-4 tw-border-b-2 tw-border-solid tw-border-gray-200 dark:tw-border-dark-gray-200 tw-rounded-t-lg">
                                 <x-transceiver :transceiver="$transceiver" :portlink="false"></x-transceiver>
                             </div>

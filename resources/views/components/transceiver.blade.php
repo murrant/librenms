@@ -9,6 +9,7 @@
         <p>@if($transceiver->revision){{ __('port.transceivers.fields.revision', $transceiver->only('revision')) }}@endif @if($transceiver->date){{ __('port.transceivers.fields.date', $transceiver->only('date')) }}@endif</p>
     </div>
     <div>
+        @if($transceiver->cable)<p>{{ __('port.transceivers.fields.cable', $transceiver->only('cable')) }}</p>@endif
         @if($transceiver->distance)<p>{{ __('port.transceivers.fields.distance', ['distance' => \LibreNMS\Util\Number::formatSi($transceiver->distance, suffix: 'm')]) }}</p>@endif
         @if($transceiver->wavelength)<p>{{ __('port.transceivers.fields.wavelength', ['wavelength' => $transceiver->wavelength . 'nm']) }}</p>@endif
         @if($transceiver->encoding)<p>{{ __('port.transceivers.fields.encoding', $transceiver->only('encoding')) }}</p>@endif
