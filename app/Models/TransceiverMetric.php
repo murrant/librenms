@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use LibreNMS\Enum\Severity;
 use LibreNMS\Enum\TransceiverMetricStatus;
 use LibreNMS\Interfaces\Models\Keyable;
 
@@ -63,11 +62,6 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
             get: fn (int|null $status) => TransceiverMetricStatus::tryFrom($status) ?? TransceiverMetricStatus::Unknown,
             set: fn (TransceiverMetricStatus $status) => $status->value,
         );
-    }
-
-    public function getStatus(): Severity
-    {
-        return $this->status->asSeverity();
     }
 
     public function hasThresholds(): bool
