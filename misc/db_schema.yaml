@@ -2214,6 +2214,7 @@ transceiver_metrics:
     - { Field: multiplier, Type: int, 'Null': false, Extra: '', Default: '1' }
     - { Field: divisor, Type: int, 'Null': false, Extra: '', Default: '1' }
     - { Field: transform_function, Type: varchar(255), 'Null': true, Extra: '' }
+    - { Field: status, Type: tinyint, 'Null': false, Extra: '', Default: '0' }
     - { Field: threshold_min_critical, Type: 'double(8,2)', 'Null': true, Extra: '' }
     - { Field: threshold_min_warning, Type: 'double(8,2)', 'Null': true, Extra: '' }
     - { Field: threshold_max_warning, Type: 'double(8,2)', 'Null': true, Extra: '' }

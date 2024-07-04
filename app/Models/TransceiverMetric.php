@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Casts\SyncMetricStatus;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use LibreNMS\Enum\Severity;
+use LibreNMS\Enum\TransceiverMetricStatus;
 use LibreNMS\Interfaces\Models\Keyable;
 
 class TransceiverMetric extends DeviceRelatedModel implements Keyable
@@ -20,6 +23,7 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
         'value',
         'multiplier',
         'divisor',
+        'status',
         'transform_function',
         'threshold_min_critical',
         'threshold_min_warning',
@@ -28,12 +32,12 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
     ];
     protected $attributes = ['channel' => 0];
     protected $casts = [
-        'value' => 'double',
+        'value' => SyncMetricStatus::class,
         'value_prev' => 'double',
-        'threshold_min_critical' => 'double',
-        'threshold_min_warning' => 'double',
-        'threshold_max_warning' => 'double',
-        'threshold_max_critical' => 'double',
+        'threshold_min_critical' => SyncMetricStatus::class,
+        'threshold_min_warning' => SyncMetricStatus::class,
+        'threshold_max_warning' => SyncMetricStatus::class,
+        'threshold_max_critical' => SyncMetricStatus::class,
     ];
 
     protected static function boot()
@@ -53,32 +57,22 @@ class TransceiverMetric extends DeviceRelatedModel implements Keyable
         });
     }
 
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: fn (int|null $status) => TransceiverMetricStatus::tryFrom($status) ?? TransceiverMetricStatus::Unknown,
+            set: fn (TransceiverMetricStatus $status) => $status->value,
+        );
+    }
+
     public function getStatus(): Severity
     {
-        $value = $this->attributes['value'];
+        return $this->status->asSeverity();
+    }
 
-        if (isset($this->attributes['threshold_min_critical']) && $value <= $this->attributes['threshold_min_critical']) {
-            return Severity::Error;
-        }
-
-        if (isset($this->attributes['threshold_max_critical']) && $value >= $this->attributes['threshold_max_critical']) {
-            return Severity::Error;
-        }
-
-        if (isset($this->attributes['threshold_min_warning']) && $value <= $this->attributes['threshold_min_warning']) {
-            return Severity::Warning;
-        }
-
-        if (isset($this->attributes['threshold_max_warning']) && $value >= $this->attributes['threshold_max_warning']) {
-            return Severity::Warning;
-        }
-
-        // no thresholds
-        if (empty($this->attributes['threshold_min_critical']) && empty($this->attributes['threshold_max_critical']) && empty($this->attributes['threshold_min_warning']) && empty($this->attributes['threshold_max_warning'])) {
-            return Severity::Unknown;
-        }
-
-        return Severity::Ok;
+    public function hasThresholds(): bool
+    {
+        return isset($this->attributes['threshold_min_critical']) || isset($this->attributes['threshold_max_critical']) || isset($this->attributes['threshold_min_warning']) || isset($this->attributes['threshold_max_warning']);
     }
 
     public function transceiver(): BelongsTo

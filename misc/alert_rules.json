@@ -335,11 +335,11 @@
     "name": "Generic PSU status failed"
   },
   {
-    "builder": {"condition":"AND","rules":[{"condition":"OR","rules":[{"id":"transceiver_metrics.value","field":"transceiver_metrics.value","type":"string","input":"text","operator":"less_or_equal","value":"`transceiver_metrics.threshold_min_critical`"},{"id":"transceiver_metrics.value","field":"transceiver_metrics.value","type":"string","input":"text","operator":"greater_or_equal","value":"`transceiver_metrics.threshold_max_critical`"}]}],"valid":true},
+    "builder": {"condition":"AND","rules":[{"id":"transceiver_metrics.status","field":"transceiver_metrics.status","type":"string","input":"text","operator":"greater_or_equal","value":"4"},{"id":"transceiver_metrics.status","field":"transceiver_metrics.status","type":"string","input":"text","operator":"less_or_equal","value":"5"}],"valid":true},
     "name": "Transceiver Metric Critical"
   },
   {
-    "builder": {"condition":"AND","rules":[{"condition":"OR","rules":[{"id":"transceiver_metrics.value","field":"transceiver_metrics.value","type":"string","input":"text","operator":"less_or_equal","value":"`transceiver_metrics.threshold_min_warning`"},{"id":"transceiver_metrics.value","field":"transceiver_metrics.value","type":"string","input":"text","operator":"greater_or_equal","value":"`transceiver_metrics.threshold_max_warning`"}]}],"valid":true},
+    "builder":{"condition":"AND","rules":[{"id":"transceiver_metrics.status","field":"transceiver_metrics.status","type":"string","input":"text","operator":"greater_or_equal","value":"2"},{"id":"transceiver_metrics.status","field":"transceiver_metrics.status","type":"string","input":"text","operator":"less_or_equal","value":"3"}],"valid":true},
     "name": "Transceiver Metric Warning"
   },
   {

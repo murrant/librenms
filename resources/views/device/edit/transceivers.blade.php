@@ -1,20 +1,20 @@
 <table class="table table-striped table-condensed">
     <thead>
     <tr>
-        <th>Port</th>
-        <th>Transceiver</th>
-        <th>Metric</th>
-        <th>Current</th>
-        <th>Min Critical</th>
-        <th>Min Warning</th>
-        <th>Max Warning</th>
-        <th>Max Critical</th>
+        <th>{{ __('Port') }}</th>
+        <th>{{ __('port.transceiver') }}</th>
+        <th>{{ __('port.transceiver_metrics.fields.type') }}</th>
+        <th>{{ __('port.transceiver_metrics.fields.value') }}</th>
+        <th>{{ __('port.transceiver_metrics.fields.threshold_min_critical') }}</th>
+        <th>{{ __('port.transceiver_metrics.fields.threshold_min_warning') }}</th>
+        <th>{{ __('port.transceiver_metrics.fields.threshold_max_warning') }}</th>
+        <th>{{ __('port.transceiver_metrics.fields.threshold_max_critical') }}</th>
     </tr>
     </thead>
     <tbody>
     @foreach($device->transceivers as $transceiver)
         @foreach($transceiver->metrics as $metric)
-            <tr x-data="transceiverMetric({{ $metric->getStatus()->value }})">
+            <tr x-data="transceiverMetric({{ $metric->status->asSeverity()->value }})">
                 <td>
                     <x-port-link :port="$transceiver->port"></x-port-link>
                 </td>
@@ -24,8 +24,8 @@
                 <td>
                     {{ trans_choice('port.transceivers.metrics.' . $metric->type,  $transceiver->channels, ['channel' => $metric->channel]) }}
                 </td>
-                <td class="tw-whitespace-nowrap">
-                    <x-label :status="$metric->getStatus()" x-bind:class="{
+                <td class="tw-whitespace-nowrap tw-text-2xl">
+                    <x-label :status="$metric->status->asSeverity()" x-bind:class="{
                      'label-success': status === 1,
                      'label-info': status === 2,
                      'label-primary': status === 3,
