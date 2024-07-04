@@ -64,5 +64,4 @@ class SyncMetricStatus implements CastsAttributes
 
         return TransceiverMetricStatus::Ok;
     }
-
 }
