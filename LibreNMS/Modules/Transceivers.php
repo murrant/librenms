@@ -90,11 +90,8 @@ class Transceivers implements Module
 
         /** @var TransceiverMetric $metric */
         foreach ($metrics as $metric) {
-            $metric->value_prev = $metric->value;
-            $metric->value = null;
-
             // transform the value to the proper scale
-            if (! empty($data[$metric->oid])) {
+            if (isset($data[$metric->oid])) {
                 $value = $data[$metric->oid];
                 if (is_numeric($value)) {
                     $value = $value * $metric->multiplier / $metric->divisor;
@@ -105,6 +102,8 @@ class Transceivers implements Module
                 }
 
                 $metric->value = $value;
+            } else {
+                $metric->value = null;
             }
             $metric->save();
 

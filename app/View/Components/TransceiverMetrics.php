@@ -35,7 +35,7 @@ class TransceiverMetrics extends Component
     public function status(Collection $metrics): Severity
     {
         return $metrics->reduce(function (Severity $previous, TransceiverMetric $metric) {
-            $current = $metric->getStatus();
+            $current = $metric->status->asSeverity();
 
             return $current->value > $previous->value ? $current : $previous;
         }, Severity::Unknown);
