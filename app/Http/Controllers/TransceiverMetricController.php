@@ -20,7 +20,7 @@ class TransceiverMetricController extends Controller
 
         return response()->json([
             'message' => $result ? 'ok' : 'Failed to save',
-            'metricStatus' => $metric->getStatus()->value,
+            'metricStatus' => $metric->status->asSeverity()->value,
         ], $result ? 200 : 500);
     }
 }
