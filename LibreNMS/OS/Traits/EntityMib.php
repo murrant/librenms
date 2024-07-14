@@ -36,7 +36,6 @@ trait EntityMib
             ->mibs(['CISCO-ENTITY-VENDORTYPE-OID-MIB'])
             ->walk('ENTITY-MIB::entPhysicalTable');
 
-
         if (! $data->isValid()) {
             return new Collection;
         }
