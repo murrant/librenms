@@ -16,9 +16,9 @@ class Arris extends OS
         return $this->discoverBaseEntityPhysical()->each(function (EntPhysical $entity) {
             // clean garbage in Rev fields "...............\n00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
             $regex = '/\.*\n?([0-9a-f]{2} )*(\n[0-9a-f]{2} ?)*$/';
-            $entity->entPhysicalHardwareRev = preg_replace($regex,'', $entity->entPhysicalHardwareRev);
-            $entity->entPhysicalFirmwareRev = preg_replace($regex,'', $entity->entPhysicalFirmwareRev);
-            $entity->entPhysicalSoftwareRev = preg_replace($regex,'', $entity->entPhysicalSoftwareRev);
+            $entity->entPhysicalHardwareRev = preg_replace($regex, '', $entity->entPhysicalHardwareRev);
+            $entity->entPhysicalFirmwareRev = preg_replace($regex, '', $entity->entPhysicalFirmwareRev);
+            $entity->entPhysicalSoftwareRev = preg_replace($regex, '', $entity->entPhysicalSoftwareRev);
         });
     }
 }

@@ -37,7 +37,6 @@ class ArubaosCx extends \LibreNMS\OS implements NacPolling
         $this->entityVendorTypeMib = 'ARUBAWIRED-NETWORKING-OID';
     }
 
-
     public function pollNac()
     {
         $nac = new Collection();
