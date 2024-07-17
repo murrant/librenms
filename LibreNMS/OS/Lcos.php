@@ -37,7 +37,6 @@ use LibreNMS\Interfaces\Polling\Sensors\WirelessFrequencyPolling;
 use LibreNMS\OS;
 use LibreNMS\Util\Mac;
 use LibreNMS\Util\Oid;
-use LibreNMS\Util\Rewrite;
 
 class Lcos extends OS implements
     WirelessFrequencyDiscovery,
