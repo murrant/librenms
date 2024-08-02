@@ -136,7 +136,7 @@ jobs:
         name: Artisan dusk:chrome-driver
         if: matrix.skip-web-check != '1'
         run: |
-          php artisan dusk:chrome-driver --detect
+          php artisan dusk:chrome-driver 126.0.6478.182
       -
         name: Copy seeded config
         run: cp "${GITHUB_WORKSPACE}/tests/testing_config.yaml" "${GITHUB_WORKSPACE}/database/seeders/config/"
