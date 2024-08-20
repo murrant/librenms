@@ -57,7 +57,7 @@ class ModuleStatus
     public function reason(): string
     {
         if ($this->manual !== null) {
-            return 'mannually';
+            return 'manually';
         }
 
         if ($this->device !== null) {
