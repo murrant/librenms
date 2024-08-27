@@ -10,6 +10,7 @@ use App\Polling\Measure\Measurement;
 use App\Polling\Measure\MeasurementManager;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -24,10 +25,11 @@ use LibreNMS\Util\Dns;
 use LibreNMS\Util\Module;
 use Throwable;
 
-class PollDevice implements ShouldQueue
+class PollDevice implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $uniqueFor = 3600;
     private ?\App\Models\Device $device = null;
     private ?array $deviceArray = null;
     /**
@@ -45,10 +47,20 @@ class PollDevice implements ShouldQueue
     ) {
     }
 
+    public function displayName(): string
+    {
+        return "PollDevice:$this->device_id";
+    }
+
+    public function uniqueId(): string
+    {
+        return $this->device_id;
+    }
+
     /**
      * Execute the job.
      */
-    public function handle()
+    public function handle(): void
     {
         $this->initDevice();
         PollingDevice::dispatch($this->device);
@@ -100,6 +112,10 @@ class PollDevice implements ShouldQueue
         if ($measurement->getDuration() > Config::get('rrd.step')) {
             Eventlog::log('Polling took longer than ' . round(Config::get('rrd.step') / 60, 2) .
                 ' minutes!  This will cause gaps in graphs.', $this->device, 'system', Severity::Error);
+        }
+
+        if (! $this->device->status) {
+            throw new \Exception('Failed to poll device');
         }
 
         DevicePolled::dispatch($this->device);
