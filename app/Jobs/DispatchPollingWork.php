@@ -47,12 +47,12 @@ class DispatchPollingWork implements ShouldQueue
             ->orderBy('last_polled_timetaken', 'desc')
             ->get();
 
-        Log::info("Due to for polling: " . $devices->pluck('device_id')->implode(','));
+        Log::info('Due to for polling: ' . $devices->pluck('device_id')->implode(','));
 
         foreach ($devices as $device) {
-                PollDevice::dispatch($device->device_id)
-                    ->onConnection($this->pollingQueueConnection)
-                    ->onQueue($device->poller_group ? "poll-$device->poller_group" : 'poll');
+            PollDevice::dispatch($device->device_id)
+                ->onConnection($this->pollingQueueConnection)
+                ->onQueue($device->poller_group ? "poll-$device->poller_group" : 'poll');
         }
     }
 }
