@@ -4,8 +4,8 @@ namespace LibreNMS\OS;
 
 use App\Models\EntPhysical;
 use App\Models\Transceiver;
-use App\Models\TransceiverMetric;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use LibreNMS\Interfaces\Discovery\EntityPhysicalDiscovery;
 use LibreNMS\Interfaces\Discovery\TransceiverDiscovery;
 use LibreNMS\OS;
@@ -79,6 +79,12 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
         }
 
         $transceivers = SnmpQuery::enumStrings()->walk('IPI-CMM-CHASSIS-MIB::cmmTransEEPROMTable')->table(2);
+
+        // load port name to port_id map
+        if (! empty($transceivers)) {
+            $ifNameToIndex = array_flip(SnmpQuery::cache()->walk('IF-MIB::ifName')->pluck());
+        }
+
         foreach ($transceivers as $cmmStackUnitIndex => $chassisTransceivers) {
             foreach ($chassisTransceivers as $cmmTransIndex => $transceiver) {
                 $inventory->push(new EntPhysical([
@@ -93,7 +99,7 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
                     'entPhysicalParentRelPos' => $cmmTransIndex,
                     'entPhysicalHardwareRev' => $transceiver['IPI-CMM-CHASSIS-MIB::cmmTransVendorRevision'] ?? null,
                     'entPhysicalIsFRU' => 'true',
-                    'ifIndex' => $this->guessPortId($cmmTransIndex, $transceiver['IPI-CMM-CHASSIS-MIB::cmmTransType'] ?? 'missing'),
+                    'ifIndex' => $ifNameToIndex[$this->guessIfName($cmmTransIndex, $transceiver['IPI-CMM-CHASSIS-MIB::cmmTransType'] ?? 'missing')] ?? null,
                 ]));
             }
         }
@@ -156,7 +162,7 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
         return $description;
     }
 
-    private function guessPortId($cmmTransIndex, $cmmTransType): int
+    private function guessIfName($cmmTransIndex, $cmmTransType): ?string
     {
         // IP Infusion has no reliable way of mapping a transceiver to a port it varies by hardware
 
@@ -171,7 +177,7 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
             $this->sfpSeen = true;
         }
 
-        $portName = match ($this->getDevice()->hardware) {
+        return match ($this->getDevice()->hardware) {
             'Ufi Space S9600-32X-R' => $prefix . ($this->sfpSeen ? ($cmmTransType == 'qsfp' ? $cmmTransIndex - 5 : $cmmTransIndex - 2) : $cmmTransIndex - 1),
             'Ufi Space S9510-28DC-B' => $prefix . ($cmmTransIndex - 1),
             'Ufi Space S9500-30XS-P' => $prefix . ($cmmTransType == 'qsfp' ? $cmmTransIndex - 29 : $cmmTransIndex - 1),
@@ -180,15 +186,6 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
             'Edgecore 7712-32X-O-AC-F' => $prefix . $cmmTransIndex . '/1',
             default => null, // no port map, so we can't guess
         };
-
-        if ($portName === null) {
-            return 0; // give up
-        }
-
-        // load port name to port_id map
-        $ifNameToIndex = array_flip(SnmpQuery::cache()->walk('IF-MIB::ifName')->pluck());
-
-        return $ifNameToIndex[$portName] ?? 0;
     }
 
     public function discoverTransceivers(): Collection
@@ -240,8 +237,12 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
 
             $cmmTransType = $data['IPI-CMM-CHASSIS-MIB::cmmTransType'] ?? 'missing';
 
+            if ($this->ifNamePortIdMap === null) {
+                $this->ifNamePortIdMap = $this->getDevice()->ports()->toBase()->pluck('port_id', 'ifName');
+            }
+
             return new Transceiver([
-                'port_id' => $this->guessPortId($cmmTransIndex, $cmmTransType),
+                'port_id' => $this->ifNamePortIdMap[$this->guessIfName($cmmTransIndex, $cmmTransType)] ?? 0,
                 'index' => "$cmmStackUnitIndex.$cmmTransIndex",
                 'type' => $cmmTransType,
                 'vendor' => $data['IPI-CMM-CHASSIS-MIB::cmmTransVendorName'] ?? 'missing',
@@ -277,27 +278,27 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
                 foreach ($module_data as $channel => $channel_data) {
                     // temp
                     if (isset($channel_data['IPI-CMM-CHASSIS-MIB::cmmTransTemperature']) && $channel_data['IPI-CMM-CHASSIS-MIB::cmmTransTemperature'] != '-100001') {
-                        $metrics->push($this->getTransceiverMetric($transceiver, 2, $chassis, $module, $channel, $channel_data, 'temperature', 'TransTemperature', 'TransTemp'));
+                        $this->getTransceiverMetric($transceiver, 2, $chassis, $module, $channel, $channel_data, 'temperature', 'TransTemperature', 'TransTemp');
                     }
 
                     // voltage
                     if (isset($channel_data['IPI-CMM-CHASSIS-MIB::cmmTransVoltage']) && $channel_data['IPI-CMM-CHASSIS-MIB::cmmTransVoltage'] != '-100001') {
-                        $metrics->push($this->getTransceiverMetric($transceiver, 7, $chassis, $module, $channel, $channel_data, 'voltage', 'TransVoltage', 'TransVolt'));
+                        $this->getTransceiverMetric($transceiver, 7, $chassis, $module, $channel, $channel_data, 'voltage', 'TransVoltage', 'TransVolt');
                     }
 
                     // bias
                     if (isset($channel_data['IPI-CMM-CHASSIS-MIB::cmmTransLaserBiasCurrent']) && $channel_data['IPI-CMM-CHASSIS-MIB::cmmTransLaserBiasCurrent'] != '-100001') {
-                        $metrics->push($this->getTransceiverMetric($transceiver, 12, $chassis, $module, $channel, $channel_data, 'bias', 'TransLaserBiasCurrent', 'TransLaserBiasCurr'));
+                        $this->getTransceiverMetric($transceiver, 12, $chassis, $module, $channel, $channel_data, 'bias', 'TransLaserBiasCurrent', 'TransLaserBiasCurr');
                     }
 
                     // power-tx
                     if (isset($channel_data['IPI-CMM-CHASSIS-MIB::cmmTransTxPowerSupported']) && $channel_data['IPI-CMM-CHASSIS-MIB::cmmTransTxPowerSupported'] == 'supported') {
-                        $metrics->push($this->getTransceiverMetric($transceiver, 17, $chassis, $module, $channel, $channel_data, 'power-tx', 'TransTxPower'));
+                        $this->getTransceiverMetric($transceiver, 17, $chassis, $module, $channel, $channel_data, 'power-tx', 'TransTxPower');
                     }
 
                     // power-rx
                     if (isset($channel_data['IPI-CMM-CHASSIS-MIB::cmmTransRxPowerSupported']) && $channel_data['IPI-CMM-CHASSIS-MIB::cmmTransRxPowerSupported'] == 'supported') {
-                        $metrics->push($this->getTransceiverMetric($transceiver, 22, $chassis, $module, $channel, $channel_data, 'power-rx', 'TransRxPower'));
+                        $this->getTransceiverMetric($transceiver, 22, $chassis, $module, $channel, $channel_data, 'power-rx', 'TransRxPower');
                     }
                 }
             }
@@ -306,7 +307,7 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
         return $metrics;
     }
 
-    private function getTransceiverMetric(Transceiver $transceiver, int $snmp_field_index, string $chassis, string $module, string $channel, array $data, string $type, string $slug, string $threshold_slug = null): TransceiverMetric
+    private function getTransceiverMetric(Transceiver $transceiver, int $snmp_field_index, string $chassis, string $module, string $channel, array $data, string $type, string $slug, string $threshold_slug = null): void
     {
         $divisor = $type == 'temperature' ? 100 : 1000;
         $threshold_slug ??= $slug;
@@ -317,18 +318,27 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
         $min_warn = $data["IPI-CMM-CHASSIS-MIB::cmm{$threshold_slug}AlertThresholdMin"] ?? null;
         $max_warn = $data["IPI-CMM-CHASSIS-MIB::cmm{$threshold_slug}AlertThresholdMax"] ?? null;
         $max_crit = $data["IPI-CMM-CHASSIS-MIB::cmm{$threshold_slug}CriticalThresholdMax"] ?? null;
+        $index = "$snmp_field_index.$chassis.$module.$channel";
+        $ifName = $this->guessIfName(Str::afterLast($transceiver->index, '.'), $transceiver->type);
 
-        return new TransceiverMetric([
-            'transceiver_id' => $transceiver->id,
-            'channel' => $channel,
-            'type' => $type,
-            'oid' => ".1.3.6.1.4.1.36673.100.1.2.3.1.$snmp_field_index.$chassis.$module.$channel",
-            'value' => $value ? $value / $divisor : null,
-            'divisor' => $divisor,
-            'threshold_min_critical' => isset($min_crit) ? $min_crit / $divisor : null,
-            'threshold_min_warning' => isset($min_warn) ? $min_warn / $divisor : null,
-            'threshold_max_warning' => isset($max_warn) ? $max_warn / $divisor : null,
-            'threshold_max_critical' => isset($max_crit) ? $max_crit / $divisor : null,
-        ]);
+        app('sensor-discovery')->discover(new \App\Models\Sensor([
+            'poller_type' => 'snmp',
+            'sensor_class' => $type,
+            'sensor_oid' => ".1.3.6.1.4.1.36673.100.1.2.3.1.$index",
+            'sensor_index' => $index,
+            'sensor_type' => 'transceiver',
+            'sensor_descr' => "$ifName transceiver module " . ucfirst($type),
+            'sensor_divisor' => $divisor,
+            'sensor_multiplier' => 1,
+            'sensor_limit' => $max_crit,
+            'sensor_limit_warn' => $max_warn,
+            'sensor_limit_low' => $min_crit,
+            'sensor_limit_low_warn' => $min_warn,
+            'sensor_current' => $value ? $value / $divisor : null,
+            'entPhysicalIndex' => $transceiver->entity_physical_index,
+            'entPhysicalIndex_measured' => 'port',
+            'user_func' => null,
+            'group' => $channel,
+        ]));
     }
 }
