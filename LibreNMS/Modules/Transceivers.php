@@ -62,18 +62,20 @@ class Transceivers implements Module
     {
         if ($os instanceof TransceiverDiscovery) {
             echo "\nTransceivers: ";
-            $transceivers = $os->discoverTransceivers();
+            $discoveredTransceivers = $os->discoverTransceivers();
 
             // save transceivers
             ModuleModelObserver::observe(Transceiver::class);
-            $transceivers = $this->syncModels($os->getDevice(), 'transceivers', $transceivers);
+            $transceivers = $this->syncModels($os->getDevice(), 'transceivers', $discoveredTransceivers);
 
             echo "\nMetrics: ";
+            ModuleModelObserver::observe(\App\Models\Sensor::class);
             $metrics = $os->discoverTransceiverMetrics($transceivers->keyBy('index'));
 
             // save metrics
             ModuleModelObserver::observe(\App\Models\TransceiverMetric::class);
             $this->syncModels($os->getDevice(), 'transceiverMetrics', $metrics);
+            app('sensor-discovery')->sync(sensor_type: 'transceiver');
 
             $this->verifyTransceiverChannelCounts($metrics, $transceivers);
 
@@ -139,7 +141,7 @@ class Transceivers implements Module
             'transceivers' => $device->transceivers()->orderBy('index')
                 ->leftJoin('ports', 'transceivers.port_id', 'ports.port_id')
                 ->select(['transceivers.*', 'ifIndex'])
-                ->get()->map->makeHidden(['id', 'created_at', 'updated_at', 'device_id', 'port_id']),
+                    ->get()->map->makeHidden(['id', 'created_at', 'updated_at', 'device_id', 'port_id']),
             'transceiver_metrics' => $device->transceiverMetrics()
                 ->orderBy('type')->orderBy('transceivers.index')->orderBy('channel')
                 ->leftJoin('transceivers', 'transceivers.id', 'transceiver_metrics.transceiver_id')

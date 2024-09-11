@@ -15,6 +15,7 @@ class Transceiver extends PortRelatedModel implements Keyable
         'port_id',
         'index', // sfp index to identify this sfp uniquely by snmp data
         'type', // module type sfp, xfp, sfp+, qsfp, sfp28, etc or more detailed info like 10G_BASE_SR_SFP
+        'entity_physical_index', // maps to inventory item, should be unique per port
         'vendor', // vendor name
         'oui', // vendor oui
         'model', // model number or name

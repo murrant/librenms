@@ -17,6 +17,7 @@ return new class extends Migration
             $table->bigInteger('device_id');
             $table->bigInteger('port_id');
             $table->string('index');
+            $table->integer('entity_physical_index')->nullable();
             $table->string('type', 32)->nullable();
             $table->string('vendor', 16)->nullable();
             $table->string('oui', 16)->nullable();
