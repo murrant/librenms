@@ -122,10 +122,15 @@ class Transceivers implements Module
         }
     }
 
-    public function cleanup(Device $device): void
+    public function dataExists(Device $device): bool
     {
-        $device->transceiverMetrics()->delete();
-        $device->transceivers()->delete();
+        return $device->transceivers()->exists() || $device->transceiverMetrics()->exists();
+    }
+
+    public function cleanup(Device $device): int
+    {
+        return $device->transceiverMetrics()->delete()
+            + $device->transceivers()->delete();
     }
 
     public function dump(Device $device): array
