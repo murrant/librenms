@@ -32,6 +32,7 @@ return new class extends Migration
             $table->integer('wavelength')->nullable();
             $table->string('connector', 16)->nullable();
             $table->smallInteger('channels')->default(1);
+            $table->index(['device_id', 'entity_physical_index']);
         });
     }
 
