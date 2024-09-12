@@ -28,7 +28,7 @@ if ($os instanceof \LibreNMS\OS\Ocnos) {
                         'sensor_limit_low' => isset($channel_data["IPI-CMM-CHASSIS-MIB::cmmTransTempCriticalThresholdMin"]) ? $channel_data["IPI-CMM-CHASSIS-MIB::cmmTransTempCriticalThresholdMin"] / $divisor : null,
                         'sensor_limit_low_warn' => isset($channel_data["IPI-CMM-CHASSIS-MIB::cmmTransTempAlertThresholdMin"]) ? $channel_data["IPI-CMM-CHASSIS-MIB::cmmTransTempAlertThresholdMin"] / $divisor : null,
                         'sensor_current' => isset($channel_data["IPI-CMM-CHASSIS-MIB::cmmTransTemperature"]) ? $channel_data["IPI-CMM-CHASSIS-MIB::cmmTransTemperature"] / $divisor : null,
-                        'entPhysicalIndex' => null, // TODO
+                        'entPhysicalIndex' => $cmmStackUnitIndex * 10000 + $cmmTransIndex,
                         'entPhysicalIndex_measured' => 'port',
                         'user_func' => null,
                         'group' => $ifName,
