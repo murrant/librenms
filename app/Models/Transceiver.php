@@ -32,6 +32,11 @@ class Transceiver extends PortRelatedModel implements Keyable
     ];
     protected $casts = ['ddm' => 'boolean'];
 
+    public function sensors(): HasMany
+    {
+        return $this->hasMany(Sensor::class, 'device_id', 'device_id')->where('entPhysicalIndex', $this->entity_physical_index);
+    }
+
     public function metrics(): HasMany
     {
         return $this->hasMany(TransceiverMetric::class);

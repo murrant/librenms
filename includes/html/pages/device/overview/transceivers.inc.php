@@ -22,11 +22,13 @@
  * @copyright  2024 Tony Murray
  * @author     Tony Murray <murraytony@gmail.com>
  */
-if (DeviceCache::get($device['device_id'])->transceivers->isNotEmpty()) {
-    DeviceCache::get($device['device_id'])->transceivers->load(['port', 'metrics']);
+if (DeviceCache::getPrimary()->transceivers->isNotEmpty()) {
+    DeviceCache::getPrimary()->transceivers->load(['port', 'metrics']);
     echo view('device.overview.transceivers', [
-        'transceivers' => DeviceCache::get($device['device_id'])->transceivers,
-        'transceivers_link' => route('device', ['device' => $device['device_id'], 'tab' => 'ports', 'vars' => 'transceivers']),
-        'filterMetrics' => fn ($metrics) => $metrics->filter(fn ($m) => in_array($m->type, ['power-rx', 'temperature'])),
+        'transceivers' => DeviceCache::getPrimary()->transceivers,
+        'transceivers_link' => route('device', ['device' => DeviceCache::getPrimary()->device_id, 'tab' => 'ports', 'vars' => 'transceivers']),
+        'sensors' => DeviceCache::getPrimary()->sensors->where('sensor_type', 'transceiver'),
+        // only temp and rx power to reduce information overload, click through to see all
+        'filterSensors' => fn ($s) => $s->sensor_class == 'temperature' || ($s->sensor_class == 'dbm' && str_contains(strtolower($s->sensor_descr), 'rx')),
     ]);
 }
