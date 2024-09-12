@@ -69,13 +69,11 @@ class Transceivers implements Module
             $transceivers = $this->syncModels($os->getDevice(), 'transceivers', $discoveredTransceivers);
 
             echo "\nMetrics: ";
-            ModuleModelObserver::observe(\App\Models\Sensor::class);
             $metrics = $os->discoverTransceiverMetrics($transceivers->keyBy('index'));
 
             // save metrics
             ModuleModelObserver::observe(\App\Models\TransceiverMetric::class);
             $this->syncModels($os->getDevice(), 'transceiverMetrics', $metrics);
-            app('sensor-discovery')->sync(sensor_type: 'transceiver');
 
             $this->verifyTransceiverChannelCounts($metrics, $transceivers);
 
