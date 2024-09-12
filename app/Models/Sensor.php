@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use LibreNMS\Enum\Severity;
 use LibreNMS\Interfaces\Models\Keyable;
 
 class Sensor extends DeviceRelatedModel implements Keyable
@@ -129,6 +130,26 @@ class Sensor extends DeviceRelatedModel implements Keyable
     }
 
     // ---- Define Relationships ----
+    public function currentStatus(): Severity
+    {
+        if ($this->sensor_limit !== null && $this->sensor_current >= $this->sensor_limit) {
+            return Severity::Error;
+        }
+        if ($this->sensor_limit_low !== null && $this->sensor_current <= $this->sensor_limit_low) {
+            return Severity::Error;
+        }
+
+        if ($this->sensor_limit_warn !== null && $this->sensor_current >= $this->sensor_limit_warn) {
+            return Severity::Warning;
+        }
+
+        if ($this->sensor_limit_low_warn !== null && $this->sensor_current <= $this->sensor_limit_low_warn) {
+            return Severity::Warning;
+        }
+
+        return Severity::Ok;
+    }
+
     public function events(): MorphMany
     {
         return $this->morphMany(Eventlog::class, 'events', 'type', 'reference');
