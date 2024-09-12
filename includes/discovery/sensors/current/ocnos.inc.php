@@ -30,7 +30,7 @@ if ($os instanceof \LibreNMS\OS\Ocnos) {
                         'sensor_limit_low' => isset($channel_data["IPI-CMM-CHASSIS-MIB::cmmTransLaserBiasCurrCriticalThresholdMin"]) ? $channel_data["IPI-CMM-CHASSIS-MIB::cmmTransLaserBiasCurrCriticalThresholdMin"] / $divisor : null,
                         'sensor_limit_low_warn' => isset($channel_data["IPI-CMM-CHASSIS-MIB::cmmTransLaserBiasCurrAlertThresholdMin"]) ? $channel_data["IPI-CMM-CHASSIS-MIB::cmmTransLaserBiasCurrAlertThresholdMin"] / $divisor : null,
                         'sensor_current' => isset($channel_data["IPI-CMM-CHASSIS-MIB::cmmTransLaserBiasCurrent"]) ? $channel_data["IPI-CMM-CHASSIS-MIB::cmmTransLaserBiasCurrent"] / $divisor : null,
-                        'entPhysicalIndex' => null, // TODO
+                        'entPhysicalIndex' => $cmmStackUnitIndex * 10000 + $cmmTransIndex,
                         'entPhysicalIndex_measured' => 'port',
                         'user_func' => null,
                         'group' => $ifName,
