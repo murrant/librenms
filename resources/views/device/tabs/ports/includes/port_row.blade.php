@@ -10,7 +10,9 @@
                     $transceiver->setRelation('port', $port); // save a query
                 @endphp
                 <x-popup>
-                    <span class="tw-ml-3 tw-text-3xl"><x-icons.transceiver/></span>
+                    <a href="{{ \LibreNMS\Util\Url::generate(['page' => 'device', 'device' => $port->device_id, 'tab' => 'port','port' => $port->port_id], ['view' => 'transceiver']) }}" class="tw-text-current">
+                        <span class="tw-ml-3 tw-text-3xl"><x-icons.transceiver/></span>
+                    </a>
                     <x-slot name="body" class="tw-p-0">
                         @if(array_filter($transceiver->only(['type', 'vendor', 'model', 'revision', 'serial', 'data', 'ddm', 'encoding', 'cable', 'distance', 'wavelength', 'connector'])))
                             <div class="tw-opacity-90 tw-p-4 tw-border-b-2 tw-border-solid tw-border-gray-200 dark:tw-border-dark-gray-200 tw-rounded-t-lg">
@@ -19,7 +21,7 @@
                         @endif
                         @if($transceiver->metrics->isNotEmpty())
                             <div class="tw-p-3">
-                                <x-transceiver-metrics :transceiver="$transceiver"></x-transceiver-metrics>
+                                <x-transceiver-sensors :transceiver="$transceiver"></x-transceiver-sensors>
                             </div>
                         @endif
                     </x-slot>
