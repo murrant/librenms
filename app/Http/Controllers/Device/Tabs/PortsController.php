@@ -252,7 +252,7 @@ class PortsController implements DeviceTab
 
     private function transceiversData(Device $device): array
     {
-        $device->load(['transceivers.port', 'transceivers.sensors']);
+        $device->load(['transceivers.port']);
 
         return [
             'transceivers' => $device->transceivers,

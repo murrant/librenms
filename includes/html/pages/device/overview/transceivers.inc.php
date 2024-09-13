@@ -23,7 +23,7 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 if (DeviceCache::getPrimary()->transceivers->isNotEmpty()) {
-    DeviceCache::getPrimary()->transceivers->load(['port', 'metrics']);
+    DeviceCache::getPrimary()->transceivers->load(['port']);
     echo view('device.overview.transceivers', [
         'transceivers' => DeviceCache::getPrimary()->transceivers,
         'transceivers_link' => route('device', ['device' => DeviceCache::getPrimary()->device_id, 'tab' => 'ports', 'vars' => 'transceivers']),
