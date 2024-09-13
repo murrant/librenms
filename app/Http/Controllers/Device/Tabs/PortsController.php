@@ -124,7 +124,6 @@ class PortsController implements DeviceTab
             $relationships[] = 'ipv6Networks.ipv6';
             $relationships['stackParent'] = fn ($q) => $q->select('port_id');
             $relationships['stackChildren'] = fn ($q) => $q->select('port_id');
-            $relationships[] = 'transceivers.metrics';
         }
 
         /** @var Collection<Port>|LengthAwarePaginator<Port> $ports */

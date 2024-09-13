@@ -2,7 +2,7 @@
 
 @foreach($groupedSensors as $class => $sensors)
     @if($loop->first)
-        <div class="tw-grid tw-grid-cols-[min-content_min-content_1fr] tw-gap-x-4"  {{ $attributes }}>
+        <div {{ $attributes->merge(['class' => 'tw-grid tw-grid-cols-[min-content_min-content_1fr] tw-gap-x-4']) }}>
     @endif
     @foreach($sensors as $sensor)
         <div class="tw-whitespace-nowrap tw-text-right">

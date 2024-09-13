@@ -9,7 +9,6 @@ use App\Http\Controllers\Maps\CustomMapController;
 use App\Http\Controllers\Maps\CustomMapDataController;
 use App\Http\Controllers\Maps\DeviceDependencyController;
 use App\Http\Controllers\PushNotificationController;
-use App\Http\Controllers\TransceiverMetricController;
 use App\Http\Controllers\ValidateController;
 use App\Http\Middleware\AuthenticateGraph;
 use Illuminate\Support\Facades\Route;
@@ -167,7 +166,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('netcmd', 'NetCommand@run');
             Route::post('ripe/raw', 'RipeNccApiController@raw');
             Route::get('snmp/capabilities', 'SnmpCapabilities')->name('snmp.capabilities');
-            Route::put('transceiver/metric/{metric}', [TransceiverMetricController::class, 'update'])->name('transceiver_metric.update');
         });
 
         Route::get('settings/list', 'SettingsController@listAll')->name('settings.list');

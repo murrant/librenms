@@ -1050,11 +1050,6 @@ class Device extends BaseModel
         return $this->hasMany(Transceiver::class, 'device_id');
     }
 
-    public function transceiverMetrics(): HasMany
-    {
-        return $this->hasMany(TransceiverMetric::class, 'device_id');
-    }
-
     public function users(): BelongsToMany
     {
         // FIXME does not include global read

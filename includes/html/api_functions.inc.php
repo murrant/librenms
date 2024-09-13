@@ -1135,33 +1135,10 @@ function get_port_transceiver(Illuminate\Http\Request $request)
     $port_id = $request->route('portid');
 
     return check_port_permission($port_id, null, function ($port_id) {
-        $transceivers = Port::find($port_id)->transceivers()->with(['metrics' => function ($query) {
-            return $query->select(['id', 'transceiver_id', 'channel', 'type', 'value', 'value_prev', 'threshold_min_critical', 'threshold_min_warning', 'threshold_max_warning', 'threshold_max_critical']);
-        }])->get();
+        $transceivers = Port::find($port_id)->transceivers()->get();
 
         return api_success($transceivers, 'transceivers');
     });
-}
-
-function update_transceiver_metric_thresholds(Illuminate\Http\Request $request)
-{
-    $data = $request->json()->all();
-    $metric = TransceiverMetric::find($request->route('metric'));
-
-    if (is_null($metric)) {
-        return api_error(404, 'Metric does not exist');
-    }
-
-    $metric->threshold_min_critical = array_key_exists('threshold_min_critical', $data) ? $data['threshold_min_critical'] : $metric->threshold_min_critical;
-    $metric->threshold_min_warning = array_key_exists('threshold_min_warning', $data) ? $data['threshold_min_warning'] : $metric->threshold_min_warning;
-    $metric->threshold_max_warning = array_key_exists('threshold_max_warning', $data) ? $data['threshold_max_warning'] : $metric->threshold_max_warning;
-    $metric->threshold_max_critical = array_key_exists('threshold_max_critical', $data) ? $data['threshold_max_critical'] : $metric->threshold_max_critical;
-
-    if ($metric->save()) {
-        return api_success($metric->only(['id', 'transceiver_id', 'channel', 'type', 'value', 'value_prev', 'threshold_min_critical', 'threshold_min_warning', 'threshold_max_warning', 'threshold_max_critical']), 'transceiver_metric');
-    }
-
-    return api_error(500, 'Failed to save changes');
 }
 
 function get_port_info(Illuminate\Http\Request $request)

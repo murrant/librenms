@@ -19,11 +19,7 @@
                                 <x-transceiver :transceiver="$transceiver" :portlink="false"></x-transceiver>
                             </div>
                         @endif
-                        @if($transceiver->metrics->isNotEmpty())
-                            <div class="tw-p-3">
-                                <x-transceiver-sensors :transceiver="$transceiver"></x-transceiver-sensors>
-                            </div>
-                        @endif
+                        <x-transceiver-sensors :transceiver="$transceiver" class="tw-p-3"></x-transceiver-sensors>
                     </x-slot>
                 </x-popup>
             @endforeach

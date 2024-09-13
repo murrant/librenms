@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use LibreNMS\Interfaces\Models\Keyable;
 
 class Transceiver extends PortRelatedModel implements Keyable
@@ -31,16 +30,6 @@ class Transceiver extends PortRelatedModel implements Keyable
         'channels', // number of channels or lanes
     ];
     protected $casts = ['ddm' => 'boolean'];
-
-    public function sensors(): HasMany
-    {
-        return $this->hasMany(Sensor::class, 'device_id', 'device_id')->where('entPhysicalIndex', $this->entity_physical_index);
-    }
-
-    public function metrics(): HasMany
-    {
-        return $this->hasMany(TransceiverMetric::class);
-    }
 
     public function getCompositeKey()
     {

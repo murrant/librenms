@@ -36,12 +36,4 @@ interface TransceiverDiscovery
      * @return Collection<\App\Models\Transceiver>
      */
     public function discoverTransceivers(): Collection;
-
-    /**
-     * Discover transceiver DDM metric data.  Previously discovered transceivers are passed in.
-     *
-     * @param  Collection<\App\Models\Transceiver>  $transceivers
-     * @return Collection<\App\Models\TransceiverMetric>
-     */
-    public function discoverTransceiverMetrics(Collection $transceivers): Collection;
 }
