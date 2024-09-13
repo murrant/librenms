@@ -32,7 +32,6 @@ use App\Models\Mempool;
 use App\Models\PortsNac;
 use App\Models\Sla;
 use App\Models\Transceiver;
-use App\Models\TransceiverMetric;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -656,45 +655,5 @@ class Cisco extends OS implements
                 'serial' => $ent['entPhysicalSerialNum'] ?? null,
             ]);
         });
-    }
-
-    public function discoverTransceiverMetrics(Collection $transceivers): Collection
-    {
-        $data = $this->getDevice()->entityPhysical()->whereIn('entPhysicalContainedIn', $transceivers->pluck('index'))->get()->keyBy('entPhysicalIndex');
-        if ($data->isEmpty()) {
-            $data = collect(\SnmpQuery::cache()->hideMib()->mibs(['CISCO-ENTITY-VENDORTYPE-OID-MIB'])->walk('ENTITY-MIB::entPhysicalTable')->table(1));
-
-            if ($data->isEmpty()) {
-                return new Collection;
-            }
-        }
-
-        $values = \SnmpQuery::walk('CISCO-ENTITY-SENSOR-MIB::entSensorValueTable')->table(1);
-        $metrics = new Collection;
-
-        foreach ($transceivers as $transceiver) {
-            $metrics = $metrics->merge($data->filter(fn ($ent) => $ent['entPhysicalContainedIn'] == $transceiver->index)
-                ->map(function ($ent, $index) use ($transceiver, $values) {
-                    $sensorValues = $values[$index];
-                    $divisor = pow(10, $sensorValues['CISCO-ENTITY-SENSOR-MIB::entSensorPrecision'] ?? 0);
-
-                    return new TransceiverMetric([
-                        'transceiver_id' => $transceiver->id,
-                        'type' => match ($ent['entPhysicalVendorType']) {
-                            'cevSensorTransceiverRxPwr' => 'power-rx',
-                            'cevSensorTransceiverTxPwr' => 'power-tx',
-                            'cevSensorTransceiverCurrent' => 'bias',
-                            'cevSensorTransceiverVoltage' => 'voltage',
-                            'cevSensorTransceiverTemp' => 'temperature',
-                            default => strtolower(str_replace('cevSensorTransceiver', '', $ent['entPhysicalVendorType'])),
-                        },
-                        'oid' => ".1.3.6.1.4.1.9.9.91.1.1.1.1.4.$index",
-                        'value' => $sensorValues['CISCO-ENTITY-SENSOR-MIB::entSensorValue'] / $divisor,
-                        'divisor' => $divisor,
-                    ]);
-                }));
-        }
-
-        return $metrics;
     }
 }

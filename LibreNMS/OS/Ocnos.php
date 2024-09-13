@@ -260,9 +260,4 @@ class Ocnos extends OS implements EntityPhysicalDiscovery, TransceiverDiscovery
             ]);
         });
     }
-
-    public function discoverTransceiverMetrics(Collection $transceivers): Collection
-    {
-        return new Collection;
-    }
 }

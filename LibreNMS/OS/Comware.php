@@ -28,14 +28,12 @@ namespace LibreNMS\OS;
 use App\Models\Device;
 use App\Models\Mempool;
 use App\Models\Transceiver;
-use App\Models\TransceiverMetric;
 use Illuminate\Support\Collection;
 use LibreNMS\Device\Processor;
 use LibreNMS\Interfaces\Discovery\MempoolsDiscovery;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\Interfaces\Discovery\TransceiverDiscovery;
 use LibreNMS\OS;
-use LibreNMS\Util\Convert;
 
 class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, TransceiverDiscovery
 {
@@ -132,136 +130,5 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
                 'wavelength' => isset($data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverWaveLength']) && $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverWaveLength'] != 2147483647 ? $data['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverWaveLength'] : null,
             ]);
         });
-    }
-
-    public function discoverTransceiverMetrics(Collection $transceivers): Collection
-    {
-        $metrics = new Collection;
-
-        $xcData = \SnmpQuery::enumStrings()->cache()->walk('HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverInfoTable')->table(1);
-        $channelData = \SnmpQuery::walk('HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelTable')->table(2);
-
-        foreach ($xcData as $ifIndex => $transceiver) {
-            $transceiver_id = $transceivers->get($ifIndex)->id;
-            // TX Power
-            if (isset($transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverCurTXPower']) && $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverCurTXPower'] != 2147483647) {
-                $metrics->push($this->setTransceiverThresholds(new TransceiverMetric([
-                    'transceiver_id' => $transceiver_id,
-                    'type' => 'power-tx',
-                    'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.9.$ifIndex",
-                    'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverCurTXPower'] / 100, // dBm
-                    'divisor' => 100,
-                ]), $transceiver, 'PwrOut', fn ($v) => Convert::uwToDbm($v / 10)));
-            }
-
-            // RX Power
-            if (isset($transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverCurRXPower']) && $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverCurRXPower'] != 2147483647) {
-                $metrics->push($this->setTransceiverThresholds(new TransceiverMetric([
-                    'transceiver_id' => $transceiver_id,
-                    'type' => 'power-rx',
-                    'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.12.$ifIndex",
-                    'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverCurRXPower'] / 100,
-                    'divisor' => 100,
-                ]), $transceiver, 'RcvPwr', fn ($v) => Convert::uwToDbm($v / 10)));
-            }
-
-            // Temperature
-            if (isset($transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverTemperature']) && $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverTemperature'] != 2147483647) {
-                $metrics->push($this->setTransceiverThresholds(new TransceiverMetric([
-                    'transceiver_id' => $transceiver_id,
-                    'type' => 'temperature',
-                    'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.15.$ifIndex",
-                    'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverTemperature'],
-                ]), $transceiver, 'Temp', fn ($v) => $v / 1000));
-            }
-
-            // Bias Current
-            if (isset($transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverBiasCurrent']) && $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverBiasCurrent'] != 2147483647) {
-                $metrics->push($this->setTransceiverThresholds(new TransceiverMetric([
-                    'transceiver_id' => $transceiver_id,
-                    'type' => 'bias',
-                    'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.17.$ifIndex",
-                    'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverBiasCurrent'] / 100,
-                    'divisor' => 100,
-                ]), $transceiver, 'Bias', fn ($v) => $v / 1000));
-            }
-
-            // Voltage
-            if (isset($transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverVoltage']) && $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverVoltage'] != 2147483647) {
-                $metrics->push($this->setTransceiverThresholds(new TransceiverMetric([
-                    'transceiver_id' => $transceiver_id,
-                    'type' => 'voltage',
-                    'oid' => ".1.3.6.1.4.1.25506.2.70.1.1.1.16.$ifIndex",
-                    'value' => $transceiver['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverVoltage'] / 100,
-                    'divisor' => 100,
-                ]), $transceiver, 'Vcc', fn ($v) => $v / 10000));
-            }
-
-            // Channels
-
-            if (! empty($channelData[$ifIndex])) {
-                foreach ($channelData[$ifIndex] as $channel => $channelDatum) {
-                    // Temperature
-                    if (isset($channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelTemperature']) && $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelTemperature'] != 2147483647) {
-                        $metrics->push($this->setTransceiverThresholds(new TransceiverMetric([
-                            'transceiver_id' => $transceiver_id,
-                            'channel' => $channel,
-                            'type' => 'temperature',
-                            'oid' => ".1.3.6.1.4.1.25506.2.70.1.2.1.4.$ifIndex.$channel",
-                            'value' => $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelTemperature'],
-                        ]), $transceiver, 'Temp', fn ($v) => $v / 1000));
-                    }
-
-                    // TX Power
-                    if (isset($channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelCurTXPower']) && $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelCurTXPower'] != 2147483647) {
-                        $metrics->push($this->setTransceiverThresholds(new TransceiverMetric([
-                            'transceiver_id' => $transceiver_id,
-                            'channel' => $channel,
-                            'type' => 'power-tx',
-                            'oid' => ".1.3.6.1.4.1.25506.2.70.1.2.1.2.$ifIndex.$channel",
-                            'value' => $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelCurTXPower'] / 100,
-                            'divisor' => 100,
-                        ]), $transceiver, 'PwrOut', fn ($v) => Convert::uwToDbm($v / 10)));
-                    }
-
-                    // RX Power
-                    if (isset($channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelCurRXPower']) && $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelCurRXPower'] != 2147483647) {
-                        $metrics->push($this->setTransceiverThresholds(new TransceiverMetric([
-                            'transceiver_id' => $transceiver_id,
-                            'channel' => $channel,
-                            'type' => 'power-tx',
-                            'oid' => ".1.3.6.1.4.1.25506.2.70.1.2.1.3.$ifIndex.$channel",
-                            'value' => $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelCurTXPower'] / 100,
-                            'divisor' => 100,
-                        ]), $transceiver, 'RcvPwr', fn ($v) => Convert::uwToDbm($v / 10)));
-                    }
-
-                    // Bias Current
-                    if (isset($channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelBiasCurrent']) && $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelBiasCurrent'] != 2147483647) {
-                        $metrics->push($this->setTransceiverThresholds(new TransceiverMetric([
-                            'transceiver_id' => $transceiver_id,
-                            'channel' => $channel,
-                            'type' => 'bias',
-                            'oid' => ".1.3.6.1.4.1.25506.2.70.1.2.1.5.$ifIndex.$channel",
-                            'value' => $channelDatum['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverChannelBiasCurrent'] / 100,
-                            'divisor' => 100,
-                        ]), $transceiver, 'Bias', fn ($v) => $v / 1000));
-                    }
-                }
-            }
-        }
-
-        return $metrics;
-    }
-
-    private function setTransceiverThresholds(TransceiverMetric $metric, array $data, string $slug, callable $transform = null): TransceiverMetric
-    {
-        $transform ??= fn ($v) => $v; // default do nothing transform
-        $metric->threshold_min_critical = ! empty($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}LoAlarm"]) ? $transform($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}LoAlarm"]) : null;
-        $metric->threshold_min_warning = ! empty($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}LoWarn"]) ? $transform($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}LoWarn"]) : null;
-        $metric->threshold_max_warning = ! empty($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}HiWarn"]) ? $transform($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}HiWarn"]) : null;
-        $metric->threshold_max_critical = ! empty($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}HiAlarm"]) ? $transform($data["HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiver{$slug}HiAlarm"]) : null;
-
-        return $metric;
     }
 }

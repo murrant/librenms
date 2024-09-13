@@ -27,17 +27,13 @@ namespace LibreNMS\Modules;
 
 use App\Models\Device;
 use App\Models\Transceiver;
-use App\Models\TransceiverMetric;
 use App\Observers\ModuleModelObserver;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use LibreNMS\DB\SyncsModels;
 use LibreNMS\Interfaces\Data\DataStorageInterface;
 use LibreNMS\Interfaces\Discovery\TransceiverDiscovery;
 use LibreNMS\Interfaces\Module;
 use LibreNMS\OS;
 use LibreNMS\Polling\ModuleStatus;
-use LibreNMS\RRD\RrdDefinition;
 
 class Transceivers implements Module
 {
@@ -55,82 +51,33 @@ class Transceivers implements Module
 
     public function shouldPoll(OS $os, ModuleStatus $status): bool
     {
-        return $status->isEnabledAndDeviceUp($os->getDevice()) && $os instanceof TransceiverDiscovery && $os->getDevice()->transceiverMetrics()->exists();
+        return false;
     }
 
     public function discover(OS $os): void
     {
         if ($os instanceof TransceiverDiscovery) {
-            echo "\nTransceivers: ";
             $discoveredTransceivers = $os->discoverTransceivers();
 
             // save transceivers
             ModuleModelObserver::observe(Transceiver::class);
-            $transceivers = $this->syncModels($os->getDevice(), 'transceivers', $discoveredTransceivers);
-
-            echo "\nMetrics: ";
-            $metrics = $os->discoverTransceiverMetrics($transceivers->keyBy('index'));
-
-            // save metrics
-            ModuleModelObserver::observe(\App\Models\TransceiverMetric::class);
-            $this->syncModels($os->getDevice(), 'transceiverMetrics', $metrics);
-
-            $this->verifyTransceiverChannelCounts($metrics, $transceivers);
-
-            echo "\n";
-        }
+            $this->syncModels($os->getDevice(), 'transceivers', $discoveredTransceivers);
+       }
     }
 
     public function poll(OS $os, DataStorageInterface $datastore): void
     {
-        $metrics = $os->getDevice()->transceiverMetrics;
-        $metrics->load('transceiver');
-
-        $oids = $metrics->pluck('oid')->all();
-        $data = \SnmpQuery::numeric()->get($oids)->values();
-
-        /** @var TransceiverMetric $metric */
-        foreach ($metrics as $metric) {
-            // transform the value to the proper scale
-            if (isset($data[$metric->oid])) {
-                $value = $data[$metric->oid];
-                if (is_numeric($value)) {
-                    $value = $value * $metric->multiplier / $metric->divisor;
-                }
-
-                if (isset($metric->transform_function) && is_callable($metric->transform_function)) {
-                    $value = call_user_func($metric->transform_function, $value, $metric);
-                }
-
-                $metric->value = $value;
-            } else {
-                $metric->value = null;
-            }
-            $metric->save();
-
-            Log::info($metric->transceiver->index . ":$metric->channel $metric->type: $metric->value");
-
-            $datastore->put($os->getDeviceArray(), 'transceiver', [
-                'type' => $metric->type,
-                'index' => $metric->transceiver->index,
-                'channel' => $metric->channel,
-                'rrd_def' => RrdDefinition::make()->addDataset('value', 'GAUGE'),
-                'rrd_name' => ['transceiver', $metric->type, $metric->transceiver->index, $metric->channel],
-            ], [
-                'value' => $metric->value,
-            ]);
-        }
+        // no polling
     }
 
     public function dataExists(Device $device): bool
     {
-        return $device->transceivers()->exists() || $device->transceiverMetrics()->exists();
+        return $device->transceivers()->exists();
     }
 
     public function cleanup(Device $device): int
     {
-        return $device->transceiverMetrics()->delete()
-            + $device->transceivers()->delete();
+        return $device->transceivers()->delete();
     }
 
     public function dump(Device $device): array
@@ -140,25 +87,6 @@ class Transceivers implements Module
                 ->leftJoin('ports', 'transceivers.port_id', 'ports.port_id')
                 ->select(['transceivers.*', 'ifIndex'])
                     ->get()->map->makeHidden(['id', 'created_at', 'updated_at', 'device_id', 'port_id']),
-            'transceiver_metrics' => $device->transceiverMetrics()
-                ->orderBy('type')->orderBy('transceivers.index')->orderBy('channel')
-                ->leftJoin('transceivers', 'transceivers.id', 'transceiver_metrics.transceiver_id')
-                ->select(['transceiver_metrics.*', 'index'])
-                ->get()->map->makeHidden(['id', 'created_at', 'updated_at', 'device_id', 'transceiver_id', 'value_prev']),
         ];
-    }
-
-    private function verifyTransceiverChannelCounts(Collection $metrics, Collection $transceivers): void
-    {
-        $groupBy = $metrics->groupBy(['transceiver_id', 'type']);
-        $transceiversById = $transceivers->keyBy('id');
-        foreach ($groupBy as $transceiver_id => $metrics) {
-            /** @var Transceiver $transceiver */
-            $transceiver = $transceiversById->get($transceiver_id);
-            $transceiver->channels = $metrics->map->count()->max(); // get the maximum count of any type of metric for this transceiver, set as channels
-            if ($transceiver->isDirty() && $transceiver->save()) {
-                Log::debug("Updated channels for transceiver $transceiver_id from " . $transceiver->getOriginal('channels') . ' to ' . $transceiver->channels);
-            }
-        }
     }
 }
