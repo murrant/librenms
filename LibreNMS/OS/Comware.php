@@ -114,7 +114,7 @@ class Comware extends OS implements MempoolsDiscovery, ProcessorDiscovery, Trans
     {
         $ifIndexToPortId = $this->getDevice()->ports()->pluck('port_id', 'ifIndex');
 
-        return \SnmpQuery::enumStrings()->cache()->walk('HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverInfoTable')->mapTable(function ($data, $ifIndex) use ($ifIndexToPortId) {
+        return \SnmpQuery::cache()->enumStrings()->walk('HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverInfoTable')->mapTable(function ($data, $ifIndex) use ($ifIndexToPortId) {
             return new Transceiver([
                 'port_id' => $ifIndexToPortId->get($ifIndex, 0),
                 'index' => $ifIndex,
