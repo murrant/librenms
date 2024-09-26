@@ -29,6 +29,18 @@ if (DeviceCache::getPrimary()->transceivers->isNotEmpty()) {
         'transceivers_link' => route('device', ['device' => DeviceCache::getPrimary()->device_id, 'tab' => 'ports', 'vars' => 'transceivers']),
         'sensors' => DeviceCache::getPrimary()->sensors->where('sensor_type', 'transceiver'),
         // only temp and rx power to reduce information overload, click through to see all
-        'filterSensors' => fn ($s) => $s->sensor_class == 'temperature' || ($s->sensor_class == 'dbm' && str_contains(strtolower($s->sensor_descr), 'rx')),
+        'filterSensors' => function (\App\Models\Sensor $sensor) {
+            if ($sensor->sensor_class == 'temperature') {
+                return true;
+            }
+
+            if ($sensor->sensor_class == 'dbm') {
+                $haystack = strtolower($sensor->sensor_descr);
+
+                return str_contains($haystack, 'rx') || str_contains($haystack, 'receive');
+            }
+
+            return false;
+        },
     ]);
 }

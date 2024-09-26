@@ -20,7 +20,7 @@
                             <tr>
                                 <td>{{ $sensor->sensor_descr }}</td>
                                 <td><x-graph loading="lazy" type="sensor_{{ $sensor->sensor_class }}" width="100" height="24" :vars="['id' => $sensor->sensor_id]"></x-graph></td>
-                                <td><x-label :status="$sensor->currentStatus()">{{ $sensor->sensor_current }} {{ __("sensors.$sensor->sensor_class.unit") }}</x-label></td>
+                                <td><x-label :status="$sensor->currentStatus()">{{ \LibreNMS\Util\Number::formatSi($sensor->sensor_current, 3, 3, __('sensors.' . $sensor->sensor_class . '.unit')) }}</x-label></td>
                             </tr>
                             @endif
                         @endforeach

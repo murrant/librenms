@@ -9,7 +9,7 @@
             {{ $sensor->sensor_descr }}
         </div>
         <div>
-            <x-label :status="$sensor->currentStatus()">{{ $sensor->sensor_current }} {{ __('sensors.' . $class . '.unit') }}</x-label>
+            <x-label :status="$sensor->currentStatus()">{{ $sensorValue($sensor) }}</x-label>
         </div>
         <div style="height: 26px;">
             <x-popup>
