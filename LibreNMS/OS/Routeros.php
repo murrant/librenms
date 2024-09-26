@@ -516,6 +516,7 @@ class Routeros extends OS implements
                 'vendor' => $data['MIKROTIK-MIB::mtxrOpticalVendorName'] ?? null,
                 'serial' => $data['MIKROTIK-MIB::mtxrOpticalVendorSerial'] ?? null,
                 'wavelength' => $wavelength == 65535 ? null : $wavelength, // NA value = 65535.00
+                'entity_physical_index' => $ifIndex,
             ]);
         });
     }
