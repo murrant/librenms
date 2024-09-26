@@ -32,7 +32,7 @@ foreach ($hh3cTransceiverInfoTable as $index => $entry) {
         $entPhysicalIndex = $index;
         $entPhysicalIndex_measured = 'ports';
         $descr = makeshortif($interface['ifDescr']) . ' Receive Power';
-        discover_sensor(null, 'dbm', $device, $oid, 'rx-' . $index, 'transceiver', $descr, $divisor, $multiplier, $limit_low, $warn_limit_low, $warn_limit, $limit, $current, 'snmp', $entPhysicalIndex, $entPhysicalIndex_measured);
+        discover_sensor(null, 'dbm', $device, $oid, 'rx-' . $index, 'comware', $descr, $divisor, $multiplier, $limit_low, $warn_limit_low, $warn_limit, $limit, $current, 'snmp', $entPhysicalIndex, $entPhysicalIndex_measured, group: 'transceiver');
     }
 
     if (is_numeric($entry['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverCurTXPower']) && $entry['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverCurTXPower'] != 2147483647 && isset($entry['HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverDiagnostic'])) {
@@ -47,7 +47,7 @@ foreach ($hh3cTransceiverInfoTable as $index => $entry) {
         $interface = get_port_by_index_cache($device['device_id'], $index);
         if ($interface['ifAdminStatus'] == 'up') {
             $descr = makeshortif($interface['ifDescr']) . ' Transmit Power';
-            discover_sensor(null, 'dbm', $device, $oid, 'tx-' . $index, 'transceiver', $descr, $divisor, $multiplier, $limit_low, $warn_limit_low, $warn_limit, $limit, $current, 'snmp', $entPhysicalIndex, $entPhysicalIndex_measured);
+            discover_sensor(null, 'dbm', $device, $oid, 'tx-' . $index, 'comware', $descr, $divisor, $multiplier, $limit_low, $warn_limit_low, $warn_limit, $limit, $current, 'snmp', $entPhysicalIndex, $entPhysicalIndex_measured, group: 'transceiver');
         }
     }
 }

@@ -15,7 +15,7 @@ foreach ($ponTable as $e7OltPonPortShelf => $ponShelf) {
                     'sensor_class' => 'dbm',
                     'sensor_oid' => ".1.3.6.1.4.1.6321.1.2.2.2.1.6.2.1.7.$index",
                     'sensor_index' => 'tx.' . $index,
-                    'sensor_type' => 'transceiver',
+                    'sensor_type' => 'exa',
                     'sensor_descr' => "$name xcvr TX power",
                     'sensor_divisor' => 1,
                     'sensor_multiplier' => 1,
@@ -26,7 +26,7 @@ foreach ($ponTable as $e7OltPonPortShelf => $ponShelf) {
                     'sensor_current' => mw_to_dbm($ponPort['E7-Calix-MIB::e7OltPonPortTxPower']),
                     'entPhysicalIndex' => $ifIndex,
                     'entPhysicalIndex_measured' => 'port',
-                    'group' => $name,
+                    'group' => 'transceiver',
                     'user_func' => 'mw_to_dbm',
                 ]));
 
@@ -35,7 +35,7 @@ foreach ($ponTable as $e7OltPonPortShelf => $ponShelf) {
                     'sensor_class' => 'dbm',
                     'sensor_oid' => ".1.3.6.1.4.1.6321.1.2.2.2.1.6.2.1.8.$index",
                     'sensor_index' => 'rx.' . $index,
-                    'sensor_type' => 'transceiver',
+                    'sensor_type' => 'exa',
                     'sensor_descr' => "$name xcvr RX power",
                     'sensor_divisor' => 1,
                     'sensor_multiplier' => 1,
@@ -46,7 +46,7 @@ foreach ($ponTable as $e7OltPonPortShelf => $ponShelf) {
                     'sensor_current' => mw_to_dbm($ponPort['E7-Calix-MIB::e7OltPonPortRxPower']),
                     'entPhysicalIndex' => $ifIndex,
                     'entPhysicalIndex_measured' => 'port',
-                    'group' => $name,
+                    'group' => 'transceiver',
                     'user_func' => 'mw_to_dbm',
                 ]));
             }

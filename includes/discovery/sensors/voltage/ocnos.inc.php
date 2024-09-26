@@ -19,7 +19,7 @@ if ($os instanceof \LibreNMS\OS\Ocnos) {
                         'sensor_class' => 'voltage',
                         'sensor_oid' => ".1.3.6.1.4.1.36673.100.1.2.3.1.7.$cmmStackUnitIndex.$cmmTransIndex.$cmmTransChannelIndex",
                         'sensor_index' => "$cmmStackUnitIndex.$cmmTransIndex",
-                        'sensor_type' => 'transceiver',
+                        'sensor_type' => 'ocnos',
                         'sensor_descr' => "$ifName xcvr voltage",
                         'sensor_divisor' => $divisor,
                         'sensor_multiplier' => 1,
@@ -31,7 +31,7 @@ if ($os instanceof \LibreNMS\OS\Ocnos) {
                         'entPhysicalIndex' => $cmmStackUnitIndex * 10000 + $cmmTransIndex,
                         'entPhysicalIndex_measured' => 'port',
                         'user_func' => null,
-                        'group' => $ifName,
+                        'group' => 'transceiver',
                     ]));
 
                     continue 2; // common across channels

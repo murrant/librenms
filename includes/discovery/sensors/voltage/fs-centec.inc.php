@@ -15,7 +15,7 @@ foreach ($voltageTable as $ifIndex => $current) {
                 'sensor_class' => 'voltage',
                 'sensor_oid' => ".1.3.6.1.4.1.52642.1.37.1.10.3.1.5.$ifIndex",
                 'sensor_index' => "$ifIndex.$channel",
-                'sensor_type' => 'transceiver',
+                'sensor_type' => 'fs-centec',
                 'sensor_descr' => "$ifName xcvr voltage",
                 'sensor_divisor' => 1,
                 'sensor_multiplier' => 1,
@@ -27,7 +27,7 @@ foreach ($voltageTable as $ifIndex => $current) {
                 'entPhysicalIndex' => $ifIndex,
                 'entPhysicalIndex_measured' => 'port',
                 'user_func' => 'fsParseChannelValue',
-                'group' => $ifName,
+                'group' => 'transceiver',
             ]));
 
             break; // only discover one sensor

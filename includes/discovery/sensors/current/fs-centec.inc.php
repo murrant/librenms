@@ -17,7 +17,7 @@ foreach ($biasTable as $ifIndex => $current) {
                 'sensor_class' => 'current',
                 'sensor_oid' => ".1.3.6.1.4.1.52642.1.37.1.10.4.1.5.$ifIndex",
                 'sensor_index' => "$ifIndex.$channel",
-                'sensor_type' => 'transceiver',
+                'sensor_type' => 'fs-centec',
                 'sensor_descr' => "$ifName:$channel xcvr bias",
                 'sensor_divisor' => $divisor,
                 'sensor_multiplier' => 1,
@@ -29,7 +29,7 @@ foreach ($biasTable as $ifIndex => $current) {
                 'entPhysicalIndex' => $ifIndex,
                 'entPhysicalIndex_measured' => 'port',
                 'user_func' => 'fsParseChannelValue',
-                'group' => $ifName,
+                'group' => 'transceiver',
             ]));
         }
     }

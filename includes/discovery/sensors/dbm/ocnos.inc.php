@@ -22,7 +22,7 @@ if ($os instanceof \LibreNMS\OS\Ocnos) {
                         'sensor_class' => 'dbm',
                         'sensor_oid' => ".1.3.6.1.4.1.36673.100.1.2.3.1.17.$cmmStackUnitIndex.$cmmTransIndex.$cmmTransChannelIndex",
                         'sensor_index' => "tx-$cmmStackUnitIndex.$cmmTransIndex.$cmmTransChannelIndex",
-                        'sensor_type' => 'transceiver',
+                        'sensor_type' => 'ocnos',
                         'sensor_descr' => "$ifName$channelDescr xcvr TX power",
                         'sensor_divisor' => $divisor,
                         'sensor_multiplier' => 1,
@@ -34,7 +34,7 @@ if ($os instanceof \LibreNMS\OS\Ocnos) {
                         'entPhysicalIndex' => null, // TODO
                         'entPhysicalIndex_measured' => 'port',
                         'user_func' => null,
-                        'group' => $ifName,
+                        'group' => 'transceiver',
                     ]));
                 }
 
@@ -45,7 +45,7 @@ if ($os instanceof \LibreNMS\OS\Ocnos) {
                         'sensor_class' => 'dbm',
                         'sensor_oid' => ".1.3.6.1.4.1.36673.100.1.2.3.1.22.$cmmStackUnitIndex.$cmmTransIndex.$cmmTransChannelIndex",
                         'sensor_index' => "rx-$cmmStackUnitIndex.$cmmTransIndex.$cmmTransChannelIndex",
-                        'sensor_type' => 'transceiver',
+                        'sensor_type' => 'ocnos',
                         'sensor_descr' => "$ifName$channelDescr xcvr RX power",
                         'sensor_divisor' => $divisor,
                         'sensor_multiplier' => 1,
@@ -57,7 +57,7 @@ if ($os instanceof \LibreNMS\OS\Ocnos) {
                         'entPhysicalIndex' => $cmmStackUnitIndex * 10000 + $cmmTransIndex,
                         'entPhysicalIndex_measured' => 'port',
                         'user_func' => null,
-                        'group' => $ifName,
+                        'group' => 'transceiver',
                     ]));
                 }
             }

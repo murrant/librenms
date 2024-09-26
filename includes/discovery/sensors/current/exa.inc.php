@@ -15,7 +15,7 @@ foreach ($ponTable as $e7OltPonPortShelf => $ponShelf) {
                     'sensor_class' => 'current',
                     'sensor_oid' => ".1.3.6.1.4.1.6321.1.2.2.2.1.6.2.1.6.$index",
                     'sensor_index' => $index,
-                    'sensor_type' => 'transceiver',
+                    'sensor_type' => 'exa',
                     'sensor_descr' => "$name xcvr bias",
                     'sensor_divisor' => 1000000,
                     'sensor_multiplier' => 1,
@@ -24,7 +24,7 @@ foreach ($ponTable as $e7OltPonPortShelf => $ponShelf) {
                     'sensor_current' => $ponPort['E7-Calix-MIB::e7OltPonPortTxBias'] / 1000000,
                     'entPhysicalIndex' => $ifIndex,
                     'entPhysicalIndex_measured' => 'port',
-                    'group' => $name,
+                    'group' => 'transceiver',
                 ]));
             }
         }

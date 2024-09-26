@@ -22,7 +22,7 @@ class TransceiverSensors extends Component
         $this->groupedSensors = Sensor::where('device_id', $this->transceiver->device_id)
             ->whereNotNull('entPhysicalIndex')
             ->where('entPhysicalIndex', $this->transceiver->entity_physical_index)
-            ->where('sensor_type', 'transceiver')
+            ->where('group', 'transceiver')
             ->get()
             ->groupBy('sensor_class');
     }

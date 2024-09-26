@@ -1,6 +1,6 @@
 <?php
 
-$sensors = DeviceCache::getPrimary()->sensors->where('sensor_class', $sensor_class)->where('sensor_type', '!=', 'transceiver'); // cache all sensors on device and exclude transceivers
+$sensors = DeviceCache::getPrimary()->sensors->where('sensor_class', $sensor_class)->where('group', '!=', 'transceiver'); // cache all sensors on device and exclude transceivers
 
 if ($sensors->isNotEmpty()) {
     $icons = \App\Models\Sensor::getIconMap();

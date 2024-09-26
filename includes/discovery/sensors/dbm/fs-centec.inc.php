@@ -21,7 +21,7 @@ foreach ($powerTables as $ifIndex => $current) {
                 'sensor_class' => 'dbm',
                 'sensor_oid' => ".1.3.6.1.4.1.52642.1.37.1.10.6.1.5.$ifIndex",
                 'sensor_index' => "rx-$ifIndex.$channel",
-                'sensor_type' => 'transceiver',
+                'sensor_type' => 'fs-centec',
                 'sensor_descr' => "$ifName:$channel xcvr TX power",
                 'sensor_divisor' => 1,
                 'sensor_multiplier' => 1,
@@ -33,7 +33,7 @@ foreach ($powerTables as $ifIndex => $current) {
                 'entPhysicalIndex' => $ifIndex,
                 'entPhysicalIndex_measured' => 'port',
                 'user_func' => 'fsParseChannelValue',
-                'group' => $ifName,
+                'group' => 'transceiver',
             ]));
         }
     }
@@ -46,7 +46,7 @@ foreach ($powerTables as $ifIndex => $current) {
                 'sensor_class' => 'dbm',
                 'sensor_oid' => ".1.3.6.1.4.1.52642.1.37.1.10.5.1.5.$ifIndex",
                 'sensor_index' => "tx-$ifIndex.$channel",
-                'sensor_type' => 'transceiver',
+                'sensor_type' => 'fs-centec',
                 'sensor_descr' => "$ifName:$channel xcvr RX power",
                 'sensor_divisor' => 1,
                 'sensor_multiplier' => 1,
@@ -58,7 +58,7 @@ foreach ($powerTables as $ifIndex => $current) {
                 'entPhysicalIndex' => $ifIndex,
                 'entPhysicalIndex_measured' => 'port',
                 'user_func' => 'fsParseChannelValue',
-                'group' => $ifName,
+                'group' => 'transceiver',
             ]));
         }
     }
