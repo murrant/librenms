@@ -25,7 +25,7 @@
 
 use LibreNMS\OS;
 
-if (! $os instanceof OS) {
+if (! isset($os) || ! $os instanceof OS) {
     $os = OS::make($device);
 }
 

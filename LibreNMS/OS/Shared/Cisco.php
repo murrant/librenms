@@ -634,25 +634,36 @@ class Cisco extends OS implements
             $data = $this->getDevice()->entityPhysical()->whereIn('entPhysicalContainedIn', $dbSfpCages)->get()->keyBy('entPhysicalIndex');
         } else {
             // fetch data via snmp
-            $snmpData = collect(\SnmpQuery::cache()->hideMib()->mibs(['CISCO-ENTITY-VENDORTYPE-OID-MIB'])->walk('ENTITY-MIB::entPhysicalTable')->table(1));
-            if ($snmpData->isEmpty()) {
+            $snmpData = \SnmpQuery::cache()->hideMib()->mibs(['CISCO-ENTITY-VENDORTYPE-OID-MIB'])->walk('ENTITY-MIB::entPhysicalTable')->table(1);
+            if (empty($snmpData)) {
                 return new Collection;
             }
 
-            $sfpCages = $snmpData->filter(fn ($ent) => $ent['ENTITY-MIB::entPhysicalVendorType'] == 'CISCO-ENTITY-VENDORTYPE-OID-MIB::cevContainerSFP');
-            $data = $snmpData->filter(fn ($ent) => $sfpCages->has($ent['ENTITY-MIB::entPhysicalContainedIn'] ?? null));
+            $snmpData = collect(\SnmpQuery::hideMib()->mibs(['IF-MIB'])->walk('ENTITY-MIB::entAliasMappingIdentifier')->table(1, $snmpData));
+
+            $sfpCages = $snmpData->filter(fn ($ent) => $ent['entPhysicalVendorType'] == 'cevContainerSFP');
+            $data = $snmpData->filter(fn ($ent) => $sfpCages->has($ent['entPhysicalContainedIn'] ?? null))->map(function ($e) {
+                if (isset($e['entAliasMappingIdentifier'][0])) {
+                    $e['ifIndex'] = preg_replace('/^.*ifIndex[.[](\d+).*$/', '$1', $e['entAliasMappingIdentifier'][0]);
+                }
+
+                return $e;
+            });
         }
         $ifIndexToPortId = $this->getDevice()->ports()->pluck('port_id', 'ifIndex');
 
         return $data->map(function ($ent, $index) use ($ifIndexToPortId) {
+            $ifIndex = $ent['ifIndex'] ?? null;
+
             return new Transceiver([
-                'port_id' => $ifIndexToPortId->get($ent['entPhysicalAlias'] ?? null, 0),
+                'port_id' => $ifIndexToPortId->get($ifIndex, 0),
                 'index' => $index,
                 'type' => $ent['entPhysicalDescr'] ?? null,
                 'vendor' => $ent['entPhysicalMfgName'] ?? null,
                 'revision' => $ent['entPhysicalHardwareRev'] ?? null,
                 'model' => $ent['entPhysicalModelName'] ?? null,
                 'serial' => $ent['entPhysicalSerialNum'] ?? null,
+                'entity_physical_index' => $ifIndex,
             ]);
         });
     }
