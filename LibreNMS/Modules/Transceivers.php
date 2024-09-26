@@ -80,8 +80,12 @@ class Transceivers implements Module
         return $device->transceivers()->delete();
     }
 
-    public function dump(Device $device): array
+    public function dump(Device $device, string $type): ?array
     {
+        if ($type == 'poller') {
+            return null;
+        }
+
         return [
             'transceivers' => $device->transceivers()->orderBy('index')
                 ->leftJoin('ports', 'transceivers.port_id', 'ports.port_id')
