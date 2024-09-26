@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use LibreNMS\Enum\Severity;
 use LibreNMS\Interfaces\Models\Keyable;
+use LibreNMS\Util\Number;
 
 class Sensor extends DeviceRelatedModel implements Keyable
 {
@@ -129,7 +130,18 @@ class Sensor extends DeviceRelatedModel implements Keyable
         }
     }
 
-    // ---- Define Relationships ----
+    /**
+     * Format current value for user display including units.
+     */
+    public function formatValue(): string
+    {
+        // use SI formatting
+        if ($this->sensor_class == 'current') {
+            return Number::formatSi($this->sensor_current, 3, 3, __('sensors.' . $this->sensor_class . '.unit'));
+        }
+
+        return $this->sensor_current . ' ' . __('sensors.' . $this->sensor_class . '.unit');
+    }
     public function currentStatus(): Severity
     {
         if ($this->sensor_limit !== null && $this->sensor_current >= $this->sensor_limit) {
@@ -149,6 +161,8 @@ class Sensor extends DeviceRelatedModel implements Keyable
 
         return Severity::Ok;
     }
+
+    // ---- Define Relationships ----
 
     public function events(): MorphMany
     {

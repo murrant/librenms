@@ -8,7 +8,6 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\View\Component;
-use LibreNMS\Util\Number;
 
 class TransceiverSensors extends Component
 {
@@ -34,10 +33,5 @@ class TransceiverSensors extends Component
     public function render(): View|Closure|string
     {
         return view('components.transceiver-sensors');
-    }
-
-    public function sensorValue(Sensor $sensor): string
-    {
-        return Number::formatSi($sensor->sensor_current, 3, 3, __('sensors.' . $sensor->sensor_class . '.unit'));
     }
 }
