@@ -18,9 +18,13 @@
                         @foreach($sensors as $sensor)
                             @if($sensor->entPhysicalIndex !== null && $sensor->entPhysicalIndex == $transceiver->entity_physical_index && $filterSensors($sensor))
                             <tr>
-                                <td>{{ $sensor->sensor_descr }}</td>
-                                <td><x-graph loading="lazy" type="sensor_{{ $sensor->sensor_class }}" width="100" height="24" :vars="['id' => $sensor->sensor_id]"></x-graph></td>
-                                <td><x-label :status="$sensor->currentStatus()">{{ $sensor->formatValue() }}</x-label></td>
+                                <td>
+                                    <div style="display: grid; grid-gap: 10px; grid-template-columns: 3fr 1fr 1fr;">
+                                        <div>{{ $sensor->sensor_descr }}</div>
+                                        <div><x-graph loading="lazy" popup="true" :popup-title="DeviceCache::getPrimary()->displayName() . ' - ' . $sensor->sensor_descr" type="sensor_{{ $sensor->sensor_class }}" width="100" height="24" :vars="['id' => $sensor->sensor_id]"></x-graph></div>
+                                        <div><x-label :status="$sensor->currentStatus()">{{ $sensor->formatValue() }}</x-label></div>
+                                    </div>
+                                </td>
                             </tr>
                             @endif
                         @endforeach

@@ -65,11 +65,11 @@ if ($sensors->isNotEmpty()) {
 
         $sensor_current = $graph_type == 'sensor_state' ? get_state_label($sensor) : get_sensor_label_color($sensor);
 
-        echo '<tr>
-            <td class="col-md-4">' . \LibreNMS\Util\Url::overlibLink($link, \LibreNMS\Util\Rewrite::shortenIfType($sensor->sensor_descr), $overlib_content, $sensor_class) . '</td>
-            <td class="col-md-4">' . \LibreNMS\Util\Url::overlibLink($link, $sensor_minigraph, $overlib_content, $sensor_class) . '</td>
-            <td class="col-md-4">' . \LibreNMS\Util\Url::overlibLink($link, $sensor_current, $overlib_content, $sensor_class) . '</td>
-            </tr>';
+        echo '<tr><td><div style="display: grid; grid-gap: 10px; grid-template-columns: 3fr 1fr 1fr;">
+            <div>' . \LibreNMS\Util\Url::overlibLink($link, \LibreNMS\Util\Rewrite::shortenIfType($sensor->sensor_descr), $overlib_content, $sensor_class) . '</div>
+            <div>' . \LibreNMS\Util\Url::overlibLink($link, $sensor_minigraph, $overlib_content, $sensor_class) . '</div>
+            <div>' . \LibreNMS\Util\Url::overlibLink($link, $sensor_current, $overlib_content, $sensor_class) . '</div>
+            </div></td></tr>';
     }//end foreach
 
     echo '</table>';
