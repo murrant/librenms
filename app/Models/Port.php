@@ -112,6 +112,17 @@ class Port extends DeviceRelatedModel
         return (string) $this->ifAlias;
     }
 
+    public function getFullLabel(): string
+    {
+        $label = $this->getLabel();
+
+        if ($label == $this->ifAlias || empty($this->ifAlias)) {
+            return $label;
+        }
+
+        return "$label - $this->ifAlias";
+    }
+
     /**
      * Check if user can access this port.
      *
