@@ -57,7 +57,8 @@ if (! empty($entphydata)) {
 $multiplier = 1;
 $divisor = 1;
 $divisor_alarm = 1000;
-foreach ($pre_cache['comware_oids'] as $index => $entry) {
+$hh3cTransceiverInfoTable = SnmpQuery::cache()->hideMib()->enumStrings()->walk('HH3C-TRANSCEIVER-INFO-MIB::hh3cTransceiverInfoTable')->table(1);
+foreach ($hh3cTransceiverInfoTable as $index => $entry) {
     if (is_numeric($entry['hh3cTransceiverTemperature']) && $entry['hh3cTransceiverTemperature'] != 2147483647 && isset($entry['hh3cTransceiverDiagnostic'])) {
         $interface = get_port_by_index_cache($device['device_id'], $index);
         if ($interface['ifAdminStatus'] != 'up') {
@@ -74,6 +75,6 @@ foreach ($pre_cache['comware_oids'] as $index => $entry) {
         $entPhysicalIndex_measured = 'ports';
 
         $descr = makeshortif($interface['ifDescr']) . ' Module';
-        discover_sensor(null, 'temperature', $device, $oid, 'temp-trans-' . $index, 'comware', $descr, $divisor, $multiplier, $limit_low, $warn_limit_low, $warn_limit, $limit, $current, 'snmp', $entPhysicalIndex, $entPhysicalIndex_measured);
+        discover_sensor(null, 'temperature', $device, $oid, 'temp-trans-' . $index, 'transceiver', $descr, $divisor, $multiplier, $limit_low, $warn_limit_low, $warn_limit, $limit, $current, 'snmp', $entPhysicalIndex, $entPhysicalIndex_measured);
     }
 }
