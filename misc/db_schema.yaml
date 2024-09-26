@@ -2187,6 +2187,7 @@ transceivers:
     - { Field: device_id, Type: bigint, 'Null': false, Extra: '' }
     - { Field: port_id, Type: bigint, 'Null': false, Extra: '' }
     - { Field: index, Type: varchar(255), 'Null': false, Extra: '' }
+    - { Field: entity_physical_index, Type: int, 'Null': true, Extra: '' }
     - { Field: type, Type: varchar(32), 'Null': true, Extra: '' }
     - { Field: vendor, Type: varchar(16), 'Null': true, Extra: '' }
     - { Field: oui, Type: varchar(16), 'Null': true, Extra: '' }
@@ -2203,28 +2204,7 @@ transceivers:
     - { Field: channels, Type: smallint, 'Null': false, Extra: '', Default: '1' }
   Indexes:
     PRIMARY: { Name: PRIMARY, Columns: [id], Unique: true, Type: BTREE }
-transceiver_metrics:
-  Columns:
-    - { Field: id, Type: 'bigint unsigned', 'Null': false, Extra: auto_increment }
-    - { Field: created_at, Type: timestamp, 'Null': true, Extra: '' }
-    - { Field: updated_at, Type: timestamp, 'Null': true, Extra: '' }
-    - { Field: device_id, Type: bigint, 'Null': false, Extra: '' }
-    - { Field: transceiver_id, Type: bigint, 'Null': false, Extra: '' }
-    - { Field: channel, Type: smallint, 'Null': false, Extra: '', Default: '0' }
-    - { Field: type, Type: varchar(16), 'Null': false, Extra: '' }
-    - { Field: oid, Type: varchar(255), 'Null': false, Extra: '' }
-    - { Field: value, Type: 'double(8,2)', 'Null': true, Extra: '' }
-    - { Field: value_prev, Type: 'double(8,2)', 'Null': true, Extra: '' }
-    - { Field: multiplier, Type: int, 'Null': false, Extra: '', Default: '1' }
-    - { Field: divisor, Type: int, 'Null': false, Extra: '', Default: '1' }
-    - { Field: status, Type: tinyint, 'Null': false, Extra: '', Default: '0' }
-    - { Field: transform_function, Type: varchar(255), 'Null': true, Extra: '' }
-    - { Field: threshold_min_critical, Type: 'double(8,2)', 'Null': true, Extra: '' }
-    - { Field: threshold_min_warning, Type: 'double(8,2)', 'Null': true, Extra: '' }
-    - { Field: threshold_max_warning, Type: 'double(8,2)', 'Null': true, Extra: '' }
-    - { Field: threshold_max_critical, Type: 'double(8,2)', 'Null': true, Extra: '' }
-  Indexes:
-    PRIMARY: { Name: PRIMARY, Columns: [id], Unique: true, Type: BTREE }
+    transceivers_device_id_entity_physical_index_index: { Name: transceivers_device_id_entity_physical_index_index, Columns: [device_id, entity_physical_index], Unique: false, Type: BTREE }
 transport_group_transport:
   Columns:
     - { Field: id, Type: 'bigint unsigned', 'Null': false, Extra: auto_increment }
