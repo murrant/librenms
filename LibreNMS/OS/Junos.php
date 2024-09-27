@@ -300,7 +300,7 @@ class Junos extends \LibreNMS\OS implements SlaDiscovery, OSPolling, SlaPolling,
         $ifIndexToPortId = Port::query()->where('device_id', $this->getDeviceId())->select(['port_id', 'ifIndex', 'ifName'])->get()->keyBy('ifIndex');
         $entPhysical = SnmpQuery::walk('ENTITY-MIB::entityPhysical')->table(1);
 
-        return SnmpQuery::cache()->walk('JUNIPER-DOM-MIB::jnxDomCurrentTable')->mapTable(function ($data, $ifIndex) use ($ifIndexToPortId, $entPhysical) {
+        $jnxDomCurrentTable = SnmpQuery::cache()->walk('JUNIPER-DOM-MIB::jnxDomCurrentTable')->mapTable(function ($data, $ifIndex) use ($ifIndexToPortId, $entPhysical) {
             $ent = $this->findTransceiverEntityByPortName($entPhysical, $ifIndexToPortId->get($ifIndex)?->ifName);
             if (empty($ent)) {
                 return null; // no module
@@ -315,8 +315,23 @@ class Junos extends \LibreNMS\OS implements SlaDiscovery, OSPolling, SlaPolling,
                 'revision' => $ent['ENTITY-MIB::entPhysicalHardwareRev'] ?? null,
                 'serial' => $ent['ENTITY-MIB::entPhysicalSerialNum'] ?? null,
                 'channels' => $data['JUNIPER-DOM-MIB::jnxDomCurrentModuleLaneCount'] ?? 0,
+                'entity_physical_index' => $ifIndex,
             ]);
         })->filter();
+
+        if ($jnxDomCurrentTable->isNotEmpty()) {
+            return $jnxDomCurrentTable;
+        }
+
+        // could use improvement by mapping JUNIPER-IFOPTICS-MIB::jnxOpticsConfigTable for a tiny bit more info
+        return SnmpQuery::cache()->walk('JUNIPER-IFOPTICS-MIB::jnxOpticsPMCurrentTable')
+            ->mapTable(function ($data, $ifIndex) use ($ifIndexToPortId) {
+                return new Transceiver([
+                    'port_id' => $ifIndexToPortId->get($ifIndex)->port_id,
+                    'index' => $ifIndex,
+                    'entity_physical_index' => $ifIndex,
+                ]);
+        });
     }
 
     private function findTransceiverEntityByPortName(array $entPhysical, string $ifName): array
