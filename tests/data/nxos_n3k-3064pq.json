@@ -15820,7 +15820,7 @@
                     "entPhysicalContainedIn": 5206,
                     "entPhysicalParentRelPos": 1,
                     "entPhysicalMfgName": "CISCOSOLIDOPTICS",
-                    "ifIndex": null
+                    "ifIndex": 436207616
                 },
                 {
                     "entPhysicalIndex": 48855,
@@ -15839,7 +15839,7 @@
                     "entPhysicalContainedIn": 5207,
                     "entPhysicalParentRelPos": 1,
                     "entPhysicalMfgName": "CISCOSOLIDOPTICS",
-                    "ifIndex": null
+                    "ifIndex": 436211712
                 },
                 {
                     "entPhysicalIndex": 48856,
@@ -15858,7 +15858,7 @@
                     "entPhysicalContainedIn": 5208,
                     "entPhysicalParentRelPos": 1,
                     "entPhysicalMfgName": "CISCOSOLIDOPTICS",
-                    "ifIndex": null
+                    "ifIndex": 436215808
                 },
                 {
                     "entPhysicalIndex": 48857,
@@ -15877,7 +15877,7 @@
                     "entPhysicalContainedIn": 5209,
                     "entPhysicalParentRelPos": 1,
                     "entPhysicalMfgName": "CISCOSOLIDOPTICS",
-                    "ifIndex": null
+                    "ifIndex": 436219904
                 },
                 {
                     "entPhysicalIndex": 48858,
@@ -15896,7 +15896,7 @@
                     "entPhysicalContainedIn": 5210,
                     "entPhysicalParentRelPos": 1,
                     "entPhysicalMfgName": "SOLID-OPTICS",
-                    "ifIndex": null
+                    "ifIndex": 436224000
                 },
                 {
                     "entPhysicalIndex": 48859,
@@ -15915,7 +15915,7 @@
                     "entPhysicalContainedIn": 5211,
                     "entPhysicalParentRelPos": 1,
                     "entPhysicalMfgName": "CISCOSOLIDOPTICS",
-                    "ifIndex": null
+                    "ifIndex": 436228096
                 },
                 {
                     "entPhysicalIndex": 48860,
@@ -15934,7 +15934,7 @@
                     "entPhysicalContainedIn": 5212,
                     "entPhysicalParentRelPos": 1,
                     "entPhysicalMfgName": "CISCOSOLIDOPTICS",
-                    "ifIndex": null
+                    "ifIndex": 436232192
                 },
                 {
                     "entPhysicalIndex": 48861,
@@ -15953,7 +15953,7 @@
                     "entPhysicalContainedIn": 5213,
                     "entPhysicalParentRelPos": 1,
                     "entPhysicalMfgName": "SOLID-OPTICS",
-                    "ifIndex": null
+                    "ifIndex": 436236288
                 },
                 {
                     "entPhysicalIndex": 48897,
@@ -15972,7 +15972,7 @@
                     "entPhysicalContainedIn": 5249,
                     "entPhysicalParentRelPos": 1,
                     "entPhysicalMfgName": "CISCO-Skylane",
-                    "ifIndex": null
+                    "ifIndex": 436383744
                 },
                 {
                     "entPhysicalIndex": 48902,
@@ -15991,7 +15991,7 @@
                     "entPhysicalContainedIn": 5254,
                     "entPhysicalParentRelPos": 1,
                     "entPhysicalMfgName": "FS",
-                    "ifIndex": null
+                    "ifIndex": 436404224
                 },
                 {
                     "entPhysicalIndex": 116950,

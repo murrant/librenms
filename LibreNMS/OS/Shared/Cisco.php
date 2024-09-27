@@ -629,9 +629,15 @@ class Cisco extends OS implements
     public function discoverTransceivers(): Collection
     {
         // use data collected by entPhysical module if available
-        $dbSfpCages = $this->getDevice()->entityPhysical()->where('entPhysicalVendorType', 'cevContainerSFP')->pluck('entPhysicalIndex');
+        $dbSfpCages = $this->getDevice()->entityPhysical()->where('entPhysicalVendorType', 'cevContainerSFP')->pluck('ifIndex', 'entPhysicalIndex');
         if ($dbSfpCages->isNotEmpty()) {
-            $data = $this->getDevice()->entityPhysical()->whereIn('entPhysicalContainedIn', $dbSfpCages)->get()->keyBy('entPhysicalIndex');
+            $data = $this->getDevice()->entityPhysical()->whereIn('entPhysicalContainedIn', $dbSfpCages->keys())->get()->map(function ($ent) use ($dbSfpCages) {
+                if (empty($ent->ifIndex) && $dbSfpCages->has($ent->entPhysicalContainedIn)) {
+                    $ent->ifIndex = $dbSfpCages->get($ent->entPhysicalContainedIn);
+                }
+
+                return $ent;
+            })->keyBy('entPhysicalIndex');
         } else {
             // fetch data via snmp
             $snmpData = \SnmpQuery::cache()->hideMib()->mibs(['CISCO-ENTITY-VENDORTYPE-OID-MIB'])->walk('ENTITY-MIB::entPhysicalTable')->table(1);
@@ -641,7 +647,7 @@ class Cisco extends OS implements
 
             $snmpData = collect(\SnmpQuery::hideMib()->mibs(['IF-MIB'])->walk('ENTITY-MIB::entAliasMappingIdentifier')->table(1, $snmpData));
 
-            $sfpCages = $snmpData->filter(fn ($ent) => $ent['entPhysicalVendorType'] == 'cevContainerSFP');
+            $sfpCages = $snmpData->filter(fn ($ent) => isset($ent['entPhysicalVendorType']) && $ent['entPhysicalVendorType'] == 'cevContainerSFP');
             $data = $snmpData->filter(fn ($ent) => $sfpCages->has($ent['entPhysicalContainedIn'] ?? null))->map(function ($e) {
                 if (isset($e['entAliasMappingIdentifier'][0])) {
                     $e['ifIndex'] = preg_replace('/^.*ifIndex[.[](\d+).*$/', '$1', $e['entAliasMappingIdentifier'][0]);
