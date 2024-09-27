@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('revision', 16)->nullable();
             $table->string('serial', 32)->nullable();
             $table->date('date')->nullable();
-            $table->boolean('ddm')->default(0);
+            $table->boolean('ddm')->nullable();
             $table->string('encoding', 16)->nullable();
             $table->string('cable', 16)->nullable();
             $table->integer('distance')->nullable();

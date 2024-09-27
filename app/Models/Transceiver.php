@@ -29,7 +29,6 @@ class Transceiver extends PortRelatedModel implements Keyable
         'connector', // LC, SM, RJ45, etc physical connector type, See Ocnos for some normalized connectors
         'channels', // number of channels or lanes
     ];
-    protected $casts = ['ddm' => 'boolean'];
 
     public function getCompositeKey()
     {
