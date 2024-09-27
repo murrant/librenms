@@ -137,7 +137,7 @@ class Sensor extends DeviceRelatedModel implements Keyable
     {
         $units = __('sensors.' . $this->sensor_class . '.unit');
 
-        return match($this->sensor_class) {
+        return match ($this->sensor_class) {
             'current', 'power' => Number::formatSi($this->sensor_current, 3, 3, $units),
             'dbm' => round($this->sensor_current, 3) . " $units",
             default => "$this->sensor_current $units",
