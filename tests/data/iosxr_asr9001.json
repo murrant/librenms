@@ -27685,7 +27685,7 @@
             "transceivers": [
                 {
                     "index": "15526104",
-                    "entity_physical_index": null,
+                    "entity_physical_index": 25,
                     "type": "1000BASE-T SFP (NEBS 3), UTP, 100m",
                     "vendor": "",
                     "oui": null,
@@ -27700,11 +27700,11 @@
                     "wavelength": null,
                     "connector": null,
                     "channels": 1,
-                    "ifIndex": null
+                    "ifIndex": 25
                 },
                 {
                     "index": "30054631",
-                    "entity_physical_index": null,
+                    "entity_physical_index": 42,
                     "type": "10GBASE-LR SFP+ Module for SMF",
                     "vendor": "",
                     "oui": null,
@@ -27719,11 +27719,11 @@
                     "wavelength": null,
                     "connector": null,
                     "channels": 1,
-                    "ifIndex": null
+                    "ifIndex": 42
                 },
                 {
                     "index": "31415605",
-                    "entity_physical_index": null,
+                    "entity_physical_index": 44,
                     "type": "10GBASE-LR SFP+ Module for SMF",
                     "vendor": "",
                     "oui": null,
@@ -27738,11 +27738,11 @@
                     "wavelength": null,
                     "connector": null,
                     "channels": 1,
-                    "ifIndex": null
+                    "ifIndex": 44
                 },
                 {
                     "index": "37336673",
-                    "entity_physical_index": null,
+                    "entity_physical_index": 21,
                     "type": "Multirate 10GBASE-LR and OC-192/STM-64 SR-1 XFP, SMF",
                     "vendor": "",
                     "oui": null,
@@ -27757,11 +27757,11 @@
                     "wavelength": null,
                     "connector": null,
                     "channels": 1,
-                    "ifIndex": null
+                    "ifIndex": 21
                 },
                 {
                     "index": "66227682",
-                    "entity_physical_index": null,
+                    "entity_physical_index": 23,
                     "type": "1000BASE-LX/LH SFP transceiver module, MMF/SMF, 1310nm, DOM",
                     "vendor": "",
                     "oui": null,
@@ -27776,7 +27776,7 @@
                     "wavelength": null,
                     "connector": null,
                     "channels": 1,
-                    "ifIndex": null
+                    "ifIndex": 23
                 }
             ]
         }
