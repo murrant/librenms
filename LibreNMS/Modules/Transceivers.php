@@ -62,7 +62,7 @@ class Transceivers implements Module
             // save transceivers
             ModuleModelObserver::observe(Transceiver::class);
             $this->syncModels($os->getDevice(), 'transceivers', $discoveredTransceivers);
-       }
+        }
     }
 
     public function poll(OS $os, DataStorageInterface $datastore): void

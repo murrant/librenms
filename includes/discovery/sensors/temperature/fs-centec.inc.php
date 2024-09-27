@@ -31,7 +31,6 @@ foreach ($tempTable as $ifIndex => $current) {
             ]));
 
             break; // only discover one sensor
-
         }
     }
 }

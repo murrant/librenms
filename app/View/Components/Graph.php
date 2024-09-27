@@ -120,11 +120,11 @@ class Graph extends Component
      */
     public function render()
     {
-       $view = $this->popup ? 'components.graph-popup' : ($this->link === false ? 'components.graph' : 'components.linked-graph');
-       $data = [
-           'link' => $this->getLink(),
-           'src' => $this->getSrc(),
-       ];
+        $view = $this->popup ? 'components.graph-popup' : ($this->link === false ? 'components.graph' : 'components.linked-graph');
+        $data = [
+            'link' => $this->getLink(),
+            'src' => $this->getSrc(),
+        ];
 
         return view($view, $data);
     }
@@ -160,10 +160,10 @@ class Graph extends Component
     {
         return match ($this->link) {
             true => url('graphs') . '/' . http_build_query($this->vars + [
-                        'type' => $this->type,
-                        'from' => $this->from,
-                        'to' => $this->to,
-                    ], '', '/'),
+                'type' => $this->type,
+                'from' => $this->from,
+                'to' => $this->to,
+            ], '', '/'),
             false => '',
             default => $this->link,
         };

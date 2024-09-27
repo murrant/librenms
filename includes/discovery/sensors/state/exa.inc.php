@@ -24,7 +24,7 @@ foreach ($ponTable as $e7OltPonPortShelf => $ponShelf) {
                     'entPhysicalIndex_measured' => 'port',
                     'group' => $name,
                 ]));
-                    // FIXME
+                // FIXME
 //                    ->withStateTranslations('E7-Calix-MIB::e7OltPonPortStatus', [
 //                    ['value' => 0, 'generic' => 3, 'graph' => 1, 'descr' => 'invalid'],
 //                    ['value' => 1, 'generic' => 0, 'graph' => 1, 'descr' => 'linkUp'],
