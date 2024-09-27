@@ -135,12 +135,13 @@ class Sensor extends DeviceRelatedModel implements Keyable
      */
     public function formatValue(): string
     {
-        // use SI formatting
-        if ($this->sensor_class == 'current') {
-            return Number::formatSi($this->sensor_current, 3, 3, __('sensors.' . $this->sensor_class . '.unit'));
-        }
+        $units = __('sensors.' . $this->sensor_class . '.unit');
 
-        return $this->sensor_current . ' ' . __('sensors.' . $this->sensor_class . '.unit');
+        return match($this->sensor_class) {
+            'current', 'power' => Number::formatSi($this->sensor_current, 3, 3, $units),
+            'dbm' => round($this->sensor_current, 3) . " $units",
+            default => "$this->sensor_current $units",
+        };
     }
 
     public function currentStatus(): Severity
