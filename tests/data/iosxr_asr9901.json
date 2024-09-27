@@ -29379,5 +29379,87 @@
                 }
             ]
         }
+    },
+    "transceivers": {
+        "discovery": {
+            "transceivers": [
+                {
+                    "index": "2990081",
+                    "entity_physical_index": 64,
+                    "type": "1000BASE-LX/LH SFP transceiver module, MMF/SMF, 1310nm, DOM",
+                    "vendor": "CISCO-FINISAR",
+                    "oui": null,
+                    "model": "GLC-LH-SMD",
+                    "revision": "V01",
+                    "serial": "S1804230026",
+                    "date": null,
+                    "ddm": null,
+                    "encoding": null,
+                    "cable": null,
+                    "distance": null,
+                    "wavelength": null,
+                    "connector": null,
+                    "channels": 1,
+                    "ifIndex": null
+                },
+                {
+                    "index": "2994177",
+                    "entity_physical_index": 81,
+                    "type": "1000BASE-T SFP (NEBS 3), UTP, 100m",
+                    "vendor": "CISCO-FINISAR",
+                    "oui": null,
+                    "model": "SFP-GE-T",
+                    "revision": "V02",
+                    "serial": "TA1907010033",
+                    "date": null,
+                    "ddm": null,
+                    "encoding": null,
+                    "cable": null,
+                    "distance": null,
+                    "wavelength": null,
+                    "connector": null,
+                    "channels": 1,
+                    "ifIndex": null
+                },
+                {
+                    "index": "3014657",
+                    "entity_physical_index": 65,
+                    "type": "10GBASE-LR SFP+ Module for SMF",
+                    "vendor": "CISCO-FINISAR",
+                    "oui": null,
+                    "model": "SFP-10G-LR",
+                    "revision": "V01",
+                    "serial": "S1809290007",
+                    "date": null,
+                    "ddm": null,
+                    "encoding": null,
+                    "cable": null,
+                    "distance": null,
+                    "wavelength": null,
+                    "connector": null,
+                    "channels": 1,
+                    "ifIndex": null
+                },
+                {
+                    "index": "3072001",
+                    "entity_physical_index": 67,
+                    "type": "10GBASE-LR SFP+ Module for SMF",
+                    "vendor": "CISCO-FINISAR",
+                    "oui": null,
+                    "model": "SFP-10G-LR",
+                    "revision": "V01",
+                    "serial": "S151207008",
+                    "date": null,
+                    "ddm": null,
+                    "encoding": null,
+                    "cable": null,
+                    "distance": null,
+                    "wavelength": null,
+                    "connector": null,
+                    "channels": 1,
+                    "ifIndex": null
+                }
+            ]
+        }
     }
 }
