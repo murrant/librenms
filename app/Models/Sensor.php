@@ -142,6 +142,7 @@ class Sensor extends DeviceRelatedModel implements Keyable
 
         return $this->sensor_current . ' ' . __('sensors.' . $this->sensor_class . '.unit');
     }
+
     public function currentStatus(): Severity
     {
         if ($this->sensor_limit !== null && $this->sensor_current >= $this->sensor_limit) {

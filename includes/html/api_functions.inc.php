@@ -28,7 +28,6 @@ use App\Models\PortGroup;
 use App\Models\PortsFdb;
 use App\Models\Sensor;
 use App\Models\ServiceTemplate;
-use App\Models\TransceiverMetric;
 use App\Models\UserPref;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
