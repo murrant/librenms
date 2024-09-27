@@ -18,10 +18,10 @@ return new class extends Migration
             $table->bigInteger('port_id');
             $table->string('index');
             $table->integer('entity_physical_index')->nullable();
-            $table->string('type', 32)->nullable();
+            $table->string('type', 128)->nullable();
             $table->string('vendor', 16)->nullable();
             $table->string('oui', 16)->nullable();
-            $table->string('model', 16)->nullable();
+            $table->string('model', 32)->nullable();
             $table->string('revision', 16)->nullable();
             $table->string('serial', 32)->nullable();
             $table->date('date')->nullable();
