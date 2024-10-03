@@ -10,8 +10,10 @@
             @foreach($tabs as $tab)
                 @if($tab->visible($device))
                     <li role="presentation" @if( $current_tab == $tab->slug() ) class="active" @endif>
-                        <a href="{{ route('device', [$device_id, $tab->slug()]) }}">
-                            <i class="fa {{ $tab->icon() }} fa-lg icon-theme" aria-hidden="true"></i>&nbsp;{{ $tab->name() }}&nbsp;</a>
+                        <a href="{{ route('device', [$device_id, $tab->slug()]) }}" class="tw-whitespace-nowrap">
+                            <i class="fa {{ $tab->icon() }} fa-lg icon-theme" aria-hidden="true"></i>
+                            {{ $tab->name() }}
+                        </a>
                     </li>
                 @endif
             @endforeach
@@ -36,6 +38,15 @@
                                    @if($link['external'])target="_blank" rel="noopener" @endif
                                 ><i class="fa {{ $link['icon'] }} fa-lg fa-fw icon-theme" aria-hidden="true"></i> {{ $link['title'] }}</a></li>
                         @endforeach
+                        @if($page_links)
+                            <li role="presentation" class="divider"></li>
+                                @foreach($page_links as $link)
+                                    <li><a href="{{ $link['url'] }}"
+                                           @if(isset($link['onclick']))onclick="{{ $link['onclick'] }}" @endif
+                                           @if($link['external'])target="_blank" rel="noopener" @endif
+                                        ><i class="fa {{ $link['icon'] }} fa-lg fa-fw icon-theme" aria-hidden="true"></i> {{ $link['title'] }}</a></li>
+                                @endforeach
+                        @endif
                     </ul>
                 </div>
             </div>

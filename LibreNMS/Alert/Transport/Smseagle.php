@@ -74,7 +74,7 @@ class Smseagle extends Transport
                     'title' => 'Access Token',
                     'name' => 'smseagle-token',
                     'descr' => 'SMSEagle Access Token',
-                    'type' => 'text',
+                    'type' => 'password',
                 ],
                 [
                     'title' => 'User',
@@ -86,7 +86,7 @@ class Smseagle extends Transport
                     'title' => 'Password',
                     'name' => 'smseagle-pass',
                     'descr' => 'SMSEagle Password',
-                    'type' => 'text',
+                    'type' => 'password',
                 ],
                 [
                     'title' => 'Mobiles',
@@ -96,10 +96,10 @@ class Smseagle extends Transport
                 ],
             ],
             'validation' => [
-                'smseagle-url'     => 'required|url',
-                'smseagle-token'    => 'required_without:smseagle-user,smseagle-pass|string',
-                'smseagle-user'    => 'required_without:smseagle-token|string',
-                'smseagle-pass'    => 'required_without:smseagle-token|string',
+                'smseagle-url' => 'required|url',
+                'smseagle-token' => 'required_without:smseagle-user,smseagle-pass|string',
+                'smseagle-user' => 'required_without:smseagle-token|string',
+                'smseagle-pass' => 'required_without:smseagle-token|string',
                 'smseagle-mobiles' => 'required',
             ],
         ];

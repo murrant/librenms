@@ -31,7 +31,7 @@ Config is simple, here's an example based on Graylog 2.4:
     lnms config:set graylog.username admin
     lnms config:set graylog.password 'admin'
     lnms config:set graylog.version 2.4
-```
+    ```
 
 ## Timezone
 Graylog messages are stored using GMT timezone. You can display
@@ -67,9 +67,28 @@ can override the default of `/api/` using
     ```
 
 ## User Credentials
-If you choose to use another user besides the admin user, please note
-that currently you must give the user "admin" permissions from within
+If you don't want to use an admin account for connection to Graylog
+Log into http://<graylog-server-ip>/api/api-browser/global/index.html using graylog admin credentials
+Browse to: Roles: User roles
+Click on: Create a new role
+In JSON body paste this:
+
+```
+{
+	"name": "LibreNMS-Read",
+	"description": "Extended reading permissions for LibreNMS",
+	"permissions" : [
+		"searches:relative",
+		"streams:read"
+	]
+}
+```
+Press “Try it out”
+Log into graylog web ui as admin and add the role to the user
+
+Otherwise you must give the user "admin" permissions from within
 Graylog, "read" permissions alone are not sufficient.
+
 
 ## TLS Certificate
 If you have enabled TLS for the Graylog API and you are using a
@@ -81,7 +100,7 @@ the FQDN or IP address specified in
 !!! setting "external/graylog"
     ```bash
     lnms config:set graylog.server example.com
-```
+    ```
 
 ## Match Any Address
 If you want to match the source address of the log entries against any

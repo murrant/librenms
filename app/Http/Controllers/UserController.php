@@ -25,6 +25,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Interfaces\ToastInterface;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\AuthLog;
@@ -32,7 +33,6 @@ use App\Models\Dashboard;
 use App\Models\User;
 use App\Models\UserPref;
 use Auth;
-use Flasher\Prime\FlasherInterface;
 use Illuminate\Support\Str;
 use LibreNMS\Authentication\LegacyAuth;
 use LibreNMS\Config;
@@ -74,7 +74,7 @@ class UserController extends Controller
         $this->authorize('create', User::class);
 
         $tmp_user = new User;
-        $tmp_user->can_modify_passwd = (int) LegacyAuth::get()->canUpdatePasswords(); // default to true for new users
+        $tmp_user->can_modify_passwd = LegacyAuth::getType() == 'mysql' ? 1 : 0; // default to true mysql
 
         return view('user.create', [
             'user' => $tmp_user,
@@ -90,26 +90,27 @@ class UserController extends Controller
      * @param  StoreUserRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreUserRequest $request, FlasherInterface $flasher)
+    public function store(StoreUserRequest $request, ToastInterface $toast)
     {
-        $user = $request->only(['username', 'realname', 'email', 'descr', 'level', 'can_modify_passwd']);
+        $user = $request->only(['username', 'realname', 'email', 'descr', 'can_modify_passwd']);
         $user['auth_type'] = LegacyAuth::getType();
         $user['can_modify_passwd'] = $request->get('can_modify_passwd'); // checkboxes are missing when unchecked
 
         $user = User::create($user);
 
         $user->setPassword($request->new_password);
+        $user->setRoles($request->get('roles', []));
         $user->auth_id = (string) LegacyAuth::get()->getUserid($user->username) ?: $user->user_id;
         $this->updateDashboard($user, $request->get('dashboard'));
         $this->updateTimezone($user, $request->get('timezone'));
 
         if ($user->save()) {
-            $flasher->addSuccess(__('User :username created', ['username' => $user->username]));
+            $toast->success(__('User :username created', ['username' => $user->username]));
 
             return redirect(route('users.index'));
         }
 
-        $flasher->addError(__('Failed to create user'));
+        $toast->error(__('Failed to create user'));
 
         return redirect()->back();
     }
@@ -168,7 +169,7 @@ class UserController extends Controller
      * @param  User  $user
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateUserRequest $request, User $user, FlasherInterface $flasher)
+    public function update(UpdateUserRequest $request, User $user, ToastInterface $toast)
     {
         if ($request->get('new_password') && $user->canSetPassword($request->user())) {
             $user->setPassword($request->new_password);
@@ -185,25 +186,29 @@ class UserController extends Controller
 
         $user->fill($request->validated());
 
+        if ($request->has('roles')) {
+            $user->setRoles($request->get('roles', []));
+        }
+
         if ($request->has('dashboard') && $this->updateDashboard($user, $request->get('dashboard'))) {
-            $flasher->addSuccess(__('Updated dashboard for :username', ['username' => $user->username]));
+            $toast->success(__('Updated dashboard for :username', ['username' => $user->username]));
         }
 
         if ($request->has('timezone') && $this->updateTimezone($user, $request->get('timezone'))) {
             if ($request->get('timezone') != 'default') {
-                $flasher->addSuccess(__('Updated timezone for :username', ['username' => $user->username]));
+                $toast->success(__('Updated timezone for :username', ['username' => $user->username]));
             } else {
-                $flasher->addSuccess(__('Cleared timezone for :username', ['username' => $user->username]));
+                $toast->success(__('Cleared timezone for :username', ['username' => $user->username]));
             }
         }
 
         if ($user->save()) {
-            $flasher->addSuccess(__('User :username updated', ['username' => $user->username]));
+            $toast->success(__('User :username updated', ['username' => $user->username]));
 
             return redirect(route(Str::contains(URL::previous(), 'preferences') ? 'preferences.index' : 'users.index'));
         }
 
-        $flasher->addError(__('Failed to update user :username', ['username' => $user->username]));
+        $toast->error(__('Failed to update user :username', ['username' => $user->username]));
 
         return redirect()->back();
     }

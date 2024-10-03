@@ -136,7 +136,7 @@ class LegacyUserProvider implements UserProvider
             if (Debug::isEnabled()) {
                 $auth_message .= '<br /> ' . $ae->getFile() . ': ' . $ae->getLine();
             }
-            flash()->addError($auth_message);
+            toast()->error($auth_message);
 
             $username = $username ?? Session::get('username', $credentials['username']);
 
@@ -183,7 +183,7 @@ class LegacyUserProvider implements UserProvider
 
                 error_reporting(-1);
             } catch (AuthenticationException $ae) {
-                flash()->addError($ae->getMessage());
+                toast()->error($ae->getMessage());
             }
 
             if (empty($new_user)) {
@@ -207,6 +207,12 @@ class LegacyUserProvider implements UserProvider
         $user->auth_type = $type; // doing this here in case it was null (legacy)
         $user->auth_id = (string) $auth_id;
         $user->save();
+
+        // create and update roles, if provided
+        $roles = $auth->getRoles($user->username);
+        if ($roles !== false) {
+            $user->setRoles($roles, true);
+        }
 
         return $user;
     }

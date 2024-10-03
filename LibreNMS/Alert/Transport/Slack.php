@@ -36,6 +36,20 @@ class Slack extends Transport
         $icon = $this->config['slack-icon_emoji'] ?? $slack_opts['icon_emoji'] ?? null;
         $slack_msg = html_entity_decode(strip_tags($alert_data['msg'] ?? ''), ENT_QUOTES);
 
+        /*
+         * Normalize spaces since you might want to do logic in your template, and Slack is
+         * very sensitive to spaces.  This turns every instance of two or more spaces into
+         * one space.
+         */
+        $slack_msg = preg_replace('/ {2,}/', ' ', $slack_msg);
+
+        /*
+         * Replace "standard" markdown links with Slack-specific markdown.
+         * This has to be done after strip_tags() because these are actually tags.
+         * So [Target](https://mysite.example.com) becomes <https://mysite.example.com|Target>
+         */
+        $slack_msg = preg_replace('/\[([^\]]+)\]\(((https?|mailto|ftp):[^\)]+)\)/', '<$2|$1>', $slack_msg);
+
         $data = [
             'attachments' => [
                 0 => [
@@ -85,7 +99,7 @@ class Slack extends Transport
                 ],
                 [
                     'title' => 'Icon',
-                    'name' => 'slack-author',
+                    'name' => 'slack-icon_emoji',
                     'descr' => 'Name of emoji for icon',
                     'type' => 'text',
                 ],
@@ -93,7 +107,7 @@ class Slack extends Transport
             'validation' => [
                 'slack-url' => 'required|url',
                 'slack-channel' => 'string',
-                'slack-username' => 'string',
+                'slack-author' => 'string',
                 'slack-icon_emoji' => 'string',
             ],
         ];

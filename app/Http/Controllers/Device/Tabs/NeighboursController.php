@@ -26,13 +26,17 @@
 namespace App\Http\Controllers\Device\Tabs;
 
 use App\Models\Device;
+use App\Models\Link;
+use Illuminate\Http\Request;
 use LibreNMS\Interfaces\UI\DeviceTab;
 
 class NeighboursController implements DeviceTab
 {
     public function visible(Device $device): bool
     {
-        return \DB::table('links')->where('local_device_id', $device->device_id)->exists();
+        return Link::where('local_device_id', $device->device_id)
+            ->orWhere('remote_device_id', $device->device_id)
+            ->exists();
     }
 
     public function slug(): string
@@ -50,7 +54,7 @@ class NeighboursController implements DeviceTab
         return __('Neighbours');
     }
 
-    public function data(Device $device): array
+    public function data(Device $device, Request $request): array
     {
         return [];
     }

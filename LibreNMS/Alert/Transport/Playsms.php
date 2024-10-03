@@ -77,7 +77,7 @@ class Playsms extends Transport
                     'title' => 'Token',
                     'name' => 'playsms-token',
                     'descr' => 'PlaySMS Token',
-                    'type' => 'text',
+                    'type' => 'password',
                 ],
                 [
                     'title' => 'From',
@@ -93,9 +93,9 @@ class Playsms extends Transport
                 ],
             ],
             'validation' => [
-                'playsms-url'     => 'required|url',
-                'playsms-user'    => 'required|string',
-                'playsms-token'   => 'required|string',
+                'playsms-url' => 'required|url',
+                'playsms-user' => 'required|string',
+                'playsms-token' => 'required|string',
                 'playsms-mobiles' => 'required',
             ],
         ];

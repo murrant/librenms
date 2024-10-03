@@ -96,6 +96,10 @@ $graphs['powerdns'] = [
     'queries',
     'queries_udp',
 ];
+$graphs['sneck'] = [
+    'results',
+    'time',
+];
 $graphs['ntp-client'] = [
     'stats',
     'freq',
@@ -180,7 +184,10 @@ $graphs['exim-stats'] = [
     'queue',
 ];
 $graphs['php-fpm'] = [
-    'stats',
+    'overview_combined',
+    'overview_slow_requests',
+    'overview_max_childen_reached',
+    'v1_last_request_cpu',
 ];
 $graphs['nvidia'] = [
     'sm',
@@ -270,6 +277,7 @@ $graphs['smart'] = [
     'id184',
     'id187',
     'id188',
+    'maxtemp',
     'id190',
     'id194',
     'id196',
@@ -321,16 +329,16 @@ $graphs['freeradius'] = [
     'queue',
 ];
 $graphs['suricata'] = [
-    'alert',
-    'packets',
-    'nasty_delta',
-    'nasty_percent',
-    'dec_proto',
-    'flow_proto',
-    'app_flows',
-    'app_tx',
-    'bytes',
-    'mem_use',
+    'packets_overview',
+    'nasty_delta_overview',
+    'nasty_percent_overview',
+    'dec_proto_overview',
+    'flow_proto_overview',
+    'app_flows_overview',
+    'app_tx_overview',
+    'bytes_overview',
+    'mem_use_overview',
+    'uptime_overview',
 ];
 $graphs['zfs'] = [
     'arc_misc',
@@ -445,6 +453,7 @@ $graphs['pwrstatd'] = [
     'minutes',
 ];
 $graphs['systemd'] = [
+    'all',
     'sub',
     'active',
     'load',
@@ -453,8 +462,48 @@ $graphs['wireguard'] = [
     'traffic',
     'time',
 ];
+$graphs['logsize'] = [
+    'size',
+    'set_sizes',
+    'max_size',
+    'mean_size',
+    'median_size',
+    'mode_size',
+    'min_size',
+];
 $graphs['linux_config_files'] = [
     'number_of_confs',
+];
+$graphs['suricata_extract'] = [
+    'errors',
+    'ignored_host',
+    'ignored_ip',
+    'ignored_ip_dest',
+    'ignored_ip_src',
+    'sub',
+    'sub_2xx',
+    'sub_3xx',
+    'sub_4xx',
+    'sub_5xx',
+    'sub_codes',
+    'sub_fail',
+    'truncated',
+    'zero_sized',
+    'sub_size',
+];
+$graphs['mojo_cape_submit'] = [
+    'subs',
+    'subs_top12',
+    'hash_changed',
+    'app_protos',
+    'size_sum',
+    'size_stats',
+    'size_max',
+    'size_mean',
+    'size_median',
+    'size_mode',
+    'size_min',
+    'size_stddev',
 ];
 $graphs['linux_softnet_stat'] = [
     'packets',
@@ -466,15 +515,60 @@ $graphs['linux_softnet_stat'] = [
     'received_rps',
     'budget',
 ];
+$graphs['privoxy'] = [
+    'client_requests',
+    'blocks',
+    'crunches',
+    'unique_bdomains',
+    'bytes_to_client',
+    'req',
+    'resp_xxx',
+    'ver',
+];
+$graphs['ss'] = [
+    'sockets',
+    'dccp',
+    'inet',
+    'inet6',
+    'link',
+    'mptcp',
+    'netlink',
+    'raw',
+    'sctp',
+    'tcp',
+    'tipc',
+    'udp',
+    'unix',
+    'vsock',
+    'xdp',
+];
+$graphs['borgbackup'] = [
+    'unique_csize',
+    'total_csize',
+    'total_size',
+    'total_chunks',
+    'total_unique_chunks',
+    'unique_size',
+    'time_since_last_modified',
+    'errored',
+    'locked',
+    'locked_for',
+];
+$graphs['nfs'] = [
+    'server_rpc',
+    'server_cache',
+    'client_rpc',
+    'client_cache',
+];
 
 echo '<div class="panel panel-default">';
 echo '<div class="panel-heading">';
 echo "<span style='font-weight: bold;'>Apps</span> &#187; ";
 unset($sep);
 $link_array = [
-    'page'   => 'device',
+    'page' => 'device',
     'device' => $device['device_id'],
-    'tab'    => 'apps',
+    'tab' => 'apps',
 ];
 
 $apps = \LibreNMS\Util\ObjectCache::applications()->flatten();

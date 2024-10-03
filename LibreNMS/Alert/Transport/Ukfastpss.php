@@ -71,7 +71,7 @@ class Ukfastpss extends Transport
                     'title' => 'API Key',
                     'name' => 'api-key',
                     'descr' => 'API key to use for authentication',
-                    'type' => 'text',
+                    'type' => 'password',
                 ],
                 [
                     'title' => 'Author',
@@ -95,7 +95,7 @@ class Ukfastpss extends Transport
                     'title' => 'Secure',
                     'name' => 'secure',
                     'descr' => 'Specifies whether created request should be secure',
-                    'type'  => 'checkbox',
+                    'type' => 'checkbox',
                     'default' => true,
                 ],
             ],

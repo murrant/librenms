@@ -26,8 +26,8 @@
 namespace LibreNMS\Data\Store;
 
 use App\Polling\Measure\Measurement;
-use Illuminate\Support\Str;
 use LibreNMS\Config;
+use LibreNMS\Enum\ImageFormat;
 use LibreNMS\Exceptions\FileExistsException;
 use LibreNMS\Exceptions\RrdGraphException;
 use LibreNMS\Proc;
@@ -44,28 +44,24 @@ class Rrd extends BaseDatastore
     private $sync_process;
     /** @var Proc */
     private $async_process;
+    /** @var string */
     private $rrd_dir;
+    /** @var string */
     private $version;
+    /** @var string */
     private $rrdcached;
+    /** @var string */
     private $rra;
+    /** @var int */
     private $step;
+    /** @var string */
+    private $rrdtool_executable;
 
     public function __construct()
     {
         parent::__construct();
-        $this->rrdcached = Config::get('rrdcached', false);
-
+        $this->loadConfig();
         $this->init();
-        $this->rrd_dir = Config::get('rrd_dir', Config::get('install_dir') . '/rrd');
-        $this->step = Config::get('rrd.step', 300);
-        $this->rra = Config::get(
-            'rrd_rra',
-            'RRA:AVERAGE:0.5:1:2016 RRA:AVERAGE:0.5:6:1440 RRA:AVERAGE:0.5:24:1440 RRA:AVERAGE:0.5:288:1440 ' .
-            ' RRA:MIN:0.5:1:2016 RRA:MIN:0.5:6:1440     RRA:MIN:0.5:24:1440     RRA:MIN:0.5:288:1440 ' .
-            ' RRA:MAX:0.5:1:2016 RRA:MAX:0.5:6:1440     RRA:MAX:0.5:24:1440     RRA:MAX:0.5:288:1440 ' .
-            ' RRA:LAST:0.5:1:2016 '
-        );
-        $this->version = Config::get('rrdtool_version', '1.4');
     }
 
     public function getName()
@@ -78,15 +74,31 @@ class Rrd extends BaseDatastore
         return Config::get('rrd.enable', true);
     }
 
+    protected function loadConfig(): void
+    {
+        $this->rrdcached = Config::get('rrdcached', false);
+        $this->rrd_dir = Config::get('rrd_dir', Config::get('install_dir') . '/rrd');
+        $this->step = Config::get('rrd.step', 300);
+        $this->rra = Config::get(
+            'rrd_rra',
+            'RRA:AVERAGE:0.5:1:2016 RRA:AVERAGE:0.5:6:1440 RRA:AVERAGE:0.5:24:1440 RRA:AVERAGE:0.5:288:1440 ' .
+            ' RRA:MIN:0.5:1:2016 RRA:MIN:0.5:6:1440     RRA:MIN:0.5:24:1440     RRA:MIN:0.5:288:1440 ' .
+            ' RRA:MAX:0.5:1:2016 RRA:MAX:0.5:6:1440     RRA:MAX:0.5:24:1440     RRA:MAX:0.5:288:1440 ' .
+            ' RRA:LAST:0.5:1:2016 '
+        );
+        $this->version = Config::get('rrdtool_version', '1.4');
+        $this->rrdtool_executable = Config::get('rrdtool', 'rrdtool');
+    }
+
     /**
      * Opens up a pipe to RRDTool using handles provided
      *
      * @param  bool  $dual_process  start an additional process that's output should be read after every command
      * @return bool the process(s) have been successfully started
      */
-    public function init($dual_process = true)
+    public function init($dual_process = true): bool
     {
-        $command = Config::get('rrdtool', 'rrdtool') . ' -';
+        $command = $this->rrdtool_executable . ' -';
 
         $descriptor_spec = [
             0 => ['pipe', 'r'], // stdin  is a pipe that the child will read from
@@ -94,7 +106,7 @@ class Rrd extends BaseDatastore
             2 => ['pipe', 'w'], // stderr is a pipe that the child will write to
         ];
 
-        $cwd = Config::get('rrd_dir');
+        $cwd = $this->rrd_dir;
 
         if (! $this->isSyncRunning()) {
             $this->sync_process = new Proc($command, $descriptor_spec, $cwd);
@@ -181,6 +193,22 @@ class Rrd extends BaseDatastore
         }
 
         $this->update($rrd, $fields);
+    }
+
+    public function lastUpdate(string $filename): ?TimeSeriesPoint
+    {
+        $output = $this->command('lastupdate', $filename, '')[0];
+
+        if (preg_match('/((?: \w+)+)\n\n(\d+):((?: [\d.-]+)+)\nOK/', $output, $matches)) {
+            $data = array_combine(
+                explode(' ', ltrim($matches[1])),
+                explode(' ', ltrim($matches[3])),
+            );
+
+            return new TimeSeriesPoint((int) $matches[2], $data);
+        }
+
+        return null;
     }
 
     /**
@@ -387,7 +415,7 @@ class Rrd extends BaseDatastore
         }
 
         // send the command!
-        if (in_array($command, ['last', 'list']) && $this->init(false)) {
+        if (in_array($command, ['last', 'list', 'lastupdate']) && $this->init(false)) {
             // send this to our synchronous process so output is guaranteed
             $output = $this->sync_process->sendCommand($cmd);
         } elseif ($this->init()) {
@@ -422,7 +450,7 @@ class Rrd extends BaseDatastore
      *
      * @throws FileExistsException if rrdtool <1.4.3 and the rrd file exists locally
      */
-    public function buildCommand($command, $filename, $options)
+    public function buildCommand($command, $filename, $options): string
     {
         if ($command == 'create') {
             // <1.4.3 doesn't support -O, so make sure the file doesn't exist
@@ -524,10 +552,10 @@ class Rrd extends BaseDatastore
     public function checkRrdExists($filename)
     {
         if ($this->rrdcached && version_compare($this->version, '1.5', '>=')) {
-            $chk = $this->command('last', $filename, '');
+            $check_output = implode($this->command('last', $filename, ''));
             $filename = str_replace([$this->rrd_dir . '/', $this->rrd_dir], '', $filename);
 
-            return ! Str::contains(implode($chk), "$filename': No such file or directory");
+            return ! (str_contains($check_output, $filename) && str_contains($check_output, 'No such file or directory'));
         } else {
             return is_file($filename);
         }
@@ -559,11 +587,11 @@ class Rrd extends BaseDatastore
      * @param  string  $options
      * @return string
      *
-     * @throws \LibreNMS\Exceptions\RrdGraphException
+     * @throws RrdGraphException
      */
     public function graph(string $options, array $env = null): string
     {
-        $process = new Process([Config::get('rrdtool', 'rrdtool'), '-'], $this->rrd_dir, $env);
+        $process = new Process([$this->rrdtool_executable, '-'], $this->rrd_dir, $env);
         $process->setTimeout(300);
         $process->setIdleTimeout(300);
 
@@ -581,8 +609,11 @@ class Rrd extends BaseDatastore
         }
 
         // if valid image is returned with error, extract image and feedback
-        $image_type = Config::get('webui.graph_type', 'png');
-        $search = $this->getImageEnd($image_type);
+        // rrdtool defaults to png if imgformat not specified
+        $graph_type = preg_match('/--imgformat=([^\s]+)/', $options, $matches) ? strtolower($matches[1]) : 'png';
+        $imageFormat = ImageFormat::forGraph($graph_type);
+
+        $search = $imageFormat->getImageEnd();
         if (($position = strrpos($process->getOutput(), $search)) !== false) {
             $position += strlen($search);
             throw new RrdGraphException(
@@ -598,16 +629,6 @@ class Rrd extends BaseDatastore
         // only error text was returned
         $error = trim($process->getOutput() . PHP_EOL . $process->getErrorOutput());
         throw new RrdGraphException($error, null, null, null, $process->getExitCode());
-    }
-
-    private function getImageEnd(string $type): string
-    {
-        $image_suffixes = [
-            'png' => hex2bin('0000000049454e44ae426082'),
-            'svg' => '</svg>',
-        ];
-
-        return $image_suffixes[$type] ?? '';
     }
 
     public function __destruct()
