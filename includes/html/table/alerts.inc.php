@@ -160,7 +160,7 @@ foreach (dbFetchRows($sql, $param) as $alert) {
         'hostname',
 //        $alert,
 //        shorthost(format_hostname($alert))
-        ) . '<div id="incident' . $alert['id'] . '"';
+    ) . '<div id="incident' . $alert['id'] . '"';
     if (is_numeric($vars['uncollapse_key_count'])) {
         $hostname .= $max_row_length < (int) $vars['uncollapse_key_count'] ? '' : ' class="collapse"';
     } else {
