@@ -408,10 +408,10 @@ class MapDataController extends Controller
             if ($group_id) {
                 $q->whereIn(
                     $q->qualifyColumn('device_id'), function ($q) use ($group_id) {
-                    $q->select('device_id')
-                        ->from('device_group_device')
-                        ->where('device_group_id', $group_id);
-                }
+                        $q->select('device_id')
+                            ->from('device_group_device')
+                            ->where('device_group_id', $group_id);
+                    }
                 );
             }
         };
