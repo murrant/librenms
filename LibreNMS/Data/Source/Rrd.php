@@ -34,7 +34,7 @@ class Rrd
         if ($this->end) {
             array_push($timeframe, '--end', $this->end);
         }
-        foreach($this->xport as $def) {
+        foreach ($this->xport as $def) {
             $this->options[] = "XPORT:$def";
         }
 
@@ -45,7 +45,7 @@ class Rrd
         $timestamps = [];
         $output = $proc->getOutput();
         $error = $proc->getErrorOutput();
-        if($error) {
+        if ($error) {
             throw new \Exception($error);
         }
 
@@ -53,7 +53,7 @@ class Rrd
         $current_timestamp = (int) $data->meta->start;
         $step = (int) $data->meta->step;
 
-        foreach($data->data->row as $row) {
+        foreach ($data->data->row as $row) {
             foreach ($this->xport as $index => $def) {
                 $value = (string) $row->v[$index];
                 $xport_data[$def][] = $value == 'NaN' ? null : Number::cast($value);

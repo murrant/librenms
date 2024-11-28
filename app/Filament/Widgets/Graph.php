@@ -32,9 +32,9 @@ class Graph extends ChartWidget
                 [
                     'label' => 'Out Bits/s',
                     'data' => $data['data']['out_bits'],
-                ]
+                ],
             ],
-            'labels' => array_map(fn($timestamp) => Date::createFromTimestamp($timestamp)->toDateTimeString(), $data['timestamps']),
+            'labels' => array_map(fn ($timestamp) => Date::createFromTimestamp($timestamp)->toDateTimeString(), $data['timestamps']),
         ];
     }
 
@@ -43,7 +43,7 @@ class Graph extends ChartWidget
         return 'line';
     }
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'md' => 2,
         'xl' => 3,
     ];
