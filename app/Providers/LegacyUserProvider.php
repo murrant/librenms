@@ -233,4 +233,9 @@ class LegacyUserProvider implements UserProvider
             $user->getAuthPasswordName() => $hasher->make($credentials['password']),
         ])->save();
     }
+
+    public function getModel(): string
+    {
+        return User::class;
+    }
 }

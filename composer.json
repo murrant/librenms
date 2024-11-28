@@ -31,6 +31,7 @@
         "easybook/geshi": "^1.0.8",
         "enshrined/svg-sanitize": "^0.22.0",
         "fico7489/laravel-pivot": "^3.0",
+        "filament/filament": "^4.0",
         "influxdata/influxdb-client-php": "^3.8",
         "influxdb/influxdb-php": "^1.15",
         "justinrainbow/json-schema": "^6.4",
@@ -139,7 +140,8 @@
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan filament:upgrade"
         ],
         "post-root-package-install": "LibreNMS\\ComposerHelper::postRootPackageInstall",
         "post-create-project-cmd": [

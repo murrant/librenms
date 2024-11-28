@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Events\UserCreated;
+use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -19,7 +20,7 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @method static \Database\Factories\UserFactory factory(...$parameters)
  */
-class User extends Authenticatable
+class User extends Authenticatable implements HasName
 {
     use HasFactory;
     use HasPushSubscriptions;
@@ -221,6 +222,11 @@ class User extends Authenticatable
         }
 
         return $this->getRelation('devices');
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->getAttributeValue('realname') ?: $this->getAttributeValue('username');
     }
 
     // ---- Define Relationships ----
