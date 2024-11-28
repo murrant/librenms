@@ -216,4 +216,9 @@ class LegacyUserProvider implements UserProvider
 
         return $user;
     }
+
+    public function getModel(): string
+    {
+        return User::class;
+    }
 }
