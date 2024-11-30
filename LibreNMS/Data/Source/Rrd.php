@@ -24,7 +24,6 @@ class Rrd
 
     public function get(): array
     {
-
     }
 
     public function def(string $label, string $dataset, string $rrd = null, RrdCF $consolidationFunction = RrdCF::AVERAGE): static
@@ -55,7 +54,7 @@ class Rrd
     public function xport(array $defs): ChartData
     {
         // set up XPORT options either ds only or ds => label
-        foreach($defs as $def) {
+        foreach ($defs as $def) {
             $this->options[] = "XPORT:$def:$def";
         }
 
@@ -86,7 +85,7 @@ class Rrd
         $proc->run();
 
         $error = $proc->getErrorOutput();
-        if($error) {
+        if ($error) {
             throw new \Exception($error);
         }
 

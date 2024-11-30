@@ -4,12 +4,12 @@ namespace LibreNMS\Data;
 
 class ChartData
 {
-
     protected function __construct(
         protected string $format,
         protected array $data,
         protected array $map = [],
-    ) {}
+    ) {
+    }
 
     public static function createFromRrd(array $legend, array $data): static
     {
@@ -23,7 +23,7 @@ class ChartData
     }
 
     /**
-     * @param ChartDataset[] $chartDatasets
+     * @param  ChartDataset[]  $chartDatasets
      * @return array
      */
     public function forChartJs(array $chartDatasets): array
@@ -34,15 +34,15 @@ class ChartData
             $timestamp_index = $this->map['_timestamp'];
             $ds = array_diff_key($this->map, ['_timestamp' => null]);
 
-            foreach($this->data as $point) {
-                foreach($ds as $name => $index) {
+            foreach ($this->data as $point) {
+                foreach ($ds as $name => $index) {
                     $data[$name][] = ['x' => (int) $point[$timestamp_index], 'y' => $point[$index]];
                 }
             }
         }
 
         $datasets = [];
-        foreach($chartDatasets as $ds) {
+        foreach ($chartDatasets as $ds) {
             $datasets[] = [
                 'label' => $ds->label,
                 'data' => $data[$ds->name],

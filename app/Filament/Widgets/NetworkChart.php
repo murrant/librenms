@@ -20,8 +20,6 @@ class NetworkChart extends ApexChartWidget
      */
     protected static ?string $heading = 'NetworkChart';
 
-
-
     /**
      * Chart options (series, labels, types, size, animations...)
      * https://apexcharts.com/docs/options

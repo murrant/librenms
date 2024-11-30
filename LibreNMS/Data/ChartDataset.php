@@ -9,5 +9,6 @@ class ChartDataset
         public string $label,
         public ?string $color = null,
         public ?string $fill = null,
-    ){}
+    ) {
+    }
 }

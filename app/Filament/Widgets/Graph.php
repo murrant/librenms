@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use App\Models\Device;
 use Filament\Widgets\ChartWidget;
 use LibreNMS\Data\ChartDataset;
-use LibreNMS\Data\ChartDatasets;
 use LibreNMS\Data\Source\Rrd;
 
 class Graph extends ChartWidget
@@ -44,7 +43,7 @@ class Graph extends ChartWidget
         return 'line';
     }
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'md' => 2,
         'xl' => 3,
     ];
