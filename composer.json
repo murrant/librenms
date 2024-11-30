@@ -39,6 +39,7 @@
         "laravel/framework": "^12.10",
         "laravel/tinker": "^2.10.1",
         "laravel/ui": "^4.6",
+        "leandrocfe/filament-apex-charts": "^4.0",
         "librenms/laravel-vue-i18n-generator": "dev-master",
         "librenms/plugin-interfaces": "^1.0",
         "mews/purifier": "^3.4",
@@ -164,6 +165,6 @@
             "url": "https://opencollective.com/librenms"
         }
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "beta",
     "prefer-stable": true
 }

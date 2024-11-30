@@ -2,40 +2,41 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Device;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Support\Facades\Date;
+use LibreNMS\Data\ChartDataset;
+use LibreNMS\Data\ChartDatasets;
 use LibreNMS\Data\Source\Rrd;
 
 class Graph extends ChartWidget
 {
     protected static ?string $heading = 'Graph';
 
+    protected static ?array $options = [
+        'scales' => [
+            'x' => [
+                'type' => 'timeseries',
+            ],
+        ],
+    ];
+
     protected function getData(): array
     {
-        $port_id = 294;
-        $hostname = 'palmer.rtr.ncn.net';
+        $port_id = 3752;
+        $device_id = 986;
+        $hostname = Device::whereDeviceId($device_id)->value('hostname');
         $rrd = \App\Facades\Rrd::name($hostname, \App\Facades\Rrd::portName($port_id));
-        $data = Rrd::make()
+        $data = Rrd::make(time() - 3600)
             ->def('in_oct', 'INOCTETS', $rrd)
             ->def('out_oct', 'OUTOCTETS', $rrd)
             ->cdef('in_bits', 'in_oct,8,*')
             ->cdef('out_bits', 'out_oct,8,*')
-            ->xport(['in_bits', 'out_bits'])
-            ->get();
+            ->xport(['in_bits', 'out_bits']);
 
-        return [
-            'datasets' => [
-                [
-                    'label' => 'In Bits/s',
-                    'data' => $data['data']['in_bits'],
-                ],
-                [
-                    'label' => 'Out Bits/s',
-                    'data' => $data['data']['out_bits'],
-                ]
-            ],
-            'labels' => array_map(fn($timestamp) => Date::createFromTimestamp($timestamp)->toDateTimeString(), $data['timestamps']),
-        ];
+        return $data->forChartJs([
+            new ChartDataset('in_bits', 'In Bits/s', '#608720', '#90B040'),
+            new ChartDataset('out_bits', 'Out Bits/s', '#606090', '#8080C0'),
+        ]);
     }
 
     protected function getType(): string
