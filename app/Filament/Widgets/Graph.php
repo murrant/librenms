@@ -6,7 +6,7 @@ use App\Models\Device;
 use Filament\Widgets\ChartWidget;
 use LibreNMS\Data\ChartDataset;
 use LibreNMS\Data\ChartDatasets;
-use LibreNMS\Data\Source\Rrd;
+use LibreNMS\Data\Source\RrdCommand;
 
 class Graph extends ChartWidget
 {
@@ -22,11 +22,11 @@ class Graph extends ChartWidget
 
     protected function getData(): array
     {
-        $port_id = 3752;
-        $device_id = 986;
+        $port_id = 294;
+        $device_id = 9;
         $hostname = Device::whereDeviceId($device_id)->value('hostname');
         $rrd = \App\Facades\Rrd::name($hostname, \App\Facades\Rrd::portName($port_id));
-        $data = Rrd::make(time() - 3600)
+        $data = RrdCommand::make(time() - 86400)
             ->def('in_oct', 'INOCTETS', $rrd)
             ->def('out_oct', 'OUTOCTETS', $rrd)
             ->cdef('in_bits', 'in_oct,8,*')
@@ -34,8 +34,8 @@ class Graph extends ChartWidget
             ->xport(['in_bits', 'out_bits']);
 
         return $data->forChartJs([
-            new ChartDataset('in_bits', 'In Bits/s', '#608720', '#90B040'),
-            new ChartDataset('out_bits', 'Out Bits/s', '#606090', '#8080C0'),
+            new ChartDataset('in_bits', 'In Bits/s', '#608720', '#90B04055'),
+            new ChartDataset('out_bits', 'Out Bits/s', '#606090', '#8080C055'),
         ]);
     }
 

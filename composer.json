@@ -44,6 +44,7 @@
         "leandrocfe/filament-apex-charts": "^3.1",
         "librenms/laravel-vue-i18n-generator": "dev-master",
         "librenms/plugin-interfaces": "^1.0",
+        "malzariey/filament-daterangepicker-filter": "^3.1",
         "mews/purifier": "^3.4",
         "nunomaduro/laravel-console-summary": "^1.9",
         "paragonie/sodium_compat": "<2.0",
