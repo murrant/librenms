@@ -44,7 +44,7 @@ class NetworkChart extends ApexChartWidget
 
             TextInput::make('title')
                 ->default('NetworkChart'),
-//                ->reactive(),
+            //                ->reactive(),
 
             DateRangePicker::make('timerange')
                 ->ranges(self::$timeRanges)
@@ -98,7 +98,7 @@ class NetworkChart extends ApexChartWidget
             'series' => $series,
             'xaxis' => [
                 'type' => 'datetime',
-//                'range' => 'XAXISRANGE',
+                //                'range' => 'XAXISRANGE',
                 'labels' => [
                     'style' => [
                         'fontFamily' => 'inherit',
@@ -112,7 +112,7 @@ class NetworkChart extends ApexChartWidget
                     ],
                 ],
             ],
-//            'colors' => ['#82b52d', '#8989c9'],
+            //            'colors' => ['#82b52d', '#8989c9'],
             'stroke' => [
                 'curve' => 'smooth',
             ],
