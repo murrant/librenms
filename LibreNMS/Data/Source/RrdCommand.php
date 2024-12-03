@@ -7,7 +7,7 @@ use LibreNMS\Data\ChartData;
 use LibreNMS\Enum\RrdCF;
 use Symfony\Component\Process\Process;
 
-class Rrd
+class RrdCommand
 {
     private array $options = [];
 

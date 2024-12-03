@@ -4,7 +4,6 @@ namespace LibreNMS\Data;
 
 class ChartData
 {
-
     protected function __construct(
         protected string $format,
         protected array $data,
@@ -36,7 +35,7 @@ class ChartData
 
             foreach($this->data as $point) {
                 foreach($ds as $name => $index) {
-                    $data[$name][] = ['x' => (int) $point[$timestamp_index], 'y' => $point[$index]];
+                    $data[$name][] = ['x' => (int) $point[$timestamp_index] * 1000, 'y' => $point[$index]];
                 }
             }
         }
@@ -55,5 +54,34 @@ class ChartData
         return [
             'datasets' => $datasets,
         ];
+    }
+
+    /**
+     * @param ChartDataset[] $chartDatasets
+     * @return array
+     */
+    public function forApexCharts(array $chartDatasets): array
+    {
+        $output = [];
+
+        if ($this->format == 'grouped_by_point') {
+            $timestamp_index = $this->map['_timestamp'];
+            $ds = array_diff_key($this->map, ['_timestamp' => null]);
+
+            // set up chart dataset labels
+            foreach ($chartDatasets as $chartDataset) {
+                $output[$ds[$chartDataset->name]]['name'] = $chartDataset->label;
+                $output[$ds[$chartDataset->name]]['color'] = $chartDataset->color;
+            }
+
+
+            foreach($this->data as $point) {
+                foreach($ds as $name => $index) {
+                    $output[$index]['data'][] = [(int) $point[$timestamp_index] * 1000, $point[$index]];
+                }
+            }
+        }
+
+        return array_values($output);
     }
 }
