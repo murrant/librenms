@@ -15,7 +15,7 @@ class DeviceTypeCounts extends BaseWidget
             ->select('type', DB::raw('count(*) total'))
             ->groupBy('type')
             ->get()
-            ->map(fn($t) => Stat::make(Str::title($t->type ?: 'None'), $t->total))
+            ->map(fn ($t) => Stat::make(Str::title($t->type ?: 'None'), $t->total))
             ->all();
     }
 }
