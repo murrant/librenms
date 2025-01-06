@@ -30,7 +30,7 @@ class IndexField extends YamlDiscoveryField
     public function handle(array $yaml, array $data, string $index, int $count): mixed
     {
         if (isset($yaml[$this->key])) {
-           return parent::handle($yaml, $data, $index, $count);
+            return parent::handle($yaml, $data, $index, $count);
         }
 
         return $index;

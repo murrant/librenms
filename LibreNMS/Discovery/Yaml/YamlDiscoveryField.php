@@ -33,11 +33,12 @@ class YamlDiscoveryField
     public bool $isOid = false;
 
     public function __construct(
-        public readonly string    $key,
-        public readonly ?string   $model_column = null,
-        public readonly ?string   $default = null,
+        public readonly string $key,
+        public readonly ?string $model_column = null,
+        public readonly ?string $default = null,
         public readonly ?\Closure $callback = null,
-    ) {}
+    ) {
+    }
 
     public function handle(array $yaml, array $data, string $index, int $count): mixed
     {

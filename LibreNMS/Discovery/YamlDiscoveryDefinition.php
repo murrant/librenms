@@ -46,7 +46,6 @@ class YamlDiscoveryDefinition
     public function __construct(
         private readonly string $model,
     ) {
-
     }
 
     public static function make(string $model): static

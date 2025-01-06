@@ -209,7 +209,7 @@ class Mempools implements Module
 
             if ($system !== null) {
                 $old = Number::formatBi($system->mempool_free);
-                $system->fillUsage(($system->mempool_used - $buffers - $cached), $system->mempool_total, multiplier: 1);
+                $system->fillUsage($system->mempool_used - $buffers - $cached, $system->mempool_total, multiplier: 1);
                 $new = Number::formatBi($system->mempool_free);
                 Log::debug("Free memory adjusted by availability calculation: {$old} -> {$new}\n");
             }

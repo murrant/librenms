@@ -36,7 +36,6 @@ use LibreNMS\Util\Oid;
 
 trait YamlMempoolsDiscovery
 {
-
     public function discoverYamlMempools()
     {
         $mempools_yaml = $this->getDiscovery('mempools');
@@ -46,11 +45,11 @@ trait YamlMempoolsDiscovery
             ->addField(new YamlDiscoveryField('type', 'mempool_type', $this->getName()))
             ->addField(new YamlDiscoveryField('class', 'mempool_class', 'system'))
             ->addField(new YamlDiscoveryField('precision', 'mempool_precision', 1))
-            ->addField(new YamlDiscoveryField('descr', 'mempool_descr', 'Memory', callback: fn($value) => ucwords($value)))
-            ->addField(new OidField('used','mempool_used'))
-            ->addField(new OidField('free','mempool_free'))
-            ->addField(new OidField('total','mempool_total'))
-            ->addField(new OidField('percent_used','mempool_prec'))
+            ->addField(new YamlDiscoveryField('descr', 'mempool_descr', 'Memory', callback: fn ($value) => ucwords($value)))
+            ->addField(new OidField('used', 'mempool_used'))
+            ->addField(new OidField('free', 'mempool_free'))
+            ->addField(new OidField('total', 'mempool_total'))
+            ->addField(new OidField('percent_used', 'mempool_prec'))
             ->addField(new YamlDiscoveryField('warn_percent', 'mempool_perc_warn', 90))
             ->afterEach(function (Mempool $mempool, YamlDiscoveryDefinition $def, $yaml, $index) {
                 // fill numeric oid that should be polled
