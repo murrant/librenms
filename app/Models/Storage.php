@@ -64,16 +64,19 @@ class Storage extends DeviceRelatedModel implements Keyable
         // filter by type
         if (LibrenmsConfig::get('ignore_mount_removable', false) && $this->storage_type == 'hrStorageRemovableDisk') {
             d_echo("skip(removable)\n");
+
             return false;
         }
 
         if (LibrenmsConfig::get('ignore_mount_network', false) && $this->storage_type == 'hrStorageNetworkDisk') {
             d_echo("skip(network)\n");
+
             return false;
         }
 
         if (LibrenmsConfig::get('ignore_mount_optical', false) && $this->storage_type == 'hrStorageCompactDisc') {
             d_echo("skip(cd)\n");
+
             return false;
         }
 
