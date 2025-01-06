@@ -136,11 +136,16 @@ class Storage implements \LibreNMS\Interfaces\Module
      */
     public function cleanup(Device $device): int
     {
-        // TODO: Implement cleanup() method.
+        return $device->storage()->delete();
     }
 
     public function dump(Device $device, string $type): ?array
     {
-        return [];
+        return [
+            'storage' => $device->storage()
+                ->orderBy('storage_index')
+                ->orderBy('storage_type')
+                ->get()->map->makeHidden(['device_id', 'storage_id']),
+        ];
     }
 }
