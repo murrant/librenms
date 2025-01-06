@@ -64,7 +64,6 @@ class Storage implements \LibreNMS\Interfaces\Module
         return $status->isEnabledAndDeviceUp($os->getDevice());
     }
 
-
     /**
      * @inheritDoc
      */
@@ -100,8 +99,8 @@ class Storage implements \LibreNMS\Interfaces\Module
             echo $percent . '% ';
 
             $fields = [
-                'used'   => $storage['used'],
-                'free'   => $storage['free'],
+                'used' => $storage['used'],
+                'free' => $storage['free'],
             ];
 
             $tags = [

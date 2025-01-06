@@ -231,9 +231,10 @@ class Number
      * If a number is less than 0, assume it has overflowed 32bit INT_MAX
      * And try to correct the value by adding INT_MAX
      *
-     * @param int $value The value to correct
-     * @param  int|null  $max an upper bounds on the corrected value
+     * @param  int  $value  The value to correct
+     * @param  int|null  $max  an upper bounds on the corrected value
      * @return int
+     *
      * @throws \Exception
      */
     public static function correctIntegerOverflow($value, ?int $max = null): int

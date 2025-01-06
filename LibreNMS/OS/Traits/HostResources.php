@@ -213,6 +213,7 @@ trait HostResources
         })->map(function ($storage) {
             $units = $storage['hrStorageAllocationUnits'];
             $index = $storage['hrStorageIndex'];
+
             return new Storage([
                 'storage_mib' => 'hrstorage',
                 'storage_index' => $index,
