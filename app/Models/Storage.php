@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Facades\LibrenmsConfig;
 use Illuminate\Support\Str;
 use LibreNMS\Interfaces\Models\Keyable;
 
@@ -9,6 +10,7 @@ class Storage extends DeviceRelatedModel implements Keyable
 {
     protected $table = 'storage';
     protected $primaryKey = 'storage_id';
+    public $timestamps = false;
     protected $fillable = [
         'storage_mib',
         'storage_index',
@@ -32,10 +34,10 @@ class Storage extends DeviceRelatedModel implements Keyable
         return "$this->storage_mib-$this->storage_index";
     }
 
-    public function isValid(string $os)
+    public function isValid(string $os): bool
     {
         // filter by mounts ignores
-        foreach (\LibreNMS\Config::getCombined($os, 'ignore_mount', []) as $im) {
+        foreach (LibrenmsConfig::getCombined($os, 'ignore_mount') as $im) {
             if ($im == $this->storage_descr) {
                 d_echo("ignored $this->storage_descr (matched: $im)\n");
 
@@ -43,7 +45,7 @@ class Storage extends DeviceRelatedModel implements Keyable
             }
         }
 
-        foreach (\LibreNMS\Config::getCombined($os, 'ignore_mount_string', []) as $ims) {
+        foreach (LibrenmsConfig::getCombined($os, 'ignore_mount_string') as $ims) {
             if (Str::contains($this->storage_descr, $ims)) {
                 d_echo("ignored $this->storage_descr (matched: $ims)\n");
 
@@ -51,7 +53,7 @@ class Storage extends DeviceRelatedModel implements Keyable
             }
         }
 
-        foreach (\LibreNMS\Config::getCombined($os, 'ignore_mount_regexp', []) as $imr) {
+        foreach (LibrenmsConfig::getCombined($os, 'ignore_mount_regexp') as $imr) {
             if (preg_match($imr, $this->storage_descr)) {
                 d_echo("ignored $this->storage_descr (matched: $imr)\n");
 
@@ -60,17 +62,17 @@ class Storage extends DeviceRelatedModel implements Keyable
         }
 
         // filter by type
-        if (\LibreNMS\Config::get('ignore_mount_removable', false) && $this->storage_type == 'hrStorageRemovableDisk') {
+        if (LibrenmsConfig::get('ignore_mount_removable', false) && $this->storage_type == 'hrStorageRemovableDisk') {
             d_echo("skip(removable)\n");
             return false;
         }
 
-        if (\LibreNMS\Config::get('ignore_mount_network', false) && $this->storage_type == 'hrStorageNetworkDisk') {
+        if (LibrenmsConfig::get('ignore_mount_network', false) && $this->storage_type == 'hrStorageNetworkDisk') {
             d_echo("skip(network)\n");
             return false;
         }
 
-        if (\LibreNMS\Config::get('ignore_mount_optical', false) && $this->storage_type == 'hrStorageCompactDisc') {
+        if (LibrenmsConfig::get('ignore_mount_optical', false) && $this->storage_type == 'hrStorageCompactDisc') {
             d_echo("skip(cd)\n");
             return false;
         }

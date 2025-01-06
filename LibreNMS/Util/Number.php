@@ -247,6 +247,6 @@ class Number
             }
         }
 
-        return $value;
+        return (int) $value;
     }
 }
