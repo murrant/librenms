@@ -74,7 +74,7 @@ class Storage implements \LibreNMS\Interfaces\Module
             d_echo($storage);
 
             if ($storage['size']) {
-                $percent = round(($storage['used'] / $storage['size'] * 100));
+                $percent = round($storage['used'] / $storage['size'] * 100);
             } else {
                 $percent = 0;
             }
@@ -82,8 +82,8 @@ class Storage implements \LibreNMS\Interfaces\Module
             echo $percent . '% ';
 
             $fields = [
-                'used'   => $storage['used'],
-                'free'   => $storage['free'],
+                'used' => $storage['used'],
+                'free' => $storage['free'],
             ];
 
             $tags = compact('mib', 'descr', 'rrd_name', 'rrd_def');
