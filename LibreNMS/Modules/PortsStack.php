@@ -75,8 +75,8 @@ class PortsStack implements Module
 
         $ifIndexToPortIdMap = $os->getDevice()->ports()->pluck('port_id', 'ifIndex')->toArray();
 
-        $portStacks = $data->mapTable(function ($data, $lowIfIndex, $highIfIndex) use ($ifIndexToPortIdMap) {
-            if ($lowIfIndex == '0' || $highIfIndex == '0') {
+        $portStacks = $data->mapTable(function ($data, $lowIfIndex, $highIfIndex = null) use ($ifIndexToPortIdMap) {
+            if ($highIfIndex == null || $lowIfIndex == '0' || $highIfIndex == '0') {
                 return null;  // we don't care about the default entries for ports that have stacking enabled
             }
 
