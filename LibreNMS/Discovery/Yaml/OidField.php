@@ -28,5 +28,4 @@ namespace LibreNMS\Discovery\Yaml;
 class OidField extends YamlDiscoveryField
 {
     public bool $isOid = true;
-
 }

@@ -422,10 +422,10 @@ class YamlDiscovery
     }
 
     /**
-     * @param array $yaml
-     * @param string $model
-     * @param array $fields<\LibreNMS\Polling\DiscoveryItem>
-     * @param array $attributes
+     * @param  array  $yaml
+     * @param  string  $model
+     * @param  array  $fields<\LibreNMS\Polling\DiscoveryItem>
+     * @param  array  $attributes
      * @return Collection
      */
     public static function from(array $yaml, string $model, array $fields, array $attributes = [], callable $callback = null): Collection
@@ -458,7 +458,7 @@ class YamlDiscovery
                         dump($field->value);
 
                         // record numeric oid for polling
-                        if ( $field->oid_column && $field->value !== null) {
+                        if ($field->oid_column && $field->value !== null) {
                             $modelAttributes[$field->oid_column] = Oid::toNumeric($yamlItem[$key]) . '.' . $index;
                         }
                     }
