@@ -48,7 +48,6 @@ class YamlDiscoveryDefinition
     public function __construct(
         private readonly string $model,
     ) {
-
     }
 
     public static function make(string $model): static
@@ -144,8 +143,8 @@ class YamlDiscoveryDefinition
     {
         $poller_fields = $this->getPollerFields();
 
-        foreach($this->fields as $field) {
-            if($field->isOid) {
+        foreach ($this->fields as $field) {
+            if ($field->isOid) {
                 $num_oid = null;
 
                 if (in_array($field, $poller_fields)) {
