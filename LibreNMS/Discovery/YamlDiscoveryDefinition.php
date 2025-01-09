@@ -176,6 +176,5 @@ class YamlDiscoveryDefinition
                 $modelAttributes[$field->model_column . '_oid'] = $num_oid;
             }
         }
-
     }
 }
