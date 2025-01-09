@@ -33,7 +33,6 @@ use LibreNMS\Discovery\YamlDiscoveryDefinition;
 
 trait YamlMempoolsDiscovery
 {
-
     public function discoverYamlMempools(): \Illuminate\Support\Collection
     {
         $mempools_yaml = $this->getDiscovery('mempools');
@@ -43,11 +42,11 @@ trait YamlMempoolsDiscovery
             ->addField(new YamlDiscoveryField('type', 'mempool_type', $this->getName()))
             ->addField(new YamlDiscoveryField('class', 'mempool_class', 'system'))
             ->addField(new YamlDiscoveryField('precision', 'mempool_precision', 1))
-            ->addField(new YamlDiscoveryField('descr', 'mempool_descr', 'Memory', callback: fn($value) => ucwords($value)))
-            ->addField(new OidField('used','mempool_used'))
-            ->addField(new OidField('free','mempool_free'))
-            ->addField(new OidField('total','mempool_total', should_poll: false))
-            ->addField(new OidField('percent_used','mempool_perc'))
+            ->addField(new YamlDiscoveryField('descr', 'mempool_descr', 'Memory', callback: fn ($value) => ucwords($value)))
+            ->addField(new OidField('used', 'mempool_used'))
+            ->addField(new OidField('free', 'mempool_free'))
+            ->addField(new OidField('total', 'mempool_total', should_poll: false))
+            ->addField(new OidField('percent_used', 'mempool_perc'))
             ->addField(new YamlDiscoveryField('warn_percent', 'mempool_perc_warn', 90))
             ->afterEach(function (Mempool $mempool, YamlDiscoveryDefinition $def, $yaml, $index) {
                 // fill missing values
