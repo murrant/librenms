@@ -49,7 +49,6 @@ class YamlDiscoveryDefinition
     public function __construct(
         private readonly string $model,
     ) {
-
     }
 
     public static function make(string $model): static
@@ -162,8 +161,8 @@ class YamlDiscoveryDefinition
 
     private function fillNumericOids(array &$modelAttributes, array $yaml, int|string $index): void
     {
-        foreach($this->fields as $field) {
-            if($field->isOid) {
+        foreach ($this->fields as $field) {
+            if ($field->isOid) {
                 $num_oid = null;
 
                 if (call_user_func($field->should_poll, $this)) {

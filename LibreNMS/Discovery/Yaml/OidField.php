@@ -37,9 +37,9 @@ class OidField extends YamlDiscoveryField
 
         // should poll heuristic
         if (is_bool($should_poll)) {
-            $this->should_poll = fn(YamlDiscoveryDefinition $def) => $should_poll;
+            $this->should_poll = fn (YamlDiscoveryDefinition $def) => $should_poll;
         } elseif ($should_poll === null) {
-            $this->should_poll = fn(YamlDiscoveryDefinition $def) => $this->value !== null;
+            $this->should_poll = fn (YamlDiscoveryDefinition $def) => $this->value !== null;
         } else {
             $this->should_poll = $should_poll;
         }
