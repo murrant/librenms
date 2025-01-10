@@ -48,7 +48,6 @@ class YamlDiscoveryDefinition
     public function __construct(
         private readonly string $model,
     ) {
-
     }
 
     public static function make(string $model): static
@@ -109,7 +108,7 @@ class YamlDiscoveryDefinition
                 }
             } else {
                 [$numeric_oids, $oids] = collect($yamlItem)->only(collect($this->fields)->where('isOid')->keys())
-                        ->partition(fn($oid) => Oid::of($oid)->isNumeric())->toArray();
+                        ->partition(fn ($oid) => Oid::of($oid)->isNumeric())->toArray();
             }
 
             $snmp_data = [];
@@ -182,8 +181,8 @@ class YamlDiscoveryDefinition
 
     private function fillNumericOids(array &$modelAttributes, array $yaml, int|string $index): void
     {
-        foreach($this->fields as $field) {
-            if($field->isOid) {
+        foreach ($this->fields as $field) {
+            if ($field->isOid) {
                 $num_oid = null;
 
                 if (call_user_func($field->should_poll, $this)) {
