@@ -84,6 +84,7 @@ class OS implements
     use UcdResources {
         UcdResources::discoverProcessors as discoverUcdProcessors;
         UcdResources::discoverMempools as discoverUcdMempools;
+        UcdResources::discoverStorage as discoverUcdStorage;
     }
     use YamlOSDiscovery;
     use YamlMempoolsDiscovery;
@@ -360,7 +361,12 @@ class OS implements
             return $this->discoverYamlStorage();
         }
 
-        return $this->discoverHrStorage();
+        $storage = $this->discoverHrStorage();
+        if ($storage->isNotEmpty()) {
+            return $storage;
+        }
+
+        return $this->discoverUcdStorage();
     }
 
     public function getDiscovery($module = null)
