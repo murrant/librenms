@@ -4172,7 +4172,8 @@
                 "/proc",
                 "/dev",
                 "/compat/linux/proc",
-                "/compat/linux/sys"
+                "/compat/linux/sys",
+                "/sys/fs/cgroup"
             ],
             "type": "array"
         },
@@ -4202,7 +4203,8 @@
                 "/^\\/dev\\/md0/",
                 "/^\\/var\\/dhcpd\\/dev/",
                 "/UMA/",
-                "/^\\/Volumes\\/OS X Base System/"
+                "/^\\/Volumes\\/OS X Base System/",
+                "/^\\/run\\/user\\//"
             ],
             "type": "array",
             "validate": {
