@@ -26,7 +26,7 @@ class ConvertStorageData extends Command
      */
     public function handle()
     {
-        foreach(glob(base_path('tests/data/*.json')) as $file) {
+        foreach (glob(base_path('tests/data/*.json')) as $file) {
             $data = json_decode(file_get_contents($file), true);
 
             if (empty($data['storage'])) {
@@ -76,8 +76,7 @@ class ConvertStorageData extends Command
                 }
             }
 
-
-            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 //            $this->info('updated: ' . basename($file));
         }
     }
