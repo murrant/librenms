@@ -36,6 +36,7 @@ use LibreNMS\Interfaces\Discovery\Sensors\WirelessUtilizationDiscovery;
 use LibreNMS\Interfaces\Polling\Sensors\WirelessCcqPolling;
 use LibreNMS\Interfaces\Polling\Sensors\WirelessFrequencyPolling;
 use LibreNMS\OS;
+use SnmpQuery;
 
 class Unifi extends OS implements
     ProcessorDiscovery,
