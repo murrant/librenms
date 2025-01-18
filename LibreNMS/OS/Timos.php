@@ -49,6 +49,7 @@ use LibreNMS\Interfaces\Discovery\Sensors\WirelessSnrDiscovery;
 use LibreNMS\Interfaces\Polling\MplsPolling;
 use LibreNMS\OS;
 use LibreNMS\RRD\RrdDefinition;
+use SnmpQuery;
 
 class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDiscovery, WirelessSnrDiscovery, WirelessRsrqDiscovery, WirelessRssiDiscovery, WirelessRsrpDiscovery, WirelessChannelDiscovery
 {
@@ -874,7 +875,7 @@ class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDisco
         $sensors = [];
 
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'tmnxCellPortSinr', [], 'TIMETRA-CELLULAR-MIB');
-        $carrier = SnmpQuery::hideMib()->walk('IF-MIB::oid')->table(1);
+        $carrier = SnmpQuery::cache()->walk('IF-MIB::ifName')->table(1);
         foreach ($data as $index => $entry) {
             $sensors[] = new WirelessSensor(
                 'snr',
@@ -882,7 +883,7 @@ class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDisco
                 '.1.3.6.1.4.1.6527.3.1.2.109.3.1.1.1.12.' . $index,
                 'timos',
                 $index,
-                'SNR: ' . $carrier[$index]['ifName'],
+                'SNR: ' . $carrier[$index]['IF-MIB::ifName'],
                 null,
                 1,
                 10
@@ -897,7 +898,7 @@ class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDisco
         $sensors = [];
 
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'tmnxCellPortRsrq', [], 'TIMETRA-CELLULAR-MIB');
-        $carrier = SnmpQuery::hideMib()->walk('IF-MIB::oid')->table(1);
+        $carrier = SnmpQuery::cache()->walk('IF-MIB::ifName')->table(1);
         foreach ($data as $index => $entry) {
             $sensors[] = new WirelessSensor(
                 'rsrq',
@@ -905,7 +906,7 @@ class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDisco
                 '.1.3.6.1.4.1.6527.3.1.2.109.3.1.1.1.11.' . $index,
                 'timos',
                 $index,
-                'RSRQ: ' . $carrier[$index]['ifName'],
+                'RSRQ: ' . $carrier[$index]['IF-MIB::ifName'],
                 null,
                 1,
                 1
@@ -920,7 +921,7 @@ class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDisco
         $sensors = [];
 
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'tmnxCellPortRssi', [], 'TIMETRA-CELLULAR-MIB');
-        $carrier = SnmpQuery::hideMib()->walk('IF-MIB::oid')->table(1);
+        $carrier = SnmpQuery::cache()->walk('IF-MIB::ifName')->table(1);
         foreach ($data as $index => $entry) {
             $sensors[] = new WirelessSensor(
                 'rssi',
@@ -928,7 +929,7 @@ class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDisco
                 '.1.3.6.1.4.1.6527.3.1.2.109.3.1.1.1.8.' . $index,
                 'timos',
                 $index,
-                'RSSI: ' . $carrier[$index]['ifName']
+                'RSSI: ' . $carrier[$index]['IF-MIB::ifName']
             );
         }
 
@@ -940,7 +941,7 @@ class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDisco
         $sensors = [];
 
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'tmnxCellPortRsrp', [], 'TIMETRA-CELLULAR-MIB');
-        $carrier = SnmpQuery::hideMib()->walk('IF-MIB::oid')->table(1);
+        $carrier = SnmpQuery::cache()->walk('IF-MIB::ifName')->table(1);
         foreach ($data as $index => $entry) {
             $sensors[] = new WirelessSensor(
                 'rsrp',
@@ -948,7 +949,7 @@ class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDisco
                 '.1.3.6.1.4.1.6527.3.1.2.109.3.1.1.1.9.' . $index,
                 'timos',
                 $index,
-                'RSRP: ' . $carrier[$index]['ifName']
+                'RSRP: ' . $carrier[$index]['IF-MIB::ifName']
             );
         }
 
@@ -960,7 +961,7 @@ class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDisco
         $sensors = [];
 
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'tmnxCellPortChannelNumber', [], 'TIMETRA-CELLULAR-MIB');
-        $carrier = SnmpQuery::hideMib()->walk('IF-MIB::oid')->table(1);
+        $carrier = SnmpQuery::cache()->walk('IF-MIB::ifName')->table(1);
         foreach ($data as $index => $entry) {
             $sensors[] = new WirelessSensor(
                 'channel',
@@ -968,7 +969,7 @@ class Timos extends OS implements MplsDiscovery, MplsPolling, WirelessPowerDisco
                 '.1.3.6.1.4.1.6527.3.1.2.109.3.1.1.1.5.' . $index,
                 'timos',
                 $index,
-                'CHANNEL: ' . $carrier[$index]['ifName'],
+                'CHANNEL: ' . $carrier[$index]['IF-MIB::ifName'],
                 null,
                 1,
                 1
