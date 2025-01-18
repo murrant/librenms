@@ -75,14 +75,14 @@ trait HostResources
         $processors = [];
 
         try {
-            $hrProcessorLoad = SnmpQuery::cache()->walk("HOST-RESOURCES-MIB::hrProcessorLoad")->pluck();
+            $hrProcessorLoad = SnmpQuery::cache()->walk('HOST-RESOURCES-MIB::hrProcessorLoad')->pluck();
 
             if (empty($hrProcessorLoad)) {
                 // no hr data, return
                 return [];
             }
 
-            $hrDeviceDescr = SnmpQuery::cache()->walk("HOST-RESOURCES-MIB::hrDeviceDescr")->pluck();
+            $hrDeviceDescr = SnmpQuery::cache()->walk('HOST-RESOURCES-MIB::hrDeviceDescr')->pluck();
         } catch (Exception $e) {
             return [];
         }
@@ -145,7 +145,7 @@ trait HostResources
 
     public function discoverMempools()
     {
-        $hr_storage = SnmpQuery::hideMib()->walk("HOST-RESOURCES-MIB:HOST-RESOURCES-TYPES::oid")->table(1);
+        $hr_storage = SnmpQuery::hideMib()->walk('HOST-RESOURCES-MIB:HOST-RESOURCES-TYPES::oid')->table(1);
 
         if (! is_array($hr_storage)) {
             return new Collection();
