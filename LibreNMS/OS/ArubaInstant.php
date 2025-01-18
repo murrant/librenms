@@ -75,7 +75,7 @@ class ArubaInstant extends OS implements
     {
         $processors = [];
         $ai_mib = 'AI-AP-MIB';
-        $ai_ap_data = $this->getCacheTable('aiAccessPointEntry', $ai_mib);
+        $ai_ap_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
 
         foreach ($ai_ap_data as $ai_ap => $ai_ap_oid) {
             $value = $ai_ap_oid['aiAPCPUUtilization'];
@@ -103,11 +103,11 @@ class ArubaInstant extends OS implements
 
         if (intval(explode('.', $device['version'])[0]) >= 8 && intval(explode('.', $device['version'])[1]) >= 4) {
             // version is at least 8.4.0.0
-            $ssid_data = $this->getCacheTable('aiWlanSSIDEntry', $ai_mib);
+            $ssid_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
 
             $ap_data = array_merge_recursive(
-                $this->getCacheTable('aiAccessPointEntry', $ai_mib),
-                $this->getCacheTable('aiRadioClientNum', $ai_mib)
+                SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1),
+                SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1)
             );
 
             $oids = [];
@@ -139,7 +139,7 @@ class ArubaInstant extends OS implements
         } else {
             // version is lower than 8.4.0.0
             // fetch the MAC addresses of currently connected clients, then count them to get an overall total
-            $client_data = $this->getCacheTable('aiClientMACAddress', $ai_mib);
+            $client_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
 
             $total_clients = count($client_data);
 
@@ -162,7 +162,7 @@ class ArubaInstant extends OS implements
     {
         $sensors = [];
         $ai_mib = 'AI-AP-MIB';
-        $ap_data = $this->getCacheTable('aiAPSerialNum', $ai_mib);
+        $ap_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
 
         $total_aps = count($ap_data);
 
@@ -231,11 +231,11 @@ class ArubaInstant extends OS implements
     {
         $ai_mib = 'AI-AP-MIB';
         $ai_sg_data = array_merge_recursive(
-            $this->getCacheTable('aiAPSerialNum', $ai_mib),
-            $this->getCacheTable('aiRadioChannel', $ai_mib),
-            $this->getCacheTable('aiRadioNoiseFloor', $ai_mib),
-            $this->getCacheTable('aiRadioTransmitPower', $ai_mib),
-            $this->getCacheTable('aiRadioUtilization64', $ai_mib)
+            SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1),
+            SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1),
+            SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1),
+            SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1),
+            SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1)
         );
 
         $sensors = [];
@@ -316,7 +316,7 @@ class ArubaInstant extends OS implements
                 // version is lower than 8.4.0.0
                 if (! empty($sensors) && count($sensors) == 1) {
                     $ai_mib = 'AI-AP-MIB';
-                    $client_data = $this->getCacheTable('aiClientMACAddress', $ai_mib);
+                    $client_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
 
                     if (empty($client_data)) {
                         $total_clients = 0;
@@ -344,7 +344,7 @@ class ArubaInstant extends OS implements
         $data = [];
         if (! empty($sensors) && count($sensors) == 1) {
             $ai_mib = 'AI-AP-MIB';
-            $ap_data = $this->getCacheTable('aiAPSerialNum', $ai_mib);
+            $ap_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
 
             $total_aps = 0;
 

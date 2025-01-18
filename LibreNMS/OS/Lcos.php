@@ -72,7 +72,7 @@ class Lcos extends OS implements
     public function discoverWirelessFrequency()
     {
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'lcsStatusWlanRadiosEntryRadioChannel', [], 'LCOS-MIB');
-        $radios = $this->getCacheByIndex('lcsStatusWlanRadiosEntryIfc', 'LCOS-MIB');
+        $radios = SnmpQuery::cache()->walk("LCOS-MIB::lcsStatusWlanRadiosEntryIfc")->pluck();
 
         $sensors = [];
         foreach ($data as $index => $entry) {
@@ -115,7 +115,7 @@ class Lcos extends OS implements
     public function discoverWirelessCapacity()
     {
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'lcsStatusWlanRadiosEntryModemLoad', [], 'LCOS-MIB');
-        $radios = $this->getCacheByIndex('lcsStatusWlanRadiosEntryIfc', 'LCOS-MIB');
+        $radios = SnmpQuery::cache()->walk("LCOS-MIB::lcsStatusWlanRadiosEntryIfc")->pluck();
 
         $sensors = [];
         foreach ($data as $index => $entry) {
@@ -146,7 +146,7 @@ class Lcos extends OS implements
     public function discoverWirelessNoiseFloor()
     {
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'lcsStatusWlanRadiosEntryNoiseLevel', [], 'LCOS-MIB');
-        $radios = $this->getCacheByIndex('lcsStatusWlanRadiosEntryIfc', 'LCOS-MIB');
+        $radios = SnmpQuery::cache()->walk("LCOS-MIB::lcsStatusWlanRadiosEntryIfc")->pluck();
 
         $sensors = [];
         foreach ($data as $index => $entry) {
@@ -177,7 +177,7 @@ class Lcos extends OS implements
     public function discoverWirelessPower()
     {
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'lcsStatusWlanRadiosEntryTransmitPower', [], 'LCOS-MIB');
-        $radios = $this->getCacheByIndex('lcsStatusWlanRadiosEntryIfc', 'LCOS-MIB');
+        $radios = SnmpQuery::cache()->walk("LCOS-MIB::lcsStatusWlanRadiosEntryIfc")->pluck();
 
         $sensors = [];
 
@@ -210,7 +210,7 @@ class Lcos extends OS implements
     {
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'lcsStatusWlanCompetingNetworksEntryPhySignal', [], 'LCOS-MIB');
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'lcsStatusWlanCompetingNetworksEntryInterpointPeerName', $data, 'LCOS-MIB');
-        $bssids = $this->getCacheByIndex('lcsStatusWlanCompetingNetworksEntryBssid', 'LCOS-MIB');
+        $bssids = SnmpQuery::cache()->walk("LCOS-MIB::lcsStatusWlanCompetingNetworksEntryBssid")->pluck();
 
         $sensors = [];
         foreach ($data as $index => $entry) {
@@ -243,7 +243,7 @@ class Lcos extends OS implements
     {
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'lcsStatusWlanCompetingNetworksEntryEffRate', [], 'LCOS-MIB');
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'lcsStatusWlanCompetingNetworksEntryInterpointPeerName', $data, 'LCOS-MIB');
-        $bssids = $this->getCacheByIndex('lcsStatusWlanCompetingNetworksEntryBssid', 'LCOS-MIB');
+        $bssids = SnmpQuery::cache()->walk("LCOS-MIB::lcsStatusWlanCompetingNetworksEntryBssid")->pluck();
 
         $sensors = [];
         foreach ($data as $index => $entry) {
@@ -277,7 +277,7 @@ class Lcos extends OS implements
     {
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'lcsStatusWlanCompetingNetworksEntrySignalLevel', [], 'LCOS-MIB');
         $data = snmpwalk_cache_oid($this->getDeviceArray(), 'lcsStatusWlanCompetingNetworksEntryInterpointPeerName', $data, 'LCOS-MIB');
-        $bssids = $this->getCacheByIndex('lcsStatusWlanCompetingNetworksEntryBssid', 'LCOS-MIB');
+        $bssids = SnmpQuery::cache()->walk("LCOS-MIB::lcsStatusWlanCompetingNetworksEntryBssid")->pluck();
 
         $sensors = [];
 
