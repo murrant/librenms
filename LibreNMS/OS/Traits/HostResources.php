@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use LibreNMS\Device\Processor;
 use Rrd;
+use SnmpQuery;
 
 trait HostResources
 {
@@ -145,9 +146,11 @@ trait HostResources
 
     public function discoverMempools()
     {
-        $hr_storage = SnmpQuery::hideMib()->walk('HOST-RESOURCES-MIB:HOST-RESOURCES-TYPES::oid')->table(1);
+        $hr_storage = SnmpQuery::hideMib()
+            ->mibs(['HOST-RESOURCES-MIB', 'HOST-RESOURCES-TYPES'])
+            ->walk('HOST-RESOURCES-MIB::hrStorageTable')->table(1);
 
-        if (! is_array($hr_storage)) {
+        if (empty($hr_storage)) {
             return new Collection();
         }
 

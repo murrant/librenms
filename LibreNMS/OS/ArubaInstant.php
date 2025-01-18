@@ -45,6 +45,7 @@ use LibreNMS\Interfaces\Polling\Sensors\WirelessFrequencyPolling;
 use LibreNMS\OS;
 use LibreNMS\Util\Mac;
 use LibreNMS\Util\Number;
+use SnmpQuery;
 
 class ArubaInstant extends OS implements
     OSDiscovery,
@@ -74,13 +75,12 @@ class ArubaInstant extends OS implements
     public function discoverProcessors()
     {
         $processors = [];
-        $ai_mib = 'AI-AP-MIB';
-        $ai_ap_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
+        $ai_ap_data = SnmpQuery::hideMib()->walk('AI-AP-MIB::discoverProcessors')->table(1);
 
         foreach ($ai_ap_data as $ai_ap => $ai_ap_oid) {
             $value = $ai_ap_oid['aiAPCPUUtilization'];
             $mac = Mac::parse($ai_ap);
-            $combined_oid = sprintf('%s::%s.%s', $ai_mib, 'aiAPCPUUtilization', $mac->oid());
+            $combined_oid = sprintf('%s::%s.%s', 'AI-AP-MIB', 'aiAPCPUUtilization', $mac->oid());
             $oid = snmp_translate($combined_oid, 'ALL', 'arubaos', '-On');
             $description = $ai_ap_data[$ai_ap]['aiAPSerialNum'];
             $processors[] = Processor::discover('aruba-instant', $this->getDeviceId(), $oid, $mac->hex(), $description, 1, $value);
@@ -99,23 +99,21 @@ class ArubaInstant extends OS implements
     {
         $sensors = [];
         $device = $this->getDeviceArray();
-        $ai_mib = 'AI-AP-MIB';
-
         if (intval(explode('.', $device['version'])[0]) >= 8 && intval(explode('.', $device['version'])[1]) >= 4) {
             // version is at least 8.4.0.0
-            $ssid_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
+            $ssid_data = SnmpQuery::hideMib()->walk('AI-AP-MIB::aiWlanSSIDTable')->table(1);
 
-            $ap_data = array_merge_recursive(
-                SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1),
-                SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1)
-            );
+            $ap_data = SnmpQuery::hideMib()->walk([
+                'AI-AP-MIB::aiAccessPointTable',
+                'AI-AP-MIB::aiRadioClientNum',
+            ])->table(1);
 
             $oids = [];
             $total_clients = 0;
 
             // Clients Per SSID
             foreach ($ssid_data as $index => $entry) {
-                $combined_oid = sprintf('%s::%s.%s', $ai_mib, 'aiSSIDClientNum', $index);
+                $combined_oid = sprintf('%s::%s.%s', 'AI-AP-MIB', 'aiSSIDClientNum', $index);
                 $oid = snmp_translate($combined_oid, 'ALL', 'arubaos', '-On');
                 $description = sprintf('SSID %s Clients', $entry['aiSSID']);
                 $oids[] = $oid;
@@ -129,7 +127,7 @@ class ArubaInstant extends OS implements
             // Clients Per Radio
             foreach ($ap_data as $index => $entry) {
                 foreach ($entry['aiRadioClientNum'] as $radio => $value) {
-                    $combined_oid = sprintf('%s::%s.%s.%s', $ai_mib, 'aiRadioClientNum', Mac::parse($index)->oid(), $radio);
+                    $combined_oid = sprintf('%s::%s.%s.%s', 'AI-AP-MIB', 'aiRadioClientNum', Mac::parse($index)->oid(), $radio);
                     $oid = snmp_translate($combined_oid, 'ALL', 'arubaos', '-On');
                     $description = sprintf('%s Radio %s', $entry['aiAPSerialNum'], $radio);
                     $sensor_index = sprintf('%s.%s', Mac::parse($index)->hex(), $radio);
@@ -139,11 +137,11 @@ class ArubaInstant extends OS implements
         } else {
             // version is lower than 8.4.0.0
             // fetch the MAC addresses of currently connected clients, then count them to get an overall total
-            $client_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
+            $client_data = SnmpQuery::hideMib()->walk('AI-AP-MIB::aiClientMACAddress')->table(1);
 
             $total_clients = count($client_data);
 
-            $combined_oid = sprintf('%s::%s', $ai_mib, 'aiClientMACAddress');
+            $combined_oid = sprintf('%s::%s', 'AI-AP-MIB', 'aiClientMACAddress');
             $oid = snmp_translate($combined_oid, 'ALL', 'arubaos', '-On');
 
             $sensors[] = new WirelessSensor('clients', $this->getDeviceId(), $oid, 'aruba-instant', 'total-clients', 'Total Clients', $total_clients);
@@ -161,12 +159,11 @@ class ArubaInstant extends OS implements
     public function discoverWirelessApCount()
     {
         $sensors = [];
-        $ai_mib = 'AI-AP-MIB';
-        $ap_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
+        $ap_data = SnmpQuery::walk('AI-AP-MIB::aiAPSerialNum')->table(1);
 
         $total_aps = count($ap_data);
 
-        $combined_oid = sprintf('%s::%s', $ai_mib, 'aiAPSerialNum');
+        $combined_oid = sprintf('%s::%s', 'AI-AP-MIB', 'aiAPSerialNum');
         $oid = snmp_translate($combined_oid, 'ALL', 'arubaos', '-On');
 
         $sensors[] = new WirelessSensor('ap-count', $this->getDeviceId(), $oid, 'aruba-instant', 'total-aps', 'Total APs', $total_aps);
@@ -229,14 +226,13 @@ class ArubaInstant extends OS implements
      */
     private function discoverInstantRadio($type, $mib, $desc = '%s Radio %s')
     {
-        $ai_mib = 'AI-AP-MIB';
-        $ai_sg_data = array_merge_recursive(
-            SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1),
-            SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1),
-            SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1),
-            SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1),
-            SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1)
-        );
+        $ai_sg_data = SnmpQuery::cache()->hideMib()->walk([
+            'AI-AP-MIB::aiAPSerialNum',
+            'AI-AP-MIB::aiRadioChannel',
+            'AI-AP-MIB::aiRadioNoiseFloor',
+            'AI-AP-MIB::aiRadioTransmitPower',
+            'AI-AP-MIB::aiRadioUtilization64',
+        ])->table(1);
 
         $sensors = [];
 
@@ -253,7 +249,7 @@ class ArubaInstant extends OS implements
                         $value = $value * $multiplier;
                     }
 
-                    $combined_oid = sprintf('%s::%s.%s.%s', $ai_mib, $mib, Mac::parse($ai_ap)->oid(), $ai_ap_radio);
+                    $combined_oid = sprintf('%s::%s.%s.%s', 'AI-AP-MIB', $mib, Mac::parse($ai_ap)->oid(), $ai_ap_radio);
                     $oid = snmp_translate($combined_oid, 'ALL', 'arubaos', '-On');
                     $description = sprintf($desc, $ai_sg_data[$ai_ap]['aiAPSerialNum'], $ai_ap_radio);
                     $index = sprintf('%s.%s', Mac::parse($ai_ap)->hex(), $ai_ap_radio);
@@ -315,8 +311,7 @@ class ArubaInstant extends OS implements
             } else {
                 // version is lower than 8.4.0.0
                 if (! empty($sensors) && count($sensors) == 1) {
-                    $ai_mib = 'AI-AP-MIB';
-                    $client_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
+                    $client_data = SnmpQuery::walk('AI-AP-MIB::aiClientMACAddress')->table(1);
 
                     if (empty($client_data)) {
                         $total_clients = 0;
@@ -343,8 +338,7 @@ class ArubaInstant extends OS implements
     {
         $data = [];
         if (! empty($sensors) && count($sensors) == 1) {
-            $ai_mib = 'AI-AP-MIB';
-            $ap_data = SnmpQuery::hideMib()->walk("$ai_mib::oid")->table(1);
+            $ap_data = SnmpQuery::walk('AI-AP-MIB::aiAPSerialNum')->table(1);
 
             $total_aps = 0;
 
