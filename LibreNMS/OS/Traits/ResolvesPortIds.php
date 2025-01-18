@@ -87,7 +87,7 @@ trait ResolvesPortIds
     private function basePortToPortIdMap(): array
     {
         if ($this->basePortIdMap === null) {
-            $base = $this->getCacheByIndex('BRIDGE-MIB::dot1dBasePortIfIndex');
+            $base = SnmpQuery::cache()->walk("null::BRIDGE-MIB::dot1dBasePortIfIndex")->pluck();
             $this->basePortIdMap = array_map(function ($ifIndex) {
                 return $this->ifIndexToId($ifIndex);
             }, $base);

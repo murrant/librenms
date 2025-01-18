@@ -77,7 +77,7 @@ class Routeros extends OS implements
     {
         $sensors = [];
 
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWlApTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
         foreach ($data as $index => $entry) {
             // skip sensors with no data (nv2 should report 1 client, but doesn't report ccq)
             if ($entry['mtxrWlApClientCount'] > 0 && $entry['mtxrWlApOverallTxCCQ'] == 0) {
@@ -96,7 +96,7 @@ class Routeros extends OS implements
             );
         }
 
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWlStatTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
         foreach ($data as $index => $entry) {
             $freq = $entry['mtxrWlStatFreq'] ? substr($entry['mtxrWlStatFreq'], 0, 1) . 'G' : 'SSID';
             if (empty($entry['mtxrWlStatTxCCQ']) && empty($entry['mtxrWlStatRxCCQ'])) {
@@ -134,7 +134,7 @@ class Routeros extends OS implements
     public function discoverWirelessClients()
     {
         $sensors = [];
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWlApTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
         foreach ($data as $index => $entry) {
             $freq = $entry['mtxrWlApFreq'] ? substr($entry['mtxrWlApFreq'], 0, 1) . 'G' : 'SSID';
 
@@ -161,7 +161,7 @@ class Routeros extends OS implements
     public function discoverWirelessFrequency()
     {
         $sensors = [];
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWlApTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
         foreach ($data as $index => $entry) {
             if ($entry['mtxrWlApFreq'] === '0') {
                 continue;
@@ -178,7 +178,7 @@ class Routeros extends OS implements
             );
         }
 
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWlStatTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
         foreach ($data as $index => $entry) {
             if ($entry['mtxrWlStatFreq'] === '0') {
                 continue;
@@ -195,7 +195,7 @@ class Routeros extends OS implements
             );
         }
 
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWl60GTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
         foreach ($data as $index => $entry) {
             $sensors[] = new WirelessSensor(
                 'frequency',
@@ -220,7 +220,7 @@ class Routeros extends OS implements
     public function discoverWirelessRssi()
     {
         $sensors = [];
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWl60GTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
 
         foreach ($data as $index => $entry) {
             $sensors[] = new WirelessSensor(
@@ -246,7 +246,7 @@ class Routeros extends OS implements
     public function discoverWirelessQuality()
     {
         $sensors = [];
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWl60GTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
 
         foreach ($data as $index => $entry) {
             $sensors[] = new WirelessSensor(
@@ -271,7 +271,7 @@ class Routeros extends OS implements
     public function discoverWirelessNoiseFloor()
     {
         $sensors = [];
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWlApTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
 
         foreach ($data as $index => $entry) {
             $freq = $entry['mtxrWlApFreq'] ? substr($entry['mtxrWlApFreq'], 0, 1) . 'G' : 'SSID';
@@ -300,7 +300,7 @@ class Routeros extends OS implements
     {
         $sensors = [];
 
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWlApTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
         foreach ($data as $index => $entry) {
             if ($entry['mtxrWlApTxRate'] === '0' && $entry['mtxrWlApRxRate'] === '0') {
                 continue;  // no data
@@ -327,7 +327,7 @@ class Routeros extends OS implements
             );
         }
 
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWlStatTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
         foreach ($data as $index => $entry) {
             if ($entry['mtxrWlStatTxRate'] === '0' && $entry['mtxrWlStatRxRate'] === '0') {
                 continue;  // no data
@@ -353,7 +353,7 @@ class Routeros extends OS implements
             );
         }
 
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWl60GTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
         foreach ($data as $index => $entry) {
             $sensors[] = new WirelessSensor(
                 'rate',
@@ -380,7 +380,7 @@ class Routeros extends OS implements
     {
         $sensors = [];
 
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrWl60GStaTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
         foreach ($data as $index => $entry) {
             $sensors[] = new WirelessSensor(
                 'distance',
@@ -406,11 +406,11 @@ class Routeros extends OS implements
      */
     public function discoverWirelessRsrq()
     {
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrLTEModemTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
 
         $sensors = [];
         foreach ($data as $index => $entry) {
-            $name = $this->getCacheByIndex('MIKROTIK-MIB::mtxrInterfaceStatsName');
+            $name = SnmpQuery::cache()->walk("null::MIKROTIK-MIB::mtxrInterfaceStatsName")->pluck();
             $sensors[] = new WirelessSensor(
                 'rsrq',
                 $this->getDeviceId(),
@@ -433,11 +433,11 @@ class Routeros extends OS implements
      */
     public function discoverWirelessRsrp()
     {
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrLTEModemTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
 
         $sensors = [];
         foreach ($data as $index => $entry) {
-            $name = $this->getCacheByIndex('MIKROTIK-MIB::mtxrInterfaceStatsName');
+            $name = SnmpQuery::cache()->walk("null::MIKROTIK-MIB::mtxrInterfaceStatsName")->pluck();
             $sensors[] = new WirelessSensor(
                 'rsrp',
                 $this->getDeviceId(),
@@ -460,11 +460,11 @@ class Routeros extends OS implements
      */
     public function discoverWirelessSinr()
     {
-        $data = $this->getCacheTable('MIKROTIK-MIB::mtxrLTEModemTable');
+        $data = SnmpQuery::hideMib()->walk("null::oid")->table(1);
 
         $sensors = [];
         foreach ($data as $index => $entry) {
-            $name = $this->getCacheByIndex('MIKROTIK-MIB::mtxrInterfaceStatsName');
+            $name = SnmpQuery::cache()->walk("null::MIKROTIK-MIB::mtxrInterfaceStatsName")->pluck();
             $sensors[] = new WirelessSensor(
                 'sinr',
                 $this->getDeviceId(),
