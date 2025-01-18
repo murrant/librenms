@@ -25,6 +25,8 @@
 
 namespace LibreNMS\OS\Traits;
 
+use SnmpQuery;
+
 trait ResolvesPortIds
 {
     /**
