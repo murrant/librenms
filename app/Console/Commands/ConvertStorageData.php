@@ -270,7 +270,6 @@ class ConvertStorageData extends Command
             }
         }
 
-
         return false;
     }
 
