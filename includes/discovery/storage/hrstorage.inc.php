@@ -3,9 +3,11 @@
 use Illuminate\Support\Str;
 use LibreNMS\Config;
 
-$hrstorage_array = SnmpQuery::hideMib()->walk("HOST-RESOURCES-MIB:HOST-RESOURCES-TYPES::oid")->table(1);
+$hrstorage_array = SnmpQuery::hideMib()
+    ->mibs(['HOST-RESOURCES-MIB', 'HOST-RESOURCES-TYPES'])
+    ->walk('HOST-RESOURCES-MIB::hrStorageTable')->table(1);
 
-if (is_array($hrstorage_array)) {
+if (! empty($hrstorage_array)) {
     echo 'hrStorage : ';
 
     $bad_fs_types = [
