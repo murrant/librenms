@@ -27,7 +27,6 @@ namespace LibreNMS\OS\Traits;
 
 use App\Models\Mempool;
 use App\Models\Storage;
-use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
