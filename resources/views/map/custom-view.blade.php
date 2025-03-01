@@ -26,7 +26,7 @@
 </div>
 @endsection
 
-@section('javascript')
+@push('javascript')
 <script type="text/javascript" src="{{ asset('js/vis-network.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/vis-data.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/leaflet.js') }}"></script>

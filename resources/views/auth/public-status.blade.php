@@ -78,7 +78,7 @@
     </style>
 @endsection
 
-@section('javascript')
+@push('javascript')
             <script class="code" type="text/javascript">
                 $(document).ready(function () {
                     $("#ToggleLogon").on("click", function () {

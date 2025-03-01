@@ -60,7 +60,7 @@
     </div>
 @endsection
 
-@section('javascript')
+@push('javascript')
 @endsection
 
 @section('scripts')

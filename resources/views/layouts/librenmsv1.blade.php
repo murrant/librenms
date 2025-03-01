@@ -99,7 +99,7 @@
         @endif
         <script src="{{ asset('js/register-service-worker.js') }}" defer></script>
     @endauth
-    @yield('javascript')
+    @stack('javascript')
 </head>
 <body>
 @if(Auth::check())

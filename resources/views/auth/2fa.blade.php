@@ -1,6 +1,6 @@
 @extends('layouts.librenmsv1')
 
-@section('javascript')
+@push('javascript')
     <script src="{{ asset('js/jquery-qrcode.min.js') }}"></script>
 @endsection
 

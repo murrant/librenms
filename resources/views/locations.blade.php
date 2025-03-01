@@ -67,7 +67,7 @@
     </style>
 @endsection
 
-@section('javascript')
+@push('javascript')
     <script src="js/leaflet.js"></script>
     <script src="js/L.Control.Locate.min.js"></script>
     <script>

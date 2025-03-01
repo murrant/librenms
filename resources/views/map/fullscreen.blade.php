@@ -46,7 +46,7 @@ html, body, #fullscreen-map {
 </style>
 @endsection
 
-@section('javascript')
+@push('javascript')
 @if($map_engine == "leaflet")
 <script src="js/leaflet.js"></script>
 <script src="js/L.Control.Locate.min.js"></script>

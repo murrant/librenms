@@ -104,7 +104,7 @@
     </div>
 @endsection
 
-@section('javascript')
+@push('javascript')
     <script>
         init_select2('#graph_type-{{ $id }}', 'graph', {}, '{{ $graph_type ?: '' }}');
         init_select2('#graph_device-{{ $id }}', 'device', {limit: 100}, '{{ $graph_device ?: '' }}');

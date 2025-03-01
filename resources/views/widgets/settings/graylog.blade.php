@@ -69,7 +69,7 @@
     </div>
 @endsection
 
-@section('javascript')
+@push('javascript')
     <script type="application/javascript">
         init_select2('#device-{{ $id }}', 'device', {limit: 100}, '{{ $device ? $device->device_id : '' }}');
         init_select2('#stream-{{ $id }}', 'graylog-streams', {}, '{{ $stream }}');

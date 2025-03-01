@@ -86,7 +86,7 @@
 
 @endsection
 
-@section('javascript')
+@push('javascript')
     <script type="text/javascript">
         init_select2('#device_group-{{ $id }}', 'device-group', {});
 

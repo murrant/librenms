@@ -16,7 +16,7 @@
     <link href="{{ asset(mix('/css/vendor.css')) }}" rel="stylesheet">
 @endpush
 
-@section('javascript')
+@push('javascript')
     <script src="{{ asset(mix('/js/lang/en.js')) }}"></script>
     <script src="{{ asset(mix('/js/lang/' . app()->getLocale() . '.js')) }}"></script>
     <script src="{{ asset(mix('/js/manifest.js')) }}"></script>

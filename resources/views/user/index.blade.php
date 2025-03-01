@@ -61,7 +61,7 @@
 </div>
 @endsection
 
-@section('javascript')
+@push('javascript')
     <script type="application/javascript">
         $(document).ready(function(){
             var user_grid = $("#users");

@@ -28,7 +28,7 @@
     </div>
 @endsection
 
-@section('javascript')
+@push('javascript')
     <script type="text/javascript">
         init_select2('#device-{{ $id }}', 'device', {}, @json($device ? ['id' => $device->device_id, 'text' => $device->displayName()] : ''));
     </script>

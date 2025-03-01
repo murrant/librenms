@@ -19,7 +19,7 @@
     </div>
 @endsection
 
-@section('javascript')
+@push('javascript')
     <script type="text/javascript">
         init_select2('#custom_map-{{ $id }}', 'custom-map', {});
 

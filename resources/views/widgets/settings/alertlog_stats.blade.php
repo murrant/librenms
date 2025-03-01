@@ -24,7 +24,7 @@
     </div>
 @endsection
 
-@section('javascript')
+@push('javascript')
     <script type="text/javascript">
         $('#hidenavigation-{{ $id }}')
             .bootstrapSwitch('offColor','danger')
