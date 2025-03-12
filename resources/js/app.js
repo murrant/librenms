@@ -6,37 +6,34 @@
 
 
 import './bootstrap';
-
-window.Vue = require('vue').default;
-import { i18n } from "./plugins/i18n.js"; // translation
-
-/**
- * The following block of code may be used to automatically register your
- * Vue components. It will recursively scan this directory for the Vue
- * components and automatically register them with their "basename".
- *
- * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
- */
-
-const files = require.context('./', true, /\.vue$/i);
-files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default));
-
+import Vue from 'vue';
+import {i18n} from "./plugins/i18n.js"; // translation
+import PollerSettings from "./components/PollerSettings.vue";
+import LibrenmsSettings from "./components/LibrenmsSettings.vue"
 import ToggleButton from 'vue-js-toggle-button'
+import VTooltip from 'v-tooltip'
+import vSelect from 'vue-select'
+import Multiselect from 'vue-multiselect'
+import VueTabs from 'vue-nav-tabs'
+import VModal from 'vue-js-modal'
+
+import.meta.glob([
+    '../../html/js/lang/**',
+]);
+
+Vue.component('PollerSettings', PollerSettings);
+Vue.component('librenms-settings', LibrenmsSettings);
+
 Vue.use(ToggleButton);
 
-import VTooltip from 'v-tooltip'
 Vue.use(VTooltip);
 
-import vSelect from 'vue-select'
 Vue.component('v-select', vSelect);
 
-import Multiselect from 'vue-multiselect'
 Vue.component('multiselect', Multiselect)
 
-import VueTabs from 'vue-nav-tabs'
 Vue.use(VueTabs)
 
-import VModal from 'vue-js-modal'
 Vue.use(VModal)
 
 // Vue.mixin({

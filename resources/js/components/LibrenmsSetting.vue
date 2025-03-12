@@ -51,7 +51,10 @@
 </template>
 
 <script>
-    export default {
+import Vue from 'vue';
+import SettingNull from './SettingNull.vue';
+
+export default {
         name: "LibrenmsSetting",
         props: {
             'setting': {type: Object, required: true},
@@ -161,7 +164,9 @@
                 const component = 'Setting' +  this.setting.type.toString()
                     .replace(/(-[a-z]|^[a-z])/g, (group) => group.toUpperCase().replace('-', ''));
 
-                return typeof Vue.options.components[component] !== 'undefined' ? component : 'SettingNull';
+                console.log(Vue.options.components[component]);
+
+                return typeof this.$options.components[component] !== 'undefined' ? component : SettingNull;
             }
         }
     }

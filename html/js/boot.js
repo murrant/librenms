@@ -22,11 +22,6 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-// set CSRF for jquery ajax request
-$.ajaxSetup({
-    headers:
-        { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-});
 
 // toastr style to match php toasts
 toastr.options = {
