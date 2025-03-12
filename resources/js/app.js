@@ -8,8 +8,6 @@
 import './bootstrap';
 import Vue from 'vue';
 import {i18n} from "./plugins/i18n.js"; // translation
-import PollerSettings from "./components/PollerSettings.vue";
-import LibrenmsSettings from "./components/LibrenmsSettings.vue"
 import ToggleButton from 'vue-js-toggle-button'
 import VTooltip from 'v-tooltip'
 import vSelect from 'vue-select'
@@ -17,12 +15,19 @@ import Multiselect from 'vue-multiselect'
 import VueTabs from 'vue-nav-tabs'
 import VModal from 'vue-js-modal'
 
-import.meta.glob([
-    '../../html/js/lang/**',
-]);
+/**
+ * The following block of code may be used to automatically register your
+ * Vue components. It will recursively scan this directory for the Vue
+ * components and automatically register them with their "basename".
+ *
+ * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
+ */
 
-Vue.component('PollerSettings', PollerSettings);
-Vue.component('librenms-settings', LibrenmsSettings);
+const components = import.meta.glob('./components/*.vue', { eager: true });
+Object.entries(components).forEach(([path, component]) => {
+    const name = path.split('/').pop().replace(/\.\w+$/, '');
+    Vue.component(name, component.default);
+});
 
 Vue.use(ToggleButton);
 

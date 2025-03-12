@@ -19,7 +19,6 @@
         "sass": "^1.49.0",
         "sass-loader": "^12.4.0",
         "tailwindcss": "^4.0.13",
-        "unplugin-vue-components": "^28.4.1",
         "vite": "^6.0",
         "vue-loader": "^15.9.8",
         "vue-template-compiler": "^2.6.14"

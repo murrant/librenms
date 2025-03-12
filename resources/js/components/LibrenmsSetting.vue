@@ -51,8 +51,7 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import SettingNull from './SettingNull.vue';
+import _ from 'lodash';
 
 export default {
         name: "LibrenmsSetting",
@@ -163,8 +162,6 @@ export default {
                 // snake to studly
                 const component = 'Setting' +  this.setting.type.toString()
                     .replace(/(-[a-z]|^[a-z])/g, (group) => group.toUpperCase().replace('-', ''));
-
-                console.log(Vue.options.components[component]);
 
                 return typeof this.$options.components[component] !== 'undefined' ? component : SettingNull;
             }
