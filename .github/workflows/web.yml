@@ -55,6 +55,9 @@ jobs:
         run: php artisan serve --no-reload &
       - name: Run Dusk Tests
         run: php artisan dusk
+      - name: Dump logs
+        if: failure()
+        run: cat logs/librenms.log || true
       - name: Upload Screenshots
         if: failure()
         uses: actions/upload-artifact@v4
