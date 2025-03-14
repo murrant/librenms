@@ -25,7 +25,6 @@
 
 namespace App;
 
-use App\Models\Callback;
 use App\Models\GraphType;
 use Exception;
 use Illuminate\Database\QueryException;
@@ -34,9 +33,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use LibreNMS\DB\Eloquent;
 use LibreNMS\Util\Debug;
-use LibreNMS\Util\Version;
 use Log;
-use PDOException;
 use Symfony\Component\Yaml\Yaml;
 
 class ConfigRepository
@@ -433,38 +430,34 @@ class ConfigRepository
         $this->deprecatedVariable('poller_modules.cisco-sla', 'poller_modules.slas');
         $this->deprecatedVariable('oxidized.group', 'oxidized.maps.group');
 
-        try {
-            // migrate device display
-            if (! $this->has('device_display_default')) {
-                $display_value = '{{ $hostname }}';
-                if ($this->get('force_hostname_to_sysname')) {
-                    $display_value = '{{ $sysName }}';
-                } elseif ($this->get('force_ip_to_sysname')) {
-                    $display_value = '{{ $sysName_fallback }}';
-                }
-
-                $this->persist('device_display_default', $display_value);
-            }
-
-            // make sure we have full path to binaries in case PATH isn't set
-            foreach (['fping', 'fping6', 'snmpgetnext', 'rrdtool', 'traceroute'] as $bin) {
-                if (! is_executable($this->get($bin))) {
-                    $this->persist($bin, $this->locateBinary($bin));
-                }
-            }
-
-            if (! $this->has('rrdtool_version')) {
-                $this->persist('rrdtool_version', (new Version($this))->rrdtool());
-            }
-            if (! $this->has('snmp.unescape')) {
-                $this->persist('snmp.unescape', version_compare((new Version($this))->netSnmp(), '5.8.0', '<'));
-            }
-            if (! $this->has('reporting.usage')) {
-                $this->persist('reporting.usage', (bool) Callback::get('enabled'));
-            }
-        } catch (PDOException) {
-            //
-        }
+        // migrate device display
+//        if (! $this->has('device_display_default')) {
+//            $display_value = '{{ $hostname }}';
+//            if ($this->get('force_hostname_to_sysname')) {
+//                $display_value = '{{ $sysName }}';
+//            } elseif ($this->get('force_ip_to_sysname')) {
+//                $display_value = '{{ $sysName_fallback }}';
+//            }
+//
+//            $this->persist('device_display_default', $display_value);
+//        }
+//
+//        // make sure we have full path to binaries in case PATH isn't set
+//        foreach (['fping', 'fping6', 'snmpgetnext', 'rrdtool', 'traceroute'] as $bin) {
+//            if (! is_executable($this->get($bin))) {
+//                $this->persist($bin, $this->locateBinary($bin));
+//            }
+//        }
+//
+//        if (! $this->has('rrdtool_version')) {
+//            $this->persist('rrdtool_version', (new Version($this))->rrdtool());
+//        }
+//        if (! $this->has('snmp.unescape')) {
+//            $this->persist('snmp.unescape', version_compare((new Version($this))->netSnmp(), '5.8.0', '<'));
+//        }
+//        if (! $this->has('reporting.usage')) {
+//            $this->persist('reporting.usage', (bool) Callback::get('enabled'));
+//        }
 
         // populate legacy DB credentials, just in case something external uses them.  Maybe remove this later
         $this->populateLegacyDbCredentials();
