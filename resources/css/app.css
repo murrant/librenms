@@ -1,5 +1,25 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import './toast.css';
 
-@import 'toast.css';
+@import "tailwindcss" prefix(tw);
+@custom-variant dark (&:where(.dark, .dark *));
+@layer base {
+    button:not(:disabled),
+    [role="button"]:not(:disabled) {
+        cursor: pointer;
+    }
+}
+@theme {
+    --color-gray-100: #4f565d;
+    --color-gray-200: #3e444c;
+    --color-gray-300: #353a41;
+    --color-gray-400: #2e3338;
+    --color-gray-500: #272b30;
+    --color-white-100: #f9fafb;
+    --color-white-200: #c8c8c8;
+    --color-white-300: #bebfbf;
+    --color-white-400: #acb6bf;
+    /*--breakpoint-sm: 576px;*/
+    /*--breakpoint-md: 768px;*/
+    /*--breakpoint-lg: 992px;*/
+    /*--breakpoint-xl: 1200px;*/
+}

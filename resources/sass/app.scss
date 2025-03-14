@@ -5,13 +5,13 @@
 @import 'variables';
 
 // Bootstrap
-//@import '~bootstrap/scss/bootstrap'; // Conflicts with normal css
+//@import 'bootstrap/scss/bootstrap'; // Conflicts with normal css
 
 // Vue Select
-@import "~vue-select/src/scss/vue-select.scss";
+@import "vue-select/src/scss/vue-select.scss";
 
 // Vue Multiselect
-@import "~vue-multiselect/dist/vue-multiselect.min.css";
+@import "vue-multiselect/dist/vue-multiselect.min.css";
 
 // Vue Tabs
-@import '~vue-nav-tabs/themes/vue-tabs.css';
+@import 'vue-nav-tabs/themes/vue-tabs.css';
