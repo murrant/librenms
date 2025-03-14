@@ -36,6 +36,7 @@ use LibreNMS\DB\Eloquent;
 use LibreNMS\Util\Debug;
 use LibreNMS\Util\Version;
 use Log;
+use PDOException;
 use Symfony\Component\Yaml\Yaml;
 
 class ConfigRepository
@@ -461,7 +462,7 @@ class ConfigRepository
             if (! $this->has('reporting.usage')) {
                 $this->persist('reporting.usage', (bool) Callback::get('enabled'));
             }
-        } catch (Exception) {
+        } catch (PDOException) {
             //
         }
 
