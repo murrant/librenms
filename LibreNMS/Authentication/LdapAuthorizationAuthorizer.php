@@ -50,8 +50,8 @@ class LdapAuthorizationAuthorizer extends AuthorizerBase
         $port = Config::get('auth_ldap_port');
         $uri = Config::get('auth_ldap_server');
         if ($port && ! str_contains($uri, '://')) {
-            $scheme = $port ==636 ? 'ldaps://' : 'ldap://';
-            $uri =  $scheme . $uri . ':' . $port;
+            $scheme = $port == 636 ? 'ldaps://' : 'ldap://';
+            $uri = $scheme . $uri . ':' . $port;
         }
 
         $this->ldap_connection = @ldap_connect($uri);
