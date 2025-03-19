@@ -21,41 +21,45 @@ class ActiveDirectoryAuthorizer extends AuthorizerBase
     protected Connection|null $ldap_connection = null;
     protected $is_bound = false; // this variable tracks if bind has been called so we don't call it multiple times
 
-    public function authenticate($credentials)
+    public function authenticate($credentials): bool
     {
-        $this->connect();
+        try {
+            $this->connect();
 
-        if ($this->ldap_connection) {
-            // bind with sAMAccountName instead of full LDAP DN
-            if (! empty($credentials['username']) && ! empty($credentials['password']) && ldap_bind($this->ldap_connection, $credentials['username'] . '@' . Config::get('auth_ad_domain'), $credentials['password'])) {
-                $this->is_bound = true;
-                // group membership in one of the configured groups is required
-                if (Config::get('auth_ad_require_groupmembership', true)) {
-                    // cycle through defined groups, test for memberOf-ship
-                    foreach (Config::get('auth_ad_groups', []) as $group => $level) {
-                        if ($this->userInGroup($credentials['username'], $group)) {
-                            return true;
+            if ($this->ldap_connection) {
+                // bind with sAMAccountName instead of full LDAP DN
+                if (!empty($credentials['username']) && !empty($credentials['password']) && ldap_bind($this->ldap_connection, $credentials['username'] . '@' . Config::get('auth_ad_domain'), $credentials['password'])) {
+                    $this->is_bound = true;
+                    // group membership in one of the configured groups is required
+                    if (Config::get('auth_ad_require_groupmembership', true)) {
+                        // cycle through defined groups, test for memberOf-ship
+                        foreach (Config::get('auth_ad_groups', []) as $group => $level) {
+                            if ($this->userInGroup($credentials['username'], $group)) {
+                                return true;
+                            }
                         }
-                    }
 
-                    // failed to find user
-                    if (Config::get('auth_ad_debug', false)) {
-                        throw new AuthenticationException('User is not in one of the required groups or user/group is outside the base dn');
-                    }
+                        // failed to find user
+                        if (Config::get('auth_ad_debug')) {
+                            throw new AuthenticationException('User is not in one of the required groups or user/group is outside the base dn');
+                        }
 
-                    throw new AuthenticationException();
-                } else {
-                    // group membership is not required and user is valid
-                    return true;
+                        throw new AuthenticationException();
+                    } else {
+                        // group membership is not required and user is valid
+                        return true;
+                    }
                 }
             }
-        }
 
-        if (empty($credentials['password'])) {
-            throw new AuthenticationException('A password is required');
-        } elseif (Config::get('auth_ad_debug', false)) {
-            ldap_get_option($this->ldap_connection, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extended_error);
-            throw new AuthenticationException(ldap_error($this->ldap_connection) . '<br />' . $extended_error);
+            if (empty($credentials['password'])) {
+                throw new AuthenticationException('A password is required');
+            } elseif (Config::get('auth_ad_debug')) {
+                ldap_get_option($this->ldap_connection, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extended_error);
+                throw new AuthenticationException(ldap_error($this->ldap_connection) . '<br />' . $extended_error);
+            }
+        } catch (\ErrorException $e) {
+            // throw error below
         }
 
         throw new AuthenticationException(ldap_error($this->ldap_connection));
@@ -157,22 +161,26 @@ class ActiveDirectoryAuthorizer extends AuthorizerBase
 
     public function getUserid($username)
     {
-        $connection = $this->getConnection();
+        try {
+            $connection = $this->getConnection();
 
-        $attributes = ['objectsid'];
-        $search = ldap_search(
-            $connection,
-            Config::get('auth_ad_base_dn'),
-            $this->userFilter($username),
-            $attributes
-        );
+            $attributes = ['objectsid'];
+            $search = ldap_search(
+                $connection,
+                Config::get('auth_ad_base_dn'),
+                $this->userFilter($username),
+                $attributes
+            );
 
-        if ($search !== false) {
-            $entries = ldap_get_entries($connection, $search);
+            if ($search !== false) {
+                $entries = ldap_get_entries($connection, $search);
 
-            if ($entries !== false && $entries['count']) {
-                return $this->getUseridFromSid($this->sidFromLdap($entries[0]['objectsid'][0]));
+                if ($entries !== false && $entries['count']) {
+                    return $this->getUseridFromSid($this->sidFromLdap($entries[0]['objectsid'][0]));
+                }
             }
+        } catch (\ErrorException) {
+            // search failed
         }
 
         return -1;
@@ -211,7 +219,7 @@ class ActiveDirectoryAuthorizer extends AuthorizerBase
             ldap_set_option(null, LDAP_OPT_DEBUG_LEVEL, 7);
         }
 
-        $this->ldap_connection = @ldap_connect(Config::get('auth_ad_url'));
+        $this->ldap_connection = ldap_connect(Config::get('auth_ad_url'));
 
         // disable referrals and force ldap version to 3
         ldap_set_option($this->ldap_connection, LDAP_OPT_REFERRALS, 0);
@@ -233,7 +241,7 @@ class ActiveDirectoryAuthorizer extends AuthorizerBase
         }
     }
 
-    public function bind($credentials = [])
+    public function bind($credentials = []): void
     {
         if (! $this->ldap_connection) {
             $this->connect();
@@ -254,15 +262,19 @@ class ActiveDirectoryAuthorizer extends AuthorizerBase
             ldap_set_option($this->ldap_connection, LDAP_OPT_NETWORK_TIMEOUT, -1); // restore timeout
 
             if ($bind_result) {
-                return $bind_result;
+                return;
             }
         } catch (\ErrorException) {
             // if bind with user fails, try anonymous bind
         }
 
-        ldap_set_option($this->ldap_connection, LDAP_OPT_NETWORK_TIMEOUT, Config::get('auth_ad_timeout', 5));
-        ldap_bind($this->ldap_connection);
-        ldap_set_option($this->ldap_connection, LDAP_OPT_NETWORK_TIMEOUT, -1); // restore timeout
+        try {
+            ldap_set_option($this->ldap_connection, LDAP_OPT_NETWORK_TIMEOUT, Config::get('auth_ad_timeout', 5));
+            ldap_bind($this->ldap_connection);
+            ldap_set_option($this->ldap_connection, LDAP_OPT_NETWORK_TIMEOUT, -1); // restore timeout
+        } catch (\ErrorException) {
+            // bind failed
+        }
     }
 
     protected function getConnection(): ?Connection

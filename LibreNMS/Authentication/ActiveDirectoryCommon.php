@@ -172,19 +172,23 @@ trait ActiveDirectoryCommon
 
     public function getUser($user_id): array
     {
-        $connection = $this->getConnection();
-        $domain_sid = $this->getDomainSid();
+        try {
+            $connection = $this->getConnection();
+            $domain_sid = $this->getDomainSid();
 
-        $search_filter = "(&(objectcategory=person)(objectclass=user)(objectsid=$domain_sid-$user_id))";
-        $attributes = ['samaccountname', 'displayname', 'objectsid', 'mail'];
-        $search = ldap_search($connection, Config::get('auth_ad_base_dn'), $search_filter, $attributes);
+            $search_filter = "(&(objectcategory=person)(objectclass=user)(objectsid=$domain_sid-$user_id))";
+            $attributes = ['samaccountname', 'displayname', 'objectsid', 'mail'];
+            $search = ldap_search($connection, Config::get('auth_ad_base_dn'), $search_filter, $attributes);
 
-        if ($search !== false) {
-            $entry = ldap_get_entries($connection, $search);
+            if ($search !== false) {
+                $entry = ldap_get_entries($connection, $search);
 
-            if (isset($entry[0]['samaccountname'][0])) {
-                return $this->userFromAd($entry[0]);
+                if (isset($entry[0]['samaccountname'][0])) {
+                    return $this->userFromAd($entry[0]);
+                }
             }
+        } catch (\ErrorException $e) {
+            // failed
         }
 
         return [];
@@ -197,22 +201,26 @@ trait ActiveDirectoryCommon
         // Extract only the domain components
         $dn_candidate = preg_replace('/^.*?DC=/i', 'DC=', Config::get('auth_ad_base_dn'));
 
-        $search = ldap_read(
-            $connection,
-            $dn_candidate,
-            '(objectClass=*)',
-            ['objectsid']
-        );
+        try {
+            $search = ldap_read(
+                $connection,
+                $dn_candidate,
+                '(objectClass=*)',
+                ['objectsid']
+            );
 
-        if ($search === false) {
-            \Log::debug('AD Auth: Could not determine domain SID');
+            if ($search === false) {
+                \Log::debug('AD Auth: Could not determine domain SID');
 
+                return '';
+            }
+
+            $entry = ldap_get_entries($connection, $search);
+
+            return substr($this->sidFromLdap($entry[0]['objectsid'][0]), 0, 41);
+        } catch (\ErrorException $e) {
             return '';
         }
-
-        $entry = ldap_get_entries($connection, $search);
-
-        return substr($this->sidFromLdap($entry[0]['objectsid'][0]), 0, 41);
     }
 
     /**
