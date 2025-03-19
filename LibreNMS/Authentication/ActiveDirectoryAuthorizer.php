@@ -28,7 +28,7 @@ class ActiveDirectoryAuthorizer extends AuthorizerBase
 
             if ($this->ldap_connection) {
                 // bind with sAMAccountName instead of full LDAP DN
-                if (!empty($credentials['username']) && !empty($credentials['password']) && ldap_bind($this->ldap_connection, $credentials['username'] . '@' . Config::get('auth_ad_domain'), $credentials['password'])) {
+                if (! empty($credentials['username']) && ! empty($credentials['password']) && ldap_bind($this->ldap_connection, $credentials['username'] . '@' . Config::get('auth_ad_domain'), $credentials['password'])) {
                     $this->is_bound = true;
                     // group membership in one of the configured groups is required
                     if (Config::get('auth_ad_require_groupmembership', true)) {
