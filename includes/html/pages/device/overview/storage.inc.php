@@ -22,21 +22,7 @@ if (count($drives)) {
         $skipdrive = 0;
 
         if ($device['os'] == 'junos') {
-            foreach (\LibreNMS\Config::get('ignore_junos_os_drives', []) as $jdrive) {
-                if (preg_match($jdrive, $drive['storage_descr'])) {
-                    $skipdrive = 1;
-                }
-            }
-
             $drive['storage_descr'] = preg_replace('/.*mounted on: (.*)/', '\\1', $drive['storage_descr']);
-        }
-
-        if ($device['os'] == 'freebsd') {
-            foreach (\LibreNMS\Config::get('ignore_bsd_os_drives', []) as $jdrive) {
-                if (preg_match($jdrive, $drive['storage_descr'])) {
-                    $skipdrive = 1;
-                }
-            }
         }
 
         if ($skipdrive) {
