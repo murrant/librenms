@@ -141,7 +141,6 @@ class Ospfv3 implements Module
                     $ospf_port['ospfv3_instance_id'] = $instance->id;
                     $ospf_port['ospfv3_area_id'] = $ospf_areas->firstWhere('ospfv3AreaId', $ospf_port['ospfv3IfAreaId'])?->id;
 
-
                     $key = [
                         'device_id' => $os->getDeviceId(),
                         'ospfv3IfInstId' => $ospfv3IfInstId,
@@ -149,6 +148,7 @@ class Ospfv3 implements Module
                         'context_name' => $context_name,
                     ];
                     dump($ospf_port, $key);
+
                     return Ospfv3Port::updateOrCreate($key, $ospf_port);
                 });
             $total_ospf_ports += $ospf_ports->count();
@@ -218,7 +218,6 @@ class Ospfv3 implements Module
         // cleanup
         $os->getDevice()->ospfv3Instances()
             ->whereNotIn('id', $valid_ospf_instance_ids)->delete();
-
     }
 
     public function dataExists(Device $device): bool
