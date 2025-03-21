@@ -995,10 +995,6 @@
             "default": null,
             "type": "directory"
         },
-        "collectd_sock": {
-            "default": null,
-            "type": "text"
-        },
         "core_descr": {
             "default": ["core"],
             "type": "array",
@@ -2064,10 +2060,6 @@
         "enable_vrfs": {
             "default": true,
             "type": "boolean"
-        },
-        "error_font": {
-            "default": null,
-            "type": "text"
         },
         "eventlog_purge": {
             "default": 30,
