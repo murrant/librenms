@@ -1516,6 +1516,26 @@ return [
                 'description' => 'Enforce roles at login',
                 'help' => 'If enabled, roles will be set to the ones specified by the Filter-ID attribute or radius.default_roles at login.  Otherwise, they will be set when the user is created and never changed after that.',
             ],
+            'hostname' => [
+                'description' => 'Radius server',
+                'help' => 'Hostname or IP to radius server',
+            ],
+            'port' => [
+                'description' => 'Radius port',
+                'help' => 'Port to use for communications with radius server',
+            ],
+            'users_purge' => [
+                'description' => 'Radius purge users after',
+                'help' => 'Delete users after they have not logged in for this many days',
+            ],
+            'secret' => [
+                'description' => 'Radius secret',
+                'help' => 'Radius shared secret to connect to server',
+            ],
+            'suffix' => [
+                'description' => 'Radius user suffix',
+                'help' => 'The username suffix to use when authenticating',
+            ],
         ],
         'reporting' => [
             'error' => [

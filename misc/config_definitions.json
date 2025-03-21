@@ -5157,30 +5157,6 @@
                 "value": "url"
             }
         },
-        "radius.default_level": {
-            "default": 1,
-            "type": "integer"
-        },
-        "radius.hostname": {
-            "default": null,
-            "type": "text"
-        },
-        "radius.port": {
-            "default": null,
-            "type": "integer"
-        },
-        "radius.users_purge": {
-            "default": null,
-            "type": "boolean"
-        },
-        "radius.secret": {
-            "default": null,
-            "type": "text"
-        },
-        "radius.suffix": {
-            "default": null,
-            "type": "text"
-        },
         "rrd.enable": {
             "default": true,
             "type": "boolean"
@@ -5736,15 +5712,51 @@
             "default": [],
             "group": "auth",
             "section": "radius",
-            "order": 3,
+            "order": 6,
             "type": "array"
         },
         "radius.enforce_roles": {
             "default": true,
             "group": "auth",
             "section": "radius",
-            "order": 4,
+            "order": 7,
             "type": "boolean"
+        },
+        "radius.hostname": {
+            "default": null,
+            "type": "text",
+            "group": "auth",
+            "section": "radius",
+            "order": 1
+        },
+        "radius.port": {
+            "default": null,
+            "type": "integer",
+            "group": "auth",
+            "section": "radius",
+            "order": 2
+        },
+        "radius.users_purge": {
+            "default": null,
+            "type": "boolean",
+            "units": "days",
+            "group": "auth",
+            "section": "radius",
+            "order": 8
+        },
+        "radius.secret": {
+            "default": null,
+            "type": "text",
+            "group": "auth",
+            "section": "radius",
+            "order": 3
+        },
+        "radius.suffix": {
+            "default": null,
+            "type": "text",
+            "group": "auth",
+            "section": "radius",
+            "order": 5
         },
         "rancid_configs": {
             "default": [],
