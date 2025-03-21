@@ -1560,6 +1560,10 @@ return [
             'help' => 'Cleanup done by daily.sh',
         ],
         'rrd' => [
+            'enable' => [
+                'description' => 'Enable RRD',
+                'help' => 'Enable writing historical data to rrd files. Required for graphs.',
+            ],
             'heartbeat' => [
                 'description' => 'Change the rrd heartbeat value (default 600)',
             ],
