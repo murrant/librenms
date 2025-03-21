@@ -84,7 +84,6 @@ class OpenTSDB extends BaseDatastore
             return;
         }
 
-        $flag = Config::get('opentsdb.co');
         $timestamp = Carbon::now()->timestamp;
         $tmp_tags = 'hostname=' . $device['hostname'];
 
@@ -98,17 +97,9 @@ class OpenTSDB extends BaseDatastore
         if ($measurement == 'ports') {
             foreach ($fields as $k => $v) {
                 $measurement = $k;
-                if ($flag == true) {
-                    $measurement = $measurement . '.' . $device['co'];
-                }
-
                 $this->putData('port.' . $measurement, $timestamp, $v, $tmp_tags);
             }
         } else {
-            if ($flag == true) {
-                $measurement = $measurement . '.' . $device['co'];
-            }
-
             foreach ($fields as $k => $v) {
                 $tmp_tags_key = $tmp_tags . ' ' . 'key' . '=' . $k;
                 $this->putData($measurement, $timestamp, $v, $tmp_tags_key);
