@@ -965,12 +965,8 @@
             "type": "integer"
         },
         "branding": {
-            "default": null,
-            "type": "text"
-        },
-        "branding.default": {
-            "default": null,
-            "type": "text"
+            "default": ['default', []],
+            "type": "array"
         },
         "callback_clear": {
             "default": "https://stats.librenms.org/clear.php",

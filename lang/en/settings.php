@@ -501,6 +501,10 @@ return [
             'description' => 'Auth log entries older than',
             'help' => 'Cleanup done by daily.sh',
         ],
+        'branding' => [
+            'description' => 'Branding overrides',
+            'help' => 'Allow you to override any setting based on server name (url). Key by url value is an array keyed by setting.',
+        ],
         'peering_descr' => [
             'description' => 'Peering Port Types',
             'help' => 'Ports of the listed description type(s) will be shown under the peering ports menu entry.  See Interface Description Parsing docs for more info.',
