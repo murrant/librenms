@@ -423,13 +423,6 @@
             "type": "boolean",
             "default": false
         },
-        "auth_ad_group": {
-            "group": "auth",
-            "section": "ad",
-            "order": 4,
-            "type": "text",
-            "default": null
-        },
         "auth_ad_require_groupmembership": {
             "group": "auth",
             "section": "ad",

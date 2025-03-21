@@ -132,7 +132,7 @@ trait ActiveDirectoryCommon
         // show all Active Directory Users by default
         $default_group = 'Users';
 
-        if (Config::has('auth_ad_group')) {
+        if (Config::has('auth_ad_group')) { // legacy setting, use auth_ad_groups
             if (Config::get('auth_ad_group') !== $default_group) {
                 $ldap_groups[] = Config::get('auth_ad_group');
             }

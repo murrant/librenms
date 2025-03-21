@@ -313,6 +313,10 @@ return [
             'description' => 'Active Directory Domain',
             'help' => 'Active Directory Domain Example: example.com',
         ],
+        'auth_ad_global_read' => [
+            'description' => 'All users have global-read',
+            'help' => 'All Active Directory users will have the global-read role.',
+        ],
         'auth_ad_group_filter' => [
             'description' => 'Group LDAP filter',
             'help' => 'Active Directory LDAP filter for selecting groups',
@@ -328,6 +332,10 @@ return [
         'auth_ad_user_filter' => [
             'description' => 'User LDAP filter',
             'help' => 'Active Directory LDAP filter for selecting users',
+        ],
+        'auth_ad_timeout' => [
+            'description' => 'LDAP timeout',
+            'help' => 'Timeout for AD ldap operations',
         ],
         'auth_ad_url' => [
             'description' => 'Active Directory Server(s)',
