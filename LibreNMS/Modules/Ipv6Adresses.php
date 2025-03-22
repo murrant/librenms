@@ -150,6 +150,7 @@ class Ipv6Adresses implements Module
                         ]);
                     } catch (InvalidIpException $e) {
                         Log::error('Failed to parse IP: ' . $e->getMessage());
+
                         return null;
                     }
                 }));
@@ -169,7 +170,7 @@ class Ipv6Adresses implements Module
                 ->mapTable(function ($data, $ipv6IfIndex, $ipv6AddrAddress) use ($context_name, $device) {
                     try {
                         $ip = IPv6::parse($ipv6AddrAddress);
-                        $origin = match($data['IP-MIB::ipv6AddrType'] ?? null) {
+                        $origin = match ($data['IP-MIB::ipv6AddrType'] ?? null) {
                             'stateless' => 'linklayer',
                             'stateful' => 'manual',
                             'unknown' => 'unknown',
@@ -186,9 +187,10 @@ class Ipv6Adresses implements Module
                         ]);
                     } catch (InvalidIpException $e) {
                         Log::error('Failed to parse IP: ' . $e->getMessage());
+
                         return null;
                     }
-            }));
+                }));
         }
 
         return $ips->filter();
