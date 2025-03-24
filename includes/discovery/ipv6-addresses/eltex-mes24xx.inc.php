@@ -1,4 +1,5 @@
 <?php
+
 /**
  * IPv6 address discovery file for eltex-mes24xx OS
  *
