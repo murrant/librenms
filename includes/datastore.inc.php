@@ -1,4 +1,5 @@
 <?php
+
 /*
  * LibreNMS abstract data storage interface to both rrdtool & influxdb
  *
