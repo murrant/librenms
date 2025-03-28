@@ -26,7 +26,7 @@ class ProcessorsController extends TableController
     {
         return [
             'device_hostname',
-            'processor_descr'
+            'processor_descr',
         ];
     }
 
@@ -42,7 +42,7 @@ class ProcessorsController extends TableController
     }
 
     /**
-     * @param Processor $processor
+     * @param  Processor  $processor
      */
     public function formatItem($processor): array
     {

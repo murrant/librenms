@@ -174,6 +174,7 @@ class Sensor extends DeviceRelatedModel implements Keyable
     {
         if ($this->sensor_class == 'state') {
             $translation = $this->currentTranslation();
+
             return $translation ? $translation->severity() : Severity::Unknown;
         }
 

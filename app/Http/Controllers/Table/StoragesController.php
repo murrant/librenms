@@ -28,7 +28,7 @@ class StoragesController extends TableController
     {
         return [
             'device_hostname',
-            'storage_descr'
+            'storage_descr',
         ];
     }
 
@@ -41,7 +41,7 @@ class StoragesController extends TableController
     }
 
     /**
-     * @param Storage $storage
+     * @param  Storage  $storage
      */
     public function formatItem($storage): array
     {
