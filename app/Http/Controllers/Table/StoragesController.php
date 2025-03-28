@@ -45,58 +45,42 @@ class StoragesController extends TableController
      */
     public function formatItem($storage): array
     {
-        if (\Request::input('view') == 'graphs') {
-            $row = Html::graphRow([
-                'type' => 'storage_usage',
-                'id' => $storage->storage_id,
-                'height' => 100,
-                'width' => 216,
-            ]);
-
-            return [
-                'device_hostname' => $row[0],
-                'storage_descr' => $row[1],
-                'graph' => $row[2],
-                'storage_used' => $row[3],
-                'storage_perc' => '',
-            ];
-        }
-
-        return [
-            'device_hostname' => Blade::render('<x-device-link :device="$device" />', ['device' => $storage->device]),
-            'storage_descr' => $storage->storage_descr,
-            'graph' => $this->miniGraph($storage),
-            'storage_used' => $this->usageBar($storage),
-            'storage_perc' => round($storage->storage_perc) . '%',
-        ];
-    }
-
-    private function miniGraph(Storage $storage): string
-    {
-        return Url::graphPopup([
+        $hostname = Blade::render('<x-device-link :device="$device" />', ['device' => $storage->device]);
+        $descr = $storage->storage_descr;
+        $graph_array = [
             'type' => 'storage_usage',
             'popup_title' => htmlentities(strip_tags($storage->device->displayName() . ': ' . $storage->storage_descr)),
             'id' => $storage->storage_id,
             'from' => '-1d',
             'height' => 20,
             'width' => 80,
-        ]);
+        ];
+        $mini_graph = URL::graphPopup($graph_array);
+        $used = $this->usageBar($storage, $graph_array);
+
+        if (\Request::input('view') == 'graphs') {
+            $row = Html::graphRow(array_replace($graph_array, ['height' => 100, 'width' => 216]));
+            $hostname = '<div class="tw:border-b tw:border-gray-200">' . $hostname . '</div><div style="width:216px;margin-left:auto;border-top:">' . $row[0] . '</div>';
+            $descr = '<div class="tw:border-b tw:border-gray-200">' . $descr . '</div><div style="width:216px">' . $row[1] . '</div>';
+            $mini_graph = '<div class="tw:border-b tw:border-gray-200" style="min-height:20px">' . $mini_graph . '</div><div style="width:216px">' . $row[2] . '</div>';
+            $used = '<div class="tw:border-b tw:border-gray-200">' . $used . '</div><div style="width:216px">' . $row[3] . '</div>';
+        }
+
+        return [
+            'device_hostname' => $hostname,
+            'storage_descr' => $descr,
+            'graph' => $mini_graph,
+            'storage_used' => $used,
+            'storage_perc' => round($storage->storage_perc) . '%',
+        ];
     }
 
-    private function usageBar(Storage $storage): string
+    private function usageBar(Storage $storage, array $graph_array): string
     {
         $left_text = Number::formatBi($storage->storage_used) . ' / ' . Number::formatBi($storage->storage_size);
         $right_text = Number::formatBi($storage->storage_free);
         $bar = Html::percentageBar(400, 20, $storage->storage_perc, $left_text, $right_text, $storage->storage_perc_warn);
 
-        return Url::graphPopup([
-            'type' => 'storage_usage',
-            'popup_title' => htmlentities(strip_tags($storage->device->displayName() . ': ' . $storage->storage_descr)),
-            'id' => $storage->storage_id,
-            'from' => '-1d',
-            'height' => 20,
-            'width' => 80,
-        ], $bar);
+        return URL::graphPopup($graph_array, $bar);
     }
-
 }
