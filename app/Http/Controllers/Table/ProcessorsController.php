@@ -46,52 +46,35 @@ class ProcessorsController extends TableController
      */
     public function formatItem($processor): array
     {
+        $perc = round($processor->processor_usage);
+        $graph_array = [
+            'type' => 'processor_usage',
+            'popup_title' => htmlentities(strip_tags($processor->device->displayName() . ': ' . $processor->processor_descr)),
+            'id' => $processor->processor_id,
+            'from' => '-1d',
+            'height' => 20,
+            'width' => 80,
+        ];
+
+        $hostname = Blade::render('<x-device-link :device="$device" />', ['device' => $processor->device]);
+        $descr = $processor->processor_descr;
+        $mini_graph = URL::graphPopup($graph_array);
+        $bar = Html::percentageBar(400, 20, $perc, $perc . '%', (100 - $perc) . '%', $processor->processor_perc_warn);
+        $usage = URL::graphPopup($graph_array, $bar);
+
         if (\Request::input('view') == 'graphs') {
-            return array_combine([
-                'device_hostname',
-                'processor_descr',
-                'graph',
-                'processor_usage',
-            ], Html::graphRow([
-                'type' => 'processor_usage',
-                'id' => $processor->processor_id,
-                'height' => 100,
-                'width' => 216,
-            ]));
+            $row = Html::graphRow(array_replace($graph_array, ['height' => 100, 'width' => 216]));
+            $hostname = '<div class="tw:border-b tw:border-gray-200">' . $hostname . '</div><div style="width:216px;margin-left:auto;border-top:">' . $row[0] . '</div>';
+            $descr = '<div class="tw:border-b tw:border-gray-200">' . $descr . '</div><div style="width:216px">' . $row[1] . '</div>';
+            $mini_graph = '<div class="tw:border-b tw:border-gray-200" style="min-height:20px">' . $mini_graph . '</div><div style="width:216px">' . $row[2] . '</div>';
+            $usage = '<div class="tw:border-b tw:border-gray-200">' . $usage . '</div><div style="width:216px">' . $row[3] . '</div>';
         }
 
         return [
-            'device_hostname' => Blade::render('<x-device-link :device="$device" />', ['device' => $processor->device]),
-            'processor_descr' => $processor->processor_descr,
-            'graph' => $this->miniGraph($processor),
-            'processor_usage' => $this->usageBar($processor),
+            'device_hostname' => $hostname,
+            'processor_descr' => $descr,
+            'graph' => $mini_graph,
+            'processor_usage' => $usage,
         ];
-    }
-
-    private function miniGraph(Processor $processor): string
-    {
-        return Url::graphPopup([
-            'type' => 'processor_usage',
-            'popup_title' => htmlentities(strip_tags($processor->device->displayName() . ': ' . $processor->processor_descr)),
-            'id' => $processor->processor_id,
-            'from' => '-1d',
-            'height' => 20,
-            'width' => 80,
-        ]);
-    }
-
-    private function usageBar(Processor $processor): string
-    {
-        $perc = round($processor->processor_usage);
-        $bar = Html::percentageBar(400, 20, $perc, $perc . '%', (100 - $perc) . '%', $processor->processor_perc_warn);
-
-        return Url::graphPopup([
-            'type' => 'processor_usage',
-            'popup_title' => htmlentities(strip_tags($processor->device->displayName() . ': ' . $processor->processor_descr)),
-            'id' => $processor->processor_id,
-            'from' => '-1d',
-            'height' => 20,
-            'width' => 80,
-        ], $bar);
     }
 }
