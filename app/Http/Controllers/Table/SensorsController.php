@@ -23,6 +23,7 @@ class SensorsController extends TableController
             'class' => Rule::in(Sensor::getTypes()),
         ];
     }
+
     protected function sortFields($request): array
     {
         return [
@@ -54,7 +55,7 @@ class SensorsController extends TableController
     }
 
     /**
-     * @param Sensor $sensor
+     * @param  Sensor  $sensor
      */
     public function formatItem($sensor): array
     {
