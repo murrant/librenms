@@ -974,6 +974,11 @@ class Device extends BaseModel
         return $this->hasMany(\App\Models\Service::class, 'device_id');
     }
 
+    public function snmpContexts(): HasMany
+    {
+        return $this->hasMany(\App\Models\SnmpContext::class, 'device_id');
+    }
+
     public function storage(): HasMany
     {
         return $this->hasMany(\App\Models\Storage::class, 'device_id');
