@@ -1,1 +1,1 @@
-LEGACY
+{!! $data['section_content'] !!}

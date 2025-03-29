@@ -30,6 +30,8 @@ use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use LibreNMS\Config;
+use LibreNMS\Util\Debug;
 use LibreNMS\Util\Url;
 
 class EditController implements \LibreNMS\Interfaces\UI\DeviceTab
@@ -57,11 +59,17 @@ class EditController implements \LibreNMS\Interfaces\UI\DeviceTab
     public function data(Device $device, Request $request): array
     {
         Gate::authorize('manage-device', $device);
-        $section = preg_replace('#^.*section=([a-z\-]+).*$#', '$1', $request->path());
+
+        if (preg_match('#section=([a-z\-]+)#', $request->path(), $section_matches)) {
+            $section = $section_matches[1];
+        } else {
+            $section = 'device';
+        }
 
         return [
             'edit_section' => $section,
             'edit_sections' => $this->getEditTabs($device),
+            'section_content' => $this->getLegacyContent($device, $section),
         ];
     }
 
@@ -118,5 +126,32 @@ class EditController implements \LibreNMS\Interfaces\UI\DeviceTab
         }
 
         return $tabs;
+    }
+
+    private function getLegacyContent(Device $device, string $section): string
+    {
+        $file = base_path("includes/html/pages/device/edit/$section.inc.php");
+
+        if (! file_exists($file)) {
+            return '';
+        }
+
+        ob_start();
+        $device = $device->toArray();
+        $device['os_group'] = Config::get("os.{$device['os']}.group");
+        Debug::set(false);
+        chdir(base_path());
+        $init_modules = ['web', 'auth'];
+        require base_path('includes/init.php');
+
+        $vars['device'] = $device['device_id'];
+        $vars['tab'] = 'edit';
+        $vars['section'] = $section;
+
+        include $file;
+        $output = ob_get_clean();
+        ob_end_clean();
+
+        return $output;
     }
 }
