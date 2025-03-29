@@ -26,8 +26,11 @@
 
 namespace App\Http\Controllers\Device\Tabs;
 
+use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use LibreNMS\Util\Url;
 
 class EditController implements \LibreNMS\Interfaces\UI\DeviceTab
 {
@@ -53,6 +56,67 @@ class EditController implements \LibreNMS\Interfaces\UI\DeviceTab
 
     public function data(Device $device, Request $request): array
     {
-        return [];
+        Gate::authorize('manage-device', $device);
+        $section = preg_replace('#^.*section=([a-z\-]+).*$#', '$1', $request->path());
+
+        return [
+            'edit_section' => $section,
+            'edit_sections' => $this->getEditTabs($device),
+        ];
+    }
+
+    private function getEditTabs(Device $device): array
+    {
+        $panes = [
+            'device' => 'Device Settings',
+            'snmp' => 'SNMP',
+        ];
+
+        if (! $device->snmp_disable) {
+            $panes['ports'] = 'Port Settings';
+
+        }
+        if ($device->bgppeers()->exists()) {
+            $panes['routing'] = 'Routing';
+        }
+        if (count(LibrenmsConfig::get("os.{$device->os}.icons", []))) {
+            $panes['icon'] = 'Icon';
+        }
+        if (! $device->snmp_disable) {
+            $panes['apps'] = 'Applications';
+        }
+        $panes['alert-rules'] = 'Alert Rules';
+        if (! $device->snmp_disable) {
+            $panes['modules'] = 'Modules';
+        }
+        if (LibrenmsConfig::get('show_services')) {
+            $panes['services'] = 'Services';
+        }
+        $panes['ipmi'] = 'IPMI';
+        if ($device->sensors()->exists()) {
+            $panes['health'] = 'Health';
+        }
+
+        if ($device->wirelessSensors()->exists()) {
+            $panes['wireless-sensors'] = 'Wireless Sensors';
+        }
+        if (! $device->snmp_disable) {
+            $panes['storage'] = 'Storage';
+            $panes['processors'] = 'Processors';
+            $panes['mempools'] = 'Memory';
+        }
+        $panes['misc'] = 'Misc';
+        $panes['component'] = 'Components';
+        $panes['customoid'] = 'Custom OID';
+
+        $tabs = [];
+        foreach ($panes as $pane => $text) {
+            $tabs[$pane] = [
+                'text' => $text,
+                'link' => Url::deviceUrl($device, ['tab' => 'edit', 'section' => $pane]),
+            ];
+        }
+
+        return $tabs;
     }
 }
