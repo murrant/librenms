@@ -74,7 +74,6 @@ class EditController implements \LibreNMS\Interfaces\UI\DeviceTab
 
         if (! $device->snmp_disable) {
             $panes['ports'] = 'Port Settings';
-
         }
         if ($device->bgppeers()->exists()) {
             $panes['routing'] = 'Routing';
