@@ -28,6 +28,7 @@ namespace App\Http\Controllers\Device\Tabs;
 
 use App\Facades\LibrenmsConfig;
 use App\Models\Device;
+use App\Models\PollerGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use LibreNMS\Config;
@@ -66,11 +67,17 @@ class EditController implements \LibreNMS\Interfaces\UI\DeviceTab
             $section = 'device';
         }
 
-        return [
+        $data = [
             'edit_section' => $section,
             'edit_sections' => $this->getEditTabs($device),
             'section_content' => $this->getLegacyContent($device, $section),
         ];
+
+        if($section == 'snmp') {
+            $data['poller_groups'] = PollerGroup::pluck('group_name', 'id');
+        }
+
+        return $data;
     }
 
     private function getEditTabs(Device $device): array
