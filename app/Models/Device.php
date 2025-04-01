@@ -500,7 +500,6 @@ class Device extends BaseModel
         );
     }
 
-
     protected function ip(): Attribute
     {
         return Attribute::make(
