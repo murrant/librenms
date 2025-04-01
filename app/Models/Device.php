@@ -6,6 +6,7 @@ use App\View\SimpleTemplate;
 use Carbon\Carbon;
 use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use LibreNMS\Enum\PortAssociationMode;
 use LibreNMS\Exceptions\InvalidIpException;
 use LibreNMS\Util\IP;
 use LibreNMS\Util\IPv4;
@@ -488,39 +490,51 @@ class Device extends BaseModel
 
     // ---- Accessors/Mutators ----
 
-    public function getIconAttribute($icon): string
+    protected function icon(): Attribute
     {
-        return Str::start(Url::findOsImage($this->os, $this->features, $icon), 'images/os/');
+        return Attribute::make(
+            get: fn (mixed $icon, array $attributes) => Str::start(
+                Url::findOsImage($attributes['os'] ?? null, $attributes['features'] ?? null, $icon),
+                'images/os/'
+            ),
+        );
     }
 
-    public function getIpAttribute($ip): ?string
-    {
-        if (empty($ip)) {
-            return null;
-        }
 
-        // @ suppresses warning, inet_ntop() returns false if it fails
-        return @inet_ntop($ip) ?: null;
+    protected function ip(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $ip) => empty($ip) ? null : (@inet_ntop($ip) ?: null),
+            set: fn (mixed $ip) => $ip ? inet_pton($ip) : null,
+        );
     }
 
-    public function setIpAttribute($ip): void
+    protected function status(): Attribute
     {
-        $this->attributes['ip'] = $ip ? inet_pton($ip) : null;
+        return Attribute::make(
+            set: fn (mixed $status) => (int) $status,
+        );
     }
 
-    public function setStatusAttribute($status): void
+    protected function sysDescr(): Attribute
     {
-        $this->attributes['status'] = (int) $status;
+        return Attribute::make(
+            set: fn (?string $sysDescr) => $sysDescr === null ? null : trim(str_replace(chr(218), "\n", $sysDescr), "\\\" \r\n\t\0"),
+        );
     }
 
-    public function setSysDescrAttribute(?string $sysDescr): void
+    protected function sysName(): Attribute
     {
-        $this->attributes['sysDescr'] = $sysDescr === null ? null : trim(str_replace(chr(218), "\n", $sysDescr), "\\\" \r\n\t\0");
+        return Attribute::make(
+            set: fn (?string $sysName) => $sysName === null ? null : str_replace("\n", '', strtolower(trim($sysName))),
+        );
     }
 
-    public function setSysNameAttribute(?string $sysName): void
+    protected function portAssociationMode(): Attribute
     {
-        $this->attributes['sysName'] = $sysName === null ? null : str_replace("\n", '', strtolower(trim($sysName)));
+        return Attribute::make(
+            set: fn (mixed $mode) => is_numeric($mode) ? (int) $mode : PortAssociationMode::getId($mode),
+        );
     }
 
     // ---- Query scopes ----

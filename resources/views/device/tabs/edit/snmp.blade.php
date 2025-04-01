@@ -59,9 +59,9 @@
         </div>
     </div>
     <div class='form-group'>
-        <label for='port_assoc_mode' class='col-sm-2 control-label'>Port Association Mode</label>
+        <label for='port_association_mode' class='col-sm-2 control-label'>Port Association Mode</label>
         <div class='col-sm-1'>
-            <select name='port_assoc_mode' id='port_assoc_mode' class='form-control input-sm'>
+            <select name='port_association_mode' id='port_association_mode' class='form-control input-sm'>
                 @foreach(\LibreNMS\Enum\PortAssociationMode::getModes() as $pam_id => $pam)
                     <option value='{{ $pam_id }}' @if($pam_id == $device->port_association_mode)selected='selected'@endif>{{ $pam }}</option>
                 @endforeach

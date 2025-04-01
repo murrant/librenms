@@ -81,6 +81,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('module/{module}', [\App\Http\Controllers\Device\Tabs\ModuleController::class, 'delete'])->name('module.delete');
     });
 
+    // Device Edit Controllers
+    Route::post('device/{device}/edit/snmp', \App\Http\Controllers\Device\Tabs\Edit\EditSnmpController::class)->name('device.edit.snmp');
+
     Route::match(['get', 'post'], 'device/{device}/{tab?}/{vars?}', 'DeviceController@index')
         ->name('device')->where('vars', '.*');
 
