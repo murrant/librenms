@@ -1,4 +1,14 @@
-<form id='edit' name='edit' method='post' action='' role='form' class='form-horizontal'>
+<form id='edit' name='edit' method='post' action='{{ route('device.edit.snmp', $device) }}' role='form' class='form-horizontal'>
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     @csrf
     <div class='form-group'>
         <label for='hardware' class='col-sm-2 control-label'>SNMP</label>
@@ -117,7 +127,11 @@
         <div class='form-group'>
             <label for='authpass' class='col-sm-2 control-label'>Auth Password</label>
             <div class='col-sm-4'>
-                <input type='password' id='authpass' name='authpass' class='form-control' value='{{ $device->authpass }}' autocomplete='off'>
+                <input type='password' id='authpass' name='authpass' class='form-control' value='{{ $device->authpass }}'
+                       autocomplete='off'
+                       onfocus="this.type = 'text'"
+                       onblur="this.type = 'password'"
+                />
             </div>
         </div>
         <div class='form-group'>
@@ -137,7 +151,11 @@
         <div class='form-group'>
             <label for='cryptopass' class='col-sm-2 control-label'>Crypto Password</label>
             <div class='col-sm-4'>
-                <input type='password' id='cryptopass' name='cryptopass' class='form-control' value='{{ $device->cryptopass }}' autocomplete='off'>
+                <input type='password' id='cryptopass' name='cryptopass' class='form-control' value='{{ $device->cryptopass }}'
+                       autocomplete='off'
+                       onfocus="this.type = 'text'"
+                       onblur="this.type = 'password'"
+                />
             </div>
         </div>
         <div class='form-group'>

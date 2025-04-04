@@ -408,16 +408,14 @@ class Device extends BaseModel
         $this->save();
     }
 
-    public function getAttrib($name, $default = null)
+    public function getAttrib(string $name, mixed $default = null): mixed
     {
         return $this->attribs->pluck('attrib_value', 'attrib_type')->get($name, $default);
     }
 
-    public function setAttrib($name, $value)
+    public function setAttrib(string $name, mixed $value): bool
     {
-        $attrib = $this->attribs->first(function ($item) use ($name) {
-            return $item->attrib_type === $name;
-        });
+        $attrib = $this->attribs->firstWhere('attrib_type', $name);
 
         if (! $attrib) {
             $attrib = new DeviceAttrib(['attrib_type' => $name]);
@@ -429,25 +427,19 @@ class Device extends BaseModel
         return (bool) $this->attribs()->save($attrib);
     }
 
-    public function forgetAttrib($name)
+    public function forgetAttrib(string $name): bool
     {
-        $attrib_index = $this->attribs->search(function ($attrib) use ($name) {
-            return $attrib->attrib_type === $name;
-        });
+        $attrib_index = $this->attribs->search(fn ($attrib) => $attrib->attrib_type === $name);
 
-        if ($attrib_index !== false) {
-            $deleted = (bool) $this->attribs->get($attrib_index)->delete();
-            // only forget the attrib_index after delete, otherwise delete() will fail fatally with:
-            // Symfony\\Component\\Debug\Exception\\FatalThrowableError(code: 0):  Call to a member function delete() on null
-            $this->attribs->forget((string) $attrib_index);
-
-            return $deleted;
+        if ($attrib_index === false) {
+            return true; // attrib does not exist
         }
 
-        return false;
+        // remove from relationship collection and delete from the database
+        return (bool) $this->attribs->pull($attrib_index)->delete();
     }
 
-    public function getAttribs()
+    public function getAttribs(): array
     {
         return $this->attribs->pluck('attrib_value', 'attrib_type')->toArray();
     }
@@ -533,7 +525,7 @@ class Device extends BaseModel
     protected function portAssociationMode(): Attribute
     {
         return Attribute::make(
-            set: fn (mixed $mode) => is_numeric($mode) ? (int) $mode : PortAssociationMode::getId($mode),
+            set: fn (mixed $mode) => is_numeric($mode) ? (int) $mode : PortAssociationMode::getId((string) $mode),
         );
     }
 
