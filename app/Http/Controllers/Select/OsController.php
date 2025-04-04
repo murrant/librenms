@@ -42,6 +42,7 @@ class OsController extends Controller
                 levenshtein($term, strtolower($item['id']), 1, 10, 10),
                 levenshtein($term, strtolower($item['text']), 1, 10, 10)
             );
+
             return ['item' => $item, 'distance' => $distance];
         }, $items);
 
