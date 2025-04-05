@@ -25,6 +25,7 @@ use LibreNMS\Util\Dns;
 use LibreNMS\Util\Module;
 use LibreNMS\Util\ModuleList;
 use Throwable;
+
 use function sprintf;
 
 class PollDevice implements ShouldQueue
