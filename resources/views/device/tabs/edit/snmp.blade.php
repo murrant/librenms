@@ -111,20 +111,20 @@
         <div class='form-group'>
             <label for='authlevel' class='col-sm-2 control-label'>Auth Level</label>
             <div class='col-sm-4'>
-                <select id='authlevel' name='authlevel' class='form-control'>
+                <select id='authlevel' name='authlevel' class='form-control' onchange="handleAuthLevelChange(this)">
                     <option value='noAuthNoPriv'>noAuthNoPriv</option>
                     <option value='authNoPriv' @if($device->authlevel == 'authNoPriv')selected @endif>authNoPriv</option>
-                    <option value='authPriv' @if($device->authlevel == 'authPriv')selected @endif>authPriv</option>
+                    <option value='authPriv' @if($device->authlevel == 'authPriv' || $device->authlevel === null)selected @endif>authPriv</option>
                 </select>
             </div>
         </div>
-        <div class='form-group'>
+        <div class='form-group' id="authname-container">
             <label for='authname' class='col-sm-2 control-label'>Auth User Name</label>
             <div class='col-sm-4'>
                 <input type='text' id='authname' name='authname' class='form-control' value='{{ $device->authname }}' autocomplete='off'>
             </div>
         </div>
-        <div class='form-group'>
+        <div class='form-group' id="authpass-container">
             <label for='authpass' class='col-sm-2 control-label'>Auth Password</label>
             <div class='col-sm-4'>
                 <input type='password' id='authpass' name='authpass' class='form-control' value='{{ $device->authpass }}'
@@ -134,7 +134,7 @@
                 />
             </div>
         </div>
-        <div class='form-group'>
+        <div class='form-group' id="authalgo-container">
             <label for='authalgo' class='col-sm-2 control-label'>Auth Algorithm</label>
             <div class='col-sm-4'>
                 <select id='authalgo' name='authalgo' class='form-control'>
@@ -148,7 +148,7 @@
                 @endif
             </div>
         </div>
-        <div class='form-group'>
+        <div class='form-group' id="cryptopass-container">
             <label for='cryptopass' class='col-sm-2 control-label'>Crypto Password</label>
             <div class='col-sm-4'>
                 <input type='password' id='cryptopass' name='cryptopass' class='form-control' value='{{ $device->cryptopass }}'
@@ -158,7 +158,7 @@
                 />
             </div>
         </div>
-        <div class='form-group'>
+        <div class='form-group' id="cryptoalgo-container">
             <label for='cryptoalgo' class='col-sm-2 control-label'>Crypto Algorithm</label>
             <div class='col-sm-4'>
                 <select id='cryptoalgo' name='cryptoalgo' class='form-control'>
@@ -218,6 +218,7 @@
             $('#snmpv3').show();
         }
     }
+
     function disableSnmp(e) {
         if(e.checked) {
             $('#snmp_conf').show();
@@ -228,15 +229,32 @@
         }
     }
 
+    function handleAuthLevelChange(e) {
+        if (e.value === 'authPriv') {
+            $('#authname-container').show();
+            $('#authpass-container').show();
+            $('#authalgo-container').show();
+            $('#cryptopass-container').show();
+            $('#cryptoalgo-container').show();
+        } else if (e.value === 'authNoPriv') {
+            $('#authname-container').show();
+            $('#authpass-container').show();
+            $('#authalgo-container').show();
+            $('#cryptopass-container').hide();
+            $('#cryptoalgo-container').hide();
+        } else if (e.value === 'noAuthNoPriv') {
+            $('#authname-container').hide();
+            $('#authpass-container').hide();
+            $('#authalgo-container').hide();
+            $('#cryptopass-container').hide();
+            $('#cryptoalgo-container').hide();
+        }
+    }
+
     $("[name='snmp']").bootstrapSwitch('offColor','danger');
 
-    @if($device->snmpver == 'v3')
-        $('#snmpv1_2').hide();
-        $('#snmpv3').show();
-    @else
-        $('#snmpv1_2').show();
-        $('#snmpv3').hide();
-    @endif
+    changeForm();
+
 
     init_select2('#os', 'os', {}, "{{ $device->os }}");
 </script>
