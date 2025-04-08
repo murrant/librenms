@@ -30,6 +30,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use LibreNMS\Enum\PortAssociationMode;
 use LibreNMS\Polling\ConnectivityHelper;
 use LibreNMS\SNMPCapabilities;
@@ -64,7 +65,6 @@ class EditSnmpController extends Controller
             'os' => Rule::in(array_keys(LibrenmsConfig::get('os', []))),
             'sysName' => 'string',
         ]);
-        dd($values);
 
         $this->applyValues($device, $values);
         $device->save();
@@ -83,7 +83,8 @@ class EditSnmpController extends Controller
 
         if (! $force_save && ! $device->snmp_disable) {
             if (! (new ConnectivityHelper($device))->isSNMPable()) {
-                throw new \Exception('Could not connect to ' . htmlspecialchars($device->hostname) . ' with those SNMP settings.  To save anyway, turn on Force Save.');
+                $message = "Could not connect to $device->hostname with those SNMP settings.  To save anyway, turn on Force Save.";
+                throw ValidationException::withMessages([$message]);
             }
         }
 
