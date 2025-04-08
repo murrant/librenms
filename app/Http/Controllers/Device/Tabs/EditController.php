@@ -73,7 +73,7 @@ class EditController implements \LibreNMS\Interfaces\UI\DeviceTab
             'section_content' => $this->getLegacyContent($device, $section),
         ];
 
-        if($section == 'snmp') {
+        if ($section == 'snmp') {
             $data['poller_groups'] = PollerGroup::pluck('group_name', 'id');
         }
 
@@ -89,7 +89,6 @@ class EditController implements \LibreNMS\Interfaces\UI\DeviceTab
 
         if (! $device->snmp_disable) {
             $panes['ports'] = 'Port Settings';
-
         }
         if ($device->bgppeers()->exists()) {
             $panes['routing'] = 'Routing';
