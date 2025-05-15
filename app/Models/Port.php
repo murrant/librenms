@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use LibreNMS\Enum\PortAssociationMode;
 use LibreNMS\Interfaces\Models\Keyable;
+use LibreNMS\Util\Number;
 use LibreNMS\Util\Rewrite;
 use Permissions;
 
@@ -322,6 +323,44 @@ class Port extends DeviceRelatedModel implements Keyable
                 ->from('port_group_port')
                 ->where('port_group_id', $portGroup);
         });
+    }
+
+    public function __toString()
+    {
+        $label = $this->getShortLabel() ?: $this->getLabel() ?: 'Unnamed Port';
+        $description = $this->getDescription();
+        $suffix = ($description && $description !== $label) ? " ($description)" : '';
+
+        // Format port speed
+        $speed = $this->ifSpeed ? Number::formatSi($this->ifSpeed, 2, 3, 'bps') : '';
+
+        // Format connector type
+        $connector = '';
+        if (!is_null($this->ifConnectorPresent)) {
+            $connector = $this->ifConnectorPresent ? 'Physical' : 'Virtual';
+        }
+
+        // Usage from pre-calculated rate fields
+        $usage = '';
+        if ($this->ifSpeed && ($this->ifInOctets_rate || $this->ifOutOctets_rate)) {
+            $in_rate = Number::formatSi($this->ifInOctets_rate, 2, 3, 'bps');
+            $out_rate = Number::formatSi($this->ifOutOctets_rate, 2, 3, 'bps');
+            $usage = "In $in_rate, Out $out_rate";
+        }
+
+        // Status: Show Admin down if down, otherwise show Oper status
+        $status = '';
+        if ($this->ifAdminStatus === 'down') {
+            $status = '[admin down]';
+        } elseif ($this->ifOperStatus) {
+            $status = "[$this->ifOperStatus]";
+        }
+
+        // Combine components, filtering out empty strings and joining with commas
+        $components = array_filter([$speed, $connector, $usage, $status]);
+        $details = $components ? ' - ' . implode(', ', $components) : '';
+
+        return "{$label}{$suffix}{$details}";
     }
 
     // ---- Define Relationships ----
