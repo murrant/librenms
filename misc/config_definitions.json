@@ -4809,6 +4809,10 @@
         "mib_dir": {
             "type": "directory"
         },
+        "modules.ports.version": {
+            "default": 1,
+            "type": "integer"
+        },
         "mono_font": {
             "default": "DejaVuSansMono",
             "type": "text"
