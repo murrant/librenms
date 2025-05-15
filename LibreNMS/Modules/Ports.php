@@ -35,6 +35,7 @@ use LibreNMS\Data\Source\SnmpResponse;
 use LibreNMS\DB\SyncsModels;
 use LibreNMS\Enum\PortAssociationMode;
 use LibreNMS\Enum\PortDisable;
+use LibreNMS\Interfaces\Data\DataStorageInterface;
 use LibreNMS\OS;
 use LibreNMS\RRD\RrdDefinition;
 use LibreNMS\Util\Number;
@@ -212,12 +213,14 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
     }
 
     /**
+     * @param OS $os
+     * @param DataStorageInterface $datastore
      * @inheritDoc
      */
-    public function poll(OS $os): void
+    public function poll(OS $os, DataStorageInterface $datastore): void
     {
         if ($this->version != 2) {
-            parent::poll($os);
+            parent::poll($os, $datastore);
             return;
         }
         $device = $os->getDevice();
@@ -253,13 +256,13 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
 
         // update the ports_statistics and others
         $statistics_data = $data->table(1);
-        $ports->each(function (Port $port) use ($statistics_data, $os, $poll_time) {
+        $ports->each(function (Port $port) use ($statistics_data, $os, $poll_time, $datastore) {
             if ($port->disabled) {
                 return; // skip disabled ports
             }
             $this->savePortStatistics($port, $statistics_data[$port->ifIndex]);
-            $this->updatePortRrd($port, $statistics_data[$port->ifIndex], $os);
-            $this->updatePortPoe($port, $statistics_data[$port->ifIndex], $os);
+            $this->updatePortRrd($datastore, $port, $statistics_data[$port->ifIndex], $os);
+            $this->updatePortPoe($datastore, $port, $statistics_data[$port->ifIndex], $os);
         });
 
         $this->printPorts($ports);
@@ -458,7 +461,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
     }
 
 
-    private function updatePortRrd(Port $port, array $port_stats, OS $os): void
+    private function updatePortRrd(DataStorageInterface $datastore, Port $port, array $port_stats, OS $os): void
     {
         $rrd_name = $this->rrdName($port);
         $rrd_max = 12500000000;
@@ -476,10 +479,10 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         $tags = $port->only(['ifName', 'ifDescr', 'ifIndex']);
         $tags['rrd_name'] = $rrd_name;
         $tags['rrd_def'] = $rrd_def;
-        app('Datastore')->put($os->getDeviceArray(), 'ports', $tags, $fields);
+        $datastore->put($os->getDeviceArray(), 'ports', $tags, $fields);
     }
 
-    private function updatePortPoe(Port $port, array $port_stats, OS $os): void
+    private function updatePortPoe(DataStorageInterface $datastore, Port $port, array $port_stats, OS $os): void
     {
         // TODO actually supply data
         $poe_alias = array_intersect_key($this->field_alias, ['PortPwrAllocated' => 1, 'PortPwrAvailable' => 1, 'PortConsumption' => 1, 'PortMaxPwrDrawn' => 1]);
@@ -494,7 +497,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             $fields[$field] = $port_stats[$oid];
         }
 
-        app('Datastore')->put($os->getDeviceArray(), 'poe', [
+        $datastore->put($os->getDeviceArray(), 'poe', [
             'ifName' => $port->ifName,
             'rrd_name' => $this->rrdName($port, 'poe'),
             'rrd_def' => $rrd_def,
@@ -511,7 +514,6 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         $table = new Table($out);
         $table->setHeaders(['Port', 'VLAN', 'Speed', 'MTU', 'Bits In', 'Bits Out']);
         foreach ($ports as $port) {
-            dump($port->ifSpeed);
             /** @var Port $port */
             $table->addRow([
                 $port->getShortLabel(),
