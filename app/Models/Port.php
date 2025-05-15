@@ -336,7 +336,7 @@ class Port extends DeviceRelatedModel implements Keyable
 
         // Format connector type
         $connector = '';
-        if (!is_null($this->ifConnectorPresent)) {
+        if (! is_null($this->ifConnectorPresent)) {
             $connector = $this->ifConnectorPresent ? 'Physical' : 'Virtual';
         }
 

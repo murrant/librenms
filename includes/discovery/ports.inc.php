@@ -2,6 +2,7 @@
 
 if (\LibreNMS\Config::get('modules.ports.version') == 2) {
     (new \LibreNMS\Modules\Ports())->discover($os);
+
     return;
 }
 
