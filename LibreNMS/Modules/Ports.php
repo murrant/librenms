@@ -38,6 +38,7 @@ use LibreNMS\Enum\PortDisable;
 use LibreNMS\Interfaces\Data\DataStorageInterface;
 use LibreNMS\OS;
 use LibreNMS\RRD\RrdDefinition;
+use LibreNMS\Util\Mac;
 use LibreNMS\Util\Number;
 use LibreNMS\Util\StringHelpers;
 use Log;
@@ -51,6 +52,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
     protected int $version;
 
     protected array $field_alias = [
+        'ifIndex' => 'IF-MIB::ifIndex',
         'ifDescr' => 'IF-MIB::ifDescr',
         'ifType' => 'IF-MIB::ifType',
         'ifMtu' => 'IF-MIB::ifMtu',
@@ -183,7 +185,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
 
         $this->field_alias = $this->getFieldAlias($this->field_alias);
 
-        $module_config = ModuleConfig::firstOrCreate([
+        $module_config = ModuleConfig::firstOrNew([
             'device_id' => $device->device_id,
             'module' => 'ports',
         ]);
@@ -197,13 +199,14 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         $base_oids = array_intersect_key($this->field_alias, array_flip($this->discovery_base_fields));
         $base_data = SnmpQuery::enumStrings()->walk($base_oids);
 
-
         $ports = $base_data->mapTable(function ($data, $ifIndex) use ($device) {
             $port = new \App\Models\Port;
             $port->ifIndex = $ifIndex;
             $port->device_id = $device->device_id;
             $this->fillPortFields($port, $data, $this->discovery_base_fields);
             $port->disabled = $this->shouldDisablePort($port)->value;
+
+            echo "$port" . PHP_EOL;
 
             return $port;
         });
@@ -227,7 +230,14 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         $device->load('ports', 'ports.statistics'); // eager load all ports and statistics
 
         // load the config TODO move to the poller code.
-        $config = ModuleConfig::firstWhere(['module' => 'ports', 'device_id' => $device->device_id])->config;
+        $module_config = ModuleConfig::firstWhere(['module' => 'ports', 'device_id' => $device->device_id]);
+        if ($module_config === null) {
+            Log::info('%rYou must run port discovery before polling%n', ['color' => true]);
+
+            return;
+        }
+
+        $config = $module_config->config;
         $port_assoc_mode = PortAssociationMode::getName($device->port_association_mode);
         $fields = array_merge($this->poller_base_fields, self::BASE_PORT_STATS_FIELDS, self::PORT_STATS_FIELDS, [$port_assoc_mode]); // collect all expected fields
         $this->field_alias = $config['field_alias'];
@@ -338,7 +348,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
     private function fillPortFields(Port $port, array $data, array $fields): Port
     {
         foreach ($fields as $field) {
-            $port->setAttribute($field, $data[$this->field_alias[$field]]);
+            $port->setAttribute($field, $data[$this->field_alias[$field]] ?? null);
         }
 
         // data tweaks
@@ -346,9 +356,8 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             $port->ifSpeed = $port->ifSpeed * 1000;
         }
 
-        if (str_contains($port->ifPhysAddress, ':')) {
-            $mac_split = explode(':', $port->ifPhysAddress);
-            $port->ifPhysAddress = zeropad($mac_split[0]) . zeropad($mac_split[1]) . zeropad($mac_split[2]) . zeropad($mac_split[3]) . zeropad($mac_split[4] ?? '') . zeropad($mac_split[5] ?? '');
+        if ($port->ifPhysAddress && str_contains($port->ifPhysAddress, ':')) {
+            $port->ifPhysAddress = Mac::parse($port->ifPhysAddress)->hex();
         }
 
         if (! $port->device->getAttrib('ifName:' . $port->ifName)) {
@@ -383,7 +392,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             }
         }
 
-        foreach (Config::getOsSetting($port->device->os, 'bad_ifdescr_regexp') as $bir) {
+        foreach (Config::getOsSetting($port->device->os, 'bad_ifdescr_regexp', []) as $bir) {
             if (preg_match($bir . 'i', $port->ifDescr)) {
                 Log::debug("ignored by ifDescr: $port->ifDescr (matched: $bir)\n");
 
@@ -391,7 +400,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             }
         }
 
-        foreach (Config::getOsSetting($port->device->os, 'bad_ifname_regexp') as $bnr) {
+        foreach (Config::getOsSetting($port->device->os, 'bad_ifname_regexp', []) as $bnr) {
             if (preg_match($bnr . 'i', $port->ifName)) {
                 Log::debug("ignored by ifName: $port->ifName (matched: $bnr)\n");
 
@@ -399,7 +408,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             }
         }
 
-        foreach (Config::getOsSetting($port->device->os, 'bad_ifalias_regexp') as $bar) {
+        foreach (Config::getOsSetting($port->device->os, 'bad_ifalias_regexp', []) as $bar) {
             if (preg_match($bar . 'i', $port->ifAlias)) {
                 Log::debug("ignored by ifName: $port->ifAlias (matched: $bar)\n");
 
@@ -407,7 +416,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             }
         }
 
-        foreach (Config::getOsSetting($port->device->os, 'bad_iftype_regexp') as $bt) {
+        foreach (Config::getOsSetting($port->device->os, 'bad_iftype_regexp', []) as $bt) {
             if (preg_match($bt . 'i', $port->ifType)) {
                 Log::debug("ignored by ifType: $port->ifType (matched: $bt )\n");
 
@@ -447,7 +456,8 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
     {
 // if statistics entry doesn't exist, create a new one
         if ($port->statistics === null) {
-            $port_stats = new PortStatistic(['port_id' => $port->port_id]);
+            $port_stats = new PortStatistic;
+            $port_stats->port_id = $port->port_id;
             $port_stats->setRelation('port', $port); // prevent extra sql query
             $port->setRelation('statistics', $port_stats);
         }
