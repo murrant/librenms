@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PortDisable.php
  *
@@ -35,5 +36,4 @@ enum PortDisable: int
     case bad_ifname_regexp = 5;
     case bad_ifalias_regexp = 6;
     case bad_iftype_regexp = 7;
-
 }

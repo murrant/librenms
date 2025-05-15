@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Ports.php
  *
@@ -176,6 +177,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
     {
         if ($this->version != 2) {
             parent::discover($os);
+
             return;
         }
         $device = $os->getDevice();
@@ -189,13 +191,12 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         $module_config->config = [
             'field_alias' => $this->field_alias,
             'per_port_polling' => Config::getOsSetting($os->getName(), 'polling.selected_ports') || $device->getAttrib('selected_ports') == 'true',
-            'etherlike' => $this->field_alias['ifDuplex'] == 'EtherLike-MIB::dot3StatsDuplexStatus'
+            'etherlike' => $this->field_alias['ifDuplex'] == 'EtherLike-MIB::dot3StatsDuplexStatus',
         ];
         $module_config->save();
 
         $base_oids = array_intersect_key($this->field_alias, array_flip($this->discovery_base_fields));
         $base_data = SnmpQuery::enumStrings()->walk($base_oids);
-
 
         $ports = $base_data->mapTable(function ($data, $ifIndex) use ($device) {
             $port = new \App\Models\Port;
@@ -207,7 +208,6 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             return $port;
         });
 
-
         $this->syncModels($device, 'ports', $ports); // TODO soft delete
     }
 
@@ -218,6 +218,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
     {
         if ($this->version != 2) {
             parent::poll($os);
+
             return;
         }
         $device = $os->getDevice();
@@ -253,7 +254,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
 
         // update the ports_statistics and others
         $statistics_data = $data->table(1);
-        $ports->each(function (Port $port) use ($statistics_data, $os, $poll_time) {
+        $ports->each(function (Port $port) use ($statistics_data, $os) {
             if ($port->disabled) {
                 return; // skip disabled ports
             }
@@ -319,7 +320,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
             };
 
             // if not a matched field and the value is >= 0 (if numeric)
-            if ($field && (!is_numeric($value) || $value >= 0)) {
+            if ($field && (! is_numeric($value) || $value >= 0)) {
                 $defaults[$field] = $oid_matches[0];
             }
         }
@@ -427,7 +428,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
 
     private function rrdName(Port $port, ?string $suffix = null)
     {
-        $parts = ['port', "id$port->port_id",];
+        $parts = ['port', "id$port->port_id"];
         if ($suffix) {
             $parts[] = $suffix;
         }
@@ -442,7 +443,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
 
     private function savePortStatistics(Port $port, array $port_statistics): void
     {
-// if statistics entry doesn't exist, create a new one
+        // if statistics entry doesn't exist, create a new one
         if ($port->statistics === null) {
             $port_stats = new PortStatistic(['port_id' => $port->port_id]);
             $port_stats->setRelation('port', $port); // prevent extra sql query
@@ -457,7 +458,6 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         $port->statistics->save();
     }
 
-
     private function updatePortRrd(Port $port, array $port_stats, OS $os): void
     {
         $rrd_name = $this->rrdName($port);
@@ -470,7 +470,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
         foreach (self::DS_FIELD_MAP as $ds => $field) {
             $rrd_def->addDataset($ds, 'DERIVE', 0, $rrd_max);
         }
-        $fields = array_map(function ($field) use ($port, $port_stats) {
+        $fields = array_map(function ($field) use ($port_stats) {
             return $port_stats[$this->field_alias[$field]] ?? null;
         }, self::DS_FIELD_MAP);
         $tags = $port->only(['ifName', 'ifDescr', 'ifIndex']);
@@ -502,7 +502,7 @@ class Ports extends LegacyModule implements \LibreNMS\Interfaces\Module
     }
 
     /**
-     * @param \Illuminate\Support\Collection $ports
+     * @param  \Illuminate\Support\Collection  $ports
      * @return void
      */
     private function printPorts(\Illuminate\Support\Collection $ports): void
