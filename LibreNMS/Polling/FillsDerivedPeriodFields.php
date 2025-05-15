@@ -1,4 +1,5 @@
 <?php
+
 /**
  * FillDerivedPeriodFields.php
  *
@@ -24,7 +25,6 @@
  */
 
 namespace LibreNMS\Polling;
-
 
 use Illuminate\Database\Eloquent\Model;
 
