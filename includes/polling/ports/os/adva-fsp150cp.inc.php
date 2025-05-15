@@ -32,5 +32,6 @@ foreach ($advaports as $index => $entry) {
         }
         if (isset($entry['ENTITY-MIB::entPhysicalName'])) {
             $port_stats[$index]['ifDescr'] = $entry['ENTITY-MIB::entPhysicalName'];
-        }    }
+        }
+    }
 }
