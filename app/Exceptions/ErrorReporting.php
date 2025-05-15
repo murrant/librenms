@@ -63,7 +63,6 @@ class ErrorReporting
             return Limit::perMinute(LibrenmsConfig::get('reporting.throttle', 30));
         });
 
-
         // override default log message
         $exceptions->reportable(function (Throwable $e) {
             \Log::critical('%RException: ' . get_class($e) . ' ' . $e->getMessage() . '%n @ %G' . $e->getFile() . ':' . $e->getLine() . '%n' . PHP_EOL . $e->getTraceAsString(), ['color' => true]);
