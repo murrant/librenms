@@ -354,7 +354,7 @@ class Url
      */
     public static function graphTag($args)
     {
-        $urlargs = array_filter($args, fn($arg) => $arg !== null);
+        $urlargs = array_filter($args, fn ($arg) => $arg !== null);
 
         return '<img src="' . route('graph', $urlargs) . '" style="border:0;" />';
     }
@@ -390,7 +390,7 @@ class Url
 
     public static function lazyGraphTag(array $args): string
     {
-        $urlargs = array_filter($args, fn($arg) => $arg !== null);
+        $urlargs = array_filter($args, fn ($arg) => $arg !== null);
 
         $tag = '<img class="graph-image" src="' . route('graph', $urlargs) . '" style="border:0;"';
 
