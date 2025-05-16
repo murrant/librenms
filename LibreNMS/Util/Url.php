@@ -354,12 +354,9 @@ class Url
      */
     public static function graphTag($args)
     {
-        $urlargs = [];
-        foreach ($args as $key => $arg) {
-            $urlargs[] = $key . '=' . ($arg === null ? '' : urlencode($arg));
-        }
+        $urlargs = array_filter($args, fn($arg) => $arg !== null);
 
-        return '<img src="' . url('graph.php') . '?' . implode('&amp;', $urlargs) . '" style="border:0;" />';
+        return '<img src="' . route('graph', $urlargs) . '" style="border:0;" />';
     }
 
     public static function graphPopup($args, $content = null, $link = null)
@@ -391,15 +388,11 @@ class Url
         return self::overlibLink($args['link'], $graph, $popup, null);
     }
 
-    public static function lazyGraphTag($args)
+    public static function lazyGraphTag(array $args): string
     {
-        $urlargs = [];
+        $urlargs = array_filter($args, fn($arg) => $arg !== null);
 
-        foreach ($args as $key => $arg) {
-            $urlargs[] = $key . '=' . ($arg === null ? '' : urlencode($arg));
-        }
-
-        $tag = '<img class="img-responsive" src="' . url('graph.php') . '?' . implode('&amp;', $urlargs) . '" style="border:0;"';
+        $tag = '<img class="graph-image" src="' . route('graph', $urlargs) . '" style="border:0;"';
 
         if (Config::get('enable_lazy_load', true)) {
             return $tag . ' loading="lazy" />';
