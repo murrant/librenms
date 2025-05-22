@@ -84,12 +84,12 @@ class Sensor extends DeviceRelatedModel implements Keyable
         return __('sensors.' . $this->sensor_class . '.unit_long');
     }
 
-    public function icon()
+    public function icon(): string
     {
         return SensorEnum::from($this->sensor_class)->icon();
     }
 
-    public static function getTypes()
+    public static function getTypes(): array
     {
         return SensorEnum::values();
     }
@@ -258,7 +258,7 @@ class Sensor extends DeviceRelatedModel implements Keyable
         return $query->where('sensor_alert', 0);
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         $data = $this->only([
             'sensor_oid',
