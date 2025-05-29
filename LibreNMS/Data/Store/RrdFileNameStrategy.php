@@ -6,7 +6,6 @@ use TimeSeriesPhp\Drivers\RRDtool\Tags\RRDTagStrategyInterface;
 
 class RrdFileNameStrategy implements RRDTagStrategyInterface
 {
-
     public function __construct(
         public readonly string $baseDir
     ) {
@@ -24,7 +23,7 @@ class RrdFileNameStrategy implements RRDTagStrategyInterface
         // TODO drop rrd_name tag...
         if (isset($tags['rrd_name'])) {
             $name = $tags['rrd_name'];
-            $rrd_name = Rrd::safeName(is_array($name) ? implode('-', $name): $name);
+            $rrd_name = Rrd::safeName(is_array($name) ? implode('-', $name) : $name);
 
             return sprintf('%s/%s/%s.rrd', $this->baseDir, $hostname, $rrd_name);
         }
@@ -42,7 +41,7 @@ class RrdFileNameStrategy implements RRDTagStrategyInterface
             unset($tags['module']);
         }
 
-        $subTags = array_filter($tags, fn ($tag) => ! in_array($tag, $this->filterKeys($measurement)), ARRAY_FILTER_USE_KEY );
+        $subTags = array_filter($tags, fn ($tag) => ! in_array($tag, $this->filterKeys($measurement)), ARRAY_FILTER_USE_KEY);
 
         array_unshift($subTags, $measurement);
         $file = Rrd::safeName(implode('-', $subTags));
@@ -92,13 +91,12 @@ class RrdFileNameStrategy implements RRDTagStrategyInterface
             return glob($path . 'port-id' . $port_id . '.rrd');
         }
 
-
         return [$path];
     }
 
     private function filterKeys(string $measurement): array
     {
-        return match($measurement) {
+        return match ($measurement) {
             'sensor' => ['device_id', 'hostname', 'sensor_descr'],
             default => ['device_id', 'hostname'],
         };

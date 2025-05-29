@@ -111,6 +111,7 @@ class Rrd extends BaseDatastore
     {
         try {
             $this->rrd = app('time-series.rrdtool');
+
             return $this->rrd->connect(new RRDtoolConfig([
                 'rrd_dir' => $this->rrd_dir,
                 'rrdtool_path' => $this->rrdtool_executable,
