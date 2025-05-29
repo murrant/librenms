@@ -73,6 +73,42 @@ Route::get('graph/{path?}', GraphController::class)
     ->where('path', '.*')
     ->middleware(['web', AuthenticateGraph::class])->name('graph');
 
+Route::get('test', function () {
+    $device = DeviceCache::get('agil');
+    $ports = $device->ports;
+    $query = (new TimeSeriesPhp\Core\Query('port'))
+        ->where('hostname', '=', 'agil')
+        ->where('port_id', '=', $ports->firstWhere('ifName', 'wlo1')->port_id)
+        ->latest('1d')
+        ->select(['INOCTETS', 'OUTOCTETS']);
+
+    $expected = 'DEF:inoctets=/home/murrant/projects/librenms/rrd/agil/port-id89338.rrd:INOCTETS:AVERAGE
+    CDEF:inbits=inoctets,8,\*';
+
+
+    try {
+        $result = TimeSeries::query($query);
+
+        return view('graph', ['results' => $result]);
+    } catch (\TimeSeriesPhp\Exceptions\QueryException $e) {
+        $error = "
+
+{$e->getMessage()}
+
+Command: /usr/bin/rrdtool {$e->getRawQuery()}
+Return: {$e->getCode()}
+
+rrdtool xport --start 1748233022 --end 1748319422 \
+DEF:v643cd433b70f9d9efbcb80a5aaad1468=/home/murrant/projects/librenms/rrd/agil/port-id89337.rrd:INOCTETS:AVERAGE \
+XPORT:v643cd433b70f9d9efbcb80a5aaad1468:INOCTETS
+
+";
+
+        return response($error)->header('Content-Type', 'text/plain');
+    }
+
+});
+
 // WebUI
 Route::middleware(['auth'])->group(function () {
     // pages

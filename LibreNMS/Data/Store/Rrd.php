@@ -39,6 +39,13 @@ use LibreNMS\Util\Debug;
 use LibreNMS\Util\Rewrite;
 use Log;
 use Symfony\Component\Process\Process;
+use TimeSeriesPhp\Core\DataPoint;
+use TimeSeriesPhp\Core\TimeSeriesInterface;
+use TimeSeriesPhp\Drivers\RRDtool\RRDtoolConfig;
+use TimeSeriesPhp\Drivers\RRDtool\RRDtoolDriver;
+use TimeSeriesPhp\Exceptions\RRDtoolPrematureUpdateException;
+use TimeSeriesPhp\Exceptions\TSDBException;
+use TimeSeriesPhp\Exceptions\WriteException;
 
 class Rrd extends BaseDatastore
 {
@@ -60,6 +67,7 @@ class Rrd extends BaseDatastore
     private $step;
     /** @var string */
     private $rrdtool_executable;
+    private RRDtoolDriver $rrd;
 
     public function __construct()
     {
@@ -68,12 +76,12 @@ class Rrd extends BaseDatastore
         $this->init();
     }
 
-    public function getName()
+    public function getName(): string
     {
         return 'RRD';
     }
 
-    public static function isEnabled()
+    public static function isEnabled(): bool
     {
         return Config::get('rrd.enable', true);
     }
@@ -102,56 +110,31 @@ class Rrd extends BaseDatastore
      */
     public function init($dual_process = true): bool
     {
-        $command = $this->rrdtool_executable . ' -';
-
-        $descriptor_spec = [
-            0 => ['pipe', 'r'], // stdin  is a pipe that the child will read from
-            1 => ['pipe', 'w'], // stdout is a pipe that the child will write to
-            2 => ['pipe', 'w'], // stderr is a pipe that the child will write to
-        ];
-
-        $cwd = $this->rrd_dir;
-
         try {
-            if (! $this->isSyncRunning()) {
-                $this->sync_process = new Proc($command, $descriptor_spec, $cwd);
-            }
-
-            if ($dual_process && ! $this->isAsyncRunning()) {
-                $this->async_process = new Proc($command, $descriptor_spec, $cwd);
-                $this->async_process->setSynchronous(false);
-            }
-
-            return $this->isSyncRunning() && ($dual_process ? $this->isAsyncRunning() : true);
-        } catch (\Exception $e) {
+            $this->rrd = app('time-series.rrdtool');
+            return $this->rrd->connect(new RRDtoolConfig([
+                'rrd_dir' => $this->rrd_dir,
+                'rrdtool_path' => $this->rrdtool_executable,
+                'use_rrdcached' => ! empty($this->rrdcached),
+                'rrdcached_address' => $this->rrdcached,
+                'default_archives' => preg_split('/\s+/', $this->rra),
+                'default_step' => $this->step,
+                'tag_strategy' => RrdFileNameStrategy::class,
+            ]));
+        } catch (TSDBException $e) {
             Log::error('Failed to start RRD datastore: ' . $e->getMessage());
 
             return false;
         }
     }
 
-    public function isSyncRunning()
-    {
-        return isset($this->sync_process) && $this->sync_process->isRunning();
-    }
-
-    public function isAsyncRunning()
-    {
-        return isset($this->async_process) && $this->async_process->isRunning();
-    }
-
     /**
      * Close all open rrdtool processes.
      * This should be done before exiting
      */
-    public function close()
+    public function close(): void
     {
-        if ($this->isSyncRunning()) {
-            $this->sync_process->close('quit');
-        }
-        if ($this->isAsyncRunning()) {
-            $this->async_process->close('quit');
-        }
+        $this->rrd?->close();
     }
 
     /**
@@ -170,6 +153,26 @@ class Rrd extends BaseDatastore
      */
     public function put($device, $measurement, $tags, $fields)
     {
+        $ts_tags = [
+            'device_id' => $device['device_id'],
+            'hostname' => $device['hostname'],
+        ];
+
+        foreach ($tags as $tag => $value) {
+            $ts_tags[$tag] = $value;
+        }
+
+        $datapoint = new DataPoint($measurement, $fields, $ts_tags);
+        try {
+            $this->rrd->write($datapoint);
+        } catch (RRDtoolPrematureUpdateException $e) {
+            // ignore
+        } catch (WriteException $e) {
+            dd($e);
+        }
+
+        return;
+
         $rrd_name = isset($tags['rrd_name']) ? $tags['rrd_name'] : $measurement;
         $step = isset($tags['rrd_step']) ? $tags['rrd_step'] : $this->step;
         if (! empty($tags['rrd_oldname'])) {
