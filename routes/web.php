@@ -85,7 +85,6 @@ Route::get('test', function () {
     $expected = 'DEF:inoctets=/home/murrant/projects/librenms/rrd/agil/port-id89338.rrd:INOCTETS:AVERAGE
     CDEF:inbits=inoctets,8,\*';
 
-
     try {
         $result = TimeSeries::query($query);
 
@@ -106,7 +105,6 @@ XPORT:v643cd433b70f9d9efbcb80a5aaad1468:INOCTETS
 
         return response($error)->header('Content-Type', 'text/plain');
     }
-
 });
 
 // WebUI

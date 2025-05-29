@@ -40,7 +40,6 @@ use LibreNMS\Util\Rewrite;
 use Log;
 use Symfony\Component\Process\Process;
 use TimeSeriesPhp\Core\DataPoint;
-use TimeSeriesPhp\Core\TimeSeriesInterface;
 use TimeSeriesPhp\Drivers\RRDtool\RRDtoolConfig;
 use TimeSeriesPhp\Drivers\RRDtool\RRDtoolDriver;
 use TimeSeriesPhp\Exceptions\RRDtoolPrematureUpdateException;
@@ -112,6 +111,7 @@ class Rrd extends BaseDatastore
     {
         try {
             $this->rrd = app('time-series.rrdtool');
+
             return $this->rrd->connect(new RRDtoolConfig([
                 'rrd_dir' => $this->rrd_dir,
                 'rrdtool_path' => $this->rrdtool_executable,
