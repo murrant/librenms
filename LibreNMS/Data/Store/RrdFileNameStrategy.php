@@ -2,9 +2,9 @@
 
 namespace LibreNMS\Data\Store;
 
-use TimeSeriesPhp\Drivers\RRDtool\Tags\RRDTagStrategyContract;
+use TimeSeriesPhp\Drivers\RRDtool\Tags\RRDTagStrategyInterface;
 
-class RrdFileNameStrategy implements RRDTagStrategyContract
+class RrdFileNameStrategy implements RRDTagStrategyInterface
 {
 
     public function __construct(
@@ -50,9 +50,14 @@ class RrdFileNameStrategy implements RRDTagStrategyContract
         return sprintf('%s/%s/%s.rrd', $this->baseDir, $hostname, $file);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function findMeasurementsByTags(array $tagConditions): array
     {
         // TODO: Implement findMeasurementsByTags() method.
+
+        return [];
     }
 
     public function resolveFilePaths(string $measurement, array $tagConditions): array
@@ -88,7 +93,7 @@ class RrdFileNameStrategy implements RRDTagStrategyContract
         }
 
 
-        return $path;
+        return [$path];
     }
 
     private function filterKeys(string $measurement): array
