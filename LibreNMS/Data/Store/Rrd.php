@@ -40,7 +40,6 @@ use LibreNMS\Util\Rewrite;
 use Log;
 use Symfony\Component\Process\Process;
 use TimeSeriesPhp\Core\DataPoint;
-use TimeSeriesPhp\Core\TimeSeriesInterface;
 use TimeSeriesPhp\Drivers\RRDtool\RRDtoolConfig;
 use TimeSeriesPhp\Drivers\RRDtool\RRDtoolDriver;
 use TimeSeriesPhp\Exceptions\RRDtoolPrematureUpdateException;
@@ -165,10 +164,11 @@ class Rrd extends BaseDatastore
         $datapoint = new DataPoint($measurement, $fields, $ts_tags);
         try {
             $this->rrd->write($datapoint);
-        } catch (RRDtoolPrematureUpdateException $e) {
-            // ignore
         } catch (WriteException $e) {
-            dd($e);
+            // ignore RRDtoolPrematureUpdateException
+            if (! $e->getPrevious() instanceof RRDtoolPrematureUpdateException) {
+                dd($e);
+            }
         }
 
         return;
