@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "42a78857c501ebe7ed715170ac2ba13c",
+    "content-hash": "d142f2495615a2a42fce55b659117213",
     "packages": [
         {
             "name": "amenadiel/jpgraph",
@@ -3122,6 +3122,63 @@
                 "source": "https://github.com/librenms/plugin-interfaces/tree/1.0"
             },
             "time": "2024-08-15T15:23:53+00:00"
+        },
+        {
+            "name": "librenms/timeseries-php",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../timeseries-php",
+                "reference": "1acf98f5e44a9c8e1a26d7842e03f7692853ae01"
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.9",
+                "illuminate/support": "^12.15",
+                "influxdata/influxdb-client-php": "^3.7",
+                "php": ">=8.2",
+                "symfony/process": "^7.2"
+            },
+            "require-dev": {
+                "ext-fileinfo": "*",
+                "laravel/pint": "^1.22",
+                "phpstan/phpstan": "^2.1",
+                "phpunit/phpunit": "^9.5",
+                "symfony/var-dumper": "^7.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "TimeSeriesPhp\\Support\\TimeSeriesServiceProvider"
+                    ],
+                    "aliases": {
+                        "TimeSeries": "TimeSeriesPhp\\Support\\TimeSeriesFacade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "TimeSeriesPhp\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "TimeSeriesPhp\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tony Murray",
+                    "email": "murraytony@gmail.com"
+                }
+            ],
+            "description": "PHP Timeseries Database Abstraction Library",
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "marc-mabe/php-enum",
@@ -13976,9 +14033,10 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": {
-        "librenms/laravel-vue-i18n-generator": 20
+        "librenms/laravel-vue-i18n-generator": 20,
+        "librenms/timeseries-php": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

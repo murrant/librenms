@@ -40,6 +40,7 @@
         "laravel/ui": "^4.6",
         "librenms/laravel-vue-i18n-generator": "dev-master",
         "librenms/plugin-interfaces": "^1.0",
+        "librenms/timeseries-php": "dev-main",
         "mews/purifier": "^3.4",
         "nesbot/carbon": "^3.8",
         "nunomaduro/laravel-console-summary": "^1.13",
@@ -159,6 +160,12 @@
             "url": "https://opencollective.com/librenms"
         }
     ],
-    "minimum-stability": "stable",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../timeseries-php"
+        }
+    ],
+    "minimum-stability": "dev",
     "prefer-stable": true
 }
