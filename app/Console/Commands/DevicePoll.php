@@ -71,7 +71,7 @@ class DevicePoll extends LnmsCommand
             $results = $processor->run();
 
             return $this->processResults($results, $measurements);
-         } catch (QueryException $e) {
+        } catch (QueryException $e) {
             return $this->handleQueryException($e);
         }
     }
