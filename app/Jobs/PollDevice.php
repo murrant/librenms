@@ -41,7 +41,7 @@ class PollDevice implements ShouldQueue
 
     /**
      * @param  int  $device_id
-     * @param  array<string, bool|string[]>  $module_overrides
+     * @param  ModuleList  $moduleList
      */
     public function __construct(
         public int $device_id,
