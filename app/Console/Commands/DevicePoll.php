@@ -67,7 +67,7 @@ class DevicePoll extends LnmsCommand
             $this->line(__('commands.device:poll.starting'));
             $this->newLine();
 
-           $processor->run();
+            $processor->run();
 
             return $processor->processResults($measurements, $this->getOutput());
         } catch (QueryException $e) {
