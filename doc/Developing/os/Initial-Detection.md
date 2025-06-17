@@ -99,7 +99,7 @@ which modules are enabled/disabled by default.
 discovery_modules:
      cisco-cef: true
      slas: true
-     cisco-mac-accounting: false
+     mac-accounting: false
 ```
 
 ##### Discovery Logic
