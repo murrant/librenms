@@ -974,7 +974,7 @@ class Cisco extends OS implements
                     'bps_in' => 0,
                     'bps_out' => 0,
                 ]);
-            })->filter()->unique(fn(MacAccounting $m) => $m->getCompositeKey());
+            })->filter()->unique(fn (MacAccounting $m) => $m->getCompositeKey());
     }
 
     /**
@@ -1007,7 +1007,7 @@ class Cisco extends OS implements
                     // get existing or add new
                     $key = $current->getCompositeKey();
                     if ($macs->has($key)) {
-                        $current =  $macs->get($key);
+                        $current = $macs->get($key);
                     } else {
                         $macs->put($key, $current);
                     }

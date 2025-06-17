@@ -903,7 +903,7 @@ class Device extends BaseModel
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MacAccounting, $this>
- */
+     */
     public function macAccounting(): HasMany
     {
         return $this->hasMany(MacAccounting::class, 'device_id');

@@ -148,7 +148,7 @@ if ($vars['subview'] == 'top10') {
         $astext = '';
         $asn = '';
         if (dbFetchCell('SELECT count(*) FROM bgpPeers WHERE device_id = ? AND bgpPeerIdentifier = ?', [$acc['device_id'], $ipv4])) {
-            $peer_info = dbFetchRow('SELECT * FROM bgpPeers WHERE device_id = ? AND bgpPeerIdentifier = ?', [$acc['device_id'],$ipv4]);
+            $peer_info = dbFetchRow('SELECT * FROM bgpPeers WHERE device_id = ? AND bgpPeerIdentifier = ?', [$acc['device_id'], $ipv4]);
             $asn = 'AS' . $peer_info['bgpPeerRemoteAs'];
             $astext = $peer_info['astext'];
         }
@@ -165,9 +165,9 @@ if ($vars['subview'] == 'top10') {
             }
 
             echo "<div style='display: block; padding: 3px; margin: 3px; min-width: 221px; max-width:221px; min-height:90px; max-height:90px; text-align: center; float: left;'>
-      " .$ipv4 . ' - ' . $asn . "
+      " . $ipv4 . ' - ' . $asn . "
           <a href='#' onmouseover=\"return overlib('\
-     <div style=\'font-size: 16px; padding:5px; font-weight: bold; color: #555555;\'>" . $name . ' - ' .$ipv4 . ' - ' . $asn . "</div>\
+     <div style=\'font-size: 16px; padding:5px; font-weight: bold; color: #555555;\'>" . $name . ' - ' . $ipv4 . ' - ' . $asn . "</div>\
      <img src=\'graph.php?id=" . $acc['ma_id'] . "&amp;type=$graph_type&amp;from=" . Config::get('time.twoday') . '&amp;to=' . Config::get('time.now') . "&amp;width=450&amp;height=150\'>\
      ', CENTER, LEFT, FGCOLOR, '#e5e5e5', BGCOLOR, '#e5e5e5', WIDTH, 400, HEIGHT, 150);\" onmouseout=\"return nd();\" >
           <img src='graph.php?id=" . $acc['ma_id'] . "&amp;type=$graph_type&amp;from=" . Config::get('time.twoday') . '&amp;to=' . Config::get('time.now') . "&amp;width=213&amp;height=45'></a>
@@ -184,7 +184,7 @@ if ($vars['subview'] == 'top10') {
           <td class=list-large width=200>' . $ipv4 . '</td>
           <td class=list-large width=500>' . $name . ' ' . $arp_name . '</td>
           <td class=list-large width=100>' . \LibreNMS\Util\Number::formatSi($acc['bps_in'], 2, 3, 'bps') . '</td>
-          <td class=list-large width=100>' . \LibreNMS\Util\Number::formatSi($acc['bps_out'] , 2, 3, 'bps') . '</td>
+          <td class=list-large width=100>' . \LibreNMS\Util\Number::formatSi($acc['bps_out'], 2, 3, 'bps') . '</td>
         </tr>
       </table>
       </div>
