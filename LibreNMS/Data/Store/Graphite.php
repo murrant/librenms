@@ -29,6 +29,7 @@ namespace LibreNMS\Data\Store;
 
 use App\Polling\Measure\Measurement;
 use Carbon\Carbon;
+use Exception;
 use LibreNMS\Config;
 use Log;
 
@@ -84,40 +85,27 @@ class Graphite extends BaseDatastore
             return;
         }
 
-        $measurement = $this->prefix . $this->sanitizeMetricString($measurement);
-        $tags = $this->serializeTags($tags);
-        $timestamp = Carbon::now()->timestamp;
-
-
-        foreach ($fields as $field => $value) {
-            // Skip fields without values
-            if (is_null($value)) {
-                continue;
-            }
-
-            $metric = "$measurement.$field$tags";
-            $this->writeData($metric, $value, $timestamp);
-        }
-    }
-
-    /**
-     * @param  string  $metric
-     * @param  int|float|string  $value
-     * @param  int  $timestamp
-     */
-    private function writeData(string $metric, int|float|string $value, int $timestamp): void
-    {
         try {
             $stat = Measurement::start('write');
+            $measurement = $this->prefix . $this->sanitizeMetricString($measurement);
+            $tags = $this->serializeTags($tags);
+            $timestamp = Carbon::now()->timestamp;
 
-            $line = "$metric $value $timestamp\n";
+            $lines = '';
+            foreach ($fields as $field => $value) {
+                if (is_null($value)) {
+                    continue; // Skip fields without values
+                }
 
-            Log::debug("Sending to Graphite: $line");
-            $this->connection->write($line);
+                $lines .= "$measurement.$field$tags $value $timestamp\n";
+            }
+
+            Log::debug("Sending to Graphite: $lines");
+            $this->connection->write($lines);
 
             $this->recordStatistic($stat->end());
-        } catch (\Socket\Raw\Exception $e) {
-            Log::error('Graphite write error: ' . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Graphite write error: '.$e->getMessage());
         }
     }
 

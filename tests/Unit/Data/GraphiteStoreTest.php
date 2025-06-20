@@ -87,13 +87,12 @@ class GraphiteStoreTest extends TestCase
         $tags = ['ifName' => 'testifname', 'type' => 'testtype'];
         $fields = ['ifIn' => 234234, 'ifOut' => 53453];
 
-        $mockSocket->shouldReceive('write')
-            ->with("librenms.testmeasure.ifIn;ifName=testifname;type=testtype 234234 $this->timestamp\n")->once();
-        $mockSocket->shouldReceive('write')
-            ->with("librenms.testmeasure.ifOut;ifName=testifname;type=testtype 53453 $this->timestamp\n")->once();
-        $graphite->write($measurement, $fields, $tags);
+        $expected = "librenms.testmeasure.ifIn;ifName=testifname;type=testtype 234234 $this->timestamp\n";
+        $expected .= "librenms.testmeasure.ifOut;ifName=testifname;type=testtype 53453 $this->timestamp\n";
 
-        Config::set('graphite.prefix', null);
+        $mockSocket->shouldReceive('write')
+            ->with($expected)->once();
+        $graphite->write($measurement, $fields, $tags);
     }
 
     public function testWriteOnlyTags(): void
@@ -105,10 +104,11 @@ class GraphiteStoreTest extends TestCase
         $tags = ['hostname' => 'testhost', 'ifName' => 'testifname', 'type' => 'testtype'];
         $fields = ['ifIn' => 234234, 'ifOut' => 53453];
 
+        $expected = "testmeasure.ifIn;hostname=testhost;ifName=testifname;type=testtype 234234 $this->timestamp\n";
+        $expected .= "testmeasure.ifOut;hostname=testhost;ifName=testifname;type=testtype 53453 $this->timestamp\n";
+
         $mockSocket->shouldReceive('write')
-            ->with("testmeasure.ifIn;hostname=testhost;ifName=testifname;type=testtype 234234 $this->timestamp\n")->once();
-        $mockSocket->shouldReceive('write')
-            ->with("testmeasure.ifOut;hostname=testhost;ifName=testifname;type=testtype 53453 $this->timestamp\n")->once();
+            ->with($expected)->once();
         $graphite->write($measurement, $fields, $tags);
     }
 
