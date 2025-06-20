@@ -143,6 +143,10 @@ class Datastore implements WriteInterface, DataStorageInterface
      */
     public function write(string $measurement, array $fields, array $tags = [], array $meta = []): void
     {
+        // ensure hostname tag (and make sure it is first)
+        $device = $meta['device'] ?? DeviceCache::getPrimary();
+        $tags = array_merge(['hostname' => $device->hostname ?? ''], $tags);
+
         foreach ($this->stores as $store) {
             $store->write($measurement, $fields, $tags, $meta);
         }

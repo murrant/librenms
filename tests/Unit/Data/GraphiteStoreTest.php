@@ -26,7 +26,6 @@
 
 namespace LibreNMS\Tests\Unit\Data;
 
-use App\Models\Device;
 use Carbon\Carbon;
 use LibreNMS\Config;
 use LibreNMS\Data\Store\Graphite;
@@ -69,31 +68,50 @@ class GraphiteStoreTest extends TestCase
 
     public function testSocketWriteError(): void
     {
-        $mockSocket = \Mockery::mock(\Socket\Raw\Socket::class);
+        $mockSocket = \Mockery::mock(Socket::class);
         $graphite = $this->mockGraphite($mockSocket);
 
         $mockSocket->shouldReceive('write')
             ->andThrow('Socket\Raw\Exception', 'Did not handle socket exception')->once();
 
-        $graphite->write('fake', ['one' => 1], ['rrd_name' => 'name']);
+        $graphite->write('fake', ['one' => 1], ['hostname' => 'testhost']);
     }
 
     public function testSimpleWrite(): void
     {
-        $mockSocket = \Mockery::mock(\Socket\Raw\Socket::class);
+        Config::set('graphite.prefix', 'librenms');
+        $mockSocket = \Mockery::mock(Socket::class);
         $graphite = $this->mockGraphite($mockSocket);
 
         $measurement = 'testmeasure';
         $tags = ['ifName' => 'testifname', 'type' => 'testtype'];
         $fields = ['ifIn' => 234234, 'ifOut' => 53453];
-        $meta = ['device' => new Device(['hostname' => 'testhost']), 'rrd_name' => 'rrd_name'];
 
         $mockSocket->shouldReceive('write')
-            ->with("testhost.testmeasure.rrd_name.ifIn 234234 $this->timestamp\n")->once();
+            ->with("librenms.testmeasure.ifIn;ifName=testifname;type=testtype 234234 $this->timestamp\n")->once();
         $mockSocket->shouldReceive('write')
-            ->with("testhost.testmeasure.rrd_name.ifOut 53453 $this->timestamp\n")->once();
-        $graphite->write($measurement, $fields, $tags, $meta);
+            ->with("librenms.testmeasure.ifOut;ifName=testifname;type=testtype 53453 $this->timestamp\n")->once();
+        $graphite->write($measurement, $fields, $tags);
+
+        Config::set('graphite.prefix', null);
     }
+
+    public function testWriteOnlyTags(): void
+    {
+        $mockSocket = \Mockery::mock(Socket::class);
+        $graphite = $this->mockGraphite($mockSocket);
+
+        $measurement = 'testmeasure';
+        $tags = ['hostname' => 'testhost', 'ifName' => 'testifname', 'type' => 'testtype'];
+        $fields = ['ifIn' => 234234, 'ifOut' => 53453];
+
+        $mockSocket->shouldReceive('write')
+            ->with("testmeasure.ifIn;hostname=testhost;ifName=testifname;type=testtype 234234 $this->timestamp\n")->once();
+        $mockSocket->shouldReceive('write')
+            ->with("testmeasure.ifOut;hostname=testhost;ifName=testifname;type=testtype 53453 $this->timestamp\n")->once();
+        $graphite->write($measurement, $fields, $tags);
+    }
+
 
     private function mockGraphite(Socket $mockSocket): Graphite
     {

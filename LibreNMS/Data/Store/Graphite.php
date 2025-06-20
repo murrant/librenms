@@ -34,9 +34,9 @@ use Log;
 
 class Graphite extends BaseDatastore
 {
-    protected $connection;
+    protected ?\Socket\Raw\Socket $connection = null;
 
-    protected $prefix;
+    protected mixed $prefix;
 
     public function __construct(\Socket\Raw\Factory $socketFactory)
     {
@@ -58,6 +58,9 @@ class Graphite extends BaseDatastore
         }
 
         $this->prefix = Config::get('graphite.prefix', '');
+        if ($this->prefix) {
+            $this->prefix .= '.';
+        }
     }
 
     public function getName(): string
@@ -81,57 +84,60 @@ class Graphite extends BaseDatastore
             return;
         }
 
+        $measurement = $this->prefix . $this->sanitizeMetricString($measurement);
+        $tags = $this->serializeTags($tags);
         $timestamp = Carbon::now()->timestamp;
 
-        if ($measurement == 'ports') {
-            $measurement = 'ports|' . $tags['ifName'];
-        }
 
-        $hostname = $this->getDevice($meta)->hostname;
-
-        // metrics will be built as prefix.hostname.measurement.field value timestamp
-        // metric fields can not contain . as this is used by graphite as a field separator
-        $hostname = preg_replace('/\./', '_', $hostname);
-        $measurement = preg_replace(['/\./', '/\//'], '_', $measurement);
-        $measurement = preg_replace('/\|/', '.', $measurement);
-
-        $measurement_name = preg_replace('/\./', '_', $meta['rrd_name'] ?? ''); // FIXME don't use rrd_name
-        $ms_name = is_array($measurement_name) ? implode('.', $measurement_name) : $measurement_name;
-        // remove the port-id tags from the metric
-        if (preg_match('/^port-id\d+/', $ms_name)) {
-            $ms_name = '';
-        }
-
-        foreach ($fields as $k => $v) {
+        foreach ($fields as $field => $value) {
             // Skip fields without values
-            if (is_null($v)) {
+            if (is_null($value)) {
                 continue;
             }
-            $metric = implode('.', array_filter([$this->prefix, $hostname, $measurement, $ms_name, $k]));
-            $this->writeData($metric, $v, $timestamp);
+
+            $metric = "$measurement.$field$tags";
+            $this->writeData($metric, $value, $timestamp);
         }
     }
 
     /**
      * @param  string  $metric
-     * @param  mixed  $value
-     * @param  mixed  $timestamp
+     * @param  scalar  $value
+     * @param  int  $timestamp
      */
-    private function writeData($metric, $value, $timestamp)
+    private function writeData(string $metric, int|float|string|bool $value, int $timestamp): void
     {
         try {
             $stat = Measurement::start('write');
 
-            // Further sanitize the full metric before sending, whitespace isn't allowed
-            $metric = preg_replace('/\s+/', '_', $metric);
+            $line = "$metric $value $timestamp\n";
 
-            $line = implode(' ', [$metric, $value, $timestamp]);
-            Log::debug("Sending to Graphite: $line\n");
-            $this->connection->write("$line\n");
+            Log::debug("Sending to Graphite: $line");
+            $this->connection->write($line);
 
             $this->recordStatistic($stat->end());
         } catch (\Socket\Raw\Exception $e) {
             Log::error('Graphite write error: ' . $e->getMessage());
         }
+    }
+
+    protected function serializeTags(array $tags): string
+    {
+        if (empty($tags)) {
+            return '';
+        }
+
+        $tag_pairs = [];
+
+        foreach ($tags as $tag => $value) {
+            $tag_pairs[] = $this->sanitizeMetricString($tag) . '=' . $this->sanitizeMetricString($value);
+        }
+
+        return ';' . implode(';', $tag_pairs);
+    }
+
+    protected function sanitizeMetricString(string $string): string
+    {
+        return str_replace(['.', ';', '=', ' '], '_', $string);
     }
 }
