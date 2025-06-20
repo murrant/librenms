@@ -48,7 +48,7 @@ class Graphite extends BaseDatastore
                 $this->connection = $socketFactory->createClient("$host:$port");
             }
         } catch (\Exception $e) {
-            d_echo($e->getMessage());
+            Log::error($e->getMessage());
         }
 
         if ($this->connection) {
@@ -79,7 +79,7 @@ class Graphite extends BaseDatastore
     public function write(string $measurement, array $fields, array $tags = [], array $meta = []): void
     {
         if (! $this->connection) {
-            d_echo("Graphite Error: not connected\n");
+            Log::error("Graphite Error: not connected\n");
 
             return;
         }
@@ -102,10 +102,10 @@ class Graphite extends BaseDatastore
 
     /**
      * @param  string  $metric
-     * @param  scalar  $value
+     * @param  int|float|string  $value
      * @param  int  $timestamp
      */
-    private function writeData(string $metric, int|float|string|bool $value, int $timestamp): void
+    private function writeData(string $metric, int|float|string $value, int $timestamp): void
     {
         try {
             $stat = Measurement::start('write');
