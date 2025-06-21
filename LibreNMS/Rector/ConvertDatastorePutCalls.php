@@ -193,8 +193,34 @@ CODE_SAMPLE
     {
         $metadataItems = [];
         $rrdNameTags = [];
+        $existingTagValues = []; // Track existing tag values to prevent duplicates
 
-        // First pass: collect rrd_name for tag extraction
+        // First pass: collect regular metadata tags and track their values
+        foreach ($tags->items as $item) {
+            if (!$item instanceof ArrayItem || !$item->key) {
+                continue;
+            }
+
+            $keyName = null;
+            if ($item->key instanceof String_) {
+                $keyName = $item->key->value;
+            }
+
+            // Skip RRD-related tags but collect regular metadata
+            if (in_array($keyName, ['rrd_def', 'rrd_name'], true)) {
+                continue;
+            }
+
+            $metadataItems[] = $item;
+
+            // Track the value to prevent duplicates
+            $tagValue = $this->getNodeValue($item->value);
+            if ($tagValue !== null) {
+                $existingTagValues[] = $tagValue;
+            }
+        }
+
+        // Second pass: extract tags from rrd_name (skip first element which is measurement)
         $rrdNameArray = null;
         foreach ($tags->items as $item) {
             if (!$item instanceof ArrayItem || !$item->key) {
@@ -212,42 +238,45 @@ CODE_SAMPLE
             }
         }
 
-        // Extract tags from rrd_name (skip first element which is measurement)
         if ($rrdNameArray && !empty($rrdNameArray->items)) {
             $rrdNameItems = array_slice($rrdNameArray->items, 1); // Skip measurement
             foreach ($rrdNameItems as $index => $rrdNameItem) {
                 if ($rrdNameItem instanceof ArrayItem && $rrdNameItem->value) {
-                    $tagKey = "tag" . ($index + 1); // Create generic tag names
-                    $rrdNameTags[] = new ArrayItem($rrdNameItem->value, new String_($tagKey));
+                    $tagValue = $this->getNodeValue($rrdNameItem->value);
+
+                    // Only add if this value doesn't already exist in the tags
+                    if ($tagValue !== null && !in_array($tagValue, $existingTagValues, true)) {
+                        $tagKey = "tag" . ($index + 1); // Create generic tag names
+                        $rrdNameTags[] = new ArrayItem($rrdNameItem->value, new String_($tagKey));
+                        $existingTagValues[] = $tagValue; // Track this value
+                    }
                 }
             }
         }
 
-        // Second pass: collect regular metadata tags
-        foreach ($tags->items as $item) {
-            if (!$item instanceof ArrayItem || !$item->key) {
-                continue;
-            }
-
-            $keyName = null;
-            if ($item->key instanceof String_) {
-                $keyName = $item->key->value;
-            }
-
-            // Skip RRD-related tags
-            if (in_array($keyName, ['rrd_def', 'rrd_name'], true)) {
-                continue;
-            }
-
-            $metadataItems[] = $item;
-        }
-
-        // Combine regular metadata with rrd_name tags
+        // Combine regular metadata with non-duplicate rrd_name tags
         $allMetadataItems = array_merge($metadataItems, $rrdNameTags);
 
         return new Array_($allMetadataItems, [
             'kind' => Array_::KIND_SHORT
         ]);
+    }
+
+    private function getNodeValue(Node $node): ?string
+    {
+        if ($node instanceof String_) {
+            return $node->value;
+        }
+
+        if ($node instanceof Variable) {
+            $varName = $this->getName($node);
+            if ($varName) {
+                return $varName; // Use variable name as identifier
+            }
+        }
+
+        // For other node types, we can't easily determine the value
+        return null;
     }
 
     private function convertFieldsToFieldValues(Array_ $fields): Array_
@@ -275,10 +304,10 @@ CODE_SAMPLE
             // Create appropriate FieldValue call, but handle parsing errors gracefully
             try {
                 $fieldValueCall = $this->createFieldValueCall($value);
+                // Remove the attributes that cause extra line returns
                 $convertedItems[] = new ArrayItem(
                     $fieldValueCall,
-                    $key,
-                    attributes: ['comments' => [new \PhpParser\Comment('')]]
+                    $key
                 );
             } catch (\Exception $e) {
                 // If we can't parse the field value, skip it to avoid corruption
