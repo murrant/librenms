@@ -304,11 +304,10 @@ CODE_SAMPLE
             // Create appropriate FieldValue call, but handle parsing errors gracefully
             try {
                 $fieldValueCall = $this->createFieldValueCall($value);
-                // Remove the attributes that cause extra line returns
-                $convertedItems[] = new ArrayItem(
-                    $fieldValueCall,
-                    $key
-                );
+                // Add comment to each array item to encourage line breaks
+                $arrayItem = new ArrayItem($fieldValueCall, $key);
+                $arrayItem->setAttribute('comments', [new \PhpParser\Comment('/* field */')]);
+                $convertedItems[] = $arrayItem;
             } catch (\Exception $e) {
                 // If we can't parse the field value, skip it to avoid corruption
                 continue;
@@ -322,9 +321,11 @@ CODE_SAMPLE
             ]);
         }
 
-        return new Array_($convertedItems, [
+        $array = new Array_($convertedItems, [
             'kind' => Array_::KIND_SHORT
         ]);
+
+        return $array;
     }
 
     private function createFieldValueCall(Node $value): StaticCall
