@@ -2,7 +2,7 @@
 
 namespace LibreNMS\Interfaces\Data;
 
-interface DataStorageInterface
+interface DataStorageInterface extends WriteInterface
 {
     /**
      * Datastore-independent function which should be used for all polled metrics.

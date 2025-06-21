@@ -32,7 +32,7 @@ class FieldValue
         protected readonly StorageType $storage = StorageType::GAUGE,
         protected ?int $step = null,
         protected ?int $max = null,
-        protected ?int $min = null,
+        protected ?int $min = 0,
     ) {
     }
 

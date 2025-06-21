@@ -298,9 +298,9 @@ class Core implements Module
                 }
             }
 
-            $datastore->write('uptime', [], [
-                'uptime' => FieldValue::asInt($uptime)->min(0),
-            ], $uptime);
+            $datastore->write('uptime', [
+                'uptime' => FieldValue::asInt($uptime),
+            ]);
 
             $os->enableGraph('uptime');
 

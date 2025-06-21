@@ -2,6 +2,8 @@
 
 namespace LibreNMS\Interfaces\Data;
 
+use LibreNMS\Data\Definitions\FieldValue;
+
 interface WriteInterface
 {
     /**
@@ -16,7 +18,7 @@ interface WriteInterface
      *
      * @param  string  $measurement  Name of this measurement
      * @param  array<string, scalar>  $tags  tags for the data to be able to diffrentiate data sets
-     * @param  array<string, scalar>  $fields  The data to update in an associative array
+     * @param  array<string, FieldValue|scalar>  $fields  The data to update in an associative array
      * @param  array<string, mixed>  $meta  additional data for the datastore (such ass rrd_def)
      */
     public function write(string $measurement, array $fields, array $tags = [], array $meta = []): void;

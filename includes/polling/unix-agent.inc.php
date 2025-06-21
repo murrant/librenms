@@ -48,8 +48,8 @@ if ($device['os_group'] == 'unix' || $device['os'] == 'windows') {
     if (! empty($agent_raw)) {
         echo 'execution time: ' . $agent_time . 'ms';
 
-        app('Datastore')->write('agent', [], [
-            'exectime' => FieldValue::asFloat($agent_time)->min(0),
+        app('Datastore')->write('agent', [
+            'exectime' => FieldValue::asFloat($agent_time),
         ]);
 
         $os->enableGraph('agent');

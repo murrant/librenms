@@ -26,23 +26,25 @@
 
 namespace LibreNMS\OS;
 
+use LibreNMS\Data\Definitions\FieldValue;
+use LibreNMS\Data\Definitions\StorageType;
 use LibreNMS\Interfaces\Data\DataStorageInterface;
 use LibreNMS\Interfaces\Polling\OSPolling;
 use LibreNMS\OS;
-use LibreNMS\RRD\RrdDefinition;
 use SnmpQuery;
 
 class Arbos extends OS implements OSPolling
 {
     public function pollOS(DataStorageInterface $datastore): void
     {
-        $flows = SnmpQuery::get('PEAKFLOW-SP-MIB::deviceTotalFlows.0')->value();
+        $flows = SnmpQuery::get([
+            'PEAKFLOW-SP-MIB::deviceTotalFlowsHC.0',
+            'PEAKFLOW-SP-MIB::deviceTotalFlows.0',
+        ])->value();
 
         if (is_numeric($flows)) {
-            $datastore->put($this->getDeviceArray(), 'arbos_flows', [
-                'rrd_def' => RrdDefinition::make()->addDataset('flows', 'GAUGE', 0, 3000000),
-            ], [
-                'flows' => $flows,
+            $datastore->write('arbos_flows', [
+                'flows' => FieldValue::asInt($flows, StorageType::COUNTER),
             ]);
 
             $this->enableGraph('arbos_flows');

@@ -27,13 +27,13 @@
 namespace LibreNMS\OS;
 
 use App\Models\AccessPoint;
+use LibreNMS\Data\Definitions\FieldValue;
 use LibreNMS\Device\WirelessSensor;
 use LibreNMS\Interfaces\Data\DataStorageInterface;
 use LibreNMS\Interfaces\Discovery\Sensors\WirelessApCountDiscovery;
 use LibreNMS\Interfaces\Discovery\Sensors\WirelessClientsDiscovery;
 use LibreNMS\Interfaces\Polling\OSPolling;
 use LibreNMS\OS\Shared\Cisco;
-use LibreNMS\RRD\RrdDefinition;
 use SnmpQuery;
 
 class Ciscowlc extends Cisco implements
@@ -47,7 +47,6 @@ class Ciscowlc extends Cisco implements
             return; // if ap count doesn't exist, skip this polling TODO replace with wireless controller module
         }
 
-        $device = $this->getDeviceArray();
         $apNames = SnmpQuery::enumStrings()->walk('AIRESPACE-WIRELESS-MIB::bsnAPName')->table(1);
         $radios = SnmpQuery::enumStrings()->walk('AIRESPACE-WIRELESS-MIB::bsnAPIfTable')->table(2);
         SnmpQuery::walk('AIRESPACE-WIRELESS-MIB::bsnAPIfLoadChannelUtilization')->table(2, $radios);
@@ -62,17 +61,10 @@ class Ciscowlc extends Cisco implements
             }
         }
 
-        $rrd_def = RrdDefinition::make()
-            ->addDataset('NUMAPS', 'GAUGE', 0, 12500000000)
-            ->addDataset('NUMCLIENTS', 'GAUGE', 0, 12500000000);
-
-        $fields = [
-            'NUMAPS' => $numAccessPoints,
-            'NUMCLIENTS' => $numClients,
-        ];
-
-        $tags = ['rrd_def' => $rrd_def];
-        $datastore->put($device, 'ciscowlc', $tags, $fields);
+        $datastore->write( 'ciscowlc', [
+            'NUMAPS' => FieldValue::asInt($numAccessPoints)->min(0)->max(12500000000),
+            'NUMCLIENTS' => FieldValue::asInt($numClients)->min(0)->max(12500000000),
+        ]);
 
         $db_aps = $this->getDevice()->accessPoints->keyBy->getCompositeKey();
         $valid_ap_ids = [];
@@ -103,29 +95,18 @@ class Ciscowlc extends Cisco implements
                     continue;
                 }
 
-                $rrd_def = RrdDefinition::make()
-                    ->addDataset('channel', 'GAUGE', 0, 200)
-                    ->addDataset('txpow', 'GAUGE', 0, 200)
-                    ->addDataset('radioutil', 'GAUGE', 0, 100)
-                    ->addDataset('nummonclients', 'GAUGE', 0, 500)
-                    ->addDataset('nummonbssid', 'GAUGE', 0, 200)
-                    ->addDataset('numasoclients', 'GAUGE', 0, 500)
-                    ->addDataset('interference', 'GAUGE', 0, 2000);
-
-                $datastore->put($device, 'arubaap', [
+                $datastore->write('arubaap', [
+                    'channel' => FieldValue::asInt($ap->channel)->max(300),
+                    'txpow' => FieldValue::asFloat($ap->txpow)->max(200),
+                    'radioutil' => FieldValue::asFloat($ap->radioutil)->max(100),
+                    'nummonclients' => FieldValue::asInt($ap->nummonclients)->max(500),
+                    'nummonbssid'  => FieldValue::asInt($ap->nummonbssid)->max(200),
+                    'numasoclients' =>  FieldValue::asInt($ap->numasoclients)->max(500),
+                    'interference' => FieldValue::asFloat($ap->interference)->max(2000),
+                ], [
                     'name' => $ap->name,
                     'radionum' => $ap->radio_number,
-                    'rrd_name' => ['arubaap', $ap->name . $ap->radio_number],
-                    'rrd_def' => $rrd_def,
-                ], $ap->only([
-                    'channel',
-                    'txpow',
-                    'radioutil',
-                    'nummonclients',
-                    'nummonbssid',
-                    'numasoclients',
-                    'interference',
-                ]));
+                ]);
 
                 /** @var AccessPoint $db_ap */
                 if ($db_ap = $db_aps->get($ap->getCompositeKey())) {

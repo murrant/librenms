@@ -40,6 +40,7 @@ use App\Models\Transceiver;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use LibreNMS\Data\Definitions\FieldValue;
 use LibreNMS\Device\Processor;
 use LibreNMS\Interfaces\Discovery\MempoolsDiscovery;
 use LibreNMS\Interfaces\Discovery\OSDiscovery;
@@ -54,7 +55,6 @@ use LibreNMS\Interfaces\Polling\QosPolling;
 use LibreNMS\Interfaces\Polling\SlaPolling;
 use LibreNMS\OS;
 use LibreNMS\OS\Traits\YamlOSDiscovery;
-use LibreNMS\RRD\RrdDefinition;
 use LibreNMS\Util\IP;
 use LibreNMS\Util\Mac;
 use SnmpQuery;
@@ -568,89 +568,56 @@ class Cisco extends OS implements
 
             Log::info('SLA ' . $sla_nr . ': ' . $rtt_type . ' ' . $sla['owner'] . ' ' . $sla['tag'] . '... ' . $sla->rtt . 'ms at ' . $time);
 
-            $collected = ['rtt' => $sla->rtt];
-
             // Let's gather some per-type fields.
             switch ($rtt_type) {
                 case 'jitter':
-                    $jitter = [
-                        'PacketLossSD' => $data[$sla_nr]['rttMonLatestJitterOperPacketLossSD'],
-                        'PacketLossDS' => $data[$sla_nr]['rttMonLatestJitterOperPacketLossDS'],
-                        'PacketOutOfSequence' => $data[$sla_nr]['rttMonLatestJitterOperPacketOutOfSequence'] ?? null,
-                        'PacketMIA' => $data[$sla_nr]['rttMonLatestJitterOperPacketMIA'] ?? null,
-                        'PacketLateArrival' => $data[$sla_nr]['rttMonLatestJitterOperPacketLateArrival'],
-                        'MOS' => isset($data[$sla_nr]['rttMonLatestJitterOperMOS']) ? intval($data[$sla_nr]['rttMonLatestJitterOperMOS']) / 100 : null,
-                        'ICPIF' => $data[$sla_nr]['rttMonLatestJitterOperICPIF'] ?? null,
-                        'OWAvgSD' => $data[$sla_nr]['rttMonLatestJitterOperOWAvgSD'] ?? null,
-                        'OWAvgDS' => $data[$sla_nr]['rttMonLatestJitterOperOWAvgDS'] ?? null,
-                        'AvgSDJ' => $data[$sla_nr]['rttMonLatestJitterOperAvgSDJ'] ?? null,
-                        'AvgDSJ' => $data[$sla_nr]['rttMonLatestJitterOperAvgDSJ'] ?? null,
-                    ];
-                    $rrd_name = ['sla', $sla_nr, $rtt_type];
-                    $rrd_def = RrdDefinition::make()
-                        ->addDataset('PacketLossSD', 'GAUGE', 0)
-                        ->addDataset('PacketLossDS', 'GAUGE', 0)
-                        ->addDataset('PacketOutOfSequence', 'GAUGE', 0)
-                        ->addDataset('PacketMIA', 'GAUGE', 0)
-                        ->addDataset('PacketLateArrival', 'GAUGE', 0)
-                        ->addDataset('MOS', 'GAUGE', 0)
-                        ->addDataset('ICPIF', 'GAUGE', 0)
-                        ->addDataset('OWAvgSD', 'GAUGE', 0)
-                        ->addDataset('OWAvgDS', 'GAUGE', 0)
-                        ->addDataset('AvgSDJ', 'GAUGE', 0)
-                        ->addDataset('AvgDSJ', 'GAUGE', 0);
-                    $tags = ['rrd_name' => $rrd_name, 'rrd_def' => $rrd_def, 'sla_nr' => $sla_nr, 'rtt_type' => $rtt_type];
-                    app('Datastore')->put($device, 'sla', $tags, $jitter);
-                    $collected = array_merge($collected, $jitter);
+                    app('Datastore')->write( 'sla', [
+                        'PacketLossSD' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketLossSD'] ?? null),
+                        'PacketLossDS' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketLossDS'] ?? null),
+                        'PacketOutOfSequence' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketOutOfSequence'] ?? null),
+                        'PacketMIA' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketMIA'] ?? null),
+                        'PacketLateArrival' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketLateArrival']),
+                        'MOS' => FieldValue::asInt(isset($data[$sla_nr]['rttMonLatestJitterOperMOS']) ? intval($data[$sla_nr]['rttMonLatestJitterOperMOS']) / 100 : null),
+                        'ICPIF' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperICPIF'] ?? null),
+                        'OWAvgSD' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperOWAvgSD'] ?? null),
+                        'OWAvgDS' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperOWAvgDS'] ?? null),
+                        'AvgSDJ' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperAvgSDJ'] ?? null),
+                        'AvgDSJ' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperAvgDSJ'] ?? null),
+                    ], [
+                        'sla_nr' => $sla_nr,
+                        'rtt_type' => $rtt_type,
+                    ]);
+
                     // Additional rrd for total number packet in sla
-                    $numPackets = [
-                        'NumPackets' => $data[$sla_nr]['rttMonEchoAdminNumPackets'],
-                    ];
-                    $rrd_name = ['sla', $sla_nr, 'NumPackets'];
-                    $rrd_def = RrdDefinition::make()
-                        ->addDataset('NumPackets', 'GAUGE', 0);
-                    $tags = ['rrd_name' => $rrd_name, 'rrd_def' => $rrd_def, 'sla_nr' => $sla_nr, 'rtt_type' => $rtt_type];
-                    app('Datastore')->put($device, 'sla', $tags, $numPackets);
-                    $collected = array_merge($collected, $numPackets);
+                    app('Datastore')->write('sla', [
+                        'NumPackets' => FieldValue::asInt($data[$sla_nr]['rttMonEchoAdminNumPackets'] ?? null),
+                    ], [
+                        'sla_nr' => $sla_nr,
+                        'rtt_type' => 'NumPackets',
+                    ]);
                     break;
                 case 'icmpjitter':
                     // icmpJitter data is placed at different locations in MIB tree, possibly based on IOS version
                     // First look for values as originally implemented in lnms (from CISCO-RTTMON-MIB), then look for OIDs defined in CISCO-RTTMON-ICMP-MIB
                     // This MIGHT mix values if a device presents some data from one and some from the other
-
-                    $icmpjitter = [
-                        'PacketLoss' => $data[$sla_nr]['rttMonLatestJitterOperPacketLossSD'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterPktLoss'],
-                        'PacketOosSD' => $data[$sla_nr]['rttMonLatestJitterOperPacketOutOfSequence'] ?? $data[$sla_nr]['rttMonLatestIcmpJPktOutSeqBoth'],
+                    app('Datastore')->write( 'sla', [
+                        'PacketLoss' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketLossSD'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterPktLoss'] ?? null),
+                        'PacketOosSD' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketOutOfSequence'] ?? $data[$sla_nr]['rttMonLatestIcmpJPktOutSeqBoth']),
                         // No equivalent found in CISCO-RTTMON-ICMP-MIB, return null
-                        'PacketOosDS' => $data[$sla_nr]['rttMonLatestJitterOperPacketMIA'] ?? null,
-                        'PacketLateArrival' => $data[$sla_nr]['rttMonLatestJitterOperPacketLateArrival'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterPktLateA'],
-                        'JitterAvgSD' => $data[$sla_nr]['rttMonLatestJitterOperAvgSDJ'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterAvgSDJ'],
-                        'JitterAvgDS' => $data[$sla_nr]['rttMonLatestJitterOperAvgDSJ'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterAvgDSJ'],
-                        'LatencyOWAvgSD' => $data[$sla_nr]['rttMonLatestJitterOperOWAvgSD'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterOWAvgSD'],
-                        'LatencyOWAvgDS' => $data[$sla_nr]['rttMonLatestJitterOperOWAvgDS'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterOWAvgDS'],
-                        'JitterIAJOut' => $data[$sla_nr]['rttMonLatestJitterOperIAJOut'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterIAJOut'],
-                        'JitterIAJIn' => $data[$sla_nr]['rttMonLatestJitterOperIAJIn'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterIAJIn'],
-                    ];
-                    $rrd_name = ['sla', $sla_nr, $rtt_type];
-                    $rrd_def = RrdDefinition::make()
-                        ->addDataset('PacketLoss', 'GAUGE', 0)
-                        ->addDataset('PacketOosSD', 'GAUGE', 0)
-                        ->addDataset('PacketOosDS', 'GAUGE', 0)
-                        ->addDataset('PacketLateArrival', 'GAUGE', 0)
-                        ->addDataset('JitterAvgSD', 'GAUGE', 0)
-                        ->addDataset('JitterAvgDS', 'GAUGE', 0)
-                        ->addDataset('LatencyOWAvgSD', 'GAUGE', 0)
-                        ->addDataset('LatencyOWAvgDS', 'GAUGE', 0)
-                        ->addDataset('JitterIAJOut', 'GAUGE', 0)
-                        ->addDataset('JitterIAJIn', 'GAUGE', 0);
-                    $tags = ['rrd_name' => $rrd_name, 'rrd_def' => $rrd_def, 'sla_nr' => $sla_nr, 'rtt_type' => $rtt_type];
-                    app('Datastore')->put($device, 'sla', $tags, $icmpjitter);
-                    $collected = array_merge($collected, $icmpjitter);
+                        'PacketOosDS' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketMIA'] ?? null),
+                        'PacketLateArrival' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketLateArrival'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterPktLateA'] ?? null),
+                        'JitterAvgSD' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperAvgSDJ'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterAvgSDJ'] ?? null),
+                        'JitterAvgDS' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperAvgDSJ'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterAvgDSJ'] ?? null),
+                        'LatencyOWAvgSD' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperOWAvgSD'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterOWAvgSD'] ?? null),
+                        'LatencyOWAvgDS' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperOWAvgDS'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterOWAvgDS'] ?? null),
+                        'JitterIAJOut' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperIAJOut'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterIAJOut'] ?? null),
+                        'JitterIAJIn' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperIAJIn'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterIAJIn'] ?? null),
+                    ], [
+                        'sla_nr' => $sla_nr,
+                        'rtt_type' => $rtt_type,
+                    ]);
                     break;
             }
-
-            d_echo('The following datasources were collected for #' . $sla['sla_nr'] . ":\n");
-            d_echo($collected);
         }
     }
 
