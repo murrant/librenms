@@ -34,6 +34,7 @@ use App\Models\PortVdsl;
 use App\Observers\ModuleModelObserver;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use LibreNMS\Data\Definitions\FieldValue;
 use LibreNMS\DB\SyncsModels;
 use LibreNMS\Enum\IntegerType;
 use LibreNMS\Interfaces\Data\DataStorageInterface;
@@ -309,15 +310,11 @@ class Xdsl implements Module
         ]);
 
         // power levels
-        $datastore->put($os->getDeviceArray(), 'xdsl2LineStatusActAtp', [
-            'ifName' => (string) PortCache::getNameFromIfIndex($ifIndex, $os->getDevice()),
-            'rrd_name' => Rrd::portName($port->port_id, 'xdsl2LineStatusActAtp'),
-            'rrd_def' => RrdDefinition::make()
-                ->addDataset('ds', 'GAUGE', -100)
-                ->addDataset('us', 'GAUGE', -100),
+        $datastore->write('xdsl2LineStatusActAtp', [
+            'ds' => FieldValue::asInt($data['xdsl2LineStatusActAtpDs'] ?? null)->min(-100),
+            'us' => FieldValue::asInt($data['xdsl2LineStatusActAtpUs'] ?? null)->min(-100),
         ], [
-            'ds' => $data['xdsl2LineStatusActAtpDs'] ?? null,
-            'us' => $data['xdsl2LineStatusActAtpUs'] ?? null,
+            'ifName' => (string) PortCache::getNameFromIfIndex($ifIndex, $os->getDevice()),
         ]);
     }
 }

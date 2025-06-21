@@ -17,6 +17,8 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Expression;
+use PhpParser\Node\Stmt\Use_;
+use PhpParser\Node\UseItem;
 use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -24,26 +26,33 @@ use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 final class ConvertDatastorePutCalls extends AbstractRector
 {
     private array $variableAssignments = [];
+    private array $rrdDatasets = []; // Store RRD dataset definitions
 
     public function getRuleDefinition(): RuleDefinition
     {
         return new RuleDefinition(
-            'Convert Datastore put() method calls to write() method calls',
+            'Convert Datastore put() method calls to write() method calls with proper FieldValue handling',
             [
                 new CodeSample(
                     <<<'CODE_SAMPLE'
-$tags = [
-    'rrd_def' => RrdDefinition::make()->addDataset('time', 'GAUGE', 0),
-];
-$fields = [
-    'time' => $agent_time,
-];
-app('Datastore')->put($device, 'agent', $tags, $fields);
+$datastore->put($os->getDeviceArray(), 'xdsl2LineStatusActAtp', [
+    'ifName' => $ifName,
+    'rrd_name' => ['xdsl2LineStatusActAtp', $ifName],
+    'rrd_def' => RrdDefinition::make()
+        ->addDataset('ds', 'GAUGE', -100)
+        ->addDataset('us', 'GAUGE', -100),
+], [
+    'ds' => $data['xdsl2LineStatusActAtpDs'] ?? null,
+    'us' => $data['xdsl2LineStatusActAtpUs'] ?? null,
+]);
 CODE_SAMPLE
                     ,
                     <<<'CODE_SAMPLE'
-app('Datastore')->write('agent', [
-    'time' => FieldValue::asFloat($agent_time),
+$datastore->write('xdsl2LineStatusActAtp', [
+    'ds' => FieldValue::asInt($data['xdsl2LineStatusActAtpDs'] ?? null, StorageType::GAUGE)->min(-100),
+    'us' => FieldValue::asInt($data['xdsl2LineStatusActAtpUs'] ?? null, StorageType::GAUGE)->min(-100),
+], [
+    'ifName' => $ifName,
 ]);
 CODE_SAMPLE
                 ),
@@ -61,6 +70,11 @@ CODE_SAMPLE
 
     public function refactor(Node $node): ?Node
     {
+        // Add necessary imports at the top of the file
+        if ($node instanceof Use_) {
+            return $this->addRequiredImports($node);
+        }
+
         // Collect variable assignments first
         if ($node instanceof Expression && $node->expr instanceof Assign) {
             $this->collectVariableAssignment($node->expr);
@@ -84,6 +98,33 @@ CODE_SAMPLE
             }
 
             return $this->transformPutToWrite($node, $methodCall);
+        }
+
+        return null;
+    }
+
+    private function addRequiredImports(Use_ $useNode): ?Use_
+    {
+        $imports = [
+            'LibreNMS\Data\Definitions\FieldValue',
+            'LibreNMS\Data\Definitions\StorageType',
+        ];
+
+        $existingImports = [];
+        foreach ($useNode->uses as $use) {
+            $existingImports[] = $use->name->toString();
+        }
+
+        $newUses = [];
+        foreach ($imports as $import) {
+            if (!in_array($import, $existingImports, true)) {
+                $newUses[] = new UseItem(new Name($import));
+            }
+        }
+
+        if (!empty($newUses)) {
+            $useNode->uses = array_merge($useNode->uses, $newUses);
+            return $useNode;
         }
 
         return null;
@@ -115,10 +156,13 @@ CODE_SAMPLE
             return null;
         }
 
+        // Extract RRD definition and parse datasets
+        $this->extractRrdDefinition($tagsArray);
+
         // Extract metadata tags (non-RRD tags) and rrd_name tags
         $metadataTags = $this->extractMetadataTags($tagsArray);
 
-        // Convert fields to FieldValue calls
+        // Convert fields to FieldValue calls with RRD dataset info
         $convertedFields = $this->convertFieldsToFieldValues($fieldsArray);
 
         // If conversion failed, don't transform
@@ -144,6 +188,94 @@ CODE_SAMPLE
         );
 
         return new Expression($newMethodCall);
+    }
+
+    private function extractRrdDefinition(Array_ $tags): void
+    {
+        $this->rrdDatasets = []; // Reset for each transformation
+
+        foreach ($tags->items as $item) {
+            if (!$item instanceof ArrayItem || !$item->key) {
+                continue;
+            }
+
+            $keyName = null;
+            if ($item->key instanceof String_) {
+                $keyName = $item->key->value;
+            }
+
+            if ($keyName === 'rrd_def') {
+                $this->parseRrdDefinition($item->value);
+                break;
+            }
+        }
+    }
+
+    private function parseRrdDefinition(Node $rrdDefNode): void
+    {
+        // Handle chained method calls like RrdDefinition::make()->addDataset(...)
+        if ($rrdDefNode instanceof MethodCall) {
+            $this->parseRrdDefinitionMethodCalls($rrdDefNode);
+        }
+        // Handle variable references
+        elseif ($rrdDefNode instanceof Variable) {
+            $varName = $this->getName($rrdDefNode);
+            if ($varName && isset($this->variableAssignments[$varName])) {
+                $this->parseRrdDefinition($this->variableAssignments[$varName]);
+            }
+        }
+    }
+
+    private function parseRrdDefinitionMethodCalls(MethodCall $methodCall): void
+    {
+        // Recursively parse the chain
+        if ($methodCall->var instanceof MethodCall) {
+            $this->parseRrdDefinitionMethodCalls($methodCall->var);
+        }
+
+        // Check if this is an addDataset call
+        if ($this->isName($methodCall->name, 'addDataset')) {
+            $this->parseAddDatasetCall($methodCall);
+        }
+    }
+
+    private function parseAddDatasetCall(MethodCall $methodCall): void
+    {
+        if (count($methodCall->args) < 2) {
+            return;
+        }
+
+        $nameArg = $methodCall->args[0]->value ?? null;
+        $typeArg = $methodCall->args[1]->value ?? null;
+        $minArg = $methodCall->args[2]->value ?? null;
+        $maxArg = $methodCall->args[3]->value ?? null;
+
+        if (!$nameArg instanceof String_ || !$typeArg instanceof String_) {
+            return;
+        }
+
+        $datasetName = $nameArg->value;
+        $storageType = $typeArg->value;
+
+        // Parse min value
+        $minValue = null;
+        if ($minArg instanceof Node\Scalar\LNumber) {
+            $minValue = $minArg->value;
+        } elseif ($minArg instanceof Node\Expr\UnaryMinus && $minArg->expr instanceof Node\Scalar\LNumber) {
+            $minValue = -$minArg->expr->value;
+        }
+
+        // Parse max value
+        $maxValue = null;
+        if ($maxArg instanceof Node\Scalar\LNumber) {
+            $maxValue = $maxArg->value;
+        }
+
+        $this->rrdDatasets[$datasetName] = [
+            'type' => $storageType,
+            'min' => $minValue,
+            'max' => $maxValue,
+        ];
     }
 
     private function isDatastoreInstance(Node $var): bool
@@ -301,10 +433,15 @@ CODE_SAMPLE
                 continue;
             }
 
-            // Create appropriate FieldValue call, but handle parsing errors gracefully
+            // Get the field name for RRD dataset lookup
+            $fieldName = null;
+            if ($key instanceof String_) {
+                $fieldName = $key->value;
+            }
+
+            // Create appropriate FieldValue call with RRD dataset info
             try {
-                $fieldValueCall = $this->createFieldValueCall($value);
-                // Add comment to each array item to encourage line breaks
+                $fieldValueCall = $this->createFieldValueCall($value, $fieldName);
                 $arrayItem = new ArrayItem($fieldValueCall, $key);
                 $arrayItem->setAttribute('comments', [new \PhpParser\Comment('/* field */')]);
                 $convertedItems[] = $arrayItem;
@@ -321,38 +458,64 @@ CODE_SAMPLE
             ]);
         }
 
-        $array = new Array_($convertedItems, [
+        return new Array_($convertedItems, [
             'kind' => Array_::KIND_SHORT
         ]);
-
-        return $array;
     }
 
-    private function createFieldValueCall(Node $value): StaticCall
+    private function createFieldValueCall(Node $value, ?string $fieldName): Node\Expr
     {
-        // Determine the type based on the value
-        if ($this->isTimeValue($value)) {
-            return new StaticCall(
-                new Name('FieldValue'),
-                'asFloat',
-                [new Node\Arg($value)]
-            );
+        // Get RRD dataset info if available
+        $datasetInfo = null;
+        if ($fieldName && isset($this->rrdDatasets[$fieldName])) {
+            $datasetInfo = $this->rrdDatasets[$fieldName];
         }
 
-        if ($this->isFloatValue($value)) {
-            return new StaticCall(
-                new Name('FieldValue'),
-                'asFloat',
-                [new Node\Arg($value)]
-            );
+        // Determine the base method (asInt or asFloat)
+        $isFloat = $this->isFloatValue($value) || $this->isTimeValue($value);
+        $method = $isFloat ? 'asFloat' : 'asInt';
+
+        // Create storage type argument
+        $storageTypeValue = 'GAUGE'; // Default
+        if ($datasetInfo && isset($datasetInfo['type'])) {
+            $storageTypeValue = strtoupper($datasetInfo['type']);
         }
 
-        // Default to asInt
-        return new StaticCall(
-            new Name('FieldValue'),
-            'asInt',
-            [new Node\Arg($value)]
+        $storageTypeExpr = new Node\Expr\ClassConstFetch(
+            new Name('StorageType'),
+            $storageTypeValue
         );
+
+        // Create base FieldValue call
+        $baseCall = new StaticCall(
+            new Name('FieldValue'),
+            $method,
+            [
+                new Node\Arg($value),
+                new Node\Arg($storageTypeExpr)
+            ]
+        );
+
+        // Chain min() and max() calls if available
+        $finalCall = $baseCall;
+
+        if ($datasetInfo) {
+            // Add min() call if min value is set and not default 0
+            if (isset($datasetInfo['min']) && $datasetInfo['min'] !== null && $datasetInfo['min'] !== 0) {
+                $minValue = $datasetInfo['min'] < 0
+                    ? new Node\Expr\UnaryMinus(new Node\Scalar\LNumber(abs($datasetInfo['min'])))
+                    : new Node\Scalar\LNumber($datasetInfo['min']);
+                $finalCall = new MethodCall($finalCall, 'min', [new Node\Arg($minValue)]);
+            }
+
+            // Add max() call if max value is set
+            if (isset($datasetInfo['max']) && $datasetInfo['max'] !== null) {
+                $maxValue = new Node\Scalar\LNumber($datasetInfo['max']);
+                $finalCall = new MethodCall($finalCall, 'max', [new Node\Arg($maxValue)]);
+            }
+        }
+
+        return $finalCall;
     }
 
     private function isTimeValue(Node $value): bool
