@@ -99,7 +99,7 @@ CODE_SAMPLE
         }
     }
 
-    private function transformPutToWrite(Expression $node, MethodCall $methodCall): Expression
+    private function transformPutToWrite(Expression $node, MethodCall $methodCall): ?Expression
     {
         $deviceArg = $methodCall->args[0]->value;
         $measurementArg = $methodCall->args[1]->value;
@@ -110,11 +110,21 @@ CODE_SAMPLE
         $tagsArray = $this->resolveToArray($tagsArg);
         $fieldsArray = $this->resolveToArray($fieldsArg);
 
-        // Extract metadata tags (non-RRD tags)
+        // If we can't resolve the fields array, don't transform to avoid corruption
+        if (empty($fieldsArray->items)) {
+            return null;
+        }
+
+        // Extract metadata tags (non-RRD tags) and rrd_name tags
         $metadataTags = $this->extractMetadataTags($tagsArray);
 
         // Convert fields to FieldValue calls
         $convertedFields = $this->convertFieldsToFieldValues($fieldsArray);
+
+        // If conversion failed, don't transform
+        if (empty($convertedFields->items)) {
+            return null;
+        }
 
         // Build new method call arguments
         $writeArgs = [
@@ -168,6 +178,10 @@ CODE_SAMPLE
                 if ($assignment instanceof Array_) {
                     return $assignment;
                 }
+                // Handle case where assignment might be another variable
+                if ($assignment instanceof Variable) {
+                    return $this->resolveToArray($assignment);
+                }
             }
         }
 
@@ -178,7 +192,38 @@ CODE_SAMPLE
     private function extractMetadataTags(Array_ $tags): Array_
     {
         $metadataItems = [];
+        $rrdNameTags = [];
 
+        // First pass: collect rrd_name for tag extraction
+        $rrdNameArray = null;
+        foreach ($tags->items as $item) {
+            if (!$item instanceof ArrayItem || !$item->key) {
+                continue;
+            }
+
+            $keyName = null;
+            if ($item->key instanceof String_) {
+                $keyName = $item->key->value;
+            }
+
+            if ($keyName === 'rrd_name') {
+                $rrdNameArray = $this->resolveToArray($item->value);
+                break;
+            }
+        }
+
+        // Extract tags from rrd_name (skip first element which is measurement)
+        if ($rrdNameArray && !empty($rrdNameArray->items)) {
+            $rrdNameItems = array_slice($rrdNameArray->items, 1); // Skip measurement
+            foreach ($rrdNameItems as $index => $rrdNameItem) {
+                if ($rrdNameItem instanceof ArrayItem && $rrdNameItem->value) {
+                    $tagKey = "tag" . ($index + 1); // Create generic tag names
+                    $rrdNameTags[] = new ArrayItem($rrdNameItem->value, new String_($tagKey));
+                }
+            }
+        }
+
+        // Second pass: collect regular metadata tags
         foreach ($tags->items as $item) {
             if (!$item instanceof ArrayItem || !$item->key) {
                 continue;
@@ -197,7 +242,12 @@ CODE_SAMPLE
             $metadataItems[] = $item;
         }
 
-        return new Array_($metadataItems);
+        // Combine regular metadata with rrd_name tags
+        $allMetadataItems = array_merge($metadataItems, $rrdNameTags);
+
+        return new Array_($allMetadataItems, [
+            'kind' => Array_::KIND_SHORT
+        ]);
     }
 
     private function convertFieldsToFieldValues(Array_ $fields): Array_
@@ -212,13 +262,41 @@ CODE_SAMPLE
             $key = $item->key;
             $value = $item->value;
 
-            // Create appropriate FieldValue call
-            $fieldValueCall = $this->createFieldValueCall($value);
+            // Skip invalid or unparseable values
+            if (!$key || !$value) {
+                continue;
+            }
 
-            $convertedItems[] = new ArrayItem($fieldValueCall, $key);
+            // Skip if key is not a string or identifier
+            if (!($key instanceof String_ || $key instanceof Node\Scalar\String_ || $key instanceof Variable)) {
+                continue;
+            }
+
+            // Create appropriate FieldValue call, but handle parsing errors gracefully
+            try {
+                $fieldValueCall = $this->createFieldValueCall($value);
+                $convertedItems[] = new ArrayItem($fieldValueCall, $key);
+            } catch (\Exception $e) {
+                // If we can't parse the field value, skip it to avoid corruption
+                continue;
+            }
         }
 
-        return new Array_($convertedItems);
+        // Only create array if we have valid items
+        if (empty($convertedItems)) {
+            return new Array_([], [
+                'kind' => Array_::KIND_SHORT
+            ]);
+        }
+
+        $newArray = new Array_($convertedItems, [
+            'kind' => Array_::KIND_SHORT
+        ]);
+
+        // Force multiline formatting for short arrays
+        $newArray->setAttribute('multiline', true);
+
+        return $newArray;
     }
 
     private function createFieldValueCall(Node $value): StaticCall
