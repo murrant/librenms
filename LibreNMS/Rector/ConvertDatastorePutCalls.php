@@ -275,7 +275,11 @@ CODE_SAMPLE
             // Create appropriate FieldValue call, but handle parsing errors gracefully
             try {
                 $fieldValueCall = $this->createFieldValueCall($value);
-                $convertedItems[] = new ArrayItem($fieldValueCall, $key);
+                $convertedItems[] = new ArrayItem(
+                    $fieldValueCall,
+                    $key,
+                    attributes: ['comments' => [new \PhpParser\Comment('')]]
+                );
             } catch (\Exception $e) {
                 // If we can't parse the field value, skip it to avoid corruption
                 continue;
@@ -289,14 +293,9 @@ CODE_SAMPLE
             ]);
         }
 
-        $newArray = new Array_($convertedItems, [
+        return new Array_($convertedItems, [
             'kind' => Array_::KIND_SHORT
         ]);
-
-        // Force multiline formatting for short arrays
-        $newArray->setAttribute('multiline', true);
-
-        return $newArray;
     }
 
     private function createFieldValueCall(Node $value): StaticCall
