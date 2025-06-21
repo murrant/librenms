@@ -17,8 +17,6 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Expression;
-use PhpParser\Node\Stmt\Use_;
-use PhpParser\Node\UseItem;
 use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -70,11 +68,6 @@ CODE_SAMPLE
 
     public function refactor(Node $node): ?Node
     {
-        // Add necessary imports at the top of the file
-        if ($node instanceof Use_) {
-            return $this->addRequiredImports($node);
-        }
-
         // Collect variable assignments first
         if ($node instanceof Expression && $node->expr instanceof Assign) {
             $this->collectVariableAssignment($node->expr);
@@ -98,33 +91,6 @@ CODE_SAMPLE
             }
 
             return $this->transformPutToWrite($node, $methodCall);
-        }
-
-        return null;
-    }
-
-    private function addRequiredImports(Use_ $useNode): ?Use_
-    {
-        $imports = [
-            'LibreNMS\Data\Definitions\FieldValue',
-            'LibreNMS\Data\Definitions\StorageType',
-        ];
-
-        $existingImports = [];
-        foreach ($useNode->uses as $use) {
-            $existingImports[] = $use->name->toString();
-        }
-
-        $newUses = [];
-        foreach ($imports as $import) {
-            if (!in_array($import, $existingImports, true)) {
-                $newUses[] = new UseItem(new Name($import));
-            }
-        }
-
-        if (!empty($newUses)) {
-            $useNode->uses = array_merge($useNode->uses, $newUses);
-            return $useNode;
         }
 
         return null;
@@ -443,7 +409,6 @@ CODE_SAMPLE
             try {
                 $fieldValueCall = $this->createFieldValueCall($value, $fieldName);
                 $arrayItem = new ArrayItem($fieldValueCall, $key);
-                $arrayItem->setAttribute('comments', [new \PhpParser\Comment('/* field */')]);
                 $convertedItems[] = $arrayItem;
             } catch (\Exception $e) {
                 // If we can't parse the field value, skip it to avoid corruption
@@ -481,14 +446,15 @@ CODE_SAMPLE
             $storageTypeValue = strtoupper($datasetInfo['type']);
         }
 
+        // Use fully qualified names to avoid conflicts
         $storageTypeExpr = new Node\Expr\ClassConstFetch(
-            new Name('StorageType'),
+            new Name(['LibreNMS', 'Data', 'Definitions', 'StorageType']),
             $storageTypeValue
         );
 
-        // Create base FieldValue call
+        // Create base FieldValue call with fully qualified name
         $baseCall = new StaticCall(
-            new Name('FieldValue'),
+            new Name(['LibreNMS', 'Data', 'Definitions', 'FieldValue']),
             $method,
             [
                 new Node\Arg($value),
