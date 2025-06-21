@@ -88,7 +88,7 @@ class Graphite extends BaseDatastore
         try {
             $stat = Measurement::start('write');
             $measurement = $this->prefix . $this->sanitizeMetricString($measurement);
-            $tags = $this->serializeTags($tags);
+            $tags = $this->serializeTags($tags, ';');
             $timestamp = Carbon::now()->timestamp;
 
             $lines = '';
@@ -109,7 +109,15 @@ class Graphite extends BaseDatastore
         }
     }
 
-    protected function serializeTags(array $tags): string
+
+    /**
+     * Turn a tag array into a string.
+     * If the array is empty, an empty string will be returned, otherwise
+     * a string of tags starting with the separator will be returned
+     *
+     * @param  array<string, scalar>  $tags
+     */
+    protected function serializeTags(array $tags, string $separator = ';', string $equate = '='): string
     {
         if (empty($tags)) {
             return '';
@@ -118,11 +126,16 @@ class Graphite extends BaseDatastore
         $tag_pairs = [];
 
         foreach ($tags as $tag => $value) {
-            $tag_pairs[] = $this->sanitizeMetricString($tag) . '=' . $this->sanitizeMetricString($value);
+            if ($value === null || $value === '') {
+                continue; // no empty tag values
+            }
+
+            $tag_pairs[] = $this->sanitizeMetricString($tag) . $equate . $this->sanitizeMetricString($value);
         }
 
-        return ';' . implode(';', $tag_pairs);
+        return $separator . implode($separator, $tag_pairs);
     }
+
 
     protected function sanitizeMetricString(string $string): string
     {

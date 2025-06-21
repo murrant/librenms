@@ -2,7 +2,7 @@
 
 use App\Models\Device;
 use Illuminate\Support\Facades\Cache;
-use LibreNMS\RRD\RrdDefinition;
+use LibreNMS\Data\Definitions\FieldValue;
 
 if ($device['os_group'] == 'unix' || $device['os'] == 'windows') {
     echo \LibreNMS\Config::get('project_name') . ' UNIX Agent: ';
@@ -48,13 +48,9 @@ if ($device['os_group'] == 'unix' || $device['os'] == 'windows') {
     if (! empty($agent_raw)) {
         echo 'execution time: ' . $agent_time . 'ms';
 
-        $tags = [
-            'rrd_def' => RrdDefinition::make()->addDataset('time', 'GAUGE', 0),
-        ];
-        $fields = [
-            'time' => $agent_time,
-        ];
-        app('Datastore')->put($device, 'agent', $tags, $fields);
+        app('Datastore')->write('agent', [], [
+            'exectime' => FieldValue::asFloat($agent_time)->min(0),
+        ]);
 
         $os->enableGraph('agent');
 

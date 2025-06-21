@@ -27,17 +27,17 @@
 
 namespace LibreNMS\Data\Store;
 
+use App\Facades\LibrenmsConfig;
 use App\Polling\Measure\Measurement;
 use InfluxDB\Client;
 use InfluxDB\Database;
 use InfluxDB\Driver\UDP;
-use LibreNMS\Config;
 use Log;
 
 class InfluxDB extends BaseDatastore
 {
     /** @var Database */
-    private $connection;
+    private Database $connection;
 
     public function __construct(Database $influx)
     {
@@ -61,7 +61,7 @@ class InfluxDB extends BaseDatastore
 
     public static function isEnabled(): bool
     {
-        return Config::get('influxdb.enable', false);
+        return LibrenmsConfig::get('influxdb.enable', false);
     }
 
     /**
@@ -70,14 +70,12 @@ class InfluxDB extends BaseDatastore
     public function write(string $measurement, array $fields, array $tags = [], array $meta = []): void
     {
         $stat = Measurement::start('write');
+
+        $timestamp = time();
+        $tags = array_filter($tags, fn($v) => $v !== null && $v !== '');
+        $fields = array_filter($fields, fn($v) => $v !== null && $v !== '');
+
         $tmp_fields = [];
-        $tmp_tags['hostname'] = $this->getDevice($meta)->hostname;
-        foreach ($tags as $k => $v) {
-            if (empty($v)) {
-                $v = '_blank_';
-            }
-            $tmp_tags[$k] = $v;
-        }
         foreach ($fields as $k => $v) {
             if ($k == 'time') {
                 $k = 'rtime';
@@ -96,7 +94,7 @@ class InfluxDB extends BaseDatastore
 
         Log::debug('InfluxDB data: ', [
             'measurement' => $measurement,
-            'tags' => $tmp_tags,
+            'tags' => $tags,
             'fields' => $tmp_fields,
         ]);
 
@@ -105,8 +103,9 @@ class InfluxDB extends BaseDatastore
                 new \InfluxDB\Point(
                     $measurement,
                     null, // the measurement value
-                    $tmp_tags,
-                    $tmp_fields // optional additional fields
+                    $tags,
+                    $tmp_fields, // optional additional fields
+                    $timestamp,
                 ),
             ];
 
@@ -123,27 +122,31 @@ class InfluxDB extends BaseDatastore
      *
      * @return Database
      */
-    public static function createFromConfig()
+    public static function createFromConfig(): Database
     {
-        $host = Config::get('influxdb.host', 'localhost');
-        $transport = Config::get('influxdb.transport', 'http');
-        $port = Config::get('influxdb.port', 8086);
-        $db = Config::get('influxdb.db', 'librenms');
-        $username = Config::get('influxdb.username', '');
-        $password = Config::get('influxdb.password', '');
-        $timeout = Config::get('influxdb.timeout', 0);
-        $verify_ssl = Config::get('influxdb.verifySSL', false);
+        $host = LibrenmsConfig::get('influxdb.host', 'localhost');
+        $port = LibrenmsConfig::get('influxdb.port', 8086);
+        $timeout = LibrenmsConfig::get('influxdb.timeout', 0);
 
-        $client = new Client($host, $port, $username, $password, $transport == 'https', $verify_ssl, $timeout, $timeout);
+        $client = new Client(
+            host: $host,
+            port: $port,
+            username: LibrenmsConfig::get('influxdb.username', ''),
+            password: LibrenmsConfig::get('influxdb.password', ''),
+            ssl: LibrenmsConfig::get('influxdb.transport', 'http') == 'https',
+            verifySSL: LibrenmsConfig::get('influxdb.verifySSL', false),
+            timeout: $timeout,
+            connectTimeout: $timeout);
 
-        if ($transport == 'udp') {
+        if (LibrenmsConfig::get('influxdb.transport', 'http') == 'udp') {
             $client->setDriver(new UDP($host, $port));
         }
 
-        return $client->selectDB($db);
+        return $client->selectDB(LibrenmsConfig::get('influxdb.db', 'librenms'));
     }
 
-    private function forceType($data)
+
+    private function forceType($data): ?float
     {
         /*
          * It is not trivial to detect if something is a float or an integer, and
@@ -156,6 +159,6 @@ class InfluxDB extends BaseDatastore
             return floatval($data);
         }
 
-        return $data === 'U' ? null : $data;
+        return null;
     }
 }

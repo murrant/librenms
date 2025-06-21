@@ -31,12 +31,12 @@ use App\Models\Eventlog;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use LibreNMS\Config;
+use LibreNMS\Data\Definitions\FieldValue;
 use LibreNMS\Enum\Severity;
 use LibreNMS\Interfaces\Data\DataStorageInterface;
 use LibreNMS\Interfaces\Module;
 use LibreNMS\OS;
 use LibreNMS\Polling\ModuleStatus;
-use LibreNMS\RRD\RrdDefinition;
 use LibreNMS\Util\Compare;
 use LibreNMS\Util\Number;
 use LibreNMS\Util\Time;
@@ -298,8 +298,8 @@ class Core implements Module
                 }
             }
 
-            $datastore->put($os->getDeviceArray(), 'uptime', [
-                'rrd_def' => RrdDefinition::make()->addDataset('uptime', 'GAUGE', 0),
+            $datastore->write('uptime', [], [
+                'uptime' => FieldValue::asInt($uptime)->min(0),
             ], $uptime);
 
             $os->enableGraph('uptime');

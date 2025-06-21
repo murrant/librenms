@@ -33,8 +33,8 @@ use LibreNMS\Interfaces\Data\Datastore as DatastoreContract;
 
 class DatastoreServiceProvider extends ServiceProvider
 {
-    protected $namespace = 'LibreNMS\\Data\\Store\\';
-    protected $stores = [
+    protected string $namespace = 'LibreNMS\\Data\\Store\\';
+    protected array $stores = [
         'LibreNMS\Data\Store\Graphite',
         'LibreNMS\Data\Store\InfluxDB',
         'LibreNMS\Data\Store\InfluxDBv2',
@@ -67,7 +67,7 @@ class DatastoreServiceProvider extends ServiceProvider
         $this->registerInflux();
     }
 
-    public function registerInflux()
+    public function registerInflux(): void
     {
         $this->app->singleton('InfluxDB\Database', function ($app) {
             return \LibreNMS\Data\Store\InfluxDB::createFromConfig();

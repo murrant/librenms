@@ -10,7 +10,7 @@ if (Rrd::checkRrdExists($agent_rrd)) {
     $rrd_filename = $agent_rrd;
 }
 
-$ds = 'time';
+$ds = 'exectime';
 
 $colour_area = 'EEEEEE';
 $colour_line = '36393D';
