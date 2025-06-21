@@ -409,6 +409,7 @@ CODE_SAMPLE
             try {
                 $fieldValueCall = $this->createFieldValueCall($value, $fieldName);
                 $arrayItem = new ArrayItem($fieldValueCall, $key);
+                $arrayItem->setAttribute('comments', [new \PhpParser\Comment('/* field */')]);
                 $convertedItems[] = $arrayItem;
             } catch (\Exception $e) {
                 // If we can't parse the field value, skip it to avoid corruption
