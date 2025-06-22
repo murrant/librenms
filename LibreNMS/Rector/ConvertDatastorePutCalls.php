@@ -487,26 +487,32 @@ CODE_SAMPLE
         $isFloat = $this->isFloatValue($value) || $this->isTimeValue($value);
         $method = $isFloat ? 'asFloat' : 'asInt';
 
-        // Create storage type argument - default is GAUGE
+        // Create storage type argument - default is GAUGE, so only include if different
         $storageTypeValue = 'GAUGE'; // Default is GAUGE
+        $includeStorageType = false;
+
         if ($datasetInfo && isset($datasetInfo['type'])) {
             $storageTypeValue = strtoupper($datasetInfo['type']);
+            $includeStorageType = ($storageTypeValue !== 'GAUGE');
         }
 
-        // Use fully qualified names to avoid conflicts
-        $storageTypeExpr = new Node\Expr\ClassConstFetch(
-            new Name\FullyQualified(['LibreNMS', 'Data', 'Definitions', 'StorageType']),
-            $storageTypeValue
-        );
+        // Build arguments for FieldValue call
+        $args = [new Node\Arg($value)];
+
+        // Only add storage type if it's not the default GAUGE
+        if ($includeStorageType) {
+            $storageTypeExpr = new Node\Expr\ClassConstFetch(
+                new Name\FullyQualified(['LibreNMS', 'Data', 'Definitions', 'StorageType']),
+                $storageTypeValue
+            );
+            $args[] = new Node\Arg($storageTypeExpr);
+        }
 
         // Create base FieldValue call with fully qualified name
         $baseCall = new StaticCall(
             new Name\FullyQualified(['LibreNMS', 'Data', 'Definitions', 'FieldValue']),
             $method,
-            [
-                new Node\Arg($value),
-                new Node\Arg($storageTypeExpr)
-            ]
+            $args
         );
 
         // Chain min() and max() calls if available
