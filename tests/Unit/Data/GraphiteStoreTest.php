@@ -112,7 +112,6 @@ class GraphiteStoreTest extends TestCase
         $graphite->write($measurement, $fields, $tags);
     }
 
-
     private function mockGraphite(Socket $mockSocket): Graphite
     {
         $mockFactory = \Mockery::mock(\Socket\Raw\Factory::class);

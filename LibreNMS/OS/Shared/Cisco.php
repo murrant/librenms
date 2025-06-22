@@ -571,7 +571,7 @@ class Cisco extends OS implements
             // Let's gather some per-type fields.
             switch ($rtt_type) {
                 case 'jitter':
-                    app('Datastore')->write( 'sla', [
+                    app('Datastore')->write('sla', [
                         'PacketLossSD' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketLossSD'] ?? null),
                         'PacketLossDS' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketLossDS'] ?? null),
                         'PacketOutOfSequence' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketOutOfSequence'] ?? null),
@@ -600,7 +600,7 @@ class Cisco extends OS implements
                     // icmpJitter data is placed at different locations in MIB tree, possibly based on IOS version
                     // First look for values as originally implemented in lnms (from CISCO-RTTMON-MIB), then look for OIDs defined in CISCO-RTTMON-ICMP-MIB
                     // This MIGHT mix values if a device presents some data from one and some from the other
-                    app('Datastore')->write( 'sla', [
+                    app('Datastore')->write('sla', [
                         'PacketLoss' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketLossSD'] ?? $data[$sla_nr]['rttMonLatestIcmpJitterPktLoss'] ?? null),
                         'PacketOosSD' => FieldValue::asInt($data[$sla_nr]['rttMonLatestJitterOperPacketOutOfSequence'] ?? $data[$sla_nr]['rttMonLatestIcmpJPktOutSeqBoth']),
                         // No equivalent found in CISCO-RTTMON-ICMP-MIB, return null

@@ -105,10 +105,9 @@ class Graphite extends BaseDatastore
 
             $this->recordStatistic($stat->end());
         } catch (Exception $e) {
-            Log::error('Graphite write error: '.$e->getMessage());
+            Log::error('Graphite write error: ' . $e->getMessage());
         }
     }
-
 
     /**
      * Turn a tag array into a string.
@@ -135,7 +134,6 @@ class Graphite extends BaseDatastore
 
         return $separator . implode($separator, $tag_pairs);
     }
-
 
     protected function sanitizeMetricString(string $string): string
     {

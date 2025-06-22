@@ -72,8 +72,8 @@ class InfluxDB extends BaseDatastore
         $stat = Measurement::start('write');
 
         $timestamp = time();
-        $tags = array_filter($tags, fn($v) => $v !== null && $v !== '');
-        $fields = array_filter($fields, fn($v) => $v !== null && $v !== '');
+        $tags = array_filter($tags, fn ($v) => $v !== null && $v !== '');
+        $fields = array_filter($fields, fn ($v) => $v !== null && $v !== '');
 
         $tmp_fields = [];
         foreach ($fields as $k => $v) {
@@ -144,7 +144,6 @@ class InfluxDB extends BaseDatastore
 
         return $client->selectDB(LibrenmsConfig::get('influxdb.db', 'librenms'));
     }
-
 
     private function forceType($data): ?float
     {

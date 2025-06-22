@@ -84,6 +84,7 @@ CODE_SAMPLE
         // Collect variable assignments first
         if ($node instanceof Expression && $node->expr instanceof Assign) {
             $this->collectVariableAssignment($node->expr);
+
             return null;
         }
 
@@ -91,11 +92,11 @@ CODE_SAMPLE
         if ($node instanceof Expression && $node->expr instanceof MethodCall) {
             $methodCall = $node->expr;
 
-            if (!$this->isName($methodCall->name, 'put')) {
+            if (! $this->isName($methodCall->name, 'put')) {
                 return null;
             }
 
-            if (!$this->isDatastoreInstance($methodCall->var)) {
+            if (! $this->isDatastoreInstance($methodCall->var)) {
                 return null;
             }
 
@@ -108,8 +109,6 @@ CODE_SAMPLE
 
         return null;
     }
-
-
 
     private function collectVariableAssignment(Assign $assign): void
     {
@@ -158,11 +157,11 @@ CODE_SAMPLE
         // Build new method call arguments
         $writeArgs = [
             new Node\Arg($measurementArg),
-            new Node\Arg($convertedFields)
+            new Node\Arg($convertedFields),
         ];
 
         // Add metadata tags if present
-        if (!empty($metadataTags->items)) {
+        if (! empty($metadataTags->items)) {
             $writeArgs[] = new Node\Arg($metadataTags);
         }
 
@@ -204,7 +203,7 @@ CODE_SAMPLE
         $this->rrdDatasets = []; // Reset for each transformation
 
         foreach ($tags->items as $item) {
-            if (!$item instanceof ArrayItem || !$item->key) {
+            if (! $item instanceof ArrayItem || ! $item->key) {
                 continue;
             }
 
@@ -259,7 +258,7 @@ CODE_SAMPLE
         $minArg = $methodCall->args[2]->value ?? null;
         $maxArg = $methodCall->args[3]->value ?? null;
 
-        if (!$nameArg instanceof String_ || !$typeArg instanceof String_) {
+        if (! $nameArg instanceof String_ || ! $typeArg instanceof String_) {
             return;
         }
 
@@ -341,7 +340,7 @@ CODE_SAMPLE
 
         // First pass: collect regular metadata tags and track their values
         foreach ($tags->items as $item) {
-            if (!$item instanceof ArrayItem || !$item->key) {
+            if (! $item instanceof ArrayItem || ! $item->key) {
                 continue;
             }
 
@@ -367,7 +366,7 @@ CODE_SAMPLE
         // Second pass: extract tags from rrd_name (skip first element which is measurement)
         $rrdNameArray = null;
         foreach ($tags->items as $item) {
-            if (!$item instanceof ArrayItem || !$item->key) {
+            if (! $item instanceof ArrayItem || ! $item->key) {
                 continue;
             }
 
@@ -382,15 +381,15 @@ CODE_SAMPLE
             }
         }
 
-        if ($rrdNameArray && !empty($rrdNameArray->items)) {
+        if ($rrdNameArray && ! empty($rrdNameArray->items)) {
             $rrdNameItems = array_slice($rrdNameArray->items, 1); // Skip measurement
             foreach ($rrdNameItems as $index => $rrdNameItem) {
                 if ($rrdNameItem instanceof ArrayItem && $rrdNameItem->value) {
                     $tagValue = $this->getNodeValue($rrdNameItem->value);
 
                     // Only add if this value doesn't already exist in the tags
-                    if ($tagValue !== null && !in_array($tagValue, $existingTagValues, true)) {
-                        $tagKey = "tag" . ($index + 1); // Create generic tag names
+                    if ($tagValue !== null && ! in_array($tagValue, $existingTagValues, true)) {
+                        $tagKey = 'tag' . ($index + 1); // Create generic tag names
                         $rrdNameTags[] = new ArrayItem($rrdNameItem->value, new String_($tagKey));
                         $existingTagValues[] = $tagValue; // Track this value
                     }
@@ -402,7 +401,7 @@ CODE_SAMPLE
         $allMetadataItems = array_merge($metadataItems, $rrdNameTags);
 
         return new Array_($allMetadataItems, [
-            'kind' => Array_::KIND_SHORT
+            'kind' => Array_::KIND_SHORT,
         ]);
     }
 
@@ -428,7 +427,7 @@ CODE_SAMPLE
         $convertedItems = [];
 
         foreach ($fields->items as $item) {
-            if (!$item instanceof ArrayItem) {
+            if (! $item instanceof ArrayItem) {
                 continue;
             }
 
@@ -436,12 +435,12 @@ CODE_SAMPLE
             $value = $item->value;
 
             // Skip invalid or unparseable values
-            if (!$key || !$value) {
+            if (! $key || ! $value) {
                 continue;
             }
 
             // Skip if key is not a string or identifier
-            if (!($key instanceof String_ || $key instanceof Node\Scalar\String_ || $key instanceof Variable)) {
+            if (! ($key instanceof String_ || $key instanceof Node\Scalar\String_ || $key instanceof Variable)) {
                 continue;
             }
 
@@ -466,12 +465,12 @@ CODE_SAMPLE
         // Only create array if we have valid items
         if (empty($convertedItems)) {
             return new Array_([], [
-                'kind' => Array_::KIND_SHORT
+                'kind' => Array_::KIND_SHORT,
             ]);
         }
 
         return new Array_($convertedItems, [
-            'kind' => Array_::KIND_SHORT
+            'kind' => Array_::KIND_SHORT,
         ]);
     }
 
@@ -547,8 +546,10 @@ CODE_SAMPLE
     {
         if ($value instanceof Variable) {
             $name = $this->getName($value);
+
             return $name && (str_contains($name, 'time') || str_contains($name, 'Time'));
         }
+
         return false;
     }
 
@@ -606,6 +607,6 @@ CODE_SAMPLE
     private function shouldRemoveVariableAssignment(string $varName): bool
     {
         // Don't remove if the variable is used elsewhere
-        return !isset($this->variableUsages[$varName]);
+        return ! isset($this->variableUsages[$varName]);
     }
 }

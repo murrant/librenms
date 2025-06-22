@@ -61,7 +61,7 @@ class Ciscowlc extends Cisco implements
             }
         }
 
-        $datastore->write( 'ciscowlc', [
+        $datastore->write('ciscowlc', [
             'NUMAPS' => FieldValue::asInt($numAccessPoints)->min(0)->max(12500000000),
             'NUMCLIENTS' => FieldValue::asInt($numClients)->min(0)->max(12500000000),
         ]);
@@ -100,8 +100,8 @@ class Ciscowlc extends Cisco implements
                     'txpow' => FieldValue::asFloat($ap->txpow)->max(200),
                     'radioutil' => FieldValue::asFloat($ap->radioutil)->max(100),
                     'nummonclients' => FieldValue::asInt($ap->nummonclients)->max(500),
-                    'nummonbssid'  => FieldValue::asInt($ap->nummonbssid)->max(200),
-                    'numasoclients' =>  FieldValue::asInt($ap->numasoclients)->max(500),
+                    'nummonbssid' => FieldValue::asInt($ap->nummonbssid)->max(200),
+                    'numasoclients' => FieldValue::asInt($ap->numasoclients)->max(500),
                     'interference' => FieldValue::asFloat($ap->interference)->max(2000),
                 ], [
                     'name' => $ap->name,

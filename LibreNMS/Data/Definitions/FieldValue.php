@@ -1,4 +1,5 @@
 <?php
+
 /**
  * FieldDef.php
  *
@@ -68,7 +69,6 @@ class FieldValue
 
         return new static($value, $storage);
     }
-
 
     public static function asFloat(?string $value, StorageType $storage = StorageType::GAUGE): static
     {

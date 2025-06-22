@@ -16,5 +16,4 @@ return RectorConfig::configure()
     ->withRules([
         CompactToVariablesRector::class,
         \LibreNMS\Rector\ConvertDatastorePutCalls::class,
-    ])
-    ;
+    ]);
