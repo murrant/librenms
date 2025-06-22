@@ -25,6 +25,7 @@ final class ConvertDatastorePutCalls extends AbstractRector
 {
     private array $variableAssignments = [];
     private array $rrdDatasets = []; // Store RRD dataset definitions
+    private array $variableUsages = []; // Track which variables are used
 
     public function getRuleDefinition(): RuleDefinition
     {
@@ -68,6 +69,18 @@ CODE_SAMPLE
 
     public function refactor(Node $node): ?Node
     {
+        // Reset state at the beginning of each file processing
+        // We detect this by checking if we're processing a new file context
+        static $lastFileHash = null;
+        $currentFileHash = spl_object_hash($this->file ?? new \stdClass());
+
+        if ($lastFileHash !== $currentFileHash) {
+            $this->variableAssignments = [];
+            $this->rrdDatasets = [];
+            $this->variableUsages = [];
+            $lastFileHash = $currentFileHash;
+        }
+
         // Collect variable assignments first
         if ($node instanceof Expression && $node->expr instanceof Assign) {
             $this->collectVariableAssignment($node->expr);
@@ -96,6 +109,8 @@ CODE_SAMPLE
         return null;
     }
 
+
+
     private function collectVariableAssignment(Assign $assign): void
     {
         if ($assign->var instanceof Variable) {
@@ -112,6 +127,10 @@ CODE_SAMPLE
         $measurementArg = $methodCall->args[1]->value;
         $tagsArg = $methodCall->args[2]->value;
         $fieldsArg = $methodCall->args[3]->value;
+
+        // Track usage of variables in the arguments
+        $this->trackVariableUsage($tagsArg);
+        $this->trackVariableUsage($fieldsArg);
 
         // Resolve variables to their actual values
         $tagsArray = $this->resolveToArray($tagsArg);
@@ -154,6 +173,30 @@ CODE_SAMPLE
         );
 
         return new Expression($newMethodCall);
+    }
+
+    private function trackVariableUsage(Node $node): void
+    {
+        if ($node instanceof Variable) {
+            $varName = $this->getName($node);
+            if ($varName) {
+                $this->variableUsages[$varName] = true;
+            }
+        }
+
+        // Recursively track usage in sub-nodes
+        foreach ($node->getSubNodeNames() as $subNodeName) {
+            $subNode = $node->$subNodeName;
+            if ($subNode instanceof Node) {
+                $this->trackVariableUsage($subNode);
+            } elseif (is_array($subNode)) {
+                foreach ($subNode as $arrayItem) {
+                    if ($arrayItem instanceof Node) {
+                        $this->trackVariableUsage($arrayItem);
+                    }
+                }
+            }
+        }
     }
 
     private function extractRrdDefinition(Array_ $tags): void
@@ -223,12 +266,14 @@ CODE_SAMPLE
         $datasetName = $nameArg->value;
         $storageType = $typeArg->value;
 
-        // Parse min value
+        // Parse min value - preserve null if not specified
         $minValue = null;
-        if ($minArg instanceof Node\Scalar\LNumber) {
-            $minValue = $minArg->value;
-        } elseif ($minArg instanceof Node\Expr\UnaryMinus && $minArg->expr instanceof Node\Scalar\LNumber) {
-            $minValue = -$minArg->expr->value;
+        if ($minArg !== null) {
+            if ($minArg instanceof Node\Scalar\LNumber) {
+                $minValue = $minArg->value;
+            } elseif ($minArg instanceof Node\Expr\UnaryMinus && $minArg->expr instanceof Node\Scalar\LNumber) {
+                $minValue = -$minArg->expr->value;
+            }
         }
 
         // Parse max value
@@ -241,6 +286,7 @@ CODE_SAMPLE
             'type' => $storageType,
             'min' => $minValue,
             'max' => $maxValue,
+            'has_min' => $minArg !== null, // Track if min was explicitly set
         ];
     }
 
@@ -409,7 +455,7 @@ CODE_SAMPLE
             try {
                 $fieldValueCall = $this->createFieldValueCall($value, $fieldName);
                 $arrayItem = new ArrayItem($fieldValueCall, $key);
-                $arrayItem->setAttribute('comments', [new \PhpParser\Comment('/* field */')]);
+                $arrayItem->setAttribute('comments', [new \PhpParser\Comment('/* field */')]); // do not remove this line!
                 $convertedItems[] = $arrayItem;
             } catch (\Exception $e) {
                 // If we can't parse the field value, skip it to avoid corruption
@@ -441,21 +487,21 @@ CODE_SAMPLE
         $isFloat = $this->isFloatValue($value) || $this->isTimeValue($value);
         $method = $isFloat ? 'asFloat' : 'asInt';
 
-        // Create storage type argument
-        $storageTypeValue = 'GAUGE'; // Default
+        // Create storage type argument - default is GAUGE
+        $storageTypeValue = 'GAUGE'; // Default is GAUGE
         if ($datasetInfo && isset($datasetInfo['type'])) {
             $storageTypeValue = strtoupper($datasetInfo['type']);
         }
 
         // Use fully qualified names to avoid conflicts
         $storageTypeExpr = new Node\Expr\ClassConstFetch(
-            new Name(['LibreNMS', 'Data', 'Definitions', 'StorageType']),
+            new Name\FullyQualified(['LibreNMS', 'Data', 'Definitions', 'StorageType']),
             $storageTypeValue
         );
 
         // Create base FieldValue call with fully qualified name
         $baseCall = new StaticCall(
-            new Name(['LibreNMS', 'Data', 'Definitions', 'FieldValue']),
+            new Name\FullyQualified(['LibreNMS', 'Data', 'Definitions', 'FieldValue']),
             $method,
             [
                 new Node\Arg($value),
@@ -467,11 +513,17 @@ CODE_SAMPLE
         $finalCall = $baseCall;
 
         if ($datasetInfo) {
-            // Add min() call if min value is set and not default 0
-            if (isset($datasetInfo['min']) && $datasetInfo['min'] !== null && $datasetInfo['min'] !== 0) {
-                $minValue = $datasetInfo['min'] < 0
-                    ? new Node\Expr\UnaryMinus(new Node\Scalar\LNumber(abs($datasetInfo['min'])))
-                    : new Node\Scalar\LNumber($datasetInfo['min']);
+            // Add min() call if min value was explicitly set in RRD definition
+            if (isset($datasetInfo['has_min']) && $datasetInfo['has_min']) {
+                $minValue = null;
+                if ($datasetInfo['min'] === null) {
+                    // Explicitly set to null to override default 0
+                    $minValue = new Node\Expr\ConstFetch(new Name('null'));
+                } elseif ($datasetInfo['min'] < 0) {
+                    $minValue = new Node\Expr\UnaryMinus(new Node\Scalar\LNumber(abs($datasetInfo['min'])));
+                } else {
+                    $minValue = new Node\Scalar\LNumber($datasetInfo['min']);
+                }
                 $finalCall = new MethodCall($finalCall, 'min', [new Node\Arg($minValue)]);
             }
 
@@ -540,5 +592,14 @@ CODE_SAMPLE
         }
 
         return false;
+    }
+
+    /**
+     * Check if a variable assignment should be removed because it's no longer used
+     */
+    private function shouldRemoveVariableAssignment(string $varName): bool
+    {
+        // Don't remove if the variable is used elsewhere
+        return !isset($this->variableUsages[$varName]);
     }
 }
