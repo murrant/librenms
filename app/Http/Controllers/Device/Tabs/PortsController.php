@@ -100,7 +100,6 @@ class PortsController implements DeviceTab
             'graphs', 'mini_graphs' => $this->graphData($device, $request),
             default => $this->portData($device, $request),
         };
-
         return array_merge([
             'tab' => $tab,
             'details' => $this->detail,
