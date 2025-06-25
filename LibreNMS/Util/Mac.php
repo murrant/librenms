@@ -111,7 +111,7 @@ class Mac
      */
     public function isValid(): bool
     {
-        return ! empty($this->mac);
+        return ! empty($this->mac) && $this->mac !== ['00', '00', '00', '00', '00', '00'];
     }
 
     /**

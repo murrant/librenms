@@ -39,6 +39,13 @@ class MacUtilTest extends TestCase
         $this->assertEquals('0c85255ce500', Mac::parseBridge('80620c85255ce500')->hex());
     }
 
+    public function testMacIsValid(): void
+    {
+        $this->assertTrue(Mac::parse('00:02:04:0B:0D:0F')->isValid());
+        $this->assertFalse(Mac::parse('00:00:00:00:00:00')->isValid());
+        $this->assertFalse((new Mac(''))->isValid());
+    }
+
     #[Test]
     #[DataProvider('validMacProvider')]
     public function testMacToHex(string $from, string $to): void
