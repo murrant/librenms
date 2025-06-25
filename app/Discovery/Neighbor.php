@@ -30,7 +30,7 @@ class Neighbor
     {
         if ($this->sysName) {
             foreach ((array) LibrenmsConfig::get('autodiscovery.xdp_exclude.sysname_regexp') as $needle) {
-                if (preg_match($needle.'i', $this->sysName)) {
+                if (preg_match($needle . 'i', $this->sysName)) {
                     Log::debug("$this->sysName - regexp '$needle' matches '$this->sysName' - skipping device discovery \n");
 
                     return true;
@@ -40,7 +40,7 @@ class Neighbor
 
         if ($this->sysDescr) {
             foreach ((array) LibrenmsConfig::get('autodiscovery.xdp_exclude.sysdesc_regexp') as $needle) {
-                if (preg_match($needle.'i', $this->sysDescr)) {
+                if (preg_match($needle . 'i', $this->sysDescr)) {
                     Log::debug("$this->sysName - regexp '$needle' matches '$this->sysDescr' - skipping device discovery \n");
 
                     return true;
@@ -50,7 +50,7 @@ class Neighbor
 
         if ($this->platform) {
             foreach ((array) LibrenmsConfig::get('autodiscovery.cdp_exclude.platform_regexp') as $needle) {
-                if (preg_match($needle.'i', $this->platform)) {
+                if (preg_match($needle . 'i', $this->platform)) {
                     Log::debug("$this->sysName - regexp '$needle' matches '$this->platform' - skipping device discovery \n");
 
                     return true;
@@ -69,37 +69,37 @@ class Neighbor
         // Single query approach with priority ordering
         $this->device = Device::query()
             // Priority 1: Hostname matches (if valid)
-            ->when($this->sysName && Validate::hostname($this->sysName), fn(Builder $query) => $query->addSelect([
+            ->when($this->sysName && Validate::hostname($this->sysName), fn (Builder $query) => $query->addSelect([
                 'priority' => \DB::raw('1'),
-                'device_id'
+                'device_id',
             ])
-                ->where(fn(Builder $q) => $q->where('hostname', $this->sysName)
+                ->where(fn (Builder $q) => $q->where('hostname', $this->sysName)
                     ->when($this->domain,
-                        fn(Builder $subQ) => $subQ->orWhere('hostname', "$this->sysName.$this->domain")
+                        fn (Builder $subQ) => $subQ->orWhere('hostname', "$this->sysName.$this->domain")
                             ->orWhereRaw('CONCAT(hostname, \'.\', ?) = ?', [$this->domain, $this->sysName])
                     )
                 )
             )
             // Priority 2: IP matches
-            ->when($this->ipAddress, fn(Builder $query) => $query->unionAll(
+            ->when($this->ipAddress, fn (Builder $query) => $query->unionAll(
                 Device::select(['device_id', \DB::raw('2 as priority')])
-                    ->where(fn(Builder $q) => $q->where('hostname', $this->ipAddress)
-                        ->when($packedIp, fn(Builder $subQ) => $subQ->orWhere('ip', $packedIp))
+                    ->where(fn (Builder $q) => $q->where('hostname', $this->ipAddress)
+                        ->when($packedIp, fn (Builder $subQ) => $subQ->orWhere('ip', $packedIp))
                     )
             )
             )
             // Priority 3: MAC address via ports
-            ->when($this->macAddress?->isValid(), fn(Builder $query) => $query->unionAll(
+            ->when($this->macAddress?->isValid(), fn (Builder $query) => $query->unionAll(
                 Port::select(['device_id', \DB::raw('3 as priority')])
                     ->where('ifPhysAddress', $this->macAddress->hex())
             )
             )
             // Priority 4: sysName (with duplicate handling)
-            ->when($this->sysName, fn(Builder $query) => $query->unionAll(
+            ->when($this->sysName, fn (Builder $query) => $query->unionAll(
                 Device::select(['device_id', \DB::raw('4 as priority')])
-                    ->where(fn(Builder $q) => $q->where('sysName', $this->sysName)
+                    ->where(fn (Builder $q) => $q->where('sysName', $this->sysName)
                         ->when($this->domain,
-                            fn(Builder $subQ) => $subQ->orWhere('sysName', "$this->sysName.$this->domain")
+                            fn (Builder $subQ) => $subQ->orWhere('sysName', "$this->sysName.$this->domain")
                                 ->orWhereRaw('CONCAT(sysName, \'.\', ?) = ?', [$this->domain, $this->sysName])
                         )
                     )
@@ -120,14 +120,14 @@ class Neighbor
         ?string $portIdentifier = null,
         ?Mac $macAddress = null
     ): int {
-        if (!$this->device && !$macAddress) {
+        if (! $this->device && ! $macAddress) {
             Log::warning('Cannot find port without device or MAC address.');
 
             return 0;
         }
 
         return Port::query()
-            ->when($this->device, fn(Builder $query) => $query->where('device_id', $this->device->device_id))
+            ->when($this->device, fn (Builder $query) => $query->where('device_id', $this->device->device_id))
             ->when($portName, function (Builder $query) use ($portName) {
                 $query->orWhere(function (Builder $q) use ($portName) {
                     $q->where('ifDescr', $portName)
