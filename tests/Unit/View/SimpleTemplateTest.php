@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SimpleTemplateTest.php
  *
@@ -253,7 +254,7 @@ class SimpleTemplateTest extends TestCase
     {
         $template = new SimpleTemplate('{{ greeting }} {{ name }}!', [
             'greeting' => 'Hello',
-            'name' => 'World'
+            'name' => 'World',
         ]);
         $this->assertEquals('Hello World!', (string) $template);
     }
@@ -265,7 +266,7 @@ class SimpleTemplateTest extends TestCase
             [
                 'name' => 'john doe',
                 'count' => '1234',
-                'item' => 'MESSAGE'
+                'item' => 'MESSAGE',
             ]
         );
 
@@ -276,7 +277,7 @@ class SimpleTemplateTest extends TestCase
         $simpleTemplate = new SimpleTemplate('Welcome {{ name|title }}! You have {{ count|number_format }} {{ item|lower }}.', [
             'name' => 'john doe',
             'count' => '1234',
-            'item' => 'MESSAGE'
+            'item' => 'MESSAGE',
         ]);
         $this->assertEquals('Welcome John Doe! You have 1,234 message.', (string) $simpleTemplate);
     }
