@@ -294,7 +294,6 @@ class Routes implements Module
 
     private function discoverIpv6MibRoutes(Device $device, int $max_routes): Collection
     {
-
         $route_count = intval(SnmpQuery::hideMib()->get('IPV6-MIB::ipv6RouteNumber.0')->value());
         if ($route_count > $max_routes) {
             Log::info('Skipping all IPv6 routes because device has more than ' . $max_routes . ' routes');
@@ -303,6 +302,7 @@ class Routes implements Module
         }
 
         Log::info('IPV6-MIB::ipv6RouteTable');
+
         return SnmpQuery::hideMib()->walk(['IPV6-MIB::ipv6RouteTable'])
         ->mapTable(function ($data, $dst = '', $pfxLen = '', $tos = '') use ($device) {
             return new Route([
