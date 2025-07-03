@@ -31,7 +31,7 @@ body:
     attributes:
       label: Output of ./validate.php
       description: |
-        Please post the output of running: /opt/librenms/validate.php
+        Please post the output of running: ./validate.php
       render: txt
   - type: input
     attributes:
@@ -49,4 +49,14 @@ body:
       description: |
         For example, error messages, or stack traces.
         *Hint: /opt/librenms/logs/*
+      render: txt
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: About LibreNMS
+      description: |
+        Paste the output of:
+        lnms about
       render: txt
