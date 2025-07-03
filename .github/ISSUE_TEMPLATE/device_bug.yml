@@ -73,3 +73,13 @@ body:
         Paste the result of:
         lnms device:poll HOSTNAME -vv --no-data
       render: txt
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: About LibreNMS
+      description: |
+        Paste the output of:
+        lnms about
+      render: txt
