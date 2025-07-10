@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 class AATestEnvTest extends TestCase
 {
-
     public function testSnmpTimeoutsAreConfigured(): void
     {
         $this->assertEquals(0.1, LibrenmsConfig::get('snmp.timeout'));
