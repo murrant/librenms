@@ -27,8 +27,8 @@
 namespace LibreNMS\OS;
 
 use App\Models\Mempool;
+use App\Models\Processor;
 use Illuminate\Support\Collection;
-use LibreNMS\Device\Processor;
 use LibreNMS\Interfaces\Discovery\MempoolsDiscovery;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\OS;
@@ -39,20 +39,24 @@ class Scalance extends OS implements MempoolsDiscovery, ProcessorDiscovery
      * Discover processors.
      * Returns an array of LibreNMS\Device\Processor objects that have been discovered
      *
-     * @return array Processors
+     * @return Collection<Processor>
      */
-    public function discoverProcessors()
+    public function discoverProcessors(): \Illuminate\Support\Collection
     {
         $oid = '.1.3.6.1.4.1.4329.20.1.1.1.1.79.3.1.13.0';
 
         return [
-            Processor::discover(
-                'scalance-cpu',
-                $this->getDeviceId(),
-                $oid,
-                0,
-                'Processor',
-            ),
+            new \App\Models\Processor([
+                'processor_type' => 'scalance-cpu',
+                'processor_oid' => $oid,
+                'processor_index' => 0,
+                'processor_descr' => 'Processor',
+                'processor_precision' => 1,
+                'entPhysicalIndex' => 0,
+                'hrDeviceIndex' => null,
+                'processor_perc_warn' => null,
+                'processor_usage' => null ?? 'FIXME_PROCESSOR_USAGE',
+            ]),
         ];
     }
 

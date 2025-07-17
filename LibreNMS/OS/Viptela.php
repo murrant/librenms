@@ -27,7 +27,6 @@
 namespace LibreNMS\OS;
 
 use App\Models\Device;
-use LibreNMS\Device\Processor;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\Interfaces\Polling\ProcessorPolling;
 use LibreNMS\OS;
@@ -50,17 +49,19 @@ class Viptela extends OS implements ProcessorDiscovery, ProcessorPolling
     public function discoverProcessors()
     {
         $idle_cpu = 100 - (int) \SnmpQuery::get([$this->procOid])->value();
-        $processors[] = Processor::discover(
-            'viptela',
-            $this->getDeviceId(),
-            $this->procOid,
-            0,
-            'Processor',
-            1,
-            $idle_cpu,
-        );
+        $processors[] = new \App\Models\Processor([
+            'processor_type' => 'viptela',
+            'processor_oid' => $this->procOid,
+            'processor_index' => 0,
+            'processor_descr' => 'Processor',
+            'processor_precision' => 1,
+            'entPhysicalIndex' => 0,
+            'hrDeviceIndex' => null,
+            'processor_perc_warn' => null,
+            'processor_usage' => $idle_cpu ?? 'FIXME_PROCESSOR_USAGE',
+        ]);
 
-        return $processors;
+        return collect($processors);
     }
 
     /**

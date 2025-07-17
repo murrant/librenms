@@ -26,7 +26,7 @@
 
 namespace LibreNMS\OS;
 
-use LibreNMS\Device\Processor;
+use App\Models\Processor;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\OS;
 
@@ -36,17 +36,21 @@ class Aos extends OS implements ProcessorDiscovery
      * Discover processors.
      * Returns an array of LibreNMS\Device\Processor objects that have been discovered
      *
-     * @return array Processors
+     * @return Collection<Processor>
      */
-    public function discoverProcessors()
+    public function discoverProcessors(): \Illuminate\Support\Collection
     {
-        $processor = Processor::discover(
-            'aos-system',
-            $this->getDeviceId(),
-            '.1.3.6.1.4.1.6486.800.1.2.1.16.1.1.1.13.0', // ALCATEL-IND1-HEALTH-MIB::healthDeviceCpuLatest
-            0,
-            'Device CPU'
-        );
+        $processor = new \App\Models\Processor([
+            'processor_type' => 'aos-system',
+            'processor_oid' => '.1.3.6.1.4.1.6486.800.1.2.1.16.1.1.1.13.0',
+            'processor_index' => 0,
+            'processor_descr' => 'Device CPU',
+            'processor_precision' => 1,
+            'entPhysicalIndex' => 0,
+            'hrDeviceIndex' => null,
+            'processor_perc_warn' => null,
+            'processor_usage' => null ?? 'FIXME_PROCESSOR_USAGE',
+        ]);
 
         if (! $processor->isValid()) {
             // AOS7 devices use a different OID for CPU load. Not all Switches have
@@ -54,13 +58,17 @@ class Aos extends OS implements ProcessorDiscovery
             // difference for a 5 min. polling interval.
             // Note: This OID shows (a) the CPU load of a single switch or (b) the
             // average CPU load of all CPUs in a stack of switches.
-            $processor = Processor::discover(
-                'aos-system',
-                $this->getDeviceId(),
-                '.1.3.6.1.4.1.6486.801.1.2.1.16.1.1.1.1.1.11.0',
-                0,
-                'Device CPU'
-            );
+            $processor = new \App\Models\Processor([
+                'processor_type' => 'aos-system',
+                'processor_oid' => '.1.3.6.1.4.1.6486.801.1.2.1.16.1.1.1.1.1.11.0',
+                'processor_index' => 0,
+                'processor_descr' => 'Device CPU',
+                'processor_precision' => 1,
+                'entPhysicalIndex' => 0,
+                'hrDeviceIndex' => null,
+                'processor_perc_warn' => null,
+                'processor_usage' => null ?? 'FIXME_PROCESSOR_USAGE',
+            ]);
         }
 
         return [$processor];

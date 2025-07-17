@@ -26,7 +26,7 @@
 
 namespace LibreNMS\OS;
 
-use LibreNMS\Device\Processor;
+use App\Models\Processor;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\OS;
 
@@ -36,9 +36,9 @@ class Smartax extends OS implements ProcessorDiscovery
      * Discover processors.
      * Returns an array of LibreNMS\Device\Processor objects that have been discovered
      *
-     * @return array Processors
+     * @return Collection<Processor>
      */
-    public function discoverProcessors()
+    public function discoverProcessors(): \Illuminate\Support\Collection
     {
         $proc_oid = '1.3.6.1.4.1.2011.2.6.7.1.1.2.1.5.0';
         $descr_oid = '1.3.6.1.4.1.2011.2.6.7.1.1.2.1.7.0';
@@ -54,18 +54,20 @@ class Smartax extends OS implements ProcessorDiscovery
         foreach ($data as $index => $value) {
             if ($value != -1) {
                 $proc_desc = $descr_data[$index];
-                $processors[] = Processor::discover(
-                    'smartax',
-                    $this->getDeviceId(),
-                    "$proc_oid.$index",
-                    $index,
-                    "$proc_desc processor",
-                    1,
-                    $value
-                );
+                $processors[] = new \App\Models\Processor([
+                    'processor_type' => 'smartax',
+                    'processor_oid' => "$proc_oid.$index",
+                    'processor_index' => $index,
+                    'processor_descr' => "$proc_desc processor",
+                    'processor_precision' => 1,
+                    'entPhysicalIndex' => 0,
+                    'hrDeviceIndex' => null,
+                    'processor_perc_warn' => null,
+                    'processor_usage' => $value ?? 'FIXME_PROCESSOR_USAGE',
+                ]);
             }
         }
 
-        return $processors;
+        return collect($processors);
     }
 }

@@ -26,7 +26,6 @@
 
 namespace LibreNMS\OS;
 
-use LibreNMS\Device\Processor;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\Interfaces\Polling\ProcessorPolling;
 use LibreNMS\OS;
@@ -60,20 +59,21 @@ class Lcossx extends OS implements ProcessorDiscovery, ProcessorPolling
         $processors = [];
         $count = 0;
         foreach ($this->convertProcessorData($data) as $cpuName => $cpuPerc) {
-            $processors[] = Processor::discover(
-                'lcossx',
-                $this->getDeviceId(),
-                $this->procOid,
-                $count,
-                'Processor ' . $cpuName,
-                1,
-                $cpuPerc,
-                100
-            );
+            $processors[] = new \App\Models\Processor([
+                'processor_type' => 'lcossx',
+                'processor_oid' => $this->procOid,
+                'processor_index' => $count,
+                'processor_descr' => 'Processor ' . $cpuName,
+                'processor_precision' => 1,
+                'entPhysicalIndex' => 0,
+                'hrDeviceIndex' => null,
+                'processor_perc_warn' => 100,
+                'processor_usage' => $cpuPerc ?? 'FIXME_PROCESSOR_USAGE',
+            ]);
             $count++;
         }
 
-        return $processors;
+        return collect($processors);
     }
 
     public function pollProcessors(array $processors)

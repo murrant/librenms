@@ -18,8 +18,8 @@
 
 namespace LibreNMS\OS;
 
+use App\Models\Processor;
 use Illuminate\Support\Str;
-use LibreNMS\Device\Processor;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\OS;
 
@@ -29,31 +29,37 @@ class Sonicwall extends OS implements ProcessorDiscovery
      * Discover processors.
      * Returns an array of LibreNMS\Device\Processor objects that have been discovered
      *
-     * @return array Processors
+     * @return Collection<Processor>
      */
-    public function discoverProcessors()
+    public function discoverProcessors(): \Illuminate\Support\Collection
     {
         if (Str::startsWith($this->getDeviceArray()['sysObjectID'], '.1.3.6.1.4.1.8741.1')) {
             return [
-                Processor::discover(
-                    'sonicwall',
-                    $this->getDeviceId(),
-                    '.1.3.6.1.4.1.8741.1.3.1.3.0',  // SONICWALL-FIREWALL-IP-STATISTICS-MIB::sonicCurrentCPUUtil.0
-                    0,
-                    'CPU',
-                    1
-                ),
+                new \App\Models\Processor([
+                    'processor_type' => 'sonicwall',
+                    'processor_oid' => '.1.3.6.1.4.1.8741.1.3.1.3.0',
+                    'processor_index' => 0,
+                    'processor_descr' => 'CPU',
+                    'processor_precision' => 1,
+                    'entPhysicalIndex' => 0,
+                    'hrDeviceIndex' => null,
+                    'processor_perc_warn' => null,
+                    'processor_usage' => null ?? 'FIXME_PROCESSOR_USAGE',
+                ]),
             ];
         } else {
             return [
-                Processor::discover(
-                    'sonicwall',
-                    $this->getDeviceId(),
-                    $this->getDeviceArray()['sysObjectID'] . '.2.1.3.0',  // different OID for each model
-                    0,
-                    'CPU',
-                    1
-                ),
+                new \App\Models\Processor([
+                    'processor_type' => 'sonicwall',
+                    'processor_oid' => $this->getDeviceArray()['sysObjectID'] . '.2.1.3.0',
+                    'processor_index' => 0,
+                    'processor_descr' => 'CPU',
+                    'processor_precision' => 1,
+                    'entPhysicalIndex' => 0,
+                    'hrDeviceIndex' => null,
+                    'processor_perc_warn' => null,
+                    'processor_usage' => null ?? 'FIXME_PROCESSOR_USAGE',
+                ]),
             ];
         }
     }

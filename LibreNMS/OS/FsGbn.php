@@ -26,7 +26,7 @@
 
 namespace LibreNMS\OS;
 
-use LibreNMS\Device\Processor;
+use App\Models\Processor;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\OS;
 
@@ -36,9 +36,9 @@ class FsGbn extends OS implements ProcessorDiscovery
      * Discover processors.
      * Returns an array of LibreNMS\Device\Processor objects that have been discovered
      *
-     * @return array Processors
+     * @return Collection<Processor>
      */
-    public function discoverProcessors()
+    public function discoverProcessors(): \Illuminate\Support\Collection
     {
         $processors = [];
 
@@ -46,17 +46,19 @@ class FsGbn extends OS implements ProcessorDiscovery
         $processors_data = snmpwalk_cache_oid($this->getDeviceArray(), 'cpuDescription', [], 'GBNPlatformOAM-MIB', 'fs');
         $processors_data = snmpwalk_cache_oid($this->getDeviceArray(), 'cpuIdle', $processors_data, 'GBNPlatformOAM-MIB', 'fs');
         foreach ($processors_data as $index => $entry) {
-            $processors[] = Processor::discover(
-                $this->getName(),
-                $this->getDeviceId(),
-                '.1.3.6.1.4.1.13464.1.2.1.1.2.11.' . $index, //GBNPlatformOAM-MIB::cpuIdle.0 = INTEGER: 95
-                $index,
-                $entry['cpuDescription'],
-                -1,
-                100 - $entry['cpuIdle']
-            );
+            $processors[] = new \App\Models\Processor([
+                'processor_type' => $this->getName(),
+                'processor_oid' => '.1.3.6.1.4.1.13464.1.2.1.1.2.11.' . $index,
+                'processor_index' => $index,
+                'processor_descr' => $entry['cpuDescription'],
+                'processor_precision' => -1,
+                'entPhysicalIndex' => 0,
+                'hrDeviceIndex' => null,
+                'processor_perc_warn' => null,
+                'processor_usage' => 100 - $entry['cpuIdle'] ?? 'FIXME_PROCESSOR_USAGE',
+            ]);
         }
 
-        return $processors;
+        return collect($processors);
     }
 }
