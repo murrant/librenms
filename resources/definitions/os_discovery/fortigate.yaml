@@ -20,12 +20,12 @@ modules:
     processors:
         data:
             -
-                oid: fgSysCpuUsage
+                oid: FORTINET-FORTIGATE-MIB::fgSysCpuUsage
                 num_oid: '.1.3.6.1.4.1.12356.101.4.1.3.{{ $index }}'
                 descr: System Cpu Usage
                 type: fortigate-fixed
             -
-                oid: fgProcessorUsage
+                oid: FORTINET-FORTIGATE-MIB::fgProcessorUsage
                 num_oid: '.1.3.6.1.4.1.12356.101.4.4.2.1.2.{{ $index }}'
                 descr: 'CPU Core {{ $index }}'
                 type: fortigate-core

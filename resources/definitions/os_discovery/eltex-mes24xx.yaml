@@ -1,4 +1,4 @@
-mib: ELTEX-MES-ISS-CPU-UTIL-MIB:ELTEX-MES-ISS-ENV-MIB:ARICENT-ISS-MIB
+mib: ELTEX-MES-ISS-ENV-MIB:ARICENT-ISS-MIB
 modules:
     os:
         serial: .1.3.6.1.4.1.2076.81.1.120.0
@@ -9,7 +9,7 @@ modules:
     processors:
         data:
             -
-                oid: eltMesIssCpuUtilLastMinute
+                oid: ELTEX-MES-ISS-CPU-UTIL-MIB::eltMesIssCpuUtilLastMinute
                 num_oid: '.1.3.6.1.4.1.35265.1.139.6.1.1.2.2.{{ $index }}'
     mempools:
         data:

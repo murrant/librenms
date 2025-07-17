@@ -41,7 +41,7 @@ foreach (dbFetchRows($sql, $param) as $drive) {
     $perc = round($drive['processor_usage'], 0);
     $perc_warn = round($drive['processor_perc_warn'], 0);
     $response[] = [
-        'processor_id' => $drive['processor_id'],
+        'processor_oid' => $drive['processor_id'],
         'hostname' => generate_device_link($drive),
         'processor_descr' => $drive['processor_descr'],
         'processor_perc' => $perc . '%',

@@ -8,34 +8,29 @@ modules:
     processors:
         data:
             -
-                oid: cienaCesChassisCPUHealthCurrMeasurement.1
-                value: cienaCesChassisCPUHealthCurrMeasurement
+                oid: CIENA-CES-CHASSIS-MIB::cienaCesChassisCPUHealthCurrMeasurement.1
+                value: CIENA-CES-CHASSIS-MIB::cienaCesChassisCPUHealthCurrMeasurement
                 num_oid: '.1.3.6.1.4.1.1271.2.1.5.1.2.1.4.5.1.4.{{ $index }}'
                 descr: 'Slot {{ $subindex1 }} CPU'
             -
-                oid: wwpLeosSystemCpuUtilization
-                value: wwpLeosSystemCpuUtilizationLast5Seconds
+                oid: WWP-LEOS-SYSTEM-CONFIG-MIB::wwpLeosSystemCpuUtilization
+                value: WWP-LEOS-SYSTEM-CONFIG-MIB::wwpLeosSystemCpuUtilizationLast5Seconds
                 num_oid: '.1.3.6.1.4.1.6141.2.60.12.1.11.1.{{ $index }}'
                 descr: 'CPU Utilization 5'
                 index: cpu5.{{ $index }}
-                #low_limit: wwpLeosSystemCpuUtilizationLast5SecondsMinimum
-                #high_limit: wwpLeosSystemCpuUtilizationLast5SecondsMaximum
+
             -
-                oid: wwpLeosSystemCpuUtilization
-                value: wwpLeosSystemCpuUtilizationLast10Seconds
+                oid: WWP-LEOS-SYSTEM-CONFIG-MIB::wwpLeosSystemCpuUtilization
+                value: WWP-LEOS-SYSTEM-CONFIG-MIB::wwpLeosSystemCpuUtilizationLast10Seconds
                 num_oid: '.1.3.6.1.4.1.6141.2.60.12.1.11.5.{{ $index }}'
                 descr: 'CPU Utilization 10'
                 index: cpu10.{{ $index }}
-                #low_limit: wwpLeosSystemCpuUtilizationLast10SecondsMinimum
-                #high_limit: wwpLeosSystemCpuUtilizationLast10SecondsMaximum
             -
-                oid: wwpLeosSystemCpuUtilization
-                value: wwpLeosSystemCpuUtilizationLast60Seconds
+                oid: WWP-LEOS-SYSTEM-CONFIG-MIB::wwpLeosSystemCpuUtilization
+                value: WWP-LEOS-SYSTEM-CONFIG-MIB::wwpLeosSystemCpuUtilizationLast60Seconds
                 num_oid: '.1.3.6.1.4.1.6141.2.60.12.1.11.9.{{ $index }}'
                 descr: 'CPU Utilization 60'
                 index: cpu60.{{ $index }}
-                #low_limit: wwpLeosSystemCpuUtilizationLast60SecondsMinimum
-                #high_limit: wwpLeosSystemCpuUtilizationLast60SecondsMaximum
     sensors:
         additional_oids:
             data:

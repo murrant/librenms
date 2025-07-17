@@ -152,6 +152,7 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Device::observe(\App\Observers\DeviceObserver::class);
         \App\Models\Mempool::observe(\App\Observers\MempoolObserver::class);
         \App\Models\Package::observe(\App\Observers\PackageObserver::class);
+        \App\Models\Processor::observe(\App\Observers\ProcessorObserver::class);
         \App\Models\Qos::observe(\App\Observers\QosObserver::class);
         Sensor::observe(\App\Observers\SensorObserver::class);
         \App\Models\Service::observe(\App\Observers\ServiceObserver::class);

@@ -1,7 +1,5 @@
 mib: TACHYON-MIB
-
 modules:
-
     os:
         version: TACHYON-MIB::firmwareVersion.0
         serial: TACHYON-MIB::deviceSerialNo.0
@@ -14,7 +12,7 @@ modules:
     processors:
         data:
             -
-                oid: cpuUsagePercent
+                oid: TACHYON-MIB::cpuUsagePercent
                 num_oid: '.1.3.6.1.4.1.57344.1.3.6.{{ $index }}'
     sensors:
         additional_oids:

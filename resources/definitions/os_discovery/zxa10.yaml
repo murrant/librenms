@@ -1,4 +1,4 @@
-mib: ZTE-AN-SMI:ZTE-AN-CHASSIS-MIB:ZTE-AN-ENVMON-MIB:ZTE-AN-OPTICAL-MODULE-MIB
+mib: ZTE-AN-SMI:ZTE-AN-ENVMON-MIB:ZTE-AN-OPTICAL-MODULE-MIB
 modules:
     mempools:
         additional_oids:
@@ -17,8 +17,8 @@ modules:
     processors:
         data:
             -
-                oid: zxAnCardTable
-                value: zxAnCardCpuLoad
+                oid: ZTE-AN-CHASSIS-MIB::zxAnCardTable
+                value: ZTE-AN-CHASSIS-MIB::zxAnCardCpuLoad
                 num_oid: '.1.3.6.1.4.1.3902.1082.10.1.2.4.1.9.{{ $index }}'
                 descr: '{{ $zxAnCardActualType }} Processor'
     sensors:

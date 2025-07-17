@@ -15,14 +15,14 @@ modules:
     processors:
         data:
             -
-                oid: cpuStatsTable
-                value: cpuStatsCurrent
+                oid: IES5206-MIB::cpuStatsTable
+                value: IES5206-MIB::cpuStatsCurrent
                 num_oid: '.1.3.6.1.4.1.890.1.5.13.13.5.9.1.3.{{ $index }}'
                 descr: 'Processor {{ $index }}'
-                warn_percent: cpuStatsHighThreshold
+                warn_percent: IES5206-MIB::cpuStatsHighThreshold
                 skip_values:
                     -
-                        oid: cpuStatsIndex
+                        oid: IES5206-MIB::cpuStatsIndex
                         op: '='
                         value: 0
     sensors:
