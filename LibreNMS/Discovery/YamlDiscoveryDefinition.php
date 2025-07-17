@@ -98,7 +98,7 @@ class YamlDiscoveryDefinition
         $models = new Collection;
         $fetchedData = $this->preFetch($yaml);
 
-        foreach ($yaml['data'] ?? [] as $yamlItem) {
+        foreach ($yaml['data'] ?? [] as $yamlIndex => $yamlItem) {
             // if a table is given fetch it otherwise, fetch scalar or table columns individually
             if (isset($yamlItem['oid'])) {
                 if (Oid::of($yamlItem['oid'])->isNumeric()) {
@@ -136,7 +136,8 @@ class YamlDiscoveryDefinition
             $count = 0;
 
             foreach ($snmp_data as $index => $snmpItem) {
-                if (YamlDiscovery::canSkipItem(null, $index, $yamlItem, $yaml, $fetchedData)) {
+                $rawSingleValue = $snmpItem[$yamlItem['value'] ?? $yamlItem['oid'] ?? ''] ?? null;
+                if (YamlDiscovery::canSkipItem($rawSingleValue, $index, $yamlItem, $yaml, $fetchedData)) {
                     Log::debug('Data at index ' . $index . ' skipped due to skip_values');
                     Log::info('x');
                     continue;
@@ -193,12 +194,11 @@ class YamlDiscoveryDefinition
         foreach ($this->fields as $field) {
             if ($field->isOid) {
                 $num_oid = null;
+                [$field_name, $column_name] = $field->getNumericNames();
 
                 if (call_user_func($field->should_poll, $this)) {
-                    $yaml_num_oid_field_name = $field->key . '_num_oid';
-
-                    if (isset($yaml[$yaml_num_oid_field_name])) {
-                        $num_oid = SimpleTemplate::parse($yaml[$yaml_num_oid_field_name], ['index' => $index]);
+                    if (isset($yaml[$field_name])) {
+                        $num_oid = SimpleTemplate::parse($yaml[$field_name], ['index' => $index]);
                         $num_oid_found = true;
                     } elseif (isset($yaml[$field->key])) {
                         if (Oid::of($yaml[$field->key])->isNumeric()) {
@@ -206,7 +206,7 @@ class YamlDiscoveryDefinition
                             $num_oid = $yaml[$field->key];
                             $num_oid_found = true;
                         } else {
-                            Log::debug("$yaml_num_oid_field_name should be added to the discovery yaml to increase discovery performance");
+                            Log::debug("$field_name should be added to the discovery yaml to increase discovery performance");
                             try {
                                 // if index is numeric, exclude it so we can cache the translation
                                 if (Oid::of($index)->isNumeric()) {
@@ -223,7 +223,7 @@ class YamlDiscoveryDefinition
                     }
                 }
 
-                $modelAttributes[$field->model_column . '_oid'] = $num_oid;
+                $modelAttributes[$column_name] = $num_oid;
             }
         }
 

@@ -14,7 +14,7 @@ modules:
     processors:
         data:
             -
-                oid: useCpu
+                oid: RAY3-MIB::useCpu
                 num_oid: '.1.3.6.1.4.1.33555.4.1.5.1.{{ $index }}'
 
     sensors:

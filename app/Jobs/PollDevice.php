@@ -58,7 +58,10 @@ class PollDevice implements ShouldQueue
 
         $helper = new ConnectivityHelper($this->device);
         $helper->saveMetrics();
-        $helper->isUp(); // check and save status
+        // check and save status
+        if (! $helper->isUp()) {
+            Log::error("%RDown%n", ['color' => true]);
+        }
 
         $this->pollModules();
 
