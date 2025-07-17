@@ -27,8 +27,9 @@
 namespace LibreNMS\OS;
 
 use App\Models\Device;
+use App\Models\Processor;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use LibreNMS\Device\Processor;
 use LibreNMS\Interfaces\Discovery\OSDiscovery;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\OS;
@@ -67,30 +68,34 @@ class Terra extends OS implements ProcessorDiscovery, OSDiscovery
      * Discover processors.
      * Returns an array of LibreNMS\Device\Processor objects that have been discovered
      *
-     * @return array Processors
+     * @return Collection<Processor>
      */
-    public function discoverProcessors()
+    public function discoverProcessors(): \Illuminate\Support\Collection
     {
-        $device = $this->getDeviceArray();
-
+        $sysDescr = (string) $this->getDevice()->sysDescr;
         $query = [
             'sti410C' => '.1.3.6.1.4.1.30631.1.9.1.1.3.0',
             'sti440' => '.1.3.6.1.4.1.30631.1.18.1.326.3.0',
         ];
 
-        foreach ($query as $decr => $oid) {
-            if (str_contains((string) $device['sysDescr'], $decr)) {
-                return [
-                    Processor::discover(
-                        'cpu',
-                        $this->getDeviceId(),
-                        $oid,
-                        0
-                    ),
-                ];
+        foreach ($query as $descr => $oid) {
+            if (str_contains($sysDescr, $descr)) {
+                $value = \SnmpQuery::get($oid)->value();
+
+                if (is_numeric($value)) {
+                    return collect([
+                        new Processor([
+                            'processor_type' => 'cpu',
+                            'processor_oid' => $oid,
+                            'processor_index' => 0,
+                            'processor_descr' => 'Processor',
+                            'processor_usage' => $value,
+                        ]),
+                    ]);
+                }
             }
         }
 
-        return [];
+        return new Collection;
     }
 }
