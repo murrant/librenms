@@ -89,8 +89,6 @@ class ArubaInstant extends OS implements
                     'processor_descr' => $description,
                     'processor_precision' => 1,
                     'entPhysicalIndex' => 0,
-                    'hrDeviceIndex' => null,
-                    'processor_perc_warn' => null,
                     'processor_usage' => $data['AI-AP-MIB::aiAPCPUUtilization'],
                 ]);
             });
