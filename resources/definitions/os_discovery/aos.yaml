@@ -1,4 +1,4 @@
-mib: RADLAN-rndMng:RADLAN-HWENVIROMENT
+mib: RADLAN-HWENVIROMENT
 modules:
     os:
         sysDescr_regex: '/(?<hardware>OmniStack \S+ \S+|OS\S+)? ?(?<version>\d+\.\d+\.\S+)?/'
@@ -46,6 +46,6 @@ modules:
     processors:
         data:
             -
-                oid: rlCpuUtilDuringLastMinute
+                oid: RADLAN-rndMng::rlCpuUtilDuringLastMinute
                 num_oid: '.1.3.6.1.4.1.89.1.8.{{ $index }}'
                 index: 0

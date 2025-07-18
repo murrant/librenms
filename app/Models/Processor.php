@@ -21,11 +21,6 @@ class Processor extends DeviceRelatedModel implements Keyable
         'processor_precision',
         'processor_perc_warn',
     ];
-    protected $attributes = [
-        'entPhysicalIndex' => 0,
-        'processor_descr' => 'Processor',
-        'processor_precision' => 1,
-    ];
 
     // ---- Attribute Mutators / Casting ----
 

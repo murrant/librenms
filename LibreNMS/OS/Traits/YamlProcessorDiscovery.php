@@ -26,6 +26,11 @@ trait YamlProcessorDiscovery
             ->addField(new YamlDiscoveryField('warn_percent', default: LibrenmsConfig::get('processor_perc_warn', 75)))
             ->addField(new IndexField('index', 'processor_index'));
 
-        return $discovery->discover($this->getDiscovery('processors'));
+        return $discovery->discover($this->getDiscovery('processors'), [
+            'entPhysicalIndex' => 0,
+            'hrDeviceIndex' => 0,
+            'processor_descr' => 'Processor',
+            'processor_precision' => 1,
+        ]);
     }
 }
