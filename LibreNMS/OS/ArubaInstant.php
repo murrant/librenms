@@ -74,7 +74,7 @@ class ArubaInstant extends OS implements
      *
      * @return Collection<Processor>
      */
-    public function discoverProcessors(): \Illuminate\Support\Collection: array
+    public function discoverProcessors(): Collection
     {
         return SnmpQuery::cache()->walk('AI-AP-MIB::aiAccessPointTable')
             ->mapTable(function ($data, $aiAPMACAddress) {
@@ -82,7 +82,7 @@ class ArubaInstant extends OS implements
                 $oid = '.1.3.6.1.4.1.14823.2.3.3.1.2.1.1.7.' . $mac->oid();
                 $description = $data['AI-AP-MIB::aiAPSerialNum'];
 
-                return new \App\Models\Processor([
+                return new Processor([
                     'processor_type' => 'aruba-instant',
                     'processor_oid' => $oid,
                     'processor_index' => $mac->hex(),
@@ -91,9 +91,9 @@ class ArubaInstant extends OS implements
                     'entPhysicalIndex' => 0,
                     'hrDeviceIndex' => null,
                     'processor_perc_warn' => null,
-                    'processor_usage' => $data['AI-AP-MIB::aiAPCPUUtilization'] ?? 'FIXME_PROCESSOR_USAGE',
+                    'processor_usage' => $data['AI-AP-MIB::aiAPCPUUtilization'],
                 ]);
-            })->all();
+            });
     }
 
     /**

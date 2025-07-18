@@ -27,8 +27,10 @@
 namespace LibreNMS\OS;
 
 use App\Models\Processor;
+use Barryvdh\Reflection\DocBlock\Type\Collection;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\OS;
+use SnmpQuery;
 
 class Aos extends OS implements ProcessorDiscovery
 {
@@ -40,25 +42,24 @@ class Aos extends OS implements ProcessorDiscovery
      */
     public function discoverProcessors(): \Illuminate\Support\Collection
     {
-        $processor = new \App\Models\Processor([
-            'processor_type' => 'aos-system',
-            'processor_oid' => '.1.3.6.1.4.1.6486.800.1.2.1.16.1.1.1.13.0',
-            'processor_index' => 0,
-            'processor_descr' => 'Device CPU',
-            'processor_precision' => 1,
-            'entPhysicalIndex' => 0,
-            'hrDeviceIndex' => null,
-            'processor_perc_warn' => null,
-            'processor_usage' => null ?? 'FIXME_PROCESSOR_USAGE',
-        ]);
+        $usage = SnmpQuery::get('ALCATEL-IND1-HEALTH-MIB::healthDeviceCpuLatest.0')->value();
+        if (is_numeric($usage)) {
+            return collect([new Processor([
+                'processor_type' => 'aos-system',
+                'processor_oid' => '.1.3.6.1.4.1.6486.800.1.2.1.16.1.1.1.13.0',
+                'processor_index' => 0,
+                'processor_descr' => 'Device CPU',
+                'processor_precision' => 1,
+                'entPhysicalIndex' => 0,
+                'hrDeviceIndex' => null,
+                'processor_perc_warn' => null,
+                'processor_usage' => $usage,
+            ])]);
+        }
 
-        if (! $processor->isValid()) {
-            // AOS7 devices use a different OID for CPU load. Not all Switches have
-            // healthModuleCpuLatest so we use healthModuleCpu1MinAvg which makes no
-            // difference for a 5 min. polling interval.
-            // Note: This OID shows (a) the CPU load of a single switch or (b) the
-            // average CPU load of all CPUs in a stack of switches.
-            $processor = new \App\Models\Processor([
+        $usage = SnmpQuery::get('ALCATEL-IND1-HEALTH-MIB::healthModuleCpu1MinAvg.0')->value();
+        if (is_numeric($usage)) {
+            return collect([new Processor([
                 'processor_type' => 'aos-system',
                 'processor_oid' => '.1.3.6.1.4.1.6486.801.1.2.1.16.1.1.1.1.1.11.0',
                 'processor_index' => 0,
@@ -67,10 +68,10 @@ class Aos extends OS implements ProcessorDiscovery
                 'entPhysicalIndex' => 0,
                 'hrDeviceIndex' => null,
                 'processor_perc_warn' => null,
-                'processor_usage' => null ?? 'FIXME_PROCESSOR_USAGE',
-            ]);
+                'processor_usage' => $usage,
+            ])]);
         }
 
-        return [$processor];
+        return new Collection;
     }
 }

@@ -27,6 +27,7 @@
 namespace LibreNMS\OS;
 
 use App\Models\Processor;
+use Illuminate\Support\Collection;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\OS;
 
@@ -38,27 +39,27 @@ class FsGbn extends OS implements ProcessorDiscovery
      *
      * @return Collection<Processor>
      */
-    public function discoverProcessors(): \Illuminate\Support\Collection
+    public function discoverProcessors(): Collection
     {
-        $processors = [];
+        $response = \SnmpQuery::get([
+            'GBNPlatformOAM-MIB::cpuDescription.0',
+            'GBNPlatformOAM-MIB::cpuIdle.0',
+        ]);
 
-        // Test first pair of OIDs from GBNPlatformOAM-MIB
-        $processors_data = snmpwalk_cache_oid($this->getDeviceArray(), 'cpuDescription', [], 'GBNPlatformOAM-MIB', 'fs');
-        $processors_data = snmpwalk_cache_oid($this->getDeviceArray(), 'cpuIdle', $processors_data, 'GBNPlatformOAM-MIB', 'fs');
-        foreach ($processors_data as $index => $entry) {
-            $processors[] = new \App\Models\Processor([
+        $idle = $response->value('GBNPlatformOAM-MIB::cpuIdle');
+        if (is_numeric($idle)) {
+            $description = $response->value('GBNPlatformOAM-MIB::cpuDescription');
+
+            return collect([new Processor([
                 'processor_type' => $this->getName(),
-                'processor_oid' => '.1.3.6.1.4.1.13464.1.2.1.1.2.11.' . $index,
-                'processor_index' => $index,
-                'processor_descr' => $entry['cpuDescription'],
+                'processor_oid' => '.1.3.6.1.4.1.13464.1.2.1.1.2.11.0',
+                'processor_index' => '0',
+                'processor_descr' => $description,
                 'processor_precision' => -1,
-                'entPhysicalIndex' => 0,
-                'hrDeviceIndex' => null,
-                'processor_perc_warn' => null,
-                'processor_usage' => 100 - $entry['cpuIdle'] ?? 'FIXME_PROCESSOR_USAGE',
-            ]);
+                'processor_usage' => 100 - $idle,
+            ])]);
         }
 
-        return collect($processors);
+        return new Collection;
     }
 }

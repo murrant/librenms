@@ -34,7 +34,7 @@ class Foundry extends OS implements ProcessorDiscovery
 {
     /**
      * Discover processors.
-     * Returns an array of LibreNMS\Device\Processor objects that have been discovered
+     * Returns an Collection of Processor objects that have been discovered
      *
      * @return Collection<Processor>
      */
@@ -55,7 +55,7 @@ class Foundry extends OS implements ProcessorDiscovery
                 $index = "$slot.$cpu.$interval";
 
                 if (is_numeric($entry['FOUNDRY-SN-AGENT-MIB::snAgentCpuUtil100thPercent'])) {
-                    return new \App\Models\Processor([
+                    return new Processor([
                         'processor_type' => $this->getName(),
                         'processor_oid' => '.1.3.6.1.4.1.1991.1.1.2.11.1.1.6.' . $index,
                         'processor_index' => $index,
@@ -64,10 +64,10 @@ class Foundry extends OS implements ProcessorDiscovery
                         'entPhysicalIndex' => 0,
                         'hrDeviceIndex' => null,
                         'processor_perc_warn' => null,
-                        'processor_usage' => $entry['FOUNDRY-SN-AGENT-MIB::snAgentCpuUtil100thPercent'] / 100 ?? 'FIXME_PROCESSOR_USAGE',
+                        'processor_usage' => $entry['FOUNDRY-SN-AGENT-MIB::snAgentCpuUtil100thPercent'] / 100,
                     ]);
                 } elseif (is_numeric($entry['FOUNDRY-SN-AGENT-MIB::snAgentCpuUtilPercent'])) {
-                    return new \App\Models\Processor([
+                    return new Processor([
                         'processor_type' => $this->getName(),
                         'processor_oid' => '.1.3.6.1.4.1.1991.1.1.2.11.1.1.4.' . $index,
                         'processor_index' => $index,
@@ -76,7 +76,7 @@ class Foundry extends OS implements ProcessorDiscovery
                         'entPhysicalIndex' => 0,
                         'hrDeviceIndex' => null,
                         'processor_perc_warn' => null,
-                        'processor_usage' => $entry['FOUNDRY-SN-AGENT-MIB::snAgentCpuUtilPercent'] ?? 'FIXME_PROCESSOR_USAGE',
+                        'processor_usage' => $entry['FOUNDRY-SN-AGENT-MIB::snAgentCpuUtilPercent'],
                     ]);
                 }
             }

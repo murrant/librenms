@@ -19,9 +19,11 @@
 namespace LibreNMS\OS;
 
 use App\Models\Processor;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\OS;
+use SnmpQuery;
 
 class Sonicwall extends OS implements ProcessorDiscovery
 {
@@ -31,11 +33,14 @@ class Sonicwall extends OS implements ProcessorDiscovery
      *
      * @return Collection<Processor>
      */
-    public function discoverProcessors(): \Illuminate\Support\Collection
+    public function discoverProcessors(): Collection
     {
-        if (Str::startsWith($this->getDeviceArray()['sysObjectID'], '.1.3.6.1.4.1.8741.1')) {
-            return [
-                new \App\Models\Processor([
+        $processors = new Collection;
+
+        if (Str::startsWith($this->getDevice()->sysObjectID, '.1.3.6.1.4.1.8741.1')) {
+            $usage = SnmpQuery::get('.1.3.6.1.4.1.8741.1.3.1.3.0')->value();
+            if (is_numeric($usage)) {
+                $processors->push(new Processor([
                     'processor_type' => 'sonicwall',
                     'processor_oid' => '.1.3.6.1.4.1.8741.1.3.1.3.0',
                     'processor_index' => 0,
@@ -44,23 +49,27 @@ class Sonicwall extends OS implements ProcessorDiscovery
                     'entPhysicalIndex' => 0,
                     'hrDeviceIndex' => null,
                     'processor_perc_warn' => null,
-                    'processor_usage' => null ?? 'FIXME_PROCESSOR_USAGE',
-                ]),
-            ];
+                    'processor_usage' => $usage,
+                ]));
+            }
         } else {
-            return [
-                new \App\Models\Processor([
+            $oid = $this->getDevice()->sysObjectID . '.2.1.3.0';
+            $usage = SnmpQuery::get($oid)->value();
+            if (is_numeric($usage)) {
+                $processors->push(new Processor([
                     'processor_type' => 'sonicwall',
-                    'processor_oid' => $this->getDeviceArray()['sysObjectID'] . '.2.1.3.0',
+                    'processor_oid' => $oid,
                     'processor_index' => 0,
                     'processor_descr' => 'CPU',
                     'processor_precision' => 1,
                     'entPhysicalIndex' => 0,
                     'hrDeviceIndex' => null,
                     'processor_perc_warn' => null,
-                    'processor_usage' => null ?? 'FIXME_PROCESSOR_USAGE',
-                ]),
-            ];
+                    'processor_usage' => $usage,
+                ]));
+            }
         }
+
+        return $processors;
     }
 }

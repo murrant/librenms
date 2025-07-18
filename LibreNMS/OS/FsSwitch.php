@@ -26,7 +26,6 @@
 
 namespace LibreNMS\OS;
 
-use App\Models\Processor;
 use LibreNMS\OS;
 
 class FsSwitch extends OS
@@ -49,35 +48,5 @@ class FsSwitch extends OS
         $value *= 0.001; // mA to A
 
         return $value;
-    }
-
-    /**
-     * Discover processors.
-     * Returns an array of LibreNMS\Device\Processor objects that have been discovered
-     *
-     * @return Collection<Processor>
-     */
-    public function discoverProcessors(): \Illuminate\Support\Collection
-    {
-        $processors = [];
-
-        // Tests OID from SWITCH MIB.
-        $processors_data = snmpwalk_cache_oid($this->getDeviceArray(), 'ssCpuIdle', [], 'SWITCH', 'fs');
-
-        foreach ($processors_data as $index => $entry) {
-            $processors[] = new \App\Models\Processor([
-                'processor_type' => 'fs-SWITCHMIB',
-                'processor_oid' => '.1.3.6.1.4.1.27975.1.2.11.' . $index,
-                'processor_index' => $index,
-                'processor_descr' => 'CPU',
-                'processor_precision' => -1,
-                'entPhysicalIndex' => 0,
-                'hrDeviceIndex' => null,
-                'processor_perc_warn' => null,
-                'processor_usage' => 100 - $entry['ssCpuIdle'] ?? 'FIXME_PROCESSOR_USAGE',
-            ]);
-        }
-
-        return collect($processors);
     }
 }

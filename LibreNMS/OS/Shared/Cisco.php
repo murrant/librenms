@@ -346,7 +346,7 @@ class Cisco extends OS implements
             if (isset($entry['cpmCore5min']) && is_array($entry['cpmCore5min'])) {
                 // This CPU has data per individual core
                 foreach ($entry['cpmCore5min'] as $core_index => $core_usage) {
-                    $processors[] = new \App\Models\Processor([
+                    $processors[] = new Processor([
                         'processor_type' => 'cpm',
                         'processor_oid' => ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.$index.$core_index",
                         'processor_index' => "$index.$core_index",
@@ -355,11 +355,11 @@ class Cisco extends OS implements
                         'entPhysicalIndex' => $entry['cpmCPUTotalPhysicalIndex'] ?? 0,
                         'hrDeviceIndex' => null,
                         'processor_perc_warn' => null,
-                        'processor_usage' => $core_usage ?? 'FIXME_PROCESSOR_USAGE',
+                        'processor_usage' => $core_usage,
                     ]);
                 }
             } else {
-                $processors[] = new \App\Models\Processor([
+                $processors[] = new Processor([
                     'processor_type' => 'cpm',
                     'processor_oid' => $usage_oid,
                     'processor_index' => $index,
@@ -368,43 +368,47 @@ class Cisco extends OS implements
                     'entPhysicalIndex' => $entry['cpmCPUTotalPhysicalIndex'] ?? 0,
                     'hrDeviceIndex' => null,
                     'processor_perc_warn' => null,
-                    'processor_usage' => $usage ?? 'FIXME_PROCESSOR_USAGE',
+                    'processor_usage' => $usage,
                 ]);
             }
         }
 
         if (empty($processors)) {
             // fallback to old pre-12.0 OID
-            $processors[] = new \App\Models\Processor([
-                'processor_type' => 'ios',
-                'processor_oid' => '.1.3.6.1.4.1.9.2.1.58.0',
-                'processor_index' => 0,
-                'processor_descr' => 'Processor',
-                'processor_precision' => 1,
-                'entPhysicalIndex' => 0,
-                'hrDeviceIndex' => null,
-                'processor_perc_warn' => null,
-                'processor_usage' => null ?? 'FIXME_PROCESSOR_USAGE',
-            ]);
+            $usage = SnmpQuery::get('.1.3.6.1.4.1.9.2.1.58.0')->value();
+            if (is_numeric($usage)) {
+                $processors[] = new Processor([
+                    'processor_type' => 'ios',
+                    'processor_oid' => '.1.3.6.1.4.1.9.2.1.58.0',
+                    'processor_index' => 0,
+                    'processor_descr' => 'Processor',
+                    'processor_precision' => 1,
+                    'entPhysicalIndex' => 0,
+                    'hrDeviceIndex' => null,
+                    'processor_perc_warn' => null,
+                    'processor_usage' => null,
+                ]);
+            }
         }
 
         // QFP processors (Forwarding Processors)
         $qfp_data = snmpwalk_group($this->getDeviceArray(), 'ceqfpUtilProcessingLoad', 'CISCO-ENTITY-QFP-MIB');
 
         foreach ($qfp_data as $entQfpPhysicalIndex => $entry) {
+            if (! isset($entry['fiveMinute'])) {
+                continue;
+            }
             /*
              * .2 OID suffix is for 1 min SMA ('oneMinute')
              * .3 OID suffix is for 5 min SMA ('fiveMinute')
              * Could be dynamically changed to appropriate value if config had pol interval value
              */
             $qfp_usage_oid = '.1.3.6.1.4.1.9.9.715.1.1.6.1.14.' . $entQfpPhysicalIndex . '.3';
-            $qfp_usage = $entry['fiveMinute'] ?? null;
-
             if ($entQfpPhysicalIndex) {
                 $qfp_descr = $this->getCacheByIndex('entPhysicalName', 'ENTITY-MIB')[$entQfpPhysicalIndex];
             }
 
-            $processors[] = new \App\Models\Processor([
+            $processors[] = new Processor([
                 'processor_type' => 'qfp',
                 'processor_oid' => $qfp_usage_oid,
                 'processor_index' => $entQfpPhysicalIndex . '.3',
@@ -413,7 +417,7 @@ class Cisco extends OS implements
                 'entPhysicalIndex' => $entQfpPhysicalIndex ?? 0,
                 'hrDeviceIndex' => null,
                 'processor_perc_warn' => null,
-                'processor_usage' => $qfp_usage ?? 'FIXME_PROCESSOR_USAGE',
+                'processor_usage' => $entry['fiveMinute'],
             ]);
         }
 

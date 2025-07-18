@@ -52,7 +52,7 @@ class Powerconnect extends OS implements ProcessorDiscovery, ProcessorPolling, N
      *
      * @return Collection<Processor>
      */
-    public function discoverProcessors(): \Illuminate\Support\Collection
+    public function discoverProcessors(): Collection
     {
         $device = $this->getDeviceArray();
         if (Str::startsWith($device['sysObjectID'], [
@@ -64,8 +64,10 @@ class Powerconnect extends OS implements ProcessorDiscovery, ProcessorPolling, N
         ])) {
             d_echo('Dell Powerconnect 55xx');
 
-            return collect([
-                new Processor([
+            $usage = SnmpQuery::get('.1.3.6.1.4.1.89.1.7.0')->value();
+            $processors = new Collection;
+            if (is_numeric($usage)) {
+                $processors->push(new Processor([
                     'processor_type' => 'powerconnect-nv',
                     'processor_oid' => '.1.3.6.1.4.1.89.1.7.0',
                     'processor_index' => 0,
@@ -74,9 +76,11 @@ class Powerconnect extends OS implements ProcessorDiscovery, ProcessorPolling, N
                     'entPhysicalIndex' => 0,
                     'hrDeviceIndex' => null,
                     'processor_perc_warn' => null,
-                    'processor_usage' => null ?? 'FIXME_PROCESSOR_USAGE',
-                ]),
-            ]);
+                    'processor_usage' => $usage,
+                ]));
+            }
+
+            return $processors;
         } elseif (Str::startsWith($device['sysObjectID'], [
             '.1.3.6.1.4.1.674.10895.3024',
             '.1.3.6.1.4.1.674.10895.3042',

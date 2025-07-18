@@ -36,18 +36,16 @@ class Processor extends DeviceRelatedModel implements Keyable
                 }
 
                 $bad_descr = [
-                    'GenuineIntel:',
-                    'AuthenticAMD:',
-                    'Intel(R)',
-                    'CPU',
+                    'GenuineIntel: ',
+                    'AuthenticAMD: ',
+                    'CPU ',
                     '(R)',
-                    '(tm)',
+                    '(TM)',
                 ];
                 $descr = str_replace($bad_descr, '', $value);
                 $descr = str_replace('  ', ' ', $descr); // reduce extra spaces;
 
-                return $descr ?: $value;
-
+                return trim($descr ?: $value);
             },
         );
     }
