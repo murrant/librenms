@@ -120,7 +120,10 @@ class Processors implements Module
     public function dump(Device $device, string $type): ?array
     {
         return [
-            'processors' => $device->processors()->get()->makeHidden(['device_id', 'processor_id']),
+            'processors' => $device->processors()
+                ->orderBy('processor_type')
+                ->orderBy('processor_index')
+                ->get()->makeHidden(['device_id', 'processor_id']),
         ];
     }
 }

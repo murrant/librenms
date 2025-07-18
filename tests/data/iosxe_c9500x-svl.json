@@ -48858,6 +48858,72 @@
                 {
                     "entPhysicalIndex": 1121,
                     "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.10",
+                    "processor_index": "17.10",
+                    "processor_type": "cpm",
+                    "processor_usage": 0,
+                    "processor_descr": "Switch 1 Slot 1 CPU: Core 10",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 1121,
+                    "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.11",
+                    "processor_index": "17.11",
+                    "processor_type": "cpm",
+                    "processor_usage": 1,
+                    "processor_descr": "Switch 1 Slot 1 CPU: Core 11",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 1121,
+                    "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.12",
+                    "processor_index": "17.12",
+                    "processor_type": "cpm",
+                    "processor_usage": 0,
+                    "processor_descr": "Switch 1 Slot 1 CPU: Core 12",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 1121,
+                    "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.13",
+                    "processor_index": "17.13",
+                    "processor_type": "cpm",
+                    "processor_usage": 1,
+                    "processor_descr": "Switch 1 Slot 1 CPU: Core 13",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 1121,
+                    "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.14",
+                    "processor_index": "17.14",
+                    "processor_type": "cpm",
+                    "processor_usage": 0,
+                    "processor_descr": "Switch 1 Slot 1 CPU: Core 14",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 1121,
+                    "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.15",
+                    "processor_index": "17.15",
+                    "processor_type": "cpm",
+                    "processor_usage": 2,
+                    "processor_descr": "Switch 1 Slot 1 CPU: Core 15",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 1121,
+                    "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.2",
                     "processor_index": "17.2",
                     "processor_type": "cpm",
@@ -48944,72 +49010,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 1121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.10",
-                    "processor_index": "17.10",
-                    "processor_type": "cpm",
-                    "processor_usage": 0,
-                    "processor_descr": "Switch 1 Slot 1 CPU: Core 10",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
-                    "entPhysicalIndex": 1121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.11",
-                    "processor_index": "17.11",
-                    "processor_type": "cpm",
-                    "processor_usage": 1,
-                    "processor_descr": "Switch 1 Slot 1 CPU: Core 11",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
-                    "entPhysicalIndex": 1121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.12",
-                    "processor_index": "17.12",
-                    "processor_type": "cpm",
-                    "processor_usage": 0,
-                    "processor_descr": "Switch 1 Slot 1 CPU: Core 12",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
-                    "entPhysicalIndex": 1121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.13",
-                    "processor_index": "17.13",
-                    "processor_type": "cpm",
-                    "processor_usage": 1,
-                    "processor_descr": "Switch 1 Slot 1 CPU: Core 13",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
-                    "entPhysicalIndex": 1121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.14",
-                    "processor_index": "17.14",
-                    "processor_type": "cpm",
-                    "processor_usage": 0,
-                    "processor_descr": "Switch 1 Slot 1 CPU: Core 14",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
-                    "entPhysicalIndex": 1121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.17.15",
-                    "processor_index": "17.15",
-                    "processor_type": "cpm",
-                    "processor_usage": 2,
-                    "processor_descr": "Switch 1 Slot 1 CPU: Core 15",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
                     "entPhysicalIndex": 2121,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.0",
@@ -49028,6 +49028,72 @@
                     "processor_type": "cpm",
                     "processor_usage": 0,
                     "processor_descr": "Switch 2 Slot 1 CPU: Core 1",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 2121,
+                    "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.10",
+                    "processor_index": "18.10",
+                    "processor_type": "cpm",
+                    "processor_usage": 0,
+                    "processor_descr": "Switch 2 Slot 1 CPU: Core 10",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 2121,
+                    "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.11",
+                    "processor_index": "18.11",
+                    "processor_type": "cpm",
+                    "processor_usage": 1,
+                    "processor_descr": "Switch 2 Slot 1 CPU: Core 11",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 2121,
+                    "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.12",
+                    "processor_index": "18.12",
+                    "processor_type": "cpm",
+                    "processor_usage": 0,
+                    "processor_descr": "Switch 2 Slot 1 CPU: Core 12",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 2121,
+                    "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.13",
+                    "processor_index": "18.13",
+                    "processor_type": "cpm",
+                    "processor_usage": 0,
+                    "processor_descr": "Switch 2 Slot 1 CPU: Core 13",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 2121,
+                    "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.14",
+                    "processor_index": "18.14",
+                    "processor_type": "cpm",
+                    "processor_usage": 2,
+                    "processor_descr": "Switch 2 Slot 1 CPU: Core 14",
+                    "processor_precision": 1,
+                    "processor_perc_warn": 75
+                },
+                {
+                    "entPhysicalIndex": 2121,
+                    "hrDeviceIndex": 0,
+                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.15",
+                    "processor_index": "18.15",
+                    "processor_type": "cpm",
+                    "processor_usage": 1,
+                    "processor_descr": "Switch 2 Slot 1 CPU: Core 15",
                     "processor_precision": 1,
                     "processor_perc_warn": 75
                 },
@@ -49116,72 +49182,6 @@
                     "processor_type": "cpm",
                     "processor_usage": 0,
                     "processor_descr": "Switch 2 Slot 1 CPU: Core 9",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
-                    "entPhysicalIndex": 2121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.10",
-                    "processor_index": "18.10",
-                    "processor_type": "cpm",
-                    "processor_usage": 0,
-                    "processor_descr": "Switch 2 Slot 1 CPU: Core 10",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
-                    "entPhysicalIndex": 2121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.11",
-                    "processor_index": "18.11",
-                    "processor_type": "cpm",
-                    "processor_usage": 1,
-                    "processor_descr": "Switch 2 Slot 1 CPU: Core 11",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
-                    "entPhysicalIndex": 2121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.12",
-                    "processor_index": "18.12",
-                    "processor_type": "cpm",
-                    "processor_usage": 0,
-                    "processor_descr": "Switch 2 Slot 1 CPU: Core 12",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
-                    "entPhysicalIndex": 2121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.13",
-                    "processor_index": "18.13",
-                    "processor_type": "cpm",
-                    "processor_usage": 0,
-                    "processor_descr": "Switch 2 Slot 1 CPU: Core 13",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
-                    "entPhysicalIndex": 2121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.14",
-                    "processor_index": "18.14",
-                    "processor_type": "cpm",
-                    "processor_usage": 2,
-                    "processor_descr": "Switch 2 Slot 1 CPU: Core 14",
-                    "processor_precision": 1,
-                    "processor_perc_warn": 75
-                },
-                {
-                    "entPhysicalIndex": 2121,
-                    "hrDeviceIndex": 0,
-                    "processor_oid": ".1.3.6.1.4.1.9.9.109.1.1.2.1.5.18.15",
-                    "processor_index": "18.15",
-                    "processor_type": "cpm",
-                    "processor_usage": 1,
-                    "processor_descr": "Switch 2 Slot 1 CPU: Core 15",
                     "processor_precision": 1,
                     "processor_perc_warn": 75
                 }

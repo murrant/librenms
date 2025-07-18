@@ -106,7 +106,7 @@ trait HostResources
             'HOST-RESOURCES-MIB::hrProcessorLoad',
             'HOST-RESOURCES-MIB::hrDeviceDescr',
         ])->mapTable(function ($data, $hrDeviceIndex) {
-            if (empty($data['HOST-RESOURCES-MIB::hrProcessorLoad']) || ! is_numeric($data['HOST-RESOURCES-MIB::hrProcessorLoad'])) {
+            if (! isset($data['HOST-RESOURCES-MIB::hrProcessorLoad']) || ! is_numeric($data['HOST-RESOURCES-MIB::hrProcessorLoad'])) {
                 return null;
             }
 
@@ -120,6 +120,7 @@ trait HostResources
                 'processor_oid' => '.1.3.6.1.2.1.25.3.3.1.2.' . $hrDeviceIndex,
                 'processor_index' => $hrDeviceIndex,
                 'processor_type' => 'hr',
+                'processor_precision' => 1,
                 'processor_usage' => $data['HOST-RESOURCES-MIB::hrProcessorLoad'],
                 'processor_descr' => $data['HOST-RESOURCES-MIB::hrDeviceDescr'] ?? null,
             ]);
