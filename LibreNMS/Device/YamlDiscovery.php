@@ -204,13 +204,12 @@ class YamlDiscovery
                 $variables = array_merge($variables, $pre_cache[$def['oid']][$index]);
             }
 
-//            if($pre_cache) dd($pre_cache, $def);
             $value = (string) (new SimpleTemplate($def[$name] ?? '', $variables))->keepEmptyTemplates();
 
             // search discovery data for values
             $template = new SimpleTemplate($value);
             $template->replaceWith(function ($matches) use ($index, $def, $pre_cache) {
-                $replace = static::getValueFromData($matches[1], $index, $def, $pre_cache);
+                $replace = static::getValueFromData($matches[1], $index, [], $pre_cache);
                 if (is_null($replace)) {
                     // allow parsing of InetAddress hex data representing ipv4 or ipv6
                     // using {{ $InetAddress_varNameContainingHexIpAddrOfTypeInetAddress }}

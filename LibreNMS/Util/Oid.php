@@ -108,6 +108,11 @@ class Oid
         return false;
     }
 
+    public function getOidAndIndex(): array
+    {
+        return explode('.', $this->oid, 2);
+    }
+
     /**
      * Convert this OID to an IP
      *

@@ -47,7 +47,7 @@ class YamlDiscoveryData implements \Iterator
 
     public function rewind(): void
     {
-        $this->pointer--;
+        $this->pointer = 0;
     }
 
     /**
@@ -56,14 +56,13 @@ class YamlDiscoveryData implements \Iterator
      */
     private function collectOids(array $dataFields): void
     {
-        foreach ($this->yaml['pre-fetch'] ?? [] as $item) {
-            foreach ($item['oids'] as $oid) {
-                $this->oids->put($oid, null, $item['snmp_flags'] ?? null);
-            }
+        $pre_cache_flags = isset($this->yaml['pre-cache']['snmp_flags']) ? (array) $this->yaml['pre-cache']['snmp_flags'] : null;
+        foreach ($this->yaml['pre-cache']['oids'] ?? [] as $oid) {
+            $this->oids->put($oid, null, $pre_cache_flags);
         }
 
         foreach ($this->yaml['data'] as $index => $item) {
-            $flags = $item['snmp_flags'] ?? null;
+            $flags = isset($item['snmp_flags']) ? (array) $item['snmp_flags'] : null;
 
             if (isset($item['oid'])) {
                 $this->oids->put($item['oid'], $index, $flags);

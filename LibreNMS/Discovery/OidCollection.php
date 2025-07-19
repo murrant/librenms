@@ -2,6 +2,7 @@
 
 namespace LibreNMS\Discovery;
 
+use Illuminate\Support\Str;
 use LibreNMS\Util\Oid;
 use SnmpQuery;
 
@@ -46,10 +47,10 @@ class OidCollection
             return;
         }
 
-        $this->data = array_merge(
-            SnmpQuery::numeric()->get($this->numeric)->values(),
-            SnmpQuery::enumStrings()->numericIndex()->get($this->scalar)->values()
-        );
+        $this->data = $this->numeric ? SnmpQuery::numeric()->get($this->numeric)->values() : [];
+        if ($this->scalar) {
+            SnmpQuery::enumStrings()->get($this->scalar)->valuesByIndex($this->data);
+        }
         foreach ($this->flagged as $oid) {
             $this->data[$oid] = SnmpQuery::options($this->flags[$oid])->get($oid)->value();
         }
@@ -72,6 +73,11 @@ class OidCollection
 
         foreach ($this->getOidsFor($item) as $oid) {
             if (! isset($this->data[$oid])) {
+                $oidName = Str::beforeLast($oid, '.0');
+                if (isset($this->data[0][$oidName])) {
+                    $data[0][$oidName] = $this->data[0][$oidName];
+                }
+
                 continue;
             }
 
