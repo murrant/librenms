@@ -88,4 +88,26 @@ class YamlDiscoveryField
 
         $this->value = $value;
     }
+
+    /**
+     * Get the numeric oid field name in yaml and the numeric oid database column name
+     *
+     * @return string[]
+     */
+    public function getNumericNames(): array
+    {
+        if ($this->key === 'value') {
+            // only one oid
+            $prefix = strstr($this->model_column, '_', true) ?: $this->model_column;
+            return [
+                'num_oid',
+                $prefix . '_oid',
+            ];
+        }
+
+        return [
+            $this->key . '_num_oid',
+            $this->model_column . '_oid',
+        ];
+    }
 }

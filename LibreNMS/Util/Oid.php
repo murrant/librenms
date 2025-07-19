@@ -60,6 +60,11 @@ class Oid
         return (bool) preg_match('/^[.\d]+$/', $this->oid);
     }
 
+    public function isScalar(): bool
+    {
+        return str_ends_with($this->oid, '.0');
+    }
+
     public function isFullTextualOid(): bool
     {
         return (bool) preg_match('/[-_A-Za-z0-9]+::[-_A-Za-z0-9]+/', $this->oid);
