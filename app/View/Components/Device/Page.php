@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Page.php
  *
@@ -37,11 +38,9 @@ class Page extends Component
     public string $alertClass;
     public ?int $parentDeviceId;
 
-
     public function __construct(
         public readonly Device $device,
-    )
-    {
+    ) {
         $this->alertClass = $device->disabled ? 'alert-info' : ($device->status ? '' : 'alert-danger');
         $this->parentDeviceId = Vminfo::guessFromDevice($device)->value('device_id');
     }
@@ -75,5 +74,4 @@ class Page extends Component
     {
         return view('components.device.page');
     }
-
 }

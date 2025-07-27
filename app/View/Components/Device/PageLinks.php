@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PageLinks.php
  *
@@ -45,9 +46,7 @@ class PageLinks extends Component
         public readonly Device $device,
         public readonly string $currentTab = '',
         public readonly array $pageLinks = [],
-    )
-    {
-
+    ) {
         $this->deviceLinks = $this->deviceLinkMenu($device, $currentTab);
         $primary_device_link_name = LibrenmsConfig::get('html.device.primary_link', 'edit');
         if (! isset($device_links[$primary_device_link_name])) {
