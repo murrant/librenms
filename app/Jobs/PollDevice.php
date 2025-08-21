@@ -60,7 +60,7 @@ class PollDevice implements ShouldQueue
         $helper->saveMetrics();
         // check and save status
         if (! $helper->isUp()) {
-            Log::error("%RDown%n", ['color' => true]);
+            Log::error('%RDown%n', ['color' => true]);
         }
 
         $this->pollModules();
