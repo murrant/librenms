@@ -41,7 +41,7 @@ trait VxworksProcessorUsage
      */
     public function discoverProcessors($oid = '.1.3.6.1.4.1.4413.1.1.1.1.4.9.0'): Collection
     {
-          $usage = SnmpQuery::get($oid)->value();
+        $usage = SnmpQuery::get($oid)->value();
         if ($usage) {
             $usage = $this->parseCpuUsageString($usage);
             if (is_numeric($usage)) {
