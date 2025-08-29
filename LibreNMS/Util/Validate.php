@@ -53,10 +53,27 @@ class Validate
             && preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*\.?$/", $hostname);
     }
 
+    public static function ipOrHostname(string $name): bool
+    {
+        if (self::hostname($name)) {
+            return true;
+        }
+
+        // allow prefixes too
+        $ip = substr($name, 0, strpos($name, '/') ?: strlen($name));
+
+        return IP::isValid($ip);
+    }
+
     public static function ascDesc($direction, $default = 'ASC')
     {
         return in_array(strtolower($direction), ['asc', 'desc'], true)
             ? $direction
             : $default;
+    }
+
+    public static function regex(string $regex): bool
+    {
+        return @preg_match($regex, '') !== false;
     }
 }

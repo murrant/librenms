@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use LibreNMS\Cache\PermissionsCache;
-use LibreNMS\Util\IP;
 use LibreNMS\Util\Validate;
 use LibreNMS\Util\Version;
 use Validator;
@@ -184,13 +183,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Validator::extend('ip_or_hostname', function ($attribute, $value, $parameters, $validator) {
-            $ip = substr($value, 0, strpos($value, '/') ?: strlen($value)); // allow prefixes too
-
-            return IP::isValid($ip) || Validate::hostname($value);
+            return Validate::ipOrHostname($value);
         });
 
         Validator::extend('is_regex', function ($attribute, $value) {
-            return @preg_match($value, '') !== false;
+            return Validate::regex($value);
         });
 
         Validator::extend('zero_or_exists', function ($attribute, $value, $parameters, $validator) {
