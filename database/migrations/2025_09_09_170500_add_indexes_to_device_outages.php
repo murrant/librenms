@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 2025_09_09_170500_add_indexes_to_device_outages.php
  *
