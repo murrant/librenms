@@ -50,7 +50,6 @@ class DeviceOutage extends DeviceRelatedModel
         ]);
     }
 
-
     public function scopeOngoing($query)
     {
         return $query->whereNull('up_again');
