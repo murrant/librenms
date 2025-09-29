@@ -3,7 +3,9 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Device;
+use App\Models\Port;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Database\Eloquent\Model;
 use LibreNMS\Data\ChartDataset;
 use LibreNMS\Data\Source\RrdCommand;
 
@@ -11,7 +13,7 @@ class Graph extends ChartWidget
 {
     protected ?string $heading = 'Graph';
 
-    public ?Device $record = null;
+    public ?Model $record = null;
 
     protected ?array $options = [
         'scales' => [
@@ -21,13 +23,26 @@ class Graph extends ChartWidget
         ],
     ];
 
+    private function getPort(): Port
+    {
+        if ($this->record instanceof Port) {
+            return $this->record;
+        }
+
+        if ($this->record instanceof Device) {
+            return $this->record->ports()->first();
+        }
+
+        return Port::first();
+    }
+
     protected function getData(): array
     {
         try {
-            $port_id = $this->record->port_id ?? 294;
-            $device_id = $this->record->device_id ?? 9;
-            $hostname = Device::whereDeviceId($device_id)->value('hostname');
-            $rrd = \App\Facades\Rrd::name($hostname, \App\Facades\Rrd::portName($port_id));
+            $port = $this->getPort();
+            $hostname = $port->device->hostname;
+
+            $rrd = \App\Facades\Rrd::name($hostname, \App\Facades\Rrd::portName($port->port_id));
             $data = RrdCommand::make(time() - 86400)
                 ->def('in_oct', 'INOCTETS', $rrd)
                 ->def('out_oct', 'OUTOCTETS', $rrd)

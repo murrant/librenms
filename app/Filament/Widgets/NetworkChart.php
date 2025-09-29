@@ -3,8 +3,10 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Device;
+use App\Models\Port;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\RawJs;
+use Illuminate\Database\Eloquent\Model;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 use LibreNMS\Data\ChartDataset;
 use LibreNMS\Data\Source\RrdCommand;
@@ -15,7 +17,7 @@ class NetworkChart extends ApexChartWidget
 {
     protected static ?string $chartId = 'networkChart';
 
-    public ?Device $record = null;
+    public ?Model $record = null;
 
     protected ?string $pollingInterval = '10s';
 
@@ -34,6 +36,19 @@ class NetworkChart extends ApexChartWidget
      * @var string|null
      */
     protected static ?string $heading = 'NetworkChart';
+
+    private function getPort(): Port
+    {
+        if ($this->record instanceof Port) {
+            return $this->record;
+        }
+
+        if ($this->record instanceof Device) {
+            return $this->record->ports()->first();
+        }
+
+        return Port::first();
+    }
 
     protected function getFormSchema(): array
     {
@@ -67,10 +82,9 @@ class NetworkChart extends ApexChartWidget
         $timerange = $this->filters['timerange'] ?? 'Last Day';
         [$dateStart, $dateEnd] = is_array($timerange) ? $timerange : self::$timeRanges[$timerange];
 
-        $port_id = $this->record->port_id ?? 294;
-        $device_id = $this->record->device_id ?? 9;
-        $hostname = Device::whereDeviceId($device_id)->value('hostname');
-        $rrd_file = \App\Facades\Rrd::name($hostname, \App\Facades\Rrd::portName($port_id));
+        $port = $this->getPort();
+        $hostname = $port->device->hostname;
+        $rrd_file = \App\Facades\Rrd::name($hostname, \App\Facades\Rrd::portName($port->port_id));
 
         $rrd_command = RrdCommand::make(Time::parseAt($dateStart))
             ->def('in_oct', 'INOCTETS', $rrd_file)

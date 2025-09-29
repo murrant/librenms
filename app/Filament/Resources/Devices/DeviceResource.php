@@ -6,6 +6,7 @@ use App\Filament\Resources\Devices\Pages\CreateDevice;
 use App\Filament\Resources\Devices\Pages\EditDevice;
 use App\Filament\Resources\Devices\Pages\ListDevices;
 use App\Filament\Resources\Devices\Pages\ViewDevice;
+use App\Filament\Resources\Devices\RelationManagers\PortsRelationManager;
 use App\Filament\Resources\Devices\Schemas\DeviceForm;
 use App\Filament\Resources\Devices\Schemas\DeviceInfolist;
 use App\Filament\Resources\Devices\Tables\DevicesTable;
@@ -42,7 +43,7 @@ class DeviceResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            PortsRelationManager::class,
         ];
     }
 
