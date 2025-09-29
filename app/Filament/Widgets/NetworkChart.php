@@ -19,7 +19,7 @@ class NetworkChart extends ApexChartWidget
 
     public ?Model $record = null;
 
-    protected ?string $pollingInterval = '10s';
+    protected ?string $pollingInterval = '30s';
 
     protected static $timeRanges = [
         'Last 6 Hours' => ['-6h', null],
@@ -150,7 +150,7 @@ class NetworkChart extends ApexChartWidget
         ];
     }
 
-    protected function extraJsOptions(): ?\Filament\Support\RawJs
+    protected function extraJsOptions(): ?RawJs
     {
         return RawJs::make(<<<'JS'
         {
@@ -159,14 +159,14 @@ class NetworkChart extends ApexChartWidget
                     formatter: function (val, index) {
                         let i = -1;
                         const byteUnits = [
-                          " kbps",
-                          " Mbps",
-                          " Gbps",
-                          " Tbps",
-                          " Pbps",
-                          " Ebps",
-                          " Zbps",
-                          " Ybps"
+                          ' kbps',
+                          ' Mbps',
+                          ' Gbps',
+                          ' Tbps',
+                          ' Pbps',
+                          ' Ebps',
+                          ' Zbps',
+                          ' Ybps'
                         ];
                         do {
                           val = val / 1024;
