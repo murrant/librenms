@@ -77,7 +77,7 @@ class Graph extends ChartWidget
         return 'line';
     }
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'md' => 2,
         'xl' => 3,
     ];
