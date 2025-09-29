@@ -46,6 +46,7 @@
         "mews/purifier": "^3.4",
         "nesbot/carbon": "^3.8",
         "nunomaduro/laravel-console-summary": "^1.13",
+        "owenvoke/blade-fontawesome": "^2.9",
         "paragonie/sodium_compat": "^1.9",
         "pear/console_color2": "^0.1",
         "pear/console_table": "^1.3",
