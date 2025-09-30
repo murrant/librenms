@@ -60,6 +60,7 @@ class PortInfolist
                                     if ($record->ignore ?? false) {
                                         return 'Ignored';
                                     }
+
                                     return null;
                                 })
                                 ->hidden(fn ($record) => ! (($record->deleted ?? false) || ($record->disabled ?? false) || ($record->ignore ?? false)))
@@ -118,9 +119,7 @@ class PortInfolist
                             ->label('IPv6 Address')
                             ->placeholder('-')
                             ->columnSpan(3),
-                    ])
-
-,
+                    ]),
 
                 // Physical and link characteristics
                 Section::make('Physical Layer')
@@ -298,6 +297,7 @@ class PortInfolist
         if ($rate < 1) {
             return 'warning';
         }
+
         return 'danger';
     }
 }

@@ -15,7 +15,7 @@ class DeviceTypeCounts extends BaseWidget
     {
         $deviceTypes = collect(LibrenmsConfig::get('device_types'))
             ->pluck('icon', 'type')
-            ->map(fn($icon) => "fas-$icon");
+            ->map(fn ($icon) => "fas-$icon");
 
         return DB::table('devices')
             ->select('type', DB::raw('count(*) total'))
