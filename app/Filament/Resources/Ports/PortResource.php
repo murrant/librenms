@@ -6,7 +6,6 @@ use App\Filament\Resources\Ports\Pages\CreatePort;
 use App\Filament\Resources\Ports\Pages\EditPort;
 use App\Filament\Resources\Ports\Pages\ListPorts;
 use App\Filament\Resources\Ports\Pages\ViewPort;
-use App\Filament\Resources\Ports\RelationManagers\DeviceRelationManager;
 use App\Filament\Resources\Ports\Schemas\PortForm;
 use App\Filament\Resources\Ports\Schemas\PortInfolist;
 use App\Filament\Resources\Ports\Tables\PortsTable;
@@ -43,7 +42,7 @@ class PortResource extends Resource
     public static function getRelations(): array
     {
         return [
-            DeviceRelationManager::class,
+            //
         ];
     }
 
