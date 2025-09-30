@@ -37,6 +37,11 @@ class NetworkChart extends ApexChartWidget
      */
     protected static ?string $heading = 'NetworkChart';
 
+    protected int|string|array $columnSpan = [
+        'md' => 2,
+        'xl' => 3,
+    ];
+
     private function getPort(): Port
     {
         if ($this->record instanceof Port) {
