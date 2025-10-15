@@ -1,9 +1,8 @@
 <?php
-
 /**
- * devices_groups.inc.php
+ * AlertTransportGroupController.php
  *
- * List devices and groups in one
+ * -Description-
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,21 +19,25 @@
  *
  * @link       https://www.librenms.org
  *
- * @copyright  2018 Tony Murray
+ * @copyright  2025 Tony Murray
  * @author     Tony Murray <murraytony@gmail.com>
  */
-[$devices, $d_more] = include 'devices.inc.php';
-[$groups, $g_more] = include 'groups.inc.php';
 
-$groups = array_map(function ($group) {
-    $group['id'] = 'g' . $group['id'];
+namespace App\Http\Controllers\Select;
 
-    return $group;
-}, $groups);
+use App\Models\AlertTransportGroup;
+use Illuminate\Http\Request;
 
-$data = [
-    ['text' => 'Groups', 'children' => $groups],
-    ['text' => 'Devices', 'children' => $devices],
-];
+class AlertTransportGroupController extends SelectController
+{
 
-return [$data, $d_more || $g_more];
+    protected function searchFields(Request $request)
+    {
+        return ['transport_group_name'];
+    }
+    protected function baseQuery(Request $request)
+    {
+        return AlertTransportGroup::query()
+            ->orderBy('transport_group_name');
+    }
+}

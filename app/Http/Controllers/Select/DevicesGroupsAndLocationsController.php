@@ -1,7 +1,6 @@
 <?php
-
 /**
- * ServiceTemplateController.php
+ * DevicesGroupsAndLocationsController.php
  *
  * -Description-
  *
@@ -20,34 +19,29 @@
  *
  * @link       https://www.librenms.org
  *
- * @copyright  2020 Anthony F McInerney <bofh80>
- * @author     Anthony F McInerney <afm404@gmail.com>
+ * @copyright  2025 Tony Murray
+ * @author     Tony Murray <murraytony@gmail.com>
  */
 
 namespace App\Http\Controllers\Select;
 
-use App\Models\ServiceTemplate;
-
-class ServiceTemplateController extends SelectController
+class DevicesGroupsAndLocationsController extends AggregateSelectController
 {
-    protected function searchFields($request)
-    {
-        return ['name'];
-    }
-
-    protected function baseQuery($request)
-    {
-        return ServiceTemplate::hasAccess($request->user())->select(['id', 'name']);
-    }
-
-    /**
-     * @param  ServiceTemplate  $template
-     */
-    public function formatItem($template)
-    {
-        return [
-            'id' => $template->id,
-            'text' => $template->name,
-        ];
-    }
+    protected array $groups = [
+        [
+            'text' => 'Devices',
+            'controller' => DeviceController::class,
+            'prefix' => '',
+        ],
+        [
+            'text' => 'Groups',
+            'controller' => DeviceGroupController::class,
+            'prefix' => 'g',
+        ],
+        [
+            'text' => 'Locations',
+            'controller' => LocationController::class,
+            'prefix' => 'l',
+        ],
+    ];
 }
