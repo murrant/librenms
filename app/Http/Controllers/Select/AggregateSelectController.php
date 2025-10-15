@@ -1,4 +1,5 @@
 <?php
+
 /**
  * AggregateSelectController.php
  *
@@ -30,7 +31,7 @@ use Illuminate\Pagination\Paginator;
 
 abstract class AggregateSelectController extends SelectController
 {
-    /** @var array<array{text: string, controller: class-string, prefix: string}> $groups */
+    /** @var array<array{text: string, controller: class-string, prefix: string}> */
     protected array $groups = [];
 
     public function __invoke(Request $request)

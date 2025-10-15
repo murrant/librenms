@@ -67,7 +67,6 @@ abstract class SelectController extends PaginatedAjaxController
 
     protected function buildQuery(SelectController $controller, Request $request): EloquentBuilder|Builder
     {
-
         $query = $controller->baseQuery($request);
         if ($controller->idField && $controller->textField) {
             $query->select([$controller->idField, $controller->textField]);

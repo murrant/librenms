@@ -1,4 +1,5 @@
 <?php
+
 /**
  * AlertTransportController.php
  *
@@ -20,6 +21,7 @@
  * @link       https://www.librenms.org
  *
  * © 2025 Tony Murray
+ *
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
@@ -30,7 +32,6 @@ use Illuminate\Http\Request;
 
 class AlertTransportController extends SelectController
 {
-
     protected function searchFields(Request $request)
     {
         return ['transport_type', 'transport_name'];

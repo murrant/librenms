@@ -1,4 +1,5 @@
 <?php
+
 /**
  * AlertTransportGroupController.php
  *
@@ -30,11 +31,11 @@ use Illuminate\Http\Request;
 
 class AlertTransportGroupController extends SelectController
 {
-
     protected function searchFields(Request $request)
     {
         return ['transport_group_name'];
     }
+
     protected function baseQuery(Request $request)
     {
         return AlertTransportGroup::query()

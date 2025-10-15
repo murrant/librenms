@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DevicesGroupsAndLocationsController.php
  *
