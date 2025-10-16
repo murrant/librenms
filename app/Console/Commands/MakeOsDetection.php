@@ -56,7 +56,6 @@ class MakeOsDetection extends LnmsCommand
         $this->addOption('dry-run', null, InputOption::VALUE_NONE);
         $this->addOption('overwrite', null, InputOption::VALUE_NONE);
         $this->addOption('no-testdata', null, InputOption::VALUE_NONE);
-        $this->addOption('non-interactive', null, InputOption::VALUE_NONE);
         $this->addOption('no-cache', null, InputOption::VALUE_NONE);
     }
 
