@@ -35,7 +35,7 @@ class ValidateDeviceAndCreate
         private Device $device,
         private bool $force = false,
         private bool $pingFallback = false
-    ){
+    ) {
     }
 
     public function execute(): bool
