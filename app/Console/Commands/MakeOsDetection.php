@@ -18,6 +18,7 @@ use LibreNMS\Util\Validate;
 use SnmpQuery;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Yaml\Yaml;
+
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\select;
@@ -122,7 +123,7 @@ class MakeOsDetection extends LnmsCommand
     private function saveState(): void
     {
         if ($this->cacheEnabled) {
-            Cache::put($this->cacheKey, [$this->detection, $this->state] , now()->addDay());
+            Cache::put($this->cacheKey, [$this->detection, $this->state], now()->addDay());
         }
     }
 
@@ -181,17 +182,17 @@ class MakeOsDetection extends LnmsCommand
         );
         $this->askValue(
             'text',
-            fn ($default) => text('Enter display text',  default: $default),
+            fn ($default) => text('Enter display text', default: $default),
             $this->derive('text', $device),
         );
         $this->askValue(
             'type',
-            fn ($default) => text('Enter device type',  default: $default),
+            fn ($default) => text('Enter device type', default: $default),
             $this->derive('type', $device),
         );
         $this->askValue(
             'icon',
-            fn ($default) => text('Enter icon name',  default: $default),
+            fn ($default) => text('Enter icon name', default: $default),
             $this->derive('icon', $device),
         );
     }
@@ -207,9 +208,9 @@ class MakeOsDetection extends LnmsCommand
         ], $default));
 
         match ($this->state['method']) {
-            'sysDescr'   => $this->buildSysDescrDiscovery($device->sysDescr),
-            'snmpget'    => $this->buildSnmpGetDiscovery($device),
-            default      => $this->buildSysObjectIdDiscovery($device->sysObjectID),
+            'sysDescr' => $this->buildSysDescrDiscovery($device->sysDescr),
+            'snmpget' => $this->buildSnmpGetDiscovery($device),
+            default => $this->buildSysObjectIdDiscovery($device->sysObjectID),
         };
     }
 
@@ -218,7 +219,7 @@ class MakeOsDetection extends LnmsCommand
         Arr::forget($this->detection, ['discovery.0.sysDescr', 'discovery.0.sysDescr_regex', 'discovery.0.snmpget']);
         info("sysObjectID: $sysObjectID");
 
-        $match_type = $this->askValue('match', fn($default) => select(
+        $match_type = $this->askValue('match', fn ($default) => select(
             label: 'Select match type',
             options: [
                 'starts' => 'starts with',
@@ -235,7 +236,7 @@ class MakeOsDetection extends LnmsCommand
             Arr::forget($this->detection, 'discovery.0.sysObjectID_regex');
         }
 
-        $this->askValue($field, fn($default) => text(
+        $this->askValue($field, fn ($default) => text(
             label: 'Enter sysObjectID prefix',
             default: $default,
             required: true,
@@ -255,7 +256,7 @@ class MakeOsDetection extends LnmsCommand
 
         info("sysDescr: $sysDescr");
 
-        $match_type = $this->askValue('match', fn($default) => select(
+        $match_type = $this->askValue('match', fn ($default) => select(
             label: 'Select match type',
             options: [
                 'contains' => 'contains',
@@ -272,7 +273,7 @@ class MakeOsDetection extends LnmsCommand
             Arr::forget($this->detection, 'discovery.0.sysDescr_regex');
         }
 
-        $this->askValue($field, fn($default) => text(
+        $this->askValue($field, fn ($default) => text(
             label: 'Enter sysDescr substring match or regex',
             default: $default,
             required: true,
@@ -312,7 +313,7 @@ class MakeOsDetection extends LnmsCommand
 
         info("Fetched value: $fetched_value");
 
-        $op = $this->askValue('discovery.0.snmpget.0.op', fn($default) => select(
+        $op = $this->askValue('discovery.0.snmpget.0.op', fn ($default) => select(
             label: 'Select operator',
             options: [
                 '=' => 'equals',
@@ -338,7 +339,7 @@ class MakeOsDetection extends LnmsCommand
             default: $default,
             scroll: 3,
         ));
-        $this->askValue('discovery.0.snmpget.0.value', fn($fetched) => text(
+        $this->askValue('discovery.0.snmpget.0.value', fn ($fetched) => text(
             label: 'Enter match string',
             default: $fetched,
             required: true,
@@ -367,7 +368,7 @@ class MakeOsDetection extends LnmsCommand
         ];
 
         $data = $this->detection;
-        uksort($data, function($a, $b) use ($order) {
+        uksort($data, function ($a, $b) use ($order) {
             $aPriority = $order[$a] ?? PHP_INT_MAX;
             $bPriority = $order[$b] ?? PHP_INT_MAX;
 
@@ -402,7 +403,7 @@ class MakeOsDetection extends LnmsCommand
     // ---------------------- Helpers --------------------------------
     private function derive(string $key, Device $device): ?string
     {
-        return match($key) {
+        return match ($key) {
             'os' => strtolower(str_replace(' ', '-', substr($device->sysDescr, 0, 10))),
             'text' => ucfirst(explode(' ', $device->sysDescr, 2)[0]),
             'type' => str_contains($device->sysDescr, 'Switch') ? 'switch' : 'network',
@@ -419,6 +420,7 @@ class MakeOsDetection extends LnmsCommand
             if (count($parts) >= 9) {
                 $pen = $parts[7];
                 $family = $parts[8];
+
                 return count($parts) > 9 ? ".1.3.6.1.4.1.$pen.$family." : ".1.3.6.1.4.1.$pen.$family";
             }
         }
@@ -438,7 +440,7 @@ class MakeOsDetection extends LnmsCommand
 
     private function printNextSteps(string $os): void
     {
-        $this->line("Next steps:");
+        $this->line('Next steps:');
         $this->line("  - Edit resources/definitions/os_detection/$os.yaml to adjust details");
         $this->line("  - Run: ./lnms dev:os-test --os=$os");
     }

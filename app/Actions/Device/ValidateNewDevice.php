@@ -22,7 +22,7 @@ class ValidateNewDevice
     private ConnectivityHelper $connectivity;
 
     public function __construct(
-        private Device  $device = new Device,
+        private Device $device = new Device,
         private DeviceDiscoveryData $data = new DeviceDiscoveryData,
         ?ConnectivityHelper $connectivity = null,
     ) {
