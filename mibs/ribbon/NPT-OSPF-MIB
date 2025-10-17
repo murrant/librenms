@@ -1,0 +1,505 @@
+
+-- File Name : NPT-OSPF-MIB
+-- Date      : Tue Dec 20 10:00:00 CST 2020
+-- Author    : Haoyang Xu
+
+
+
+NPT-OSPF-MIB	DEFINITIONS ::= BEGIN
+	IMPORTS
+	nptOSPF
+		     FROM NPT-ROOT-MIB
+        MODULE-IDENTITY, OBJECT-TYPE, Counter32, Gauge32,
+        Integer32, Unsigned32, IpAddress, mib-2
+                     FROM SNMPv2-SMI
+        TEXTUAL-CONVENTION, TruthValue, RowStatus, TimeStamp
+                     FROM SNMPv2-TC
+        MODULE-COMPLIANCE, OBJECT-GROUP
+                     FROM SNMPv2-CONF
+        InterfaceIndexOrZero
+                     FROM IF-MIB
+        AreaID, RouterID, DesignatedRouterPriority
+                     FROM OSPF-MIB;
+
+    nptOspf MODULE-IDENTITY
+        LAST-UPDATED "202012020000Z"
+        ORGANIZATION "Ribbon Communications Inc."
+        CONTACT-INFO "on.support@rbbn.com 
+                         Ribbon Communications Inc.,China
+                         Dongxin Tower, No.398 Wensan Road, 
+                         Hangzhou, 310012 P.R.China"
+        DESCRIPTION  "Description"
+		REVISION	 "01Z"
+		DESCRIPTION	 ""
+		::=  {  nptOSPF  1  }
+
+    -- Objects
+    nptOspfObjects OBJECT IDENTIFIER ::= { nptOspf 1 }
+
+--  OSPF Neighbor Table
+
+  nptOspfNbrTable OBJECT-TYPE
+       SYNTAX       SEQUENCE OF NptOspfNbrEntry
+       MAX-ACCESS   not-accessible
+       STATUS       current
+       DESCRIPTION
+          "A table describing all non-virtual neighbors
+          in the locality of the OSPF router."
+       REFERENCE
+          "OSPF Version 2, Section 10 The Neighbor Data
+          Structure"
+       ::= { nptOspfObjects 1 }
+
+  nptOspfNbrEntry OBJECT-TYPE
+       SYNTAX       NptOspfNbrEntry
+       MAX-ACCESS   not-accessible
+       STATUS       current
+       DESCRIPTION
+          "The information regarding a single neighbor.
+
+          Information in this table is persistent and when this object
+          is written the entity SHOULD save the change to non-volatile
+          storage."
+       REFERENCE
+          "OSPF Version 2, Section 10 The Neighbor Data
+          Structure"
+       INDEX { nptOspfNbrIpAddr, nptOspfNbrAddressLessIndex , nptOspfNbrInstanceIndex}
+       ::= { nptOspfNbrTable 1 }
+
+  NptOspfNbrEntry ::=
+       SEQUENCE {
+          nptOspfNbrIpAddr
+             IpAddress,
+          nptOspfNbrAddressLessIndex
+             InterfaceIndexOrZero,
+          nptOspfNbrInstanceIndex
+             Counter32,
+          nptOspfNbrRtrId
+             RouterID,
+          nptOspfNbrOptions
+             Integer32,
+          nptOspfNbrPriority
+             DesignatedRouterPriority,
+          nptOspfNbrState
+             INTEGER,
+          nptOspfNbrEvents
+             Counter32,
+          nptOspfNbrLsRetransQLen
+             Gauge32,
+          nptOspfNbmaNbrStatus
+             RowStatus,
+          nptOspfNbmaNbrPermanence
+             INTEGER,
+          nptOspfNbrHelloSuppressed
+             TruthValue,
+          nptOspfNbrRestartHelperStatus
+             INTEGER,
+          nptOspfNbrRestartHelperAge
+             Unsigned32,
+          nptOspfNbrRestartHelperExitReason
+             INTEGER
+          }
+
+  nptOspfNbrIpAddr OBJECT-TYPE
+       SYNTAX       IpAddress
+       MAX-ACCESS   read-only -- read-only since originally an
+                              -- SMIv1 index
+       STATUS       current
+       DESCRIPTION
+          "The IP address this neighbor is using in its
+          IP source address.  Note that, on addressless
+          links, this will not be 0.0.0.0 but the
+          address of another of the neighbor's interfaces."
+       ::= { nptOspfNbrEntry 1 }
+
+   nptOspfNbrAddressLessIndex OBJECT-TYPE
+       SYNTAX       InterfaceIndexOrZero
+       MAX-ACCESS   read-only -- read-only since originally an
+                              -- SMIv1 index
+       STATUS       current
+       DESCRIPTION
+          "On an interface having an IP address, zero.
+          On addressless interfaces, the corresponding
+          value of ifIndex in the Internet Standard MIB.
+          On row creation, this can be derived from the
+          instance."
+        ::= { nptOspfNbrEntry 2 }
+
+   nptOspfNbrInstanceIndex OBJECT-TYPE
+       SYNTAX       Counter32
+       MAX-ACCESS   read-only -- read-only since originally an
+                              -- SMIv1 index
+       STATUS       current
+       DESCRIPTION
+          "oid transform from ospf instance name."
+        ::= { nptOspfNbrEntry 3 }
+
+  nptOspfNbrRtrId OBJECT-TYPE
+       SYNTAX       RouterID
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "A 32-bit integer (represented as a type
+          IpAddress) uniquely identifying the neighboring
+          router in the Autonomous System."
+       DEFVAL { '00000000'H } -- 0.0.0.0
+       ::= { nptOspfNbrEntry 4 }
+
+  nptOspfNbrOptions OBJECT-TYPE
+       SYNTAX       Integer32
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "A bit mask corresponding to the neighbor's
+          options field.
+
+          Bit 0, if set, indicates that the system will
+          operate on Type of Service metrics other than
+          TOS 0.  If zero, the neighbor will ignore all
+          metrics except the TOS 0 metric.
+
+          Bit 1, if set, indicates that the associated
+          area accepts and operates on external
+          information; if zero, it is a stub area.
+
+          Bit 2, if set, indicates that the system is
+          capable of routing IP multicast datagrams, that is
+          that it implements the multicast extensions to
+          OSPF.
+
+          Bit 3, if set, indicates that the associated
+          area is an NSSA.  These areas are capable of
+          carrying type-7 external advertisements, which
+          are translated into type-5 external advertisements
+          at NSSA borders."
+       REFERENCE
+           "OSPF Version 2, Section 12.1.2 Options"
+       DEFVAL { 0 }
+       ::= { nptOspfNbrEntry 5 }
+
+   nptOspfNbrPriority OBJECT-TYPE
+       SYNTAX       DesignatedRouterPriority
+       MAX-ACCESS   read-create
+       STATUS       current
+       DESCRIPTION
+          "The priority of this neighbor in the designated
+          router election algorithm.  The value 0 signifies
+          that the neighbor is not eligible to become
+          the designated router on this particular network."
+
+       DEFVAL { 1 }
+       ::= { nptOspfNbrEntry 6 }
+
+   nptOspfNbrState OBJECT-TYPE
+        SYNTAX       INTEGER {
+                         down (1),
+                         attempt (2),
+                         init (3),
+                         twoWay (4),
+                         exchangeStart (5),
+                         exchange (6),
+                         loading (7),
+                         full (8)
+                         }
+         MAX-ACCESS   read-only
+         STATUS       current
+         DESCRIPTION
+            "The state of the relationship with this neighbor."
+         REFERENCE
+            "OSPF Version 2, Section 10.1 Neighbor States"
+         DEFVAL { down }
+         ::= { nptOspfNbrEntry 7 }
+
+  nptOspfNbrEvents OBJECT-TYPE
+       SYNTAX       Counter32
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "The number of times this neighbor relationship
+          has changed state or an error has occurred.
+
+          Discontinuities in the value of this counter can occur
+          at re-initialization of the management system, and at other
+          times as indicated by the value of ospfDiscontinuityTime."
+       ::= { nptOspfNbrEntry 8 }
+
+  nptOspfNbrLsRetransQLen OBJECT-TYPE
+       SYNTAX       Gauge32
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "The current length of the retransmission
+          queue."
+       ::= { nptOspfNbrEntry 9 }
+
+  nptOspfNbmaNbrStatus OBJECT-TYPE
+       SYNTAX       RowStatus
+       MAX-ACCESS   read-create
+       STATUS       current
+       DESCRIPTION
+          "This object permits management of the table by
+          facilitating actions such as row creation,
+          construction, and destruction.
+
+          The value of this object has no effect on
+          whether other objects in this conceptual row can be
+          modified."
+       ::= { nptOspfNbrEntry 10 }
+
+  nptOspfNbmaNbrPermanence OBJECT-TYPE
+       SYNTAX       INTEGER {
+                       dynamic (1), -- learned through protocol
+                       permanent (2) -- configured address
+                       }
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "This variable displays the status of the entry;
+          'dynamic' and 'permanent' refer to how the neighbor
+          became known."
+       DEFVAL { permanent }
+       ::= { nptOspfNbrEntry 11 }
+
+   nptOspfNbrHelloSuppressed OBJECT-TYPE
+       SYNTAX       TruthValue
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "Indicates whether Hellos are being suppressed
+          to the neighbor."
+       ::= { nptOspfNbrEntry 12 }
+
+  nptOspfNbrRestartHelperStatus OBJECT-TYPE
+       SYNTAX       INTEGER { notHelping (1),
+                              helping (2)
+                            }
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "Indicates whether the router is acting
+          as a graceful restart helper for the neighbor."
+          ::= { nptOspfNbrEntry 13 }
+
+  nptOspfNbrRestartHelperAge OBJECT-TYPE
+       SYNTAX       Unsigned32
+       UNITS        "seconds"
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "Remaining time in current OSPF graceful restart
+          interval, if the router is acting as a restart
+          helper for the neighbor."
+       ::= { nptOspfNbrEntry 14 }
+
+  nptOspfNbrRestartHelperExitReason OBJECT-TYPE
+       SYNTAX       INTEGER { none (1),           -- not attempted
+                              inProgress (2),     -- restart in
+                                                  -- progress
+                              completed (3),      -- successfully
+                                                  -- completed
+                              timedOut (4),       -- timed out
+                              topologyChanged (5) -- aborted due to
+                                                  -- topology
+                                                  -- change.
+                            }
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "Describes the outcome of the last attempt at acting
+           as a graceful restart helper for the neighbor."
+       ::= { nptOspfNbrEntry 15 }
+
+--  OSPF Virtual Neighbor Table
+
+  nptOspfVirtNbrTable OBJECT-TYPE
+       SYNTAX       SEQUENCE OF NptOspfVirtNbrEntry
+       MAX-ACCESS   not-accessible
+       STATUS       current
+       DESCRIPTION
+          "This table describes all virtual neighbors.
+          Since virtual links are configured
+          in the Virtual Interface Table, this table is read-only."
+       REFERENCE
+          "OSPF Version 2, Section 15 Virtual Links"
+       ::= { nptOspfObjects 2 }
+
+  nptOspfVirtNbrEntry OBJECT-TYPE
+       SYNTAX       NptOspfVirtNbrEntry
+       MAX-ACCESS   not-accessible
+       STATUS       current
+       DESCRIPTION
+          "Virtual neighbor information."
+       INDEX { nptOspfVirtNbrArea, nptOspfVirtNbrRtrId , nptOspfVirInstanceIndex}
+       ::= { nptOspfVirtNbrTable 1 }
+
+  NptOspfVirtNbrEntry ::=
+       SEQUENCE {
+          nptOspfVirtNbrArea
+             AreaID,
+          nptOspfVirtNbrRtrId
+             RouterID,
+          nptOspfVirInstanceIndex
+             Counter32,
+          nptOspfVirtNbrIpAddr
+             IpAddress,
+          nptOspfVirtNbrOptions
+             Integer32,
+          nptOspfVirtNbrState
+             INTEGER,
+          nptOspfVirtNbrEvents
+             Counter32,
+          nptOspfVirtNbrLsRetransQLen
+             Gauge32,
+          nptOspfVirtNbrHelloSuppressed
+             TruthValue,
+          nptOspfVirtNbrRestartHelperStatus
+             INTEGER,
+          nptOspfVirtNbrRestartHelperAge
+             Unsigned32,
+          nptOspfVirtNbrRestartHelperExitReason
+             INTEGER
+          }
+
+  nptOspfVirtNbrArea OBJECT-TYPE
+       SYNTAX       AreaID
+       MAX-ACCESS   read-only -- read-only since originally an
+                              -- SMIv1 index
+       STATUS       current
+       DESCRIPTION
+          "The Transit Area Identifier."
+       ::= { nptOspfVirtNbrEntry 1 }
+
+  nptOspfVirtNbrRtrId OBJECT-TYPE
+       SYNTAX       RouterID
+       MAX-ACCESS   read-only -- read-only since originally an
+                              -- SMIv1 index
+       STATUS      current
+       DESCRIPTION
+          "A 32-bit integer uniquely identifying the
+          neighboring router in the Autonomous System."
+       ::= { nptOspfVirtNbrEntry 2 }
+
+   nptOspfVirInstanceIndex OBJECT-TYPE
+       SYNTAX       Counter32
+       MAX-ACCESS   read-only -- read-only since originally an
+                              -- SMIv1 index
+       STATUS       current
+       DESCRIPTION
+          "oid transform from ospf instance name."
+        ::= { nptOspfVirtNbrEntry 3 }
+
+  nptOspfVirtNbrIpAddr OBJECT-TYPE
+       SYNTAX       IpAddress
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "The IP address this virtual neighbor is using."
+       ::= { nptOspfVirtNbrEntry 4 }
+
+  nptOspfVirtNbrOptions OBJECT-TYPE
+       SYNTAX       Integer32
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "A bit mask corresponding to the neighbor's
+          options field.
+
+          Bit 1, if set, indicates that the system will
+          operate on Type of Service metrics other than
+          TOS 0.  If zero, the neighbor will ignore all
+          metrics except the TOS 0 metric.
+
+          Bit 2, if set, indicates that the system is
+          network multicast capable, i.e., that it
+          implements OSPF multicast routing."
+       ::= { nptOspfVirtNbrEntry 5 }
+
+   nptOspfVirtNbrState OBJECT-TYPE
+       SYNTAX       INTEGER {
+                       down (1),
+                       attempt (2),
+                       init (3),
+                       twoWay (4),
+                       exchangeStart (5),
+                       exchange (6),
+                       loading (7),
+                       full (8)
+                       }
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "The state of the virtual neighbor relationship."
+       ::= { nptOspfVirtNbrEntry 6 }
+
+  nptOspfVirtNbrEvents OBJECT-TYPE
+       SYNTAX       Counter32
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "The number of times this virtual link has
+          changed its state or an error has occurred.
+
+          Discontinuities in the value of this counter can occur
+          at re-initialization of the management system, and at other
+          times as indicated by the value of ospfDiscontinuityTime."
+       ::= { nptOspfVirtNbrEntry 7 }
+
+  nptOspfVirtNbrLsRetransQLen OBJECT-TYPE
+       SYNTAX       Gauge32
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "The current length of the retransmission
+          queue."
+       ::= { nptOspfVirtNbrEntry 8 }
+
+  nptOspfVirtNbrHelloSuppressed OBJECT-TYPE
+       SYNTAX       TruthValue
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "Indicates whether Hellos are being suppressed
+          to the neighbor."
+       ::= { nptOspfVirtNbrEntry 9 }
+
+  nptOspfVirtNbrRestartHelperStatus OBJECT-TYPE
+       SYNTAX       INTEGER { notHelping (1),
+                              helping (2)
+                            }
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "Indicates whether the router is acting
+          as a graceful restart helper for the neighbor."
+       ::= { nptOspfVirtNbrEntry 10 }
+
+  nptOspfVirtNbrRestartHelperAge OBJECT-TYPE
+       SYNTAX       Unsigned32
+       UNITS        "seconds"
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "Remaining time in current OSPF graceful restart
+          interval, if the router is acting as a restart
+          helper for the neighbor."
+       ::= { nptOspfVirtNbrEntry 11 }
+
+  nptOspfVirtNbrRestartHelperExitReason OBJECT-TYPE
+       SYNTAX       INTEGER { none (1),           -- not attempted
+                              inProgress (2),     -- restart in
+                                                  -- progress
+                              completed (3),      -- successfully
+                                                  -- completed
+                              timedOut (4),       -- timed out
+                              topologyChanged (5) -- aborted due to
+                                                  -- topology
+                                                  -- change.
+                            }
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION
+          "Describes the outcome of the last attempt at acting
+           as a graceful restart helper for the neighbor."
+       ::= { nptOspfVirtNbrEntry 12 }
+       
+END

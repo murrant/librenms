@@ -1,0 +1,146 @@
+
+-- File Name : NPT-ALARM-MIB
+-- Date      : Thu Jun 09 18:50:03 CST 2011
+-- Author    : AdventNet Agent Toolkit C Edition - MibEditor 6
+
+
+
+NPT-ALARM-MIB	DEFINITIONS ::= BEGIN
+	IMPORTS
+		nptAlarm, nptTrap
+			FROM NPT-ROOT-MIB
+		String512
+		    FROM NPT-TC-MIB
+		RowStatus, DateAndTime, TEXTUAL-CONVENTION, DisplayString
+			FROM SNMPv2-TC
+		DisplayString
+			FROM RFC1213-MIB
+		MODULE-IDENTITY, OBJECT-TYPE, Integer32, enterprises, NOTIFICATION-TYPE, Unsigned32
+			FROM SNMPv2-SMI;
+
+	nptAlarmModule	MODULE-IDENTITY
+		LAST-UPDATED	"201105240945Z"
+		ORGANIZATION	"Ribbon Communications Inc."
+		CONTACT-INFO	"on.support@rbbn.com 
+                         Ribbon Communications Inc.,China
+                         Dongxin Tower, No.398 Wensan Road, 
+                         Hangzhou, 310012 P.R.China"
+		DESCRIPTION		"Description"
+		REVISION		"201105301453Z"
+		DESCRIPTION		""
+		::=  {  nptAlarm  1  }
+        
+	org	OBJECT IDENTIFIER
+		::=  {  iso  3  }
+        
+	dod	OBJECT IDENTIFIER
+		::=  {  org  6  }
+        
+	internet	OBJECT IDENTIFIER
+		::=  {  dod  1  }
+
+	private	OBJECT IDENTIFIER
+		::=  {  internet  4  }
+
+	enterprises	OBJECT IDENTIFIER
+		::=  {  private  1  }
+
+	nptAlarmTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptAlarmEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Description"
+		::=  { nptAlarmModule  1 }
+
+	nptAlarmEntry	OBJECT-TYPE
+		SYNTAX		NptAlarmEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Row Description"
+		INDEX		{  nptObjectId,  nptAlarmId }
+		::=  { nptAlarmTable 1 }
+
+	NptAlarmEntry  ::=  SEQUENCE {
+		nptObjectId    Unsigned32,
+		nptAlarmId     Unsigned32,
+		nptAlarmName  DisplayString,
+		nptAlarmDescription  DisplayString,
+		nptAlarmSeverity  DisplayString,
+		nptAlarmType  DisplayString,
+		nptNeId  DisplayString,
+		nptAlarmTimeStamp  DisplayString,
+		nptAlarmAddtionalinfo  String512
+		}
+
+
+	nptObjectId	OBJECT-TYPE	
+		SYNTAX			Unsigned32  ( 0 .. 4294967295  )
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"the alarm object index"
+		::=  {  nptAlarmEntry  1  }
+
+
+	nptAlarmId	OBJECT-TYPE	
+		SYNTAX			Unsigned32  ( 0 .. 4294967295  )
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"the alarm id"
+		::=  {  nptAlarmEntry  2  }
+		
+	nptAlarmName	OBJECT-TYPE	
+		SYNTAX			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"alarm name"
+		::=  {  nptAlarmEntry  3  }
+
+
+	nptAlarmDescription	OBJECT-TYPE	
+		SYNTAX			DisplayString 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Column Description"
+		::=  {  nptAlarmEntry  4  }
+
+
+	nptAlarmSeverity	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Alarm Severity"
+		::=  {  nptAlarmEntry  5  }
+
+
+	nptAlarmType	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Alarm Type"
+		::=  {  nptAlarmEntry  6  }
+		
+	nptNeId	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"NE ID"
+		::=  {  nptAlarmEntry  7  }
+
+
+	nptAlarmTimeStamp	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Alarm TimeStam"
+		::=  {  nptAlarmEntry  8  }
+		
+	nptAlarmAddtionalinfo	OBJECT-TYPE	
+		SYNTAX			String512
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Alarm Addtional info"
+		::=  {  nptAlarmEntry  9  }
+
+
+
+END

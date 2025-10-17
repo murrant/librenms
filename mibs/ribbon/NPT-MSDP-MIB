@@ -1,0 +1,540 @@
+
+-- File Name : NPT-MSDP-MIB.mib
+-- Date      : Sat Nov  4 23:59:59 CST 2023
+-- Author    : Bill Chen
+
+
+
+NPT-MSDP-MIB	DEFINITIONS ::= BEGIN
+	IMPORTS
+		nptMsdp
+			FROM NPT-ROOT-MIB
+		TEXTUAL-CONVENTION, TruthValue, RowStatus, TimeStamp, DisplayString
+			FROM SNMPv2-TC
+		MODULE-COMPLIANCE, OBJECT-GROUP
+			FROM SNMPv2-CONF
+		InterfaceIndexOrZero
+			FROM IF-MIB
+		MODULE-IDENTITY, OBJECT-TYPE, Counter32, Gauge32, Integer32, Unsigned32, IpAddress, mib-2, enterprises, Counter32
+			FROM SNMPv2-SMI
+		NPTStatisticsTunnelType
+			FROM NPT-TC-MIB;
+
+	nptMsdpModule	MODULE-IDENTITY
+		LAST-UPDATED	"202109260000Z"
+		ORGANIZATION	"Ribbon Communications Inc."
+		CONTACT-INFO	"on.support@rbbn.com 
+                         Ribbon Communications Inc., China
+                         7th Floor, East Communication Building
+						 No.398 Wensan Road, 
+                         Hangzhou, 310012 P.R.China"
+		DESCRIPTION		"MIB for NPT MSDP protocol"
+		REVISION		"01Z"
+		DESCRIPTION		"MSDP module MIB for NPT product"
+		::=  {  nptMsdp  1  }
+
+	org	OBJECT IDENTIFIER
+		::=  {  iso  3  }
+
+	dod	OBJECT IDENTIFIER
+		::=  {  org  6  }
+
+	internet	OBJECT IDENTIFIER
+		::=  {  dod  1  }
+
+	mgmt	OBJECT IDENTIFIER
+		::=  {  internet  2  }
+
+	private	OBJECT IDENTIFIER
+		::=  {  internet  4  }
+
+	mib-2	OBJECT IDENTIFIER
+		::=  {  mgmt  1  }
+
+	enterprises	OBJECT IDENTIFIER
+		::=  {  private  1  }
+
+
+-- Table definitions
+-- nptMsdpStatisticsTable
+	nptMsdpStatisticsTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptMsdpStatisticsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Table for MSDP instance statistics"
+		::=  { nptMsdpModule  1 }
+
+	nptMsdpStatisticsEntry	OBJECT-TYPE
+		SYNTAX		NptMsdpStatisticsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry contains statistics collected from an instance of MSDP."
+		INDEX		{  nptMsdpStatisticsInstance  }
+		::=  { nptMsdpStatisticsTable 1 }
+
+	NptMsdpStatisticsEntry  ::=  SEQUENCE {
+		nptMsdpStatisticsInstance  Integer32,
+		nptMsdpStatisticsDisContinuityTime  DisplayString,
+		nptMsdpStatisticsElapsed  DisplayString,
+		nptMsdpStatisticsSaLimitExceeded  Counter32,
+		nptMsdpStatisticsImportRejected  Counter32,
+		nptMsdpStatisticsExportRejected  Counter32,
+		nptMsdpStatisticsTcaCrossed  Counter32
+		}
+
+
+	nptMsdpStatisticsInstance	OBJECT-TYPE	
+		SYNTAX			Integer32  ( 0 .. 2147483647  ) 
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		" The routing instance in which the MSDP protocol is running"
+		::=  {  nptMsdpStatisticsEntry  1  }
+
+
+	nptMsdpStatisticsDisContinuityTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"DisContinuity Time for the counters in this table"
+		::=  {  nptMsdpStatisticsEntry  2  }
+
+
+	nptMsdpStatisticsElapsed	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Elapsed time for the counters in this table, in the format of dd:hh:mm:ss"
+		::=  {  nptMsdpStatisticsEntry  3  }
+
+
+	nptMsdpStatisticsSaLimitExceeded	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Count number of times SA cache exceeded its SA limit."
+		::=  {  nptMsdpStatisticsEntry  4  }
+
+
+	nptMsdpStatisticsImportRejected	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Count number of times rejected SA message as part of import policy."
+		::=  {  nptMsdpStatisticsEntry  5  }
+
+
+	nptMsdpStatisticsExportRejected	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Count number of times rejected SA message as part of export policy."
+		::=  {  nptMsdpStatisticsEntry  6  }
+
+
+	nptMsdpStatisticsTcaCrossed	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Count number of times SA cache threshold exceeded its configured value ."
+		::=  {  nptMsdpStatisticsEntry  7  }
+
+
+-- nptMsdpPeerStatusTable
+	nptMsdpPeerStatusTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptMsdpPeerStatusEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Table of MSDP Peer status."
+		::=  { nptMsdpModule  2 }
+
+	nptMsdpPeerStatusEntry	OBJECT-TYPE
+		SYNTAX		NptMsdpPeerStatusEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry contains status for a single MSDP Peer."
+		INDEX		{  nptMsdpPeerStatusRoutingInstance, nptMsdpPeerRemoteAddress  }
+		::=  { nptMsdpPeerStatusTable 1 }
+
+	NptMsdpPeerStatusEntry  ::=  SEQUENCE {
+		nptMsdpPeerStatusRoutingInstance  Integer32,
+		nptMsdpPeerRemoteAddress  IpAddress,
+		nptMsdpPeerAdminStatue  Integer,
+		nptMsdpPeerMode  Integer,
+		nptMsdpPeerConnectionState  Integer,
+		nptMsdpPeerLastUptime  DisplayString,
+		nptMsdpPeerMeshGroups  DisplayString,
+		nptMsdpPeerStateTimerExpires  Counter32,
+		nptMsdpPeerTimesOut  Counter32,
+		nptMsdpPeerInMessageTime	TimeStamp,
+		nptMsdpPeerLocalAddress	IpAddress,
+		nptMsdpPeerRemotePort	Integer32,
+		nptMsdpPeerLocalPort	Integer32
+		}
+
+
+	nptMsdpPeerStatusRoutingInstance	OBJECT-TYPE	
+		SYNTAX			Integer32 ( 0 .. 2147483647  )
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		"The routing instance in which the MSDP protocol is running."
+		::=  {  nptMsdpPeerStatusEntry  1  }
+
+
+	nptMsdpPeerRemoteAddress	OBJECT-TYPE	
+		SYNTAX			IpAddress   
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		"Remote MSDP peer IP address."
+		::=  {  nptMsdpPeerStatusEntry  2  }
+
+
+	nptMsdpPeerAdminStatue	OBJECT-TYPE	
+		SYNTAX			Integer { down(0), -- Administrative Down, 
+									up(1) -- Administrative Up
+									}
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		"Administrative state of MSDP-peer."
+		::=  {  nptMsdpPeerStatusEntry  3  }
+
+	nptMsdpPeerMode	OBJECT-TYPE	
+		SYNTAX			Integer { default-peer(0), -- Default Peer, 
+									regular(1), -- Regular Peer,
+									mesh(2) -- Part of Mesh Group
+									}
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"MSDP peer mode: default peer, regular peer or part of mesh group."
+		::=  {  nptMsdpPeerStatusEntry  4  }
+		
+	nptMsdpPeerConnectionState	OBJECT-TYPE	
+		SYNTAX			Integer { disabled(0), 
+									inactive(1),
+									listen(2),
+									connecting(3), 
+									established(4) 
+									}
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"MSDP peer connection state."
+		::=  {  nptMsdpPeerStatusEntry  5  }
+
+
+	nptMsdpPeerLastUptime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Time at which the most recent peer-state change occurred."
+		::=  {  nptMsdpPeerStatusEntry  6  }
+
+
+	nptMsdpPeerMeshGroups	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"List of the mesh group names that such peer is member."
+		::=  {  nptMsdpPeerStatusEntry  7  }
+
+
+	nptMsdpPeerStateTimerExpires	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of seconds before another message is sent to a peer."
+		::=  {  nptMsdpPeerStatusEntry  8  }
+
+
+	nptMsdpPeerTimesOut	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"number of seconds to wait for a response from the peer before the peer declared as unavailable."
+		::=  {  nptMsdpPeerStatusEntry  9  }
+
+	nptMsdpPeerInMessageTime	OBJECT-TYPE	
+		SYNTAX			TimeStamp
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The sysUpTime value when the last MSDP message was received from the peer. It is set to zero when the MSDP speaker is booted."
+		::=  {  nptMsdpPeerStatusEntry  10  }
+		
+	nptMsdpPeerLocalAddress OBJECT-TYPE
+		SYNTAX     IpAddress
+		MAX-ACCESS read-create
+		STATUS     current
+		DESCRIPTION
+			   "The local IP address used for this entry's MSDP TCP
+				connection."
+		::= { nptMsdpPeerStatusEntry 11 }
+	
+		
+	nptMsdpPeerRemotePort OBJECT-TYPE
+		SYNTAX     Integer32 (0..65535)
+		MAX-ACCESS read-only
+		STATUS     current
+		DESCRIPTION
+			   "The remote port for the TCP connection between the MSDP
+				peers."
+		DEFVAL { 639 }
+		::= { nptMsdpPeerStatusEntry 12 }
+
+	nptMsdpPeerLocalPort OBJECT-TYPE
+		SYNTAX     Integer32 (0..65535)
+		MAX-ACCESS read-only
+		STATUS     current
+		DESCRIPTION
+			   "The local port for the TCP connection between the MSDP
+				peers."
+		DEFVAL { 639 }
+		::= { nptMsdpPeerStatusEntry 13 }
+
+-- nptMsdpPeerStatisticsTable
+	nptMsdpPeerStatisticsTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptMsdpPeerStatisticsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"MSDP peer statistics"
+		::=  { nptMsdpModule  3 }
+		
+	nptMsdpPeerStatisticsEntry	OBJECT-TYPE
+		SYNTAX		NptMsdpPeerStatisticsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry contains statistics collected for MSDP peer."
+		INDEX		{  nptMsdpPeerStatisticsRoutingInstance, nptMsdpPeerStatisticsRemoteAddress  }
+		::=  { nptMsdpPeerStatisticsTable 1 }
+
+	NptMsdpPeerStatisticsEntry  ::=  SEQUENCE {
+		nptMsdpPeerStatisticsRoutingInstance  Integer32,
+		nptMsdpPeerStatisticsRemoteAddress  IpAddress,
+		nptMsdpPeerStatisticsDiscTime  DisplayString,
+		nptMsdpPeerStatisticsElapsedTime  DisplayString,
+		nptMsdpPeerStatisticsInTotal  Counter32,
+		nptMsdpPeerStatisticsOutTotal  Counter32,
+		nptMsdpPeerStatisticsInKeepalive  Counter32,
+		nptMsdpPeerStatisticsOutKeepalive  Counter32,
+		nptMsdpPeerStatisticsInMessage  Counter32,
+		nptMsdpPeerStatisticsOutMessage  Counter32,
+		nptMsdpPeerStatisticsInSaRequest  Counter32,
+		nptMsdpPeerStatisticsOutSaRequest  Counter32,
+		nptMsdpPeerStatisticsInSaResponse  Counter32,
+		nptMsdpPeerStatisticsOutSaResponse  Counter32,
+		nptMsdpPeerStatisticsInUnknown  Counter32,
+		nptMsdpPeerStatisticsInError  Counter32,
+		nptMsdpPeerStatisticsPeerConnectedRetries  Counter32,		
+		nptMsdpPeerStatisticsSaAccepted  Counter32,		
+		nptMsdpPeerStatisticsSaReceived  Counter32,
+		nptMsdpPeerStatisticsSaLimitExceeded  Counter32,
+		nptMsdpPeerStatisticsImportRejected  Counter32,
+		nptMsdpPeerStatisticsExportRejected  Counter32,
+		nptMsdpPeerStatisticsTcaCrossed  Counter32,
+		nptMsdpPeerRPFFailures Counter32,
+		nptMsdpPeerFsmEstablishedTransitions	Counter32
+		}
+
+	nptMsdpPeerStatisticsRoutingInstance	OBJECT-TYPE	
+		SYNTAX			Integer32  ( 0 .. 2147483647  )
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The routing instance in which the MSDP protocol is running."
+		::=  {  nptMsdpPeerStatisticsEntry  1  }
+
+	nptMsdpPeerStatisticsRemoteAddress	OBJECT-TYPE	
+		SYNTAX			IpAddress 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Remote MSDP peer IP address."
+		::=  {  nptMsdpPeerStatisticsEntry  2  }
+
+
+	nptMsdpPeerStatisticsDiscTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"DisContinuity time for the counters in this table."
+		::=  {  nptMsdpPeerStatisticsEntry  3  }
+
+
+	nptMsdpPeerStatisticsElapsedTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Elapsed time for the counters in this table, in the format of dd:hh:mm:ss"
+		::=  {  nptMsdpPeerStatisticsEntry  4  }
+
+
+	nptMsdpPeerStatisticsInTotal	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Total MSDP TLV received."
+		::=  {  nptMsdpPeerStatisticsEntry  5  }
+
+
+	nptMsdpPeerStatisticsOutTotal	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Total MSDP TLV sent."
+		::=  {  nptMsdpPeerStatisticsEntry  6  }
+
+
+	nptMsdpPeerStatisticsInKeepalive	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of received keepalive TLV."
+		::=  {  nptMsdpPeerStatisticsEntry  7  }
+
+
+	nptMsdpPeerStatisticsOutKeepalive	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of keepalive TLV sent."
+		::=  {  nptMsdpPeerStatisticsEntry  8  }
+
+
+	nptMsdpPeerStatisticsInMessage	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of received SA message TLV."
+		::=  {  nptMsdpPeerStatisticsEntry  9  }
+
+
+	nptMsdpPeerStatisticsOutMessage	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of SA message TLV sent."
+		::=  {  nptMsdpPeerStatisticsEntry  10  }
+
+
+	nptMsdpPeerStatisticsInSaRequest	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of received SA request TLV."
+		::=  {  nptMsdpPeerStatisticsEntry  11  }
+
+
+	nptMsdpPeerStatisticsOutSaRequest	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of SA request TLV sent."
+		::=  {  nptMsdpPeerStatisticsEntry  12  }
+
+
+	nptMsdpPeerStatisticsInSaResponse	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of received SA response TLV."
+		::=  {  nptMsdpPeerStatisticsEntry  13  }
+
+
+	nptMsdpPeerStatisticsOutSaResponse	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of SA response TLV sent"
+		::=  {  nptMsdpPeerStatisticsEntry  14  }
+
+
+	nptMsdpPeerStatisticsInUnknown	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of received unknown TLV."
+		::=  {  nptMsdpPeerStatisticsEntry  15  }
+
+	nptMsdpPeerStatisticsInError	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of received error messages."
+		::=  {  nptMsdpPeerStatisticsEntry  16  }
+
+
+	nptMsdpPeerStatisticsPeerConnectedRetries	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of peer connection retries."
+		::=  {  nptMsdpPeerStatisticsEntry  17  }
+
+
+	nptMsdpPeerStatisticsSaAccepted	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of entries in source active cache accepted from the peer."
+		::=  {  nptMsdpPeerStatisticsEntry  18  }
+
+
+	nptMsdpPeerStatisticsSaReceived	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of entries the source active cache received by the peer."
+		::=  {  nptMsdpPeerStatisticsEntry  19  }
+
+
+	nptMsdpPeerStatisticsSaLimitExceeded	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Count number of times SA cache exceeded its SA limit."
+		::=  {  nptMsdpPeerStatisticsEntry  20  }
+
+
+	nptMsdpPeerStatisticsImportRejected	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Count number of times rejected SA message as part of import policy."
+		::=  {  nptMsdpPeerStatisticsEntry  21  }
+
+
+	nptMsdpPeerStatisticsExportRejected	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Count number of times rejected SA message as part of export policy."
+		::=  {  nptMsdpPeerStatisticsEntry  22  }
+
+
+	nptMsdpPeerStatisticsTcaCrossed	OBJECT-TYPE	
+		SYNTAX			Counter32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Count number of times SA cache threshold exceeded its configured value."
+		::=  {  nptMsdpPeerStatisticsEntry  23  }
+
+	nptMsdpPeerRPFFailures OBJECT-TYPE
+		SYNTAX     Counter32
+		MAX-ACCESS read-only
+		STATUS     current
+		DESCRIPTION
+			   "The number of SA messages received from this peer that
+				failed the Peer-RPF check.
+
+				Discontinuities in the value of this counter can occur at
+				re-initialization of the management system, and at other
+				times as indicated by the value of
+				msdpPeerDiscontinuityTime."
+		::= { nptMsdpPeerStatisticsEntry 24 }
+		
+	nptMsdpPeerFsmEstablishedTransitions OBJECT-TYPE
+		SYNTAX     Counter32
+		MAX-ACCESS read-only
+		STATUS     current
+		DESCRIPTION
+			   "The total number of times the MSDP FSM transitioned into
+				the ESTABLISHED state."
+		REFERENCE "RFC 3618 section 11"
+		::= { nptMsdpPeerStatisticsEntry 25 }
+
+END

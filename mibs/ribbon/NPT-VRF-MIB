@@ -1,0 +1,78 @@
+
+-- File Name : NPT-VRF-MIB
+-- Date      : Tue Dec 20 10:00:00 CST 2020
+-- Author    : Haoyang Xu
+
+
+
+NPT-VRF-MIB	DEFINITIONS ::= BEGIN
+	IMPORTS
+	nptVRF
+		     FROM NPT-ROOT-MIB
+        MODULE-IDENTITY, OBJECT-TYPE, Counter32, Gauge32,
+        Integer32, Unsigned32, IpAddress, mib-2
+                     FROM SNMPv2-SMI
+		DisplayString
+			FROM RFC1213-MIB;
+
+    nptvrf MODULE-IDENTITY
+        LAST-UPDATED "202012020000Z"
+        ORGANIZATION "Ribbon Communications Inc."
+        CONTACT-INFO "on.support@rbbn.com 
+                         Ribbon Communications Inc.,China
+                         Dongxin Tower, No.398 Wensan Road, 
+                         Hangzhou, 310012 P.R.China"
+        DESCRIPTION  "Description"
+		REVISION	 "01Z"
+		DESCRIPTION	 ""
+		::=  {  nptVRF  1  }
+
+    -- Objects
+    nptvrfObjects OBJECT IDENTIFIER ::= { nptvrf 1 }
+
+  nptVRFTable OBJECT-TYPE
+       SYNTAX       SEQUENCE OF NptVRFEntry
+       MAX-ACCESS   not-accessible
+       STATUS       current
+       DESCRIPTION
+          "DESCRIPTION"
+       REFERENCE
+          "REFERENCE"
+       ::= { nptvrfObjects 1 }
+
+  nptVRFEntry OBJECT-TYPE
+       SYNTAX       NptVRFEntry
+       MAX-ACCESS   not-accessible
+       STATUS       current
+       DESCRIPTION
+          "DESCRIPTION"
+       REFERENCE
+          "REFERENCE"
+       INDEX { nptroutingInstance}
+       ::= { nptVRFTable 1 }
+
+  NptVRFEntry ::=
+       SEQUENCE {
+          nptroutingInstance
+             Unsigned32,
+          nptroutingInstanceName
+             DisplayString
+          }
+
+  nptroutingInstance OBJECT-TYPE
+       SYNTAX       Unsigned32
+       MAX-ACCESS   read-only 
+       STATUS       current
+       DESCRIPTION
+          "DESCRIPTION"
+       ::= { nptVRFEntry 1 }
+
+   nptroutingInstanceName OBJECT-TYPE
+       SYNTAX       DisplayString
+       MAX-ACCESS   read-only 
+       STATUS       current
+       DESCRIPTION
+          "DESCRIPTION"
+        ::= { nptVRFEntry 2 }
+       
+END

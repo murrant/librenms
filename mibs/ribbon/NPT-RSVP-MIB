@@ -1,0 +1,1719 @@
+
+-- File Name : NPT-RSVP-MIB.mib
+-- Date      : Sun Sep 26 07:05:35 GMT 2021
+-- Author    : Bill Chen
+
+
+
+NPT-RSVP-MIB	DEFINITIONS ::= BEGIN
+	IMPORTS
+		nptRSVP
+			FROM NPT-ROOT-MIB
+		TEXTUAL-CONVENTION, TruthValue, RowStatus, TimeStamp, DisplayString
+			FROM SNMPv2-TC
+		MODULE-COMPLIANCE, OBJECT-GROUP
+			FROM SNMPv2-CONF
+		InterfaceIndexOrZero
+			FROM IF-MIB
+		MODULE-IDENTITY, OBJECT-TYPE, Counter32, Gauge32, Integer32, Unsigned32, IpAddress, mib-2, enterprises, Counter64
+			FROM SNMPv2-SMI
+		NPTStatisticsTunnelType
+			FROM NPT-TC-MIB;
+
+	nptrsvp	MODULE-IDENTITY
+		LAST-UPDATED	"202109260000Z"
+		ORGANIZATION	"Ribbon Communications Inc."
+		CONTACT-INFO	"on.support@rbbn.com 
+                         Ribbon Communications Inc., China
+                         7th Floor, East Communication Building
+						 No.398 Wensan Road, 
+                         Hangzhou, 310012 P.R.China"
+		DESCRIPTION		"MIB for NPT RSVP protocol"
+		REVISION		"01Z"
+		DESCRIPTION		"RSVP module MIB for NPT product"
+		::=  {  nptRSVP  1  }
+
+	org	OBJECT IDENTIFIER
+		::=  {  iso  3  }
+
+	dod	OBJECT IDENTIFIER
+		::=  {  org  6  }
+
+	internet	OBJECT IDENTIFIER
+		::=  {  dod  1  }
+
+	mgmt	OBJECT IDENTIFIER
+		::=  {  internet  2  }
+
+	private	OBJECT IDENTIFIER
+		::=  {  internet  4  }
+
+	mib-2	OBJECT IDENTIFIER
+		::=  {  mgmt  1  }
+
+	enterprises	OBJECT IDENTIFIER
+		::=  {  private  1  }
+
+	nptRsvpObjects	OBJECT IDENTIFIER
+		::=  {  nptrsvp  1  }
+
+	nptRsvpStatsTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptRsvpStatsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Table for RSVP instance statistics"
+		::=  { nptRsvpObjects  1 }
+
+	nptRsvpStatsEntry	OBJECT-TYPE
+		SYNTAX		NptRsvpStatsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry contains statistics collected from an instance of RSVP."
+		INDEX		{  nptRsvpStatsIndex  }
+		::=  { nptRsvpStatsTable 1 }
+
+	NptRsvpStatsEntry  ::=  SEQUENCE {
+		nptRsvpStatsIndex  Integer32,
+		nptRsvpStatsInstance  DisplayString,
+		nptRsvpStatsDisContinuityTime  DisplayString,
+		nptRsvpStatsElapsed  DisplayString,
+		nptRsvpStatsAckSentCount  Counter64,
+		nptRsvpStatsAckRcvdCount  Counter64,
+		nptRsvpStatsBundleSentCount  Counter64,
+		nptRsvpStatsBundleRcvdCount  Counter64,
+		nptRsvpStatsHelloSentCount  Counter64,
+		nptRsvpStatsHelloRcvdCount  Counter64,
+		nptRsvpStatsNotifySentCount  Counter64,
+		nptRsvpStatsNotifyRcvdCount  Counter64,
+		nptRsvpStatsPathSentCount  Counter64,
+		nptRsvpStatsPathRcvdCount  Counter64,
+		nptRsvpStatsPathErrSentCount  Counter64,
+		nptRsvpStatsPathErrRcvdCount  Counter64,
+		nptRsvpStatsPathTearSentCount  Counter64,
+		nptRsvpStatsPathTearRcvdCount  Counter64,
+		nptRsvpStatsResvSentCount  Counter64,
+		nptRsvpStatsResvRcvdCount  Counter64,
+		nptRsvpStatsResvConfSentCount  Counter64,
+		nptRsvpStatsResvConfRcvdCount  Counter64,
+		nptRsvpStatsResvErrSentCount  Counter64,
+		nptRsvpStatsResvErrRcvdCount  Counter64,
+		nptRsvpStatsResvTearSentCount  Counter64,
+		nptRsvpStatsResvTearRcvdCount  Counter64,
+		nptRsvpStatsSRefreshSentCount  Counter64,
+		nptRsvpStatsSRefreshRcvdCount  Counter64,
+		nptRsvpStatsUnknownMsgCount  Counter64,
+		nptRsvpStatsPathTimeoutCount  Counter64,
+		nptRsvpStatsResvTimeoutCount  Counter64,
+		nptRsvpStatsPacketSentCount  Counter64,
+		nptRsvpStatsPacketRcvdCount  Counter64,
+		nptRsvpStatsPacketInDropCount  Counter64,
+		nptRsvpStatsPacketInErrorCount  Counter64,
+		nptRsvpStatsErrorAuthCount  Counter64,
+		nptRsvpStatsErrorChecksumCount  Counter64,
+		nptRsvpStatsErrorPktLenCount  Counter64
+		}
+
+
+	nptRsvpStatsIndex	OBJECT-TYPE	
+		SYNTAX			Integer32  ( 0 .. 2147483647  ) 
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		"The index of the RSVP protocol statistics."
+		::=  {  nptRsvpStatsEntry  1  }
+
+
+	nptRsvpStatsInstance	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		" The routing instance in which the RSVP protocol is running"
+		::=  {  nptRsvpStatsEntry  2  }
+
+
+	nptRsvpStatsDisContinuityTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"DisContinuity Time for the counters in this table"
+		::=  {  nptRsvpStatsEntry  3  }
+
+
+	nptRsvpStatsElapsed	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Elapsed time for the counters in this table, in the format of dd:hh:mm:ss"
+		::=  {  nptRsvpStatsEntry  4  }
+
+
+	nptRsvpStatsAckSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Ack messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  5  }
+
+
+	nptRsvpStatsAckRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Ack messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  6  }
+
+
+	nptRsvpStatsBundleSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Bundle messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  7  }
+
+
+	nptRsvpStatsBundleRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Bundle messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  8  }
+
+
+	nptRsvpStatsHelloSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Hello messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  9  }
+
+
+	nptRsvpStatsHelloRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Hello messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  10  }
+
+
+	nptRsvpStatsNotifySentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Notify messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  11  }
+
+
+	nptRsvpStatsNotifyRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Notify messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  12  }
+
+
+	nptRsvpStatsPathSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  13  }
+
+
+	nptRsvpStatsPathRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  14  }
+
+
+	nptRsvpStatsPathErrSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path Error messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  15  }
+
+
+	nptRsvpStatsPathErrRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path Error messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  16  }
+
+
+	nptRsvpStatsPathTearSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path Tear messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  17  }
+
+
+	nptRsvpStatsPathTearRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path Tear messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  18  }
+
+
+	nptRsvpStatsResvSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  19  }
+
+
+	nptRsvpStatsResvRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  20  }
+
+
+	nptRsvpStatsResvConfSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Confirm messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  21  }
+
+
+	nptRsvpStatsResvConfRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Confirm messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  22  }
+
+
+	nptRsvpStatsResvErrSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Error messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  23  }
+
+
+	nptRsvpStatsResvErrRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Error messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  24  }
+
+
+	nptRsvpStatsResvTearSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Tear messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  25  }
+
+
+	nptRsvpStatsResvTearRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Tear messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  26  }
+
+
+	nptRsvpStatsSRefreshSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP SRefresh messages sent by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  27  }
+
+
+	nptRsvpStatsSRefreshRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP SRefresh messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  28  }
+
+
+	nptRsvpStatsUnknownMsgCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of unknown messages received by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  29  }
+
+
+	nptRsvpStatsPathTimeoutCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of path state timeouts that have occurred on
+           this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  30  }
+
+
+	nptRsvpStatsResvTimeoutCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of resv state timeouts that have occurred on
+           this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  31  }
+
+
+	nptRsvpStatsPacketSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP packets that have been sent by this instance of RSVP"
+		::=  {  nptRsvpStatsEntry  32  }
+
+
+	nptRsvpStatsPacketRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP packets that have been received by this instance of RSVP"
+		::=  {  nptRsvpStatsEntry  33  }
+
+
+	nptRsvpStatsPacketInDropCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of incoming packets that have been dropped by this instance of RSVP"
+		::=  {  nptRsvpStatsEntry  34  }
+
+
+	nptRsvpStatsPacketInErrorCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of incoming packets that have been detected as having an error by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  35  }
+
+
+	nptRsvpStatsErrorAuthCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of authentication errors that have been detected by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  36  }
+
+
+	nptRsvpStatsErrorChecksumCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of checksum errors that have been detected by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  37  }
+
+
+	nptRsvpStatsErrorPktLenCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of packet length errors that have been detected by this instance of RSVP."
+		::=  {  nptRsvpStatsEntry  38  }
+
+	nptRsvpIfStatsTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptRsvpIfStatsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Table of RSVP Interface statistics."
+		::=  { nptRsvpObjects  2 }
+
+	nptRsvpIfStatsEntry	OBJECT-TYPE
+		SYNTAX		NptRsvpIfStatsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry contains statistics collected from a single interface."
+		INDEX		{  nptRsvpIfStatsIndex  }
+		::=  { nptRsvpIfStatsTable 1 }
+
+	NptRsvpIfStatsEntry  ::=  SEQUENCE {
+		nptRsvpIfStatsIndex  Integer32,
+		nptRsvpIfStatsInstance  DisplayString,
+		nptRsvpIfStatsInterfaceIndex  Integer32,
+		nptRsvpIfStatsInterfaceName  DisplayString,
+		nptRsvpIfStatsDisContinuityTime  DisplayString,
+		nptRsvpIfStatsElapsed  DisplayString,
+		nptRsvpIfStatsAckSentCount  Counter64,
+		nptRsvpIfStatsAckRcvdCount  Counter64,
+		nptRsvpIfStatsBundleSentCount  Counter64,
+		nptRsvpIfStatsBundleRcvdCount  Counter64,
+		nptRsvpIfStatsHelloSentCount  Counter64,
+		nptRsvpIfStatsHelloRcvdCount  Counter64,
+		nptRsvpIfStatsNotifySentCount  Counter64,
+		nptRsvpIfStatsNotifyRcvdCount  Counter64,
+		nptRsvpIfStatsPathSentCount  Counter64,
+		nptRsvpIfStatsPathRcvdCount  Counter64,
+		nptRsvpIfStatsPathErrSentCount  Counter64,
+		nptRsvpIfStatsPathErrRcvdCount  Counter64,
+		nptRsvpIfStatsPathTearSentCount  Counter64,
+		nptRsvpIfStatsPathTearRcvdCount  Counter64,
+		nptRsvpIfStatsResvSentCount  Counter64,
+		nptRsvpIfStatsResvRcvdCount  Counter64,
+		nptRsvpIfStatsResvConfSentCount  Counter64,
+		nptRsvpIfStatsResvConfRcvdCount  Counter64,
+		nptRsvpIfStatsResvErrSentCount  Counter64,
+		nptRsvpIfStatsResvErrRcvdCount  Counter64,
+		nptRsvpIfStatsResvTearSentCount  Counter64,
+		nptRsvpIfStatsResvTearRcvdCount  Counter64,
+		nptRsvpIfStatsSRefreshSentCount  Counter64,
+		nptRsvpIfStatsSRefreshRcvdCount  Counter64,
+		nptRsvpIfStatsUnknownMsgCount  Counter64,
+		nptRsvpIfStatsPacketSentCount  Counter64,
+		nptRsvpIfStatsPacketRcvdCount  Counter64,
+		nptRsvpIfStatsPacketInDropCount  Counter64,
+		nptRsvpIfStatsPacketInErrorCount  Counter64,
+		nptRsvpIfStatsErrorAuthCount  Counter64,
+		nptRsvpIfStatsErrorChecksumCount  Counter64,
+		nptRsvpIfStatsErrorPktLenCount  Counter64,
+		nptRsvpIfStatsPreemptionEventCount Counter64,
+		nptRsvpIfStatsSoftPreemptionEventCount Counter64
+		}
+
+
+	nptRsvpIfStatsIndex	OBJECT-TYPE	
+		SYNTAX			Integer32  ( 0 .. 2147483647  ) 
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		"The index of the RSVP interface statistics."
+		::=  {  nptRsvpIfStatsEntry  1  }
+
+
+	nptRsvpIfStatsInstance	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		"The routing instance in which the RSVP protocol is running"
+		::=  {  nptRsvpIfStatsEntry  2  }
+
+
+	nptRsvpIfStatsInterfaceIndex	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		"The index of the RSVP-TE interface."
+		::=  {  nptRsvpIfStatsEntry  3  }
+
+	nptRsvpIfStatsInterfaceName	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The name of the RSVP-TE interface."
+		::=  {  nptRsvpIfStatsEntry  4  }
+		
+	nptRsvpIfStatsDisContinuityTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"DisContinuity Time for the counters in this table."
+		::=  {  nptRsvpIfStatsEntry  5  }
+
+
+	nptRsvpIfStatsElapsed	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Elapsed time for the counters in this table, in the format of dd:hh:mm:ss"
+		::=  {  nptRsvpIfStatsEntry  6  }
+
+
+	nptRsvpIfStatsAckSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Ack messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  7  }
+
+
+	nptRsvpIfStatsAckRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Ack messages received over this interface."
+		::=  {  nptRsvpIfStatsEntry  8  }
+
+
+	nptRsvpIfStatsBundleSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Bundle messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  9  }
+
+
+	nptRsvpIfStatsBundleRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Bundle messages received over this interface."
+		::=  {  nptRsvpIfStatsEntry  10  }
+
+
+	nptRsvpIfStatsHelloSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Hello messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  11  }
+
+
+	nptRsvpIfStatsHelloRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Hello messages received over this interface."
+		::=  {  nptRsvpIfStatsEntry  12  }
+
+
+	nptRsvpIfStatsNotifySentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Notify messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  13  }
+
+
+	nptRsvpIfStatsNotifyRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Notify messages received over this interface."
+		::=  {  nptRsvpIfStatsEntry  14  }
+
+
+	nptRsvpIfStatsPathSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  15  }
+
+
+	nptRsvpIfStatsPathRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path messages received over this interface."
+		::=  {  nptRsvpIfStatsEntry  16  }
+
+
+	nptRsvpIfStatsPathErrSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path Error messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  17  }
+
+
+	nptRsvpIfStatsPathErrRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path Error messages received over this
+           interface."
+		::=  {  nptRsvpIfStatsEntry  18  }
+
+
+	nptRsvpIfStatsPathTearSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path Tear messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  19  }
+
+
+	nptRsvpIfStatsPathTearRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Path Tear messages received over this
+          interface."
+		::=  {  nptRsvpIfStatsEntry  20  }
+
+
+	nptRsvpIfStatsResvSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  21  }
+
+
+	nptRsvpIfStatsResvRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv messages received over this interface."
+		::=  {  nptRsvpIfStatsEntry  22  }
+
+
+	nptRsvpIfStatsResvConfSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Confirm messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  23  }
+
+
+	nptRsvpIfStatsResvConfRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Confirm messages received over this interface."
+		::=  {  nptRsvpIfStatsEntry  24  }
+
+
+	nptRsvpIfStatsResvErrSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Error messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  25  }
+
+
+	nptRsvpIfStatsResvErrRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Error messages received over this interface."
+		::=  {  nptRsvpIfStatsEntry  26  }
+
+
+	nptRsvpIfStatsResvTearSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Tear messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  27  }
+
+
+	nptRsvpIfStatsResvTearRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP Resv Tear messages received over this interface."
+		::=  {  nptRsvpIfStatsEntry  28  }
+
+
+	nptRsvpIfStatsSRefreshSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP SRefresh messages sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  29  }
+
+
+	nptRsvpIfStatsSRefreshRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP SRefresh messages received over this interface."
+		::=  {  nptRsvpIfStatsEntry  30  }
+
+
+	nptRsvpIfStatsUnknownMsgCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of unknown messages received over this interface."
+		::=  {  nptRsvpIfStatsEntry  31  }
+
+
+	nptRsvpIfStatsPacketSentCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP packets that have been sent over this interface."
+		::=  {  nptRsvpIfStatsEntry  32  }
+
+
+	nptRsvpIfStatsPacketRcvdCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of RSVP packets that have been received over this interface."
+		::=  {  nptRsvpIfStatsEntry  33  }
+
+
+	nptRsvpIfStatsPacketInDropCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of incoming packets over this interface that have been dropped."
+		::=  {  nptRsvpIfStatsEntry  34  }
+
+
+	nptRsvpIfStatsPacketInErrorCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of incoming packets over this interface that have been detected as having an error."
+		::=  {  nptRsvpIfStatsEntry  35  }
+
+
+	nptRsvpIfStatsErrorAuthCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of authentication errors that have been detected on this interface."
+		::=  {  nptRsvpIfStatsEntry  36  }
+
+
+	nptRsvpIfStatsErrorChecksumCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of checksum errors that have been detected on this interface."
+		::=  {  nptRsvpIfStatsEntry  37  }
+
+
+	nptRsvpIfStatsErrorPktLenCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The number of packet length errors that have been detected on this interface."
+		::=  {  nptRsvpIfStatsEntry  38  }
+
+	nptRsvpIfStatsPreemptionEventCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Preempting LSR increment this counter upon hard preemption on this interface."
+		::=  {  nptRsvpIfStatsEntry  39  }
+
+	nptRsvpIfStatsSoftPreemptionEventCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of times a soft preemption occurred on this interface.  
+						Whenever LSR decides to issue soft preemption on this interface, it increments this counter.
+						When Cleanup timer expires and there are preempted LSP pending for preemption, LSR increment LSP soft-preempted on timeout counter."
+		::=  {  nptRsvpIfStatsEntry  40  }
+		
+		
+	nptRsvpTeTunnelTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptRsvpTeTunnelEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"RSVP-TE Tunnel statistics"
+		::=  { nptRsvpObjects  3 }
+
+	nptRsvpTeTunnelEntry	OBJECT-TYPE
+		SYNTAX		NptRsvpTeTunnelEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry contains statistics collected for RSVP-TE tunnel."
+		INDEX		{  nptRsvpTeTunnelIndex  }
+		::=  { nptRsvpTeTunnelTable 1 }
+
+	NptRsvpTeTunnelEntry  ::=  SEQUENCE {
+		nptRsvpTeTunnelIndex  Integer32,
+		nptRsvpTeTunnelTunnelName  DisplayString,
+		nptRsvpTeTunnelTunnelType  NPTStatisticsTunnelType,
+		nptRsvpTeTunnelDiscTime  DisplayString,
+		nptRsvpTeTunnelElapsedTime  DisplayString,
+		nptRsvpTeTunnelOctetsPassG  Counter64,
+		nptRsvpTeTunnelOctetsPassY  Counter64,
+		nptRsvpTeTunnelOctetsPassSum  Counter64,
+		nptRsvpTeTunnelOctetsDiscardGY  Counter64,
+		nptRsvpTeTunnelOctetsDiscardR  Counter64,
+		nptRsvpTeTunnelOctetsDiscardSum  Counter64,
+		nptRsvpTeTunnelPacketsPassG  Counter64,
+		nptRsvpTeTunnelPacketsPassY  Counter64,
+		nptRsvpTeTunnelPacketsPassSum  Counter64,
+		nptRsvpTeTunnelPacketsDiscardGY  Counter64,
+		nptRsvpTeTunnelPacketsDiscardR  Counter64,
+		nptRsvpTeTunnelPacketsDiscardSum  Counter64
+		}
+
+
+	nptRsvpTeTunnelIndex	OBJECT-TYPE	
+		SYNTAX			Integer32  ( 0 .. 2147483647  ) 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Index of the statistics for RSVP-TE tunnel."
+		::=  {  nptRsvpTeTunnelEntry  1  }
+
+
+	nptRsvpTeTunnelTunnelName	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE Tunnel Name"
+		::=  {  nptRsvpTeTunnelEntry  2  }
+
+
+	nptRsvpTeTunnelTunnelType	OBJECT-TYPE	
+		SYNTAX			NPTStatisticsTunnelType
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE Tunnel Type"
+		::=  {  nptRsvpTeTunnelEntry  3  }
+
+
+	nptRsvpTeTunnelDiscTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"DisContinuity time for the counters in this table."
+		::=  {  nptRsvpTeTunnelEntry  4  }
+
+
+	nptRsvpTeTunnelElapsedTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Elapsed time for the counters in this table, in the format of dd:hh:mm:ss"
+		::=  {  nptRsvpTeTunnelEntry  5  }
+
+
+	nptRsvpTeTunnelOctetsPassG	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of green bytes by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  6  }
+
+
+	nptRsvpTeTunnelOctetsPassY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of yellow bytes by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  7  }
+
+
+	nptRsvpTeTunnelOctetsPassSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of bytes(green+yellow) by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  8  }
+
+
+	nptRsvpTeTunnelOctetsDiscardGY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of green or yellow bytes by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  9  }
+
+
+	nptRsvpTeTunnelOctetsDiscardR	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of red bytes by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  10  }
+
+
+	nptRsvpTeTunnelOctetsDiscardSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of bytes by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  11  }
+
+
+	nptRsvpTeTunnelPacketsPassG	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of green packets by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  12  }
+
+
+	nptRsvpTeTunnelPacketsPassY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of yellow packets by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  13  }
+
+
+	nptRsvpTeTunnelPacketsPassSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of packets(green+yellow) by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  14  }
+
+
+	nptRsvpTeTunnelPacketsDiscardGY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of green or yellow packets by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  15  }
+
+
+	nptRsvpTeTunnelPacketsDiscardR	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of red packets by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  16  }
+
+
+	nptRsvpTeTunnelPacketsDiscardSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of packets by this RSVP-TE Tunnel"
+		::=  {  nptRsvpTeTunnelEntry  17  }
+
+	nptRsvpTeTunnelCoSTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptRsvpTeTunnelCoSEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"RSVP-TE Tunnel CoS statistics"
+		::=  { nptRsvpObjects  4 }
+
+	nptRsvpTeTunnelCoSEntry	OBJECT-TYPE
+		SYNTAX		NptRsvpTeTunnelCoSEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry contains statistics collected for RSVP-TE tunnel CoS"
+		INDEX		{  nptRsvpTeTunnelCoSIndex  }
+		::=  { nptRsvpTeTunnelCoSTable 1 }
+
+	NptRsvpTeTunnelCoSEntry  ::=  SEQUENCE {
+		nptRsvpTeTunnelCoSIndex  Integer32,
+		nptRsvpTeTunnelCoSTunnelName  DisplayString,
+		nptRsvpTeTunnelCoSTunnelType  NPTStatisticsTunnelType,
+		nptRsvpTeTunnelCoS  Integer32,
+		nptRsvpTeTunnelCoSDisContinuityTime  DisplayString,
+		nptRsvpTeTunnelCoSElapsed  DisplayString,
+		nptRsvpTeTunnelCoSOctetsPassG  Counter64,
+		nptRsvpTeTunnelCoSOctetsPassY  Counter64,
+		nptRsvpTeTunnelCoSOctetsPassSum  Counter64,
+		nptRsvpTeTunnelCoSOctetsDiscardGY  Counter64,
+		nptRsvpTeTunnelCoSOctetsDiscardR  Counter64,
+		nptRsvpTeTunnelCoSOctetsDiscardSum  Counter64,
+		nptRsvpTeTunnelCoSPacketsPassG  Counter64,
+		nptRsvpTeTunnelCoSPacketsPassY  Counter64,
+		nptRsvpTeTunnelCoSPacketsPassSum  Counter64,
+		nptRsvpTeTunnelCoSPacketsDiscardGY  Counter64,
+		nptRsvpTeTunnelCoSPacketsDiscardR  Counter64,
+		nptRsvpTeTunnelCoSPacketsDiscardSum  Counter64
+		}
+
+
+	nptRsvpTeTunnelCoSIndex	OBJECT-TYPE	
+		SYNTAX			Integer32  ( 0 .. 2147483647  ) 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Index of the statistics for RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  1  }
+
+
+	nptRsvpTeTunnelCoSTunnelName	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE Tunnel Name"
+		::=  {  nptRsvpTeTunnelCoSEntry  2  }
+
+
+	nptRsvpTeTunnelCoSTunnelType	OBJECT-TYPE	
+		SYNTAX			NPTStatisticsTunnelType
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE Tunnel Type"
+		::=  {  nptRsvpTeTunnelCoSEntry  3  }
+
+
+	nptRsvpTeTunnelCoS	OBJECT-TYPE	
+		SYNTAX			Integer32	( 0 .. 7  ) 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE Tunnel CoS (0~7)"
+		::=  {  nptRsvpTeTunnelCoSEntry  4  }
+
+
+	nptRsvpTeTunnelCoSDisContinuityTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"DisContinuity Time for the counters in this table"
+		::=  {  nptRsvpTeTunnelCoSEntry  5  }
+
+
+	nptRsvpTeTunnelCoSElapsed	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Elapsed time for the counters in this table, in the format of dd:hh:mm:ss"
+		::=  {  nptRsvpTeTunnelCoSEntry  6  }
+
+
+	nptRsvpTeTunnelCoSOctetsPassG	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of green bytes by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  7  }
+
+
+	nptRsvpTeTunnelCoSOctetsPassY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of yellow bytes by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  8  }
+
+
+	nptRsvpTeTunnelCoSOctetsPassSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of bytes(green+yellow) by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  9  }
+
+
+	nptRsvpTeTunnelCoSOctetsDiscardGY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of green or yellow bytes by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  10  }
+
+
+	nptRsvpTeTunnelCoSOctetsDiscardR	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of red bytes by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  11  }
+
+
+	nptRsvpTeTunnelCoSOctetsDiscardSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of bytes by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  12  }
+
+
+	nptRsvpTeTunnelCoSPacketsPassG	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of green packets by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  13  }
+
+
+	nptRsvpTeTunnelCoSPacketsPassY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of yellow packets by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  14  }
+
+
+	nptRsvpTeTunnelCoSPacketsPassSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of packets(green+yellow) by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  15  }
+
+
+	nptRsvpTeTunnelCoSPacketsDiscardGY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of green or yellow packets by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  16  }
+
+
+	nptRsvpTeTunnelCoSPacketsDiscardR	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of yellow or red packets by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  17  }
+
+
+	nptRsvpTeTunnelCoSPacketsDiscardSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of packets by this RSVP-TE Tunnel CoS"
+		::=  {  nptRsvpTeTunnelCoSEntry  18  }
+
+	nptRsvpTeLspTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptRsvpTeLspEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"RSVR-TE LSP statistics table"
+		::=  { nptRsvpObjects  5 }
+
+	nptRsvpTeLspEntry	OBJECT-TYPE
+		SYNTAX		NptRsvpTeLspEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry contains statistics collected for RSVP-TE LSP"
+		INDEX		{  nptRsvpTeLspIndex  }
+		::=  { nptRsvpTeLspTable 1 }
+
+	NptRsvpTeLspEntry  ::=  SEQUENCE {
+		nptRsvpTeLspIndex  Integer32,
+		nptRsvpTeLspTunnelID  Integer32,
+		nptRsvpTeLspCoSTunnelFromAddr  DisplayString,
+		nptRsvpTeLspCoSTunnelToAddr  DisplayString,
+		nptRsvpTeLspLspId  Integer32,
+		nptRsvpTeLspLspType  NPTStatisticsTunnelType,
+		nptRsvpTeLspDiscTime  DisplayString,
+		nptRsvpTeLspElapsedTime  DisplayString,
+		nptRsvpTeLspOctetsPassG  Counter64,
+		nptRsvpTeLspOctetsPassY  Counter64,
+		nptRsvpTeLspOctetsPassSum  Counter64,
+		nptRsvpTeLspOctetsDiscardGY  Counter64,
+		nptRsvpTeLspOctetsDiscardR  Counter64,
+		nptRsvpTeLspOctetsDiscardSum  Counter64,
+		nptRsvpTeLspPacketsPassG  Counter64,
+		nptRsvpTeLspPacketsPassY  Counter64,
+		nptRsvpTeLspPacketsPassSum  Counter64,
+		nptRsvpTeLspPacketsDiscardGY  Counter64,
+		nptRsvpTeLspPacketsDiscardR  Counter64,
+		nptRsvpTeLspPacketsDiscardSum  Counter64
+		}
+
+
+	nptRsvpTeLspIndex	OBJECT-TYPE	
+		SYNTAX			Integer32  ( 0 .. 2147483647  ) 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Index of the statistics for RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  1  }
+
+
+	nptRsvpTeLspTunnelID	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE Tunnel ID"
+		::=  {  nptRsvpTeLspEntry  2  }
+
+
+	nptRsvpTeLspCoSTunnelFromAddr	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE Tunnel From Address"
+		::=  {  nptRsvpTeLspEntry  3  }
+
+
+	nptRsvpTeLspCoSTunnelToAddr	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE Tunnel To Address"
+		::=  {  nptRsvpTeLspEntry  4  }
+
+
+	nptRsvpTeLspLspId	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE LSP ID"
+		::=  {  nptRsvpTeLspEntry  5  }
+
+
+	nptRsvpTeLspLspType	OBJECT-TYPE	
+		SYNTAX			NPTStatisticsTunnelType
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE LSP Type"
+		::=  {  nptRsvpTeLspEntry  6  }
+
+
+	nptRsvpTeLspDiscTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"DisContinuity Time for the counters in this table"
+		::=  {  nptRsvpTeLspEntry  7  }
+
+
+	nptRsvpTeLspElapsedTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Elapsed time for the counters in this table, in the format of dd:hh:mm:ss"
+		::=  {  nptRsvpTeLspEntry  8  }
+
+
+	nptRsvpTeLspOctetsPassG	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of green bytes by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  9  }
+
+
+	nptRsvpTeLspOctetsPassY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of green bytes by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  10  }
+
+
+	nptRsvpTeLspOctetsPassSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of bytes(green+yellow) by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  11  }
+
+
+	nptRsvpTeLspOctetsDiscardGY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of green or yellow bytes by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  12  }
+
+
+	nptRsvpTeLspOctetsDiscardR	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of red bytes by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  13  }
+
+
+	nptRsvpTeLspOctetsDiscardSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of bytes by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  14  }
+
+
+	nptRsvpTeLspPacketsPassG	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of green packets by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  15  }
+
+
+	nptRsvpTeLspPacketsPassY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of yellow packets by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  16  }
+
+
+	nptRsvpTeLspPacketsPassSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of packets(green+yellow) by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  17  }
+
+
+	nptRsvpTeLspPacketsDiscardGY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of green or yellow packets by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  18  }
+
+
+	nptRsvpTeLspPacketsDiscardR	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of red packets by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  19  }
+
+
+	nptRsvpTeLspPacketsDiscardSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of packets by this RSVP-TE LSP"
+		::=  {  nptRsvpTeLspEntry  20  }
+
+	nptRsvpTeLspCoSTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptRsvpTeLspCoSEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"RSVP-TE LSP CoS statistics table"
+		::=  { nptRsvpObjects  6 }
+
+	nptRsvpTeLspCoSEntry	OBJECT-TYPE
+		SYNTAX		NptRsvpTeLspCoSEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry contains statistics collected for RSVP-TE LSP"
+		INDEX		{  nptRsvpTeLspCoSIndex  }
+		::=  { nptRsvpTeLspCoSTable 1 }
+
+	NptRsvpTeLspCoSEntry  ::=  SEQUENCE {
+		nptRsvpTeLspCoSIndex  Integer32,
+		nptRsvpTeLspCoSTunnelID  Integer32,
+		nptRsvpTeLspCoSLspId  Integer32,
+		nptRsvpTeLspCoSLspType  NPTStatisticsTunnelType,
+		nptRsvpTeLspCoS  Integer32,
+		nptRsvpTeLspCoSDisContinuityTime  DisplayString,
+		nptRsvpTeLspCoSElapsed  DisplayString,
+		nptRsvpTeLspCoSOctetsPassG  Counter64,
+		nptRsvpTeLspCoSOctetsPassY  Counter64,
+		nptRsvpTeLspCoSOctetsPassSum  Counter64,
+		nptRsvpTeLspCoSOctetsDiscardGY  Counter64,
+		nptRsvpTeLspCoSOctetsDiscardR  Counter64,
+		nptRsvpTeLspCoSOctetsDiscardSum  Counter64,
+		nptRsvpTeLspCoSPacketsPassG  Counter64,
+		nptRsvpTeLspCoSPacketsPassY  Counter64,
+		nptRsvpTeLspCoSPacketsPassSum  Counter64,
+		nptRsvpTeLspCoSPacketsDiscardGY  Counter64,
+		nptRsvpTeLspCoSPacketsDiscardR  Counter64,
+		nptRsvpTeLspCoSPacketsDiscardSum  Counter64
+		}
+
+
+	nptRsvpTeLspCoSIndex	OBJECT-TYPE	
+		SYNTAX			Integer32  ( 0 .. 2147483647  ) 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Index of the statistics for RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  1  }
+
+
+	nptRsvpTeLspCoSTunnelID	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE Tunnel ID"
+		::=  {  nptRsvpTeLspCoSEntry  2  }
+
+
+	nptRsvpTeLspCoSLspId	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE LSP ID"
+		::=  {  nptRsvpTeLspCoSEntry  5  }
+
+
+	nptRsvpTeLspCoSLspType	OBJECT-TYPE	
+		SYNTAX			NPTStatisticsTunnelType
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE LSP type"
+		::=  {  nptRsvpTeLspCoSEntry  6  }
+
+
+	nptRsvpTeLspCoS	OBJECT-TYPE	
+		SYNTAX			Integer32	( 0 .. 7  )
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"RSVP-TE LSP CoS (0~7)"
+		::=  {  nptRsvpTeLspCoSEntry  7  }
+
+
+	nptRsvpTeLspCoSDisContinuityTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"DisContinuity Time for the counters in this table"
+		::=  {  nptRsvpTeLspCoSEntry  8  }
+
+
+	nptRsvpTeLspCoSElapsed	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Elapsed time for the counters in this table, in the format of dd:hh:mm:ss"
+		::=  {  nptRsvpTeLspCoSEntry  9  }
+
+
+	nptRsvpTeLspCoSOctetsPassG	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of green bytes by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  10  }
+
+
+	nptRsvpTeLspCoSOctetsPassY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of yellow bytes by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  11  }
+
+
+	nptRsvpTeLspCoSOctetsPassSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of bytes(green+yellow) by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  12  }
+
+
+	nptRsvpTeLspCoSOctetsDiscardGY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of green or yellow bytes by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  13  }
+
+
+	nptRsvpTeLspCoSOctetsDiscardR	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of red bytes by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  14  }
+
+
+	nptRsvpTeLspCoSOctetsDiscardSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of bytes by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  15  }
+
+
+	nptRsvpTeLspCoSPacketsPassG	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of green packets by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  16  }
+
+
+	nptRsvpTeLspCoSPacketsPassY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of yellow packets by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  17  }
+
+
+	nptRsvpTeLspCoSPacketsPassSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Passed total number of packets(green+yellow) by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  18  }
+
+
+	nptRsvpTeLspCoSPacketsDiscardGY	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of green or yellow packets by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  19  }
+
+
+	nptRsvpTeLspCoSPacketsDiscardR	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of red packets by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  20  }
+
+
+	nptRsvpTeLspCoSPacketsDiscardSum	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Discarded total number of packets by this RSVP-TE LSP CoS"
+		::=  {  nptRsvpTeLspCoSEntry  21  }
+
+	nptRsvpSoftPreemptionNodeStatsTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptRsvpSoftPreemptionNodeStatsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Table for RSVP soft preemption node statistics"
+		::=  { nptRsvpObjects  7 }
+
+	nptRsvpSoftPreemptionNodeStatsEntry	OBJECT-TYPE
+		SYNTAX		NptRsvpSoftPreemptionNodeStatsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry contains statistics collected from an instance of RSVP."
+		INDEX		{  nptRsvpSoftPreemptionNodeStatsIndex  }
+		::=  { nptRsvpSoftPreemptionNodeStatsTable 1 }
+
+	NptRsvpSoftPreemptionNodeStatsEntry  ::=  SEQUENCE {
+		nptRsvpSoftPreemptionNodeStatsIndex  Integer32,
+		nptRsvpSoftPreemptionNodeStatsInstance  DisplayString,
+		nptRsvpSoftPreemptionNodeStatsDisContinuityTime  DisplayString,
+		nptRsvpSoftPreemptionNodeStatsElapsed  DisplayString,
+		nptRsvpSoftPreemptionNodeStatsTotalEventsCount  Counter64,
+		nptRsvpSoftPreemptionNodeStatsLspCount  Counter64,
+		nptRsvpSoftPreemptionNodeStatsTimedOutLspCount  Counter64,
+		nptRsvpSoftPreemptionNodeStatsTornDownLspCount  Counter64,
+		nptRsvpSoftPreemptionNodeStatsMinTimeInPendingStateCount  Counter64,
+		nptRsvpSoftPreemptionNodeStatsMaxTimeInPendingStateCount  Counter64
+		}
+		
+	nptRsvpSoftPreemptionNodeStatsIndex	OBJECT-TYPE	
+		SYNTAX			Integer32  ( 0 .. 2147483647  ) 
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		"The index of the RSVP Soft Preemption Node statistics."
+		::=  {  nptRsvpSoftPreemptionNodeStatsEntry  1  }
+
+
+	nptRsvpSoftPreemptionNodeStatsInstance	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		" The routing instance in which the RSVP protocol is running"
+		::=  {  nptRsvpSoftPreemptionNodeStatsEntry  2  }
+
+
+	nptRsvpSoftPreemptionNodeStatsDisContinuityTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"DisContinuity Time for the counters in this table"
+		::=  {  nptRsvpSoftPreemptionNodeStatsEntry  3  }
+
+
+	nptRsvpSoftPreemptionNodeStatsElapsed	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Elapsed time for the counters in this table, in the format of dd:hh:mm:ss"
+		::=  {  nptRsvpSoftPreemptionNodeStatsEntry  4  }
+
+
+	nptRsvpSoftPreemptionNodeStatsTotalEventsCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of soft preemption events happened on a node."
+		::=  {  nptRsvpSoftPreemptionNodeStatsEntry  5  }	
+		
+	nptRsvpSoftPreemptionNodeStatsLspCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of soft preempted LSPs by transit LSR."
+		::=  {  nptRsvpSoftPreemptionNodeStatsEntry  6  }	
+		
+	nptRsvpSoftPreemptionNodeStatsTimedOutLspCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of soft preempted LSPs, waiting for PATH Tear from Headend."
+		::=  {  nptRsvpSoftPreemptionNodeStatsEntry  7  }	
+
+	nptRsvpSoftPreemptionNodeStatsTornDownLspCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of soft preempted LSPs, that were torn down."
+		::=  {  nptRsvpSoftPreemptionNodeStatsEntry  8  }	
+
+	nptRsvpSoftPreemptionNodeStatsMinTimeInPendingStateCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Minimum time soft preempted LSP in pending state."
+		::=  {  nptRsvpSoftPreemptionNodeStatsEntry  9  }	
+		
+	nptRsvpSoftPreemptionNodeStatsMaxTimeInPendingStateCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Maximum time soft preempted LSP in pending state."
+		::=  {  nptRsvpSoftPreemptionNodeStatsEntry  10  }	
+
+	nptRsvpSoftPreemptionHeadendStatsTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  NptRsvpSoftPreemptionHeadendStatsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Table for RSVP soft preemption headend statistics"
+		::=  { nptRsvpObjects  8 }
+
+	nptRsvpSoftPreemptionHeadendStatsEntry	OBJECT-TYPE
+		SYNTAX		NptRsvpSoftPreemptionHeadendStatsEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry contains statistics collected from an instance of RSVP."
+		INDEX		{  nptRsvpSoftPreemptionHeadendStatsIndex  }
+		::=  { nptRsvpSoftPreemptionHeadendStatsTable 1 }
+
+	NptRsvpSoftPreemptionHeadendStatsEntry  ::=  SEQUENCE {
+		nptRsvpSoftPreemptionHeadendStatsIndex  Integer32,
+		nptRsvpSoftPreemptionHeadendStatsInstance  DisplayString,
+		nptRsvpSoftPreemptionHeadendStatsDisContinuityTime  DisplayString,
+		nptRsvpSoftPreemptionHeadendStatsElapsed  DisplayString,
+		nptRsvpSoftPreemptionHeadendStatsLspCount  Counter64,
+		nptRsvpSoftPreemptionHeadendStatsReroutedLspCount  Counter64,
+		nptRsvpSoftPreemptionHeadendStatsTornDownLspCount  Counter64
+		}
+		
+	nptRsvpSoftPreemptionHeadendStatsIndex	OBJECT-TYPE	
+		SYNTAX			Integer32  ( 0 .. 2147483647  ) 
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		"The index of the RSVP Soft Preemption headend statistics."
+		::=  {  nptRsvpSoftPreemptionHeadendStatsEntry  1  }
+
+
+	nptRsvpSoftPreemptionHeadendStatsInstance	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		not-accessible
+		STATUS			current
+		DESCRIPTION		" The routing instance in which the RSVP protocol is running"
+		::=  {  nptRsvpSoftPreemptionHeadendStatsEntry  2  }
+
+
+	nptRsvpSoftPreemptionHeadendStatsDisContinuityTime	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"DisContinuity Time for the counters in this table"
+		::=  {  nptRsvpSoftPreemptionHeadendStatsEntry  3  }
+
+
+	nptRsvpSoftPreemptionHeadendStatsElapsed	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Elapsed time for the counters in this table, in the format of dd:hh:mm:ss"
+		::=  {  nptRsvpSoftPreemptionHeadendStatsEntry  4  }
+
+
+	nptRsvpSoftPreemptionHeadendStatsLspCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of soft preempted LSPs by Headend LSR."
+		::=  {  nptRsvpSoftPreemptionHeadendStatsEntry  5  }	
+		
+	nptRsvpSoftPreemptionHeadendStatsReroutedLspCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of re-routed soft preempted headend-LSPs."
+		::=  {  nptRsvpSoftPreemptionHeadendStatsEntry  6  }	
+		
+	nptRsvpSoftPreemptionHeadendStatsTornDownLspCount	OBJECT-TYPE	
+		SYNTAX			Counter64
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Number of soft preempted Headend-LSPs, that were torn down."
+		::=  {  nptRsvpSoftPreemptionHeadendStatsEntry  7  }			
+		
+END
