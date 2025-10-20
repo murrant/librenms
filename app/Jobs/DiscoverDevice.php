@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Actions\Device\CheckDeviceAvailability;
-use App\Actions\Device\CheckDeviceHasAnyAvailability;
 use App\Events\DeviceDiscovered;
 use App\Events\DiscoveringDevice;
 use App\Facades\LibrenmsConfig;
