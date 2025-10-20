@@ -10,7 +10,6 @@ use App\Models\Device;
 use App\PerDeviceProcess;
 use App\Polling\Measure\MeasurementManager;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Log;
 use LibreNMS\Enum\ProcessType;
 use LibreNMS\Util\ModuleList;
 use Symfony\Component\Console\Input\InputArgument;
