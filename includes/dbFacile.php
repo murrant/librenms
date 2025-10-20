@@ -60,7 +60,7 @@ function dbQuery($sql, $parameters = [])
  * @deprecated Please use Eloquent instead; https://laravel.com/docs/eloquent#inserting-and-updating-models
  * @see https://laravel.com/docs/eloquent#inserting-and-updating-models
  */
-function dbInsert($data, $table): int|null
+function dbInsert($data, $table): ?int
 {
     $sql = 'INSERT IGNORE INTO `' . $table . '` (`' . implode('`,`', array_keys($data)) . '`)  VALUES (' . implode(',', dbPlaceHolders($data)) . ')';
 
