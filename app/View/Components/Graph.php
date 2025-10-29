@@ -56,8 +56,8 @@ class Graph extends Component
      * @param  int  $absolute_size
      * @param  Device|int|null  $device
      * @param  Port|int|null  $port
-     * @param bool $link
-     * @param string $popupTitle
+     * @param  bool  $link
+     * @param  string  $popupTitle
      */
     public function __construct(
         string $type = '',

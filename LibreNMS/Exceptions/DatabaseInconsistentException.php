@@ -39,7 +39,7 @@ use Throwable;
 class DatabaseInconsistentException extends \Exception implements UpgradeableException
 {
     /**
-     * @param \LibreNMS\ValidationResult[] $validationResults
+     * @param  \LibreNMS\ValidationResult[]  $validationResults
      */
     public function __construct(/**
      * @var \LibreNMS\ValidationResult[]

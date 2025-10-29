@@ -65,7 +65,7 @@ class Datastore implements WriteInterface, DataStorageInterface
     /**
      * Datastore constructor.
      *
-     * @param DatastoreContract[] $stores
+     * @param  DatastoreContract[]  $stores
      */
     public function __construct(protected array $stores)
     {

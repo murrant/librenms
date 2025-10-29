@@ -147,6 +147,7 @@ class ObjectCache
             $query = Port::hasAccess(auth()->user())->when($device_id, function ($query) use ($device_id): void {
                 $query->where('device_id', $device_id);
             });
+
             return match ($field) {
                 'down' => $query->isDown()->count(),
                 'up' => $query->isUp()->count(),
@@ -179,6 +180,7 @@ class ObjectCache
     {
         return Cache::remember("ObjectCache:device_{$field}_count:" . auth()->id(), self::$cache_time, function () use ($field) {
             $query = Device::hasAccess(auth()->user());
+
             return match ($field) {
                 'down' => $query->isDown()->count(),
                 'up' => $query->isUp()->count(),
@@ -210,6 +212,7 @@ class ObjectCache
             $query = Service::hasAccess(auth()->user())->when($device_id, function ($query) use ($device_id): void {
                 $query->where('device_id', $device_id);
             });
+
             return match ($field) {
                 'ok' => $query->isOk()->count(),
                 'warning' => $query->isWarning()->count(),
@@ -241,6 +244,7 @@ class ObjectCache
             $query = Sensor::hasAccess(auth()->user())->when($device_id, function ($query) use ($device_id): void {
                 $query->where('device_id', $device_id);
             });
+
             return match ($field) {
                 'ok' => $query->count() - $query->isCritical()->count(),
                 'critical' => $query->isCritical()->count(),

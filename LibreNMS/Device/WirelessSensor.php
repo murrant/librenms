@@ -46,7 +46,7 @@ class WirelessSensor
      * @param  int  $multiplier  a number to multiply the value(s) by
      * @param  int  $divisor  a number to divide the value(s) by
      * @param  string  $aggregator  an operation to combine multiple numbers. Supported: sum, avg
-     * @param int $access_point_ip The id of the AP in the access_points sensor this belongs to (generally used for controllers)
+     * @param  int  $access_point_ip  The id of the AP in the access_points sensor this belongs to (generally used for controllers)
      * @param  int|float  $high_limit  Alerting: Maximum value
      * @param  int|float  $low_limit  Alerting: Minimum value
      * @param  int|float  $high_warn  Alerting: High warning value

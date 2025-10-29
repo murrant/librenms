@@ -9,12 +9,12 @@ class Submenu extends Component
     /**
      * Create a new component instance.
      *
+     * @param  string  $title
+     * @param  string  $menu
+     * @param  string  $deviceId
+     * @param  string  $currentTab
+     * @param  string  $selected
      * @return void
-     * @param string $title
-     * @param string $menu
-     * @param string $deviceId
-     * @param string $currentTab
-     * @param string $selected
      */
     public function __construct(
         /**
@@ -37,8 +37,7 @@ class Submenu extends Component
          * The submenu selected.
          */
         public $selected
-    )
-    {
+    ) {
     }
 
     /**

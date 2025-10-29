@@ -46,7 +46,7 @@ class SnmpResponse implements \Stringable
      * Create a new response object filling with output from the net-snmp command.
      *
      * @param  string  $output
-     * @param string $stderr
+     * @param  string  $stderr
      * @param  int  $exitCode
      */
     public function __construct(string $output, public readonly string $stderr = '', public readonly int $exitCode = 0)

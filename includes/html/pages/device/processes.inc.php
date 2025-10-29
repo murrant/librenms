@@ -32,7 +32,7 @@ $order = match ($vars['order'] ?? '') {
     'user' => '`user`',
     'command' => '`command`',
     default => '`pid`',
-};//end switch
+}; //end switch
 
 if (isset($vars['by']) && $vars['by'] == 'desc') {
     $by = 'desc';

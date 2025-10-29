@@ -9,9 +9,9 @@ class Panel extends Component
     /**
      * Create a new component instance.
      *
+     * @param  string  $title
+     * @param  string  $bodyClass
      * @return void
-     * @param string $title
-     * @param string $bodyClass
      */
     public function __construct(
         /**
@@ -22,8 +22,7 @@ class Panel extends Component
          * The Panel body class.
          */
         public $body_class = null
-    )
-    {
+    ) {
     }
 
     /**
