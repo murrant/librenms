@@ -15,7 +15,7 @@ try {
     return;
 }
 
-include 'includes/nfs-shared.inc.php';
+include base_path('includes/nfs-shared.inc.php');
 
 $data = $returned['data'];
 
