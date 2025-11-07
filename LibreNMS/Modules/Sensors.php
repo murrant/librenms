@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Sensors.php
  *
@@ -104,7 +105,6 @@ class Sensors implements \LibreNMS\Interfaces\Module
                 );
             }
 
-
             discovery_process($os, $sensor_class, $pre_cache);
             app('sensor-discovery')->sync(sensor_class: $sensor_class, poller_type: 'snmp');
 //            $this->syncModelsByGroup($os->getDevice(), 'sensors', $sensors, ['sensor_class' => $type]);
@@ -126,6 +126,7 @@ class Sensors implements \LibreNMS\Interfaces\Module
         // fetch data for all non-custom polled sensors
         $oids = $all_sensors->filter(function ($sensor, $sensor_class) use ($os) {
             $polling_interface = Sensor::from($sensor_class)->getPollingInterface();
+
             return ! $os instanceof $polling_interface;
         })->flatten()->pluck('sensor_oid')->unique()->all();
 
@@ -253,7 +254,7 @@ class Sensors implements \LibreNMS\Interfaces\Module
                     'state_translation_id',
                     'state_index_id',
                     'sensors_to_state_translations_id',
-                    'lastupdate'
+                    'lastupdate',
                 ]),
             'state_indexes' => StateIndex::join('state_translations', 'state_indexes.state_index_id', '=', 'state_translations.state_index_id')
                 ->joinSub(
@@ -275,7 +276,7 @@ class Sensors implements \LibreNMS\Interfaces\Module
                     'state_translations.state_draw_graph',
                     'state_translations.state_value',
                     'state_translations.state_generic_value',
-                    ])
+                ])
                 ->get(),
         ];
     }

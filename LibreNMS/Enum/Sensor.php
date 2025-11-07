@@ -159,7 +159,7 @@ enum Sensor: string
      */
     public function getPollingInterface(): string
     {
-        return match($this) {
+        return match ($this) {
             self::AIRFLOW => \LibreNMS\Interfaces\Polling\Sensors\SensorAirflowPolling::class,
             self::BER => \LibreNMS\Interfaces\Polling\Sensors\SensorBerPolling::class,
             self::BITRATE => \LibreNMS\Interfaces\Polling\Sensors\SensorBitratePolling::class,
