@@ -4,6 +4,14 @@ use App\Facades\LibrenmsConfig;
 use LibreNMS\Enum\Sensor;
 use LibreNMS\OS;
 
+if (empty($os) || ! $os instanceof OS) {
+    $os = OS::make($device);
+}
+
+(new \LibreNMS\Modules\Sensors())->discover($os);
+
+return;
+
 /** @var OS $os */
 $pre_cache = $os->preCache();
 

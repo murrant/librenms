@@ -23,6 +23,7 @@
 
 namespace LibreNMS\Util;
 
+use App\Models\Sensor;
 use Illuminate\Support\Str;
 use LibreNMS\Exceptions\UserFunctionExistException;
 
@@ -31,7 +32,7 @@ class UserFuncHelper
     public function __construct(
         public string|int|float $value,
         public string|int|float|null $value_raw = null,
-        public array $sensor = [],
+        public Sensor|array $sensor = [],
     ) {
     }
 

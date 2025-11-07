@@ -113,4 +113,84 @@ enum Sensor: string
             self::SIGNAL_LOSS => 'wave-square'
         };
     }
+
+    /**
+     * @return class-string
+     */
+    public function discoveryInterface(): string
+    {
+        return match ($this) {
+            self::AIRFLOW => \LibreNMS\Interfaces\Discovery\Sensors\SensorAirflowDiscovery::class,
+            self::BER => \LibreNMS\Interfaces\Discovery\Sensors\SensorBerDiscovery::class,
+            self::BITRATE => \LibreNMS\Interfaces\Discovery\Sensors\SensorBitRateDiscovery::class,
+            self::CHARGE => \LibreNMS\Interfaces\Discovery\Sensors\SensorChargeDiscovery::class,
+            self::CHROMATIC_DISPERSION => \LibreNMS\Interfaces\Discovery\Sensors\SensorChromaticDispersionDiscovery::class,
+            self::COOLING => \LibreNMS\Interfaces\Discovery\Sensors\SensorCoolingDiscovery::class,
+            self::COUNT => \LibreNMS\Interfaces\Discovery\Sensors\SensorCountDiscovery::class,
+            self::CURRENT => \LibreNMS\Interfaces\Discovery\Sensors\SensorCurrentDiscovery::class,
+            self::DBM => \LibreNMS\Interfaces\Discovery\Sensors\SensorDbmDiscovery::class,
+            self::DELAY => \LibreNMS\Interfaces\Discovery\Sensors\SensorDelayDiscovery::class,
+            self::EER => \LibreNMS\Interfaces\Discovery\Sensors\SensorEerDiscovery::class,
+            self::FANSPEED => \LibreNMS\Interfaces\Discovery\Sensors\SensorFanspeedDiscovery::class,
+            self::FREQUENCY => \LibreNMS\Interfaces\Discovery\Sensors\SensorFrequencyDiscovery::class,
+            self::HUMIDITY => \LibreNMS\Interfaces\Discovery\Sensors\SensorHumidityDiscovery::class,
+            self::LOAD => \LibreNMS\Interfaces\Discovery\Sensors\SensorLoadDiscovery::class,
+            self::LOSS => \LibreNMS\Interfaces\Discovery\Sensors\SensorLossDiscovery::class,
+            self::PERCENT => \LibreNMS\Interfaces\Discovery\Sensors\SensorPercentDiscovery::class,
+            self::POWER => \LibreNMS\Interfaces\Discovery\Sensors\SensorPowerDiscovery::class,
+            self::POWER_CONSUMED => \LibreNMS\Interfaces\Discovery\Sensors\SensorPowerConsumedDiscovery::class,
+            self::POWER_FACTOR => \LibreNMS\Interfaces\Discovery\Sensors\SensorPowerFactorDiscovery::class,
+            self::PRESSURE => \LibreNMS\Interfaces\Discovery\Sensors\SensorPressureDiscovery::class,
+            self::QUALITY_FACTOR => \LibreNMS\Interfaces\Discovery\Sensors\SensorQualityFactorDiscovery::class,
+            self::RUNTIME => \LibreNMS\Interfaces\Discovery\Sensors\SensorRuntimeDiscovery::class,
+            self::SIGNAL => \LibreNMS\Interfaces\Discovery\Sensors\SensorSignalDiscovery::class,
+            self::SNR => \LibreNMS\Interfaces\Discovery\Sensors\SensorSnrDiscovery::class,
+            self::STATE => \LibreNMS\Interfaces\Discovery\Sensors\SensorStateDiscovery::class,
+            self::TEMPERATURE => \LibreNMS\Interfaces\Discovery\Sensors\SensorTemperatureDiscovery::class,
+            self::TV_SIGNAL => \LibreNMS\Interfaces\Discovery\Sensors\SensorTvSignalDiscovery::class,
+            self::VOLTAGE => \LibreNMS\Interfaces\Discovery\Sensors\SensorVoltageDiscovery::class,
+            self::WATERFLOW => \LibreNMS\Interfaces\Discovery\Sensors\SensorWaterflowDiscovery::class,
+            self::SIGNAL_LOSS => \LibreNMS\Interfaces\Discovery\Sensors\SensorSignalLossDiscovery::class,
+        };
+    }
+
+    /**
+     * @return class-string
+     */
+    public function getPollingInterface(): string
+    {
+        return match($this) {
+            self::AIRFLOW => \LibreNMS\Interfaces\Polling\Sensors\SensorAirflowPolling::class,
+            self::BER => \LibreNMS\Interfaces\Polling\Sensors\SensorBerPolling::class,
+            self::BITRATE => \LibreNMS\Interfaces\Polling\Sensors\SensorBitratePolling::class,
+            self::CHARGE => \LibreNMS\Interfaces\Polling\Sensors\SensorChargePolling::class,
+            self::CHROMATIC_DISPERSION => \LibreNMS\Interfaces\Polling\Sensors\SensorChromaticDispersionPolling::class,
+            self::COOLING => \LibreNMS\Interfaces\Polling\Sensors\SensorCoolingPolling::class,
+            self::COUNT => \LibreNMS\Interfaces\Polling\Sensors\SensorCountPolling::class,
+            self::CURRENT => \LibreNMS\Interfaces\Polling\Sensors\SensorCurrentPolling::class,
+            self::DBM => \LibreNMS\Interfaces\Polling\Sensors\SensorDbmPolling::class,
+            self::DELAY => \LibreNMS\Interfaces\Polling\Sensors\SensorDelayPolling::class,
+            self::EER => \LibreNMS\Interfaces\Polling\Sensors\SensorEerPolling::class,
+            self::FANSPEED => \LibreNMS\Interfaces\Polling\Sensors\SensorFanspeedPolling::class,
+            self::FREQUENCY => \LibreNMS\Interfaces\Polling\Sensors\SensorFrequencyPolling::class,
+            self::HUMIDITY => \LibreNMS\Interfaces\Polling\Sensors\SensorHumidityPolling::class,
+            self::LOAD => \LibreNMS\Interfaces\Polling\Sensors\SensorLoadPolling::class,
+            self::LOSS => \LibreNMS\Interfaces\Polling\Sensors\SensorLossPolling::class,
+            self::PERCENT => \LibreNMS\Interfaces\Polling\Sensors\SensorPercentPolling::class,
+            self::POWER => \LibreNMS\Interfaces\Polling\Sensors\SensorPowerPolling::class,
+            self::POWER_CONSUMED => \LibreNMS\Interfaces\Polling\Sensors\SensorPowerConsumedPolling::class,
+            self::POWER_FACTOR => \LibreNMS\Interfaces\Polling\Sensors\SensorPowerFactorPolling::class,
+            self::PRESSURE => \LibreNMS\Interfaces\Polling\Sensors\SensorPressurePolling::class,
+            self::QUALITY_FACTOR => \LibreNMS\Interfaces\Polling\Sensors\SensorQualityFactorPolling::class,
+            self::RUNTIME => \LibreNMS\Interfaces\Polling\Sensors\SensorRuntimePolling::class,
+            self::SIGNAL => \LibreNMS\Interfaces\Polling\Sensors\SensorSignalPolling::class,
+            self::SNR => \LibreNMS\Interfaces\Polling\Sensors\SensorSnrPolling::class,
+            self::STATE => \LibreNMS\Interfaces\Polling\Sensors\SensorStatePolling::class,
+            self::TEMPERATURE => \LibreNMS\Interfaces\Polling\Sensors\SensorTemperaturePolling::class,
+            self::TV_SIGNAL => \LibreNMS\Interfaces\Polling\Sensors\SensorTvSignalPolling::class,
+            self::VOLTAGE => \LibreNMS\Interfaces\Polling\Sensors\SensorVoltagePolling::class,
+            self::WATERFLOW => \LibreNMS\Interfaces\Polling\Sensors\SensorWaterflowPolling::class,
+            self::SIGNAL_LOSS => \LibreNMS\Interfaces\Polling\Sensors\SensorSignalLossPolling::class,
+        };
+    }
 }

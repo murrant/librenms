@@ -19,7 +19,9 @@ class Sensor extends DeviceRelatedModel implements Keyable
     use HasFactory;
     use HasThresholds;
 
-    public $timestamps = false;
+    const CREATED_AT = null;
+    const UPDATED_AT = 'lastupdate';
+
     protected $primaryKey = 'sensor_id';
     protected $fillable = [
         'poller_type',
