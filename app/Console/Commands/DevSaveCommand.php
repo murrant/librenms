@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SaveTestData.php
  *
@@ -82,7 +83,7 @@ class DevSaveCommand extends LnmsCommand
 
         // Build list of OS/variants to process
         if (! empty($osName) && ! empty($variant)) {
-            $osList = [ $osName . '_' . $variant => [$osName, $variant] ];
+            $osList = [$osName . '_' . $variant => [$osName, $variant]];
         } else {
             $osList = ModuleTestHelper::findOsWithData($modules, $osName);
         }
