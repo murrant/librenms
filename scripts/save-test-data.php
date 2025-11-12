@@ -27,13 +27,13 @@ $hasHelp = isset($options['h']) || isset($options['help']);
 $hasOs = isset($options['o']) || isset($options['os']);
 $hasModules = isset($options['m']) || isset($options['modules']);
 
-if ($hasHelp || (!$hasOs && !$hasModules)) {
+if ($hasHelp || (! $hasOs && ! $hasModules)) {
     $cmd[] = '--help';
 } else {
     // OS + variant
     $os = $options['o'] ?? $options['os'] ?? null;
     $variant = $options['v'] ?? $options['variant'] ?? null;
-    if (!empty($os)) {
+    if (! empty($os)) {
         $cmd[] = $variant ? "{$os}_{$variant}" : $os;
     }
 
@@ -50,7 +50,7 @@ if ($hasHelp || (!$hasOs && !$hasModules)) {
 
     // File
     $file = $options['f'] ?? $options['file'] ?? null;
-    if (!empty($file)) {
+    if (! empty($file)) {
         array_push($cmd, '-f', $file);
     }
 
