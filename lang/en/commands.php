@@ -60,6 +60,25 @@ return [
             'snmpsim' => 'Use snmpsim for unit tests',
         ],
     ],
+    'dev:save' => [
+        'description' => 'Save or refresh test data used by unit tests',
+        'arguments' => [
+            'os' => 'OS to save test data for, optionally include a variant using underscore: os_variant',
+        ],
+        'options' => [
+            'modules' => 'The discovery/poller module(s) to collect data for, comma delimited. Use "all" for all modules',
+            'no-save' => "Don't save database entries, print them out instead",
+            'file' => 'Save data to the given file instead of the standard location',
+        ],
+        'os' => 'OS',
+        'module' => 'Module',
+        'variant' => 'Variant',
+        'waiting_snmpsim' => 'Waiting for snmpsim to initialize...',
+        'failed_start_snmpsim' => 'Failed to start snmpsim, make sure it is installed, working, and there are no bad snmprec files.',
+        'no_snmprec' => 'No matching snmprec(s) found.',
+        'file_single_only' => 'Failed to create test data, -f/--file option can be used with one os/variant combination.',
+        'multiple_found' => 'Multiple combinations (:count) found.',
+    ],
     'dev:simulate' => [
         'description' => 'Simulate devices using test data',
         'arguments' => [

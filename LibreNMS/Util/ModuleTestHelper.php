@@ -547,7 +547,6 @@ class ModuleTestHelper
      */
     public function generateTestData(string $snmpSimIp, int $snmpSimPort, bool $noSave = false): ?array
     {
-        global $device;
         LibrenmsConfig::set('rrd.enable', false); // disable rrd
         LibrenmsConfig::set('rrdtool_version', '1.7.2'); // don't detect rrdtool version, rrdtool is not install on ci
 
@@ -565,8 +564,8 @@ class ModuleTestHelper
         }
 
         // Remove existing device in case it didn't get removed previously, if we're not running in CI
-        if (! getenv('CI') && ($existing_device = device_by_name($snmpSimIp)) && isset($existing_device['device_id'])) {
-            delete_device($existing_device['device_id']);
+        if (! getenv('CI')) {
+            DeviceCache::get($snmpSimIp)->delete();
         }
 
         // Add the test device
@@ -590,8 +589,9 @@ class ModuleTestHelper
         }
 
         // Populate the device variable
-        $device = device_by_id_cache($device_id, true);
+        DeviceCache::refresh($device_id);
         DeviceCache::setPrimary($device_id);
+        $device = DeviceCache::get($device_id)->toArray();
 
         $data = [];  // array to hold dumped data
 
@@ -655,7 +655,7 @@ class ModuleTestHelper
         if (! getenv('CI') && $device['hostname'] == $snmpSimIp) {
             // we don't need the debug from this
             Debug::set(false);
-            delete_device($device_id);
+            DeviceCache::get($device_id)->delete();
         }
 
         if (! $noSave) {
