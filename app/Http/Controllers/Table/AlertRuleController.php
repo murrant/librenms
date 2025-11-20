@@ -1,4 +1,5 @@
 <?php
+
 /**
  * AlertRuleController.php
  *
@@ -33,7 +34,6 @@ use LibreNMS\Enum\AlertState;
 
 class AlertRuleController extends TableController
 {
-
     protected function rules()
     {
         return [
@@ -59,13 +59,13 @@ class AlertRuleController extends TableController
         return AlertRule::query()
             ->when($request->get('device_id'), fn ($query) => $query->whereHas('devices', fn ($q) => $q->where('device_id', $request->get('device_id'))))
             ->with([
-            'alerts' => fn ($query) => $query->select(['id', 'rule_id', 'state']),
-            'devices' => fn ($query) => $query->select(['devices.device_id', 'hostname', 'display', 'sysName']),
-            'groups' => fn ($query) => $query->select(['device_groups.id', 'name']),
-            'locations' => fn ($query) => $query->select(['locations.id', 'location']),
-            'transportSingles' => fn ($query) => $query->select(['alert_transports.transport_id', 'transport_name']),
-            'transportGroups' => fn ($query) => $query->select(['alert_transport_groups.transport_group_id', 'transport_group_name']),
-        ]);
+                'alerts' => fn ($query) => $query->select(['id', 'rule_id', 'state']),
+                'devices' => fn ($query) => $query->select(['devices.device_id', 'hostname', 'display', 'sysName']),
+                'groups' => fn ($query) => $query->select(['device_groups.id', 'name']),
+                'locations' => fn ($query) => $query->select(['locations.id', 'location']),
+                'transportSingles' => fn ($query) => $query->select(['alert_transports.transport_id', 'transport_name']),
+                'transportGroups' => fn ($query) => $query->select(['alert_transport_groups.transport_group_id', 'transport_group_name']),
+            ]);
     }
 
     /**
@@ -92,7 +92,7 @@ class AlertRuleController extends TableController
     {
         $devices = [];
 
-        foreach($alertRule->devices as $device) {
+        foreach ($alertRule->devices as $device) {
             $devices[] = [
                 'type' => 'device',
                 'id' => $device->device_id,
@@ -101,7 +101,7 @@ class AlertRuleController extends TableController
             ];
         }
 
-        foreach($alertRule->groups as $group) {
+        foreach ($alertRule->groups as $group) {
             $devices[] = [
                 'type' => 'group',
                 'id' => $group->id,
@@ -110,7 +110,7 @@ class AlertRuleController extends TableController
             ];
         }
 
-        foreach($alertRule->locations as $location) {
+        foreach ($alertRule->locations as $location) {
             $devices[] = [
                 'type' => 'location',
                 'id' => $location->id,
@@ -126,7 +126,7 @@ class AlertRuleController extends TableController
     {
         $transports = [];
 
-        foreach($alertRule->transportSingles as $transport) {
+        foreach ($alertRule->transportSingles as $transport) {
             $transports[] = [
                 'type' => 'single',
                 'id' => $transport->transport_id,
@@ -134,7 +134,7 @@ class AlertRuleController extends TableController
             ];
         }
 
-        foreach($alertRule->transportGroups as $transport) {
+        foreach ($alertRule->transportGroups as $transport) {
             $transports[] = [
                 'type' => 'group',
                 'id' => $transport->transport_group_id,
