@@ -246,6 +246,7 @@ if (Auth::user()->hasGlobalAdmin()) {
 
             if (result_json !== null && result_json.valid) {
                 $('#builder_json').val(JSON.stringify(result_json));
+                console.log(result_json);
                 $.ajax({
                     type: method,
                     url: url,
@@ -255,7 +256,12 @@ if (Auth::user()->hasGlobalAdmin()) {
                         if (data.status == 'ok') {
                             toastr.success(data.message);
                             $('#create-alert').modal('hide');
-                            window.location.reload(); // FIXME: reload table
+                            var table = $('#alert-rules-table');
+                            if (table.length > 0) {
+                                table.bootgrid('reload');
+                            } else {
+                                window.location.reload(); // FIXME: reload table
+                            }
                         } else {
                             toastr.error(data.message);
                         }
