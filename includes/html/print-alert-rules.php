@@ -184,10 +184,15 @@ function addPopover(element, title = null, message = null, placement = 'right') 
     }
 }
 
-var alert_table = $('#alert-rules-table').bootgrid({
+$('#alert-rules-table').bootgrid({
     rowCount: [50, 100, 250, -1],
     ajax: true,
     url: '<?php echo route('table.alert-rule'); ?>',
+    post() {
+        return {
+            device: <?php echo json_encode($device['device_id'] ?? ''); ?>
+        };
+    },
     templates: {
         header: '<div id="{{ctx.id}}" class="{{css.header}}"><div class="row"> \
                 <div class="col-sm-8 actionBar tw:flex tw:justify-start tw:items-center"> \

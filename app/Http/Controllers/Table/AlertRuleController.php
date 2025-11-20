@@ -33,11 +33,12 @@ use LibreNMS\Enum\AlertState;
 
 class AlertRuleController extends TableController
 {
+    private ?array $defaultAlertRules = null;
 
     protected function rules()
     {
         return [
-            'device_id' => 'nullable|int',
+            'device' => 'nullable|int',
         ];
     }
 
@@ -57,7 +58,19 @@ class AlertRuleController extends TableController
     protected function baseQuery(Request $request)
     {
         return AlertRule::query()
-            ->when($request->get('device_id'), fn ($query) => $query->whereHas('devices', fn ($q) => $q->where('device_id', $request->get('device_id'))))
+            ->when($request->get('device'), function ($query, $device_id) {
+                return $query->where(function ($query) use ($device_id) {
+                    return $query->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id))
+                        ->orWhereHas('groups', fn ($q) => $q->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id)))
+                        ->orWhereHas('locations', fn ($q) => $q->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id)))
+                        ->orWhere(function ($query) {
+                            // Include rules with NO devices, groups, or locations
+                            return $query->whereDoesntHave('devices')
+                                ->whereDoesntHave('groups')
+                                ->whereDoesntHave('locations');
+                        });
+                });
+            })
             ->with([
             'alerts' => fn ($query) => $query->select(['id', 'rule_id', 'state']),
             'devices' => fn ($query) => $query->select(['devices.device_id', 'hostname', 'display', 'sysName']),
@@ -143,13 +156,18 @@ class AlertRuleController extends TableController
         }
 
         if (empty($transports)) {
-            $transports = AlertTransport::where('is_default', true)->get()->map(fn ($transport) => [
-                'type' => 'default',
-                'id' => $transport->transport_id,
-                'name' => $transport->transport_name,
-            ])->all();
+            return $this->defaultAlertRules();
         }
 
         return $transports;
+    }
+
+    private function defaultAlertRules(): array
+    {
+        return $this->defaultAlertRules ?? AlertTransport::where('is_default', true)->get()->map(fn ($transport) => [
+            'type' => 'default',
+            'id' => $transport->transport_id,
+            'name' => $transport->transport_name,
+        ])->all();
     }
 }
