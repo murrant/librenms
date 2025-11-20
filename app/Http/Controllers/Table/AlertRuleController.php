@@ -58,27 +58,37 @@ class AlertRuleController extends TableController
     protected function baseQuery(Request $request)
     {
         return AlertRule::query()
-            ->when($request->get('device'), function ($query, $device_id) {
-                return $query->where(function ($query) use ($device_id) {
-                    return $query->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id))
-                        ->orWhereHas('groups', fn ($q) => $q->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id)))
-                        ->orWhereHas('locations', fn ($q) => $q->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id)))
-                        ->orWhere(function ($query) {
-                            // Include rules with NO devices, groups, or locations
-                            return $query->whereDoesntHave('devices')
-                                ->whereDoesntHave('groups')
-                                ->whereDoesntHave('locations');
-                        });
-                });
-            })
-            ->with([
-            'alerts' => fn ($query) => $query->select(['id', 'rule_id', 'state']),
-            'devices' => fn ($query) => $query->select(['devices.device_id', 'hostname', 'display', 'sysName']),
-            'groups' => fn ($query) => $query->select(['device_groups.id', 'name']),
-            'locations' => fn ($query) => $query->select(['locations.id', 'location']),
-            'transportSingles' => fn ($query) => $query->select(['alert_transports.transport_id', 'transport_name']),
-            'transportGroups' => fn ($query) => $query->select(['alert_transport_groups.transport_group_id', 'transport_group_name']),
-        ]);
+            ->when($request->get('device'), fn($query, $device_id) => $query->where(function ($query) use ($device_id): void {
+                // Rules where invert_map is false/null (normal behavior)
+                $query->where(fn($query) => $query->where(function ($query): void {
+                    $query->where('invert_map', false)
+                        ->orWhereNull('invert_map');
+                })->where(fn($query) =>
+                // Match if device is in any relationship OR no relationships exist
+                    $query->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id))
+                    ->orWhereHas('groups', fn ($q) => $q->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id)))
+                    ->orWhereHas('locations', fn ($q) => $q->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id)))
+                    ->orWhere(fn($query) => $query->whereDoesntHave('devices')
+                        ->whereDoesntHave('groups')
+                        ->whereDoesntHave('locations'))))
+                // Rules where invert_map is true (inverted behavior)
+                ->orWhere(fn($query) => $query->where('invert_map', true)
+                    ->where(fn($query) =>
+                        // Must have at least one relationship
+                        $query->has('devices')
+                        ->orHas('groups')
+                        ->orHas('locations'))
+                    ->whereDoesntHave('devices', fn ($q) => $q->where('devices.device_id', $device_id))
+                    ->whereDoesntHave('groups', fn ($q) => $q->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id)))
+                    ->whereDoesntHave('locations', fn ($q) => $q->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id))));
+            }))->with([
+                'alerts' => fn ($query) => $query->select(['id', 'rule_id', 'state']),
+                'devices' => fn ($query) => $query->select(['devices.device_id', 'hostname', 'display', 'sysName']),
+                'groups' => fn ($query) => $query->select(['device_groups.id', 'name']),
+                'locations' => fn ($query) => $query->select(['locations.id', 'location']),
+                'transportSingles' => fn ($query) => $query->select(['alert_transports.transport_id', 'transport_name']),
+                'transportGroups' => fn ($query) => $query->select(['alert_transport_groups.transport_group_id', 'transport_group_name']),
+            ]);
     }
 
     /**
