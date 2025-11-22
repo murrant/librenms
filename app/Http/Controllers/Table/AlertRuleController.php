@@ -1,4 +1,5 @@
 <?php
+
 /**
  * AlertRuleController.php
  *
@@ -58,22 +59,22 @@ class AlertRuleController extends TableController
     protected function baseQuery(Request $request)
     {
         return AlertRule::query()
-            ->when($request->get('device'), fn($query, $device_id) => $query->where(function ($query) use ($device_id): void {
+            ->when($request->get('device'), fn ($query, $device_id) => $query->where(function ($query) use ($device_id): void {
                 // Rules where invert_map is false/null (normal behavior)
-                $query->where(fn($query) => $query->where(function ($query): void {
+                $query->where(fn ($query) => $query->where(function ($query): void {
                     $query->where('invert_map', false)
                         ->orWhereNull('invert_map');
-                })->where(fn($query) =>
+                })->where(fn ($query) =>
                 // Match if device is in any relationship OR no relationships exist
                     $query->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id))
                     ->orWhereHas('groups', fn ($q) => $q->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id)))
                     ->orWhereHas('locations', fn ($q) => $q->whereHas('devices', fn ($q) => $q->where('devices.device_id', $device_id)))
-                    ->orWhere(fn($query) => $query->whereDoesntHave('devices')
+                    ->orWhere(fn ($query) => $query->whereDoesntHave('devices')
                         ->whereDoesntHave('groups')
                         ->whereDoesntHave('locations'))))
                 // Rules where invert_map is true (inverted behavior)
-                ->orWhere(fn($query) => $query->where('invert_map', true)
-                    ->where(fn($query) =>
+                ->orWhere(fn ($query) => $query->where('invert_map', true)
+                    ->where(fn ($query) =>
                         // Must have at least one relationship
                         $query->has('devices')
                         ->orHas('groups')
@@ -115,7 +116,7 @@ class AlertRuleController extends TableController
     {
         $devices = [];
 
-        foreach($alertRule->devices as $device) {
+        foreach ($alertRule->devices as $device) {
             $devices[] = [
                 'type' => 'device',
                 'id' => $device->device_id,
@@ -124,7 +125,7 @@ class AlertRuleController extends TableController
             ];
         }
 
-        foreach($alertRule->groups as $group) {
+        foreach ($alertRule->groups as $group) {
             $devices[] = [
                 'type' => 'group',
                 'id' => $group->id,
@@ -133,7 +134,7 @@ class AlertRuleController extends TableController
             ];
         }
 
-        foreach($alertRule->locations as $location) {
+        foreach ($alertRule->locations as $location) {
             $devices[] = [
                 'type' => 'location',
                 'id' => $location->id,
@@ -149,7 +150,7 @@ class AlertRuleController extends TableController
     {
         $transports = [];
 
-        foreach($alertRule->transportSingles as $transport) {
+        foreach ($alertRule->transportSingles as $transport) {
             $transports[] = [
                 'type' => 'single',
                 'id' => $transport->transport_id,
@@ -157,7 +158,7 @@ class AlertRuleController extends TableController
             ];
         }
 
-        foreach($alertRule->transportGroups as $transport) {
+        foreach ($alertRule->transportGroups as $transport) {
             $transports[] = [
                 'type' => 'group',
                 'id' => $transport->transport_group_id,
