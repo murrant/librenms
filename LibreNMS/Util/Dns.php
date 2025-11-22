@@ -100,6 +100,7 @@ class Dns implements Geocoder
 
     /**
      * Resolve IPs for hostname IPv4 and IPv6. Respecting the order for dns.resolution_mode
+     *
      * @return string[]
      */
     public function resolveIPs(string $hostname, ?string $preferredIpFirst = null): array
@@ -127,7 +128,7 @@ class Dns implements Geocoder
             }
 
             // only put preferred IP in front of the same type of IPs
-            foreach($orig as $k => $ip) {
+            foreach ($orig as $k => $ip) {
                 $is_ipv4 = IPv4::isValid($ip);
                 if ($is_ipv4 === $target_is_ipv4 && $k < $orig_key) {
                     unset($orig[$orig_key]);
