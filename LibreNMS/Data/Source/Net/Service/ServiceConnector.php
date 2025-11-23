@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ServiceConnector.php
  *
@@ -29,15 +30,17 @@ use Socket;
 
 interface ServiceConnector extends \Stringable
 {
-
     public function connect(): bool;
+
     public function close(): void;
 
-
     public function getIp(): string;
+
     public function hasSocket(Socket $socket): bool;
+
     public function isServiceAvailable(): bool;
 
     public function prepSocketSelect(array &$read, array &$write, array &$except): void;
+
     public function getFiber(): \Fiber;
 }

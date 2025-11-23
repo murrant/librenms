@@ -1,4 +1,5 @@
 <?php
+
 /**
  * UdpConnector.php
  *
@@ -62,6 +63,7 @@ class UdpConnector extends BaseConnector
             // Basic validation: check if response is valid SNMP
             if ($this->requestMessage->validateResponse($response)) {
                 Log::info("Received valid UDP response from $this->ip");
+
                 return true;
             }
         }

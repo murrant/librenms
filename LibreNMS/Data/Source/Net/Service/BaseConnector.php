@@ -1,4 +1,5 @@
 <?php
+
 /**
  * BaseConnector.php
  *
@@ -44,9 +45,8 @@ abstract class BaseConnector implements ServiceConnector, Stringable
     public function __construct(
         public readonly string $ip,
         public readonly int $port,
-    )
-    {
-        $this->fiber = new Fiber(fn() => $this->fiberWorker());
+    ) {
+        $this->fiber = new Fiber(fn () => $this->fiberWorker());
     }
 
     final protected function createSocket(int $type, int $protocol): void
@@ -55,7 +55,7 @@ abstract class BaseConnector implements ServiceConnector, Stringable
         $socket = socket_create($domain, $type, $protocol);
 
         if ($socket === false) {
-            throw new \RuntimeException("Failed to create socket for $this->ip:$this->port ".socket_strerror(socket_last_error()));
+            throw new \RuntimeException("Failed to create socket for $this->ip:$this->port " . socket_strerror(socket_last_error()));
         }
 
         $this->socket = $socket;
@@ -123,11 +123,11 @@ abstract class BaseConnector implements ServiceConnector, Stringable
                     if ($this->isServiceAvailable()) {
                         Log::info("Successfully connected to the first available IP: $this->ip");
                         Fiber::suspend($this->ip);
+
                         return;
                     }
                 }
             } while ($ready === true);
-
         } catch (Throwable $e) {
             throw $e;
         } finally {

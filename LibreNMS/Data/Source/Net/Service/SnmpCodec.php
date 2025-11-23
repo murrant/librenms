@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SnmpCodec.php
  *
@@ -84,6 +85,7 @@ class SnmpCodec implements UdpCodec
         $pdu = $this->buildGetRequestPdu();
 
         $message = $version . $community . $pdu;
+
         return $this->encodeSequence($message);
     }
 
@@ -97,6 +99,7 @@ class SnmpCodec implements UdpCodec
         $pdu = $this->buildGetRequestPdu();
 
         $message = $version . $community . $pdu;
+
         return $this->encodeSequence($message);
     }
 
@@ -135,6 +138,7 @@ class SnmpCodec implements UdpCodec
         $scopedPdu = $this->encodeSequence($contextEngineId . $contextName . $pdu);
 
         $message = $version . $headerData . $msgSecurityParameters . $scopedPdu;
+
         return $this->encodeSequence($message);
     }
 
@@ -156,7 +160,7 @@ class SnmpCodec implements UdpCodec
         $pduContent = $requestId . $errorStatus . $errorIndex . $varbindList;
 
         // PDU type: GetRequest (0xa0)
-        return chr(0xa0) . $this->encodeLength(strlen($pduContent)) . $pduContent;
+        return chr(0xA0) . $this->encodeLength(strlen($pduContent)) . $pduContent;
     }
 
     /**
@@ -175,7 +179,7 @@ class SnmpCodec implements UdpCodec
         $pduContent = $requestId . $errorStatus . $errorIndex . $varbindList;
 
         // PDU type: GetRequest (0xa0)
-        return chr(0xa0) . $this->encodeLength(strlen($pduContent)) . $pduContent;
+        return chr(0xA0) . $this->encodeLength(strlen($pduContent)) . $pduContent;
     }
 
     /**

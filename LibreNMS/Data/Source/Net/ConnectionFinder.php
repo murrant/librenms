@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ConnectionFinder.php
  *
@@ -32,7 +33,8 @@ use LibreNMS\Data\Source\Net\Service\UdpCodec;
 use Socket;
 use Throwable;
 
-class ConnectionFinder {
+class ConnectionFinder
+{
     private const TIMEOUT_SECONDS = 3;
     private const TIMEOUT_MS = 0;
 
@@ -48,10 +50,12 @@ class ConnectionFinder {
      * @param  class-string<ServiceConnector>  $connectorClass
      * @param  UdpCodec  $codec
      * @return string|null The first successfully connected IP address, or null if all fail.
+     *
      * @throws Throwable
      */
-    public function connect(array $ips, int $port, string $connectorClass, UdpCodec $codec): ?string {
-        Log::info("Starting Happy Eyeballs connection attempt to " . count($ips) . " IPs.");
+    public function connect(array $ips, int $port, string $connectorClass, UdpCodec $codec): ?string
+    {
+        Log::info('Starting Happy Eyeballs connection attempt to ' . count($ips) . ' IPs.');
         $startTime = microtime(true);
 
         // initiate fibers and connectors for each IP
@@ -63,12 +67,12 @@ class ConnectionFinder {
         }
 
         // The Event Loop
-        while (!empty($this->connections) && $this->connectedIp === null) {
-            /** @var Socket[] $read **/
+        while (! empty($this->connections) && $this->connectedIp === null) {
+            /** @var Socket[] $read * */
             $read = [];
-            /** @var Socket[] $write **/
+            /** @var Socket[] $write * */
             $write = [];
-            /** @var Socket[] $except **/
+            /** @var Socket[] $except * */
             $except = [];
 
             foreach ($this->connections as $connection) {
@@ -83,7 +87,7 @@ class ConnectionFinder {
             }
 
             if ($numChanged === false) {
-                Log::error("Socket select error: " . socket_strerror(socket_last_error()));
+                Log::error('Socket select error: ' . socket_strerror(socket_last_error()));
                 break;
             } elseif ($numChanged > 0) {
                 Log::debug("Socket select returned $numChanged sockets ready.");
@@ -96,13 +100,13 @@ class ConnectionFinder {
                         try {
                             Log::debug("Resuming fiber for $readyConnection->connector");
                             $result = $readyConnection->fiber->resume(true);
-                            Log::debug("Fiber resume result: " . var_export($result, true));
+                            Log::debug('Fiber resume result: ' . var_export($result, true));
                             if ($result) {
                                 $this->connectedIp ??= $readyConnection->ip;
                                 $this->forgetConnection($readyConnection);
                             }
                         } catch (Throwable $e) {
-                            Log::error("Exception in fiber resume: " . $e->getMessage());
+                            Log::error('Exception in fiber resume: ' . $e->getMessage());
                             $this->forgetConnection($readyConnection);
                         }
                     }
@@ -110,7 +114,7 @@ class ConnectionFinder {
             }
             // Check for overall time limit
             if ((microtime(true) - $startTime) * 1000 >= self::TIMEOUT_MS) {
-                Log::debug("Global timeout reached. Terminating connection attempts.");
+                Log::debug('Global timeout reached. Terminating connection attempts.');
                 break;
             }
         }
@@ -119,14 +123,14 @@ class ConnectionFinder {
         foreach ($this->connections as $connection) {
             if ($connection->fiber->isSuspended()) {
                 $result = $connection->fiber->resume(false);
-                Log::debug("Fiber resume result: " . var_export($result, true));
+                Log::debug('Fiber resume result: ' . var_export($result, true));
             }
         }
 
         return $this->connectedIp;
     }
 
-    protected function getConnection(string|Socket $search): Connection|null
+    protected function getConnection(string|Socket $search): ?Connection
     {
         if (is_string($search)) {
             return $this->connections[$search] ?? null;
@@ -161,11 +165,11 @@ class ConnectionFinder {
                     if ($connector->isServiceAvailable()) {
                         Log::info("Successfully connected to the first available IP: $ip");
                         Fiber::suspend($ip); // return IP to the caller
+
                         return;
                     }
                 }
             } while ($ready === true);
-
         } catch (Throwable $e) {
             throw $e;
         } finally {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TcpConnector.php
  *
@@ -56,7 +57,7 @@ class TcpConnector extends BaseConnector
         $soError = socket_get_option($this->socket, SOL_SOCKET, SO_ERROR);
 
         $peerIp = null;
-        if($soError === 0 && socket_getpeername($this->socket, $peerIp) && $peerIp === $this->ip) {
+        if ($soError === 0 && socket_getpeername($this->socket, $peerIp) && $peerIp === $this->ip) {
             return true;
         }
 

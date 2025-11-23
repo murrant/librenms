@@ -104,6 +104,7 @@ class Dns implements Geocoder, ResolverInterface
 
     /**
      * Resolve IPs for hostname IPv4 and IPv6. Respecting the order for dns.resolution_mode
+     *
      * @return array{'ipv4': string[], 'ipv6': string[]}
      */
     public function resolveIPs(string $hostname, ?string $preferredIpFirst = null): array

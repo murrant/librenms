@@ -8,23 +8,20 @@ use Illuminate\Support\Arr;
 use LibreNMS\Data\Source\Net\AddrInfoResolver;
 use LibreNMS\Data\Source\Net\ConnectionFinder;
 use LibreNMS\Data\Source\Net\Service\DnsCodec;
-use LibreNMS\Data\Source\Net\Service\IcmpConnector;
 use LibreNMS\Data\Source\Net\Service\NtpCodec;
-use LibreNMS\Data\Source\Net\Service\NtpConnector;
 use LibreNMS\Data\Source\Net\Service\SnmpCodec;
-use LibreNMS\Data\Source\Net\Service\SnmpConnector;
 use LibreNMS\Data\Source\Net\Service\TcpConnector;
 use LibreNMS\Data\Source\Net\Service\UdpCodec;
 use LibreNMS\Data\Source\Net\Service\UdpConnector;
 use LibreNMS\Data\Source\Net\UdpHappyEyeballsConnector;
 use LibreNMS\Util\Dns;
 use React\Dns\Resolver\Resolver;
+
 use function React\Async\await;
 
 class TestHappyEyeballs extends LnmsCommand
 {
     protected $signature = 'test:happy-eyeballs {hostname?} {service?} {--port=} {--fibers}';
-
 
     public function handle(Dns $dns): int
     {
@@ -32,6 +29,7 @@ class TestHappyEyeballs extends LnmsCommand
 
         if ($this->option('fibers')) {
             $this->info('Using Custom Fibers');
+
             return $this->fibers($dns);
         }
 
@@ -43,7 +41,7 @@ class TestHappyEyeballs extends LnmsCommand
 
         if ($codec === null) {
             $result = $this->reactTcp($hostname, $port);
-            $this->info("Elapsed time: " . (microtime(true) - $start_time) . " seconds");
+            $this->info('Elapsed time: ' . (microtime(true) - $start_time) . ' seconds');
 
             return $result;
         }
@@ -53,16 +51,16 @@ class TestHappyEyeballs extends LnmsCommand
 
         await($connector->connect($hostname, $port, $codec)->then(
             function ($result) {
-                echo "connected via: " . $result['address'] . "\n";
-                echo "Response length: " . strlen($result['response']) . " bytes\n";
+                echo 'connected via: ' . $result['address'] . "\n";
+                echo 'Response length: ' . strlen($result['response']) . " bytes\n";
                 $result['socket']->close();
             },
             function ($error) {
-                echo "connection failed: " . $error->getMessage() . "\n";
+                echo 'connection failed: ' . $error->getMessage() . "\n";
             }
         ));
 
-        $this->info("Elapsed time: " . (microtime(true) - $start_time) . " seconds");
+        $this->info('Elapsed time: ' . (microtime(true) - $start_time) . ' seconds');
 
         return 0;
     }
@@ -74,7 +72,7 @@ class TestHappyEyeballs extends LnmsCommand
         $dnsConnector = new \React\Socket\HappyEyeBallsConnector(null, $tcpConnector, $reactDns);
 
         $dnsConnector->connect("$hostname:$port")->then(function (\React\Socket\ConnectionInterface $connection) {
-            $this->info("Connected to: " . $connection->getRemoteAddress());
+            $this->info('Connected to: ' . $connection->getRemoteAddress());
             $connection->end();
         });
 
@@ -110,14 +108,14 @@ class TestHappyEyeballs extends LnmsCommand
             return 0;
         }
 
-        $this->error("Failed to connect to any IP address within the timeout.");
+        $this->error('Failed to connect to any IP address within the timeout.');
 
         return 1;
     }
 
     private function resolvePort(): int
     {
-        $default_port = match($this->argument('service')) {
+        $default_port = match ($this->argument('service')) {
             'ntp' => 123,
             'dns' => 53,
             'snmp' => 161,
@@ -129,7 +127,7 @@ class TestHappyEyeballs extends LnmsCommand
 
     private function resolveUdpCodec(): ?UdpCodec
     {
-        return match($this->argument('service')) {
+        return match ($this->argument('service')) {
             'ntp' => new NtpCodec(),
             'dns' => new DnsCodec(),
             'snmp' => $this->createSnmpCodec(),
@@ -155,7 +153,7 @@ class TestHappyEyeballs extends LnmsCommand
                     );
                 }
             } catch (\Exception $e) {
-                $this->error("Error: " . $e->getMessage());
+                $this->error('Error: ' . $e->getMessage());
             }
         }
 

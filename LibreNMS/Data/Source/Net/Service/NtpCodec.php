@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NtpCodec.php
  *
@@ -31,8 +32,9 @@ class NtpCodec implements UdpCodec
     {
         // NTP packet format (48 bytes)
         // LI = 0, VN = 3, Mode = 3 (client)
-        $packet = chr(0x1b); // 00011011 in binary
+        $packet = chr(0x1B); // 00011011 in binary
         $packet .= str_repeat(chr(0), 47);
+
         return $packet;
     }
 
