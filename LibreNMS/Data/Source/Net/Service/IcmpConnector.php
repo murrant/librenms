@@ -1,4 +1,5 @@
 <?php
+
 /**
  * IcmpConnector.php
  *
@@ -27,7 +28,6 @@ namespace LibreNMS\Data\Source\Net\Service;
 
 class IcmpConnector extends BaseConnector
 {
-
     public function __construct(string $ip, int $port = 0)
     {
         parent::__construct($ip, $port);
@@ -38,7 +38,7 @@ class IcmpConnector extends BaseConnector
         $this->createSocket(SOCK_RAW, 1);
 
         if (! socket_connect($this->socket, $this->ip, $this->port)) {
-            throw new \RuntimeException("Failed to connect to $this ".socket_strerror(socket_last_error($this->socket)));
+            throw new \RuntimeException("Failed to connect to $this " . socket_strerror(socket_last_error($this->socket)));
         }
 
         $packet = $this->createPacket();
@@ -46,7 +46,7 @@ class IcmpConnector extends BaseConnector
         $this->waitForRead();
 
         if ($bytesSent === false) {
-            throw new \RuntimeException("Failed to send NTP packet to $this ".socket_strerror(socket_last_error($this->socket)));
+            throw new \RuntimeException("Failed to send NTP packet to $this " . socket_strerror(socket_last_error($this->socket)));
         }
 
         return true;
@@ -68,13 +68,13 @@ class IcmpConnector extends BaseConnector
         $code = 0;
         $identifier = 1234; // Example identifier
         $sequence = 1; // Example sequence number
-        $data = "PingHost";
+        $data = 'PingHost';
 
         $packet = pack('CCnnn', $type, $code, 0, $identifier, $sequence) . $data;
         $checksum = $this->calculateChecksum($packet);
+
         return pack('CCnnn', $type, $code, $checksum, $identifier, $sequence) . $data;
     }
-
 
     private function calculateChecksum(string $data): int
     {
@@ -90,6 +90,7 @@ class IcmpConnector extends BaseConnector
         while ($sum >> 16) {
             $sum = ($sum & 0xFFFF) + ($sum >> 16);
         }
+
         return ~$sum & 0xFFFF; // One's complement
     }
 }

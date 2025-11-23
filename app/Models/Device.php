@@ -139,7 +139,6 @@ class Device extends BaseModel
         return $resolvedIps ?: [$this->hostname];
     }
 
-
     public function ipFamily(): AddressFamily
     {
         return str_ends_with($this->transport ?? '', '6') ? AddressFamily::IPv6 : AddressFamily::IPv4;

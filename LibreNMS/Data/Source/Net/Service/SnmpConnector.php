@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SnmpConnector.php
  *
@@ -40,18 +41,18 @@ class SnmpConnector extends BaseConnector
     private readonly int $requestId;
 
     /**
-     * @param string $ip
-     * @param int $port
-     * @param string $version SNMP version: '1', '2c', or '3'
-     * @param string $community Community string for v1/v2c
-     * @param string $oid OID to query (default: system.sysDescr.0)
-     * @param array $v3Config SNMPv3 configuration array with keys:
-     *                        - securityName
-     *                        - securityLevel: 'noAuthNoPriv', 'authNoPriv', or 'authPriv'
-     *                        - authProtocol: 'MD5' or 'SHA'
-     *                        - authPassphrase
-     *                        - privProtocol: 'DES' or 'AES'
-     *                        - privPassphrase
+     * @param  string  $ip
+     * @param  int  $port
+     * @param  string  $version  SNMP version: '1', '2c', or '3'
+     * @param  string  $community  Community string for v1/v2c
+     * @param  string  $oid  OID to query (default: system.sysDescr.0)
+     * @param  array  $v3Config  SNMPv3 configuration array with keys:
+     *                           - securityName
+     *                           - securityLevel: 'noAuthNoPriv', 'authNoPriv', or 'authPriv'
+     *                           - authProtocol: 'MD5' or 'SHA'
+     *                           - authPassphrase
+     *                           - privProtocol: 'DES' or 'AES'
+     *                           - privPassphrase
      */
     public function __construct(
         string $ip,
@@ -81,7 +82,6 @@ class SnmpConnector extends BaseConnector
                 $this->privProtocol = $device->cryptoalgo;
                 $this->privPassphrase = $device->cryptopass;
             }
-
         } else {
             $this->version = $version;
             $this->community = $community;
@@ -125,6 +125,7 @@ class SnmpConnector extends BaseConnector
             // Basic validation: check if response is valid SNMP
             if ($this->isValidSnmpResponse($response)) {
                 Log::info("Received valid SNMP response from $this->ip");
+
                 return true;
             }
         }
@@ -155,6 +156,7 @@ class SnmpConnector extends BaseConnector
         $pdu = $this->buildGetRequestPdu();
 
         $message = $version . $community . $pdu;
+
         return $this->encodeSequence($message);
     }
 
@@ -168,6 +170,7 @@ class SnmpConnector extends BaseConnector
         $pdu = $this->buildGetRequestPdu();
 
         $message = $version . $community . $pdu;
+
         return $this->encodeSequence($message);
     }
 
@@ -206,6 +209,7 @@ class SnmpConnector extends BaseConnector
         $scopedPdu = $this->encodeSequence($contextEngineId . $contextName . $pdu);
 
         $message = $version . $headerData . $msgSecurityParameters . $scopedPdu;
+
         return $this->encodeSequence($message);
     }
 
@@ -245,7 +249,7 @@ class SnmpConnector extends BaseConnector
         $pduContent = $requestId . $errorStatus . $errorIndex . $varbindList;
 
         // PDU type: GetRequest (0xa0)
-        return chr(0xa0) . $this->encodeLength(strlen($pduContent)) . $pduContent;
+        return chr(0xA0) . $this->encodeLength(strlen($pduContent)) . $pduContent;
     }
 
     /**

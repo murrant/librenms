@@ -323,6 +323,7 @@ class DnsTest extends TestCase
 
         $this->assertNull($result);
     }
+
     public function testResolveIpsReturnsEmptyArrayOnLookupFailure(): void
     {
         $this->mockConfig('os');
@@ -647,19 +648,19 @@ class DnsTest extends TestCase
         foreach ($ips as $ip) {
             if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                 $records[] = [
-                    'ai_family'    => AF_INET,
-                    'ai_socktype'  => SOCK_STREAM,
-                    'ai_protocol'  => 6,
-                    'ai_addr'      => ['sin_addr' => $ip, 'sin_port' => 0],
-                    'ai_flags'     => 0,
+                    'ai_family' => AF_INET,
+                    'ai_socktype' => SOCK_STREAM,
+                    'ai_protocol' => 6,
+                    'ai_addr' => ['sin_addr' => $ip, 'sin_port' => 0],
+                    'ai_flags' => 0,
                 ];
             } else {
                 $records[] = [
-                    'ai_family'    => AF_INET6,
-                    'ai_socktype'  => SOCK_STREAM,
-                    'ai_protocol'  => 6,
-                    'ai_addr'      => ['sin6_addr' => $ip, 'sin6_port' => 0],
-                    'ai_flags'     => 0,
+                    'ai_family' => AF_INET6,
+                    'ai_socktype' => SOCK_STREAM,
+                    'ai_protocol' => 6,
+                    'ai_addr' => ['sin6_addr' => $ip, 'sin6_port' => 0],
+                    'ai_flags' => 0,
                 ];
             }
         }

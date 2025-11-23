@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HappyEyeballsConnector.php
  *
@@ -32,7 +33,8 @@ use LibreNMS\Data\Source\Net\Service\ServiceConnector;
 use Socket;
 use Throwable;
 
-class HappyEyeballsConnector {
+class HappyEyeballsConnector
+{
     private const TIMEOUT_MS = 300; // Short timeout as per RFC 6555 recommendations (around 300ms)
 
     /** @var HappyEyeballsConnection[] */
@@ -46,10 +48,12 @@ class HappyEyeballsConnector {
      * @param  array  $ips  Ordered list of IPv4 and IPv6 addresses.
      * @param  class-string<ServiceConnector>  $connectorClass
      * @return string|null The first successfully connected IP address, or null if all fail.
+     *
      * @throws Throwable
      */
-    public function connect(array $ips, string $connectorClass = HttpConnector::class, ...$args): ?string {
-        Log::info("Starting Happy Eyeballs connection attempt to " . count($ips) . " IPs.");
+    public function connect(array $ips, string $connectorClass = HttpConnector::class, ...$args): ?string
+    {
+        Log::info('Starting Happy Eyeballs connection attempt to ' . count($ips) . ' IPs.');
         $startTime = microtime(true);
 
         // initiate fibers and connectors for each IP
@@ -61,12 +65,12 @@ class HappyEyeballsConnector {
         }
 
         // The Event Loop
-        while (!empty($this->connections) && $this->connectedIp === null) {
-            /** @var Socket[] $read **/
+        while (! empty($this->connections) && $this->connectedIp === null) {
+            /** @var Socket[] $read * */
             $read = [];
-            /** @var Socket[] $write **/
+            /** @var Socket[] $write * */
             $write = [];
-            /** @var Socket[] $except **/
+            /** @var Socket[] $except * */
             $except = [];
 
             foreach ($this->connections as $connection) {
@@ -81,7 +85,7 @@ class HappyEyeballsConnector {
             }
 
             if ($numChanged === false) {
-                Log::error("Socket select error: " . socket_strerror(socket_last_error()));
+                Log::error('Socket select error: ' . socket_strerror(socket_last_error()));
                 break;
             } elseif ($numChanged > 0) {
                 Log::debug("Socket select returned $numChanged sockets ready.");
@@ -94,13 +98,13 @@ class HappyEyeballsConnector {
                         try {
                             Log::debug("Resuming fiber for $readyConnection->connector");
                             $result = $readyConnection->fiber->resume(true);
-                            Log::debug("Fiber resume result: " . var_export($result, true));
+                            Log::debug('Fiber resume result: ' . var_export($result, true));
                             if ($result) {
                                 $this->connectedIp ??= $readyConnection->ip;
                                 $this->forgetConnection($readyConnection);
                             }
                         } catch (Throwable $e) {
-                            Log::error("Exception in fiber resume: " . $e->getMessage());
+                            Log::error('Exception in fiber resume: ' . $e->getMessage());
                             $this->forgetConnection($readyConnection);
                         }
                     }
@@ -108,7 +112,7 @@ class HappyEyeballsConnector {
             }
             // Check for overall time limit
             if ((microtime(true) - $startTime) * 1000 >= self::TIMEOUT_MS) {
-                Log::debug("Global timeout reached. Terminating connection attempts.");
+                Log::debug('Global timeout reached. Terminating connection attempts.');
                 break;
             }
         }
@@ -117,14 +121,14 @@ class HappyEyeballsConnector {
         foreach ($this->connections as $connection) {
             if ($connection->fiber->isSuspended()) {
                 $result = $connection->fiber->resume(false);
-                Log::debug("Fiber resume result: " . var_export($result, true));
+                Log::debug('Fiber resume result: ' . var_export($result, true));
             }
         }
 
         return $this->connectedIp;
     }
 
-    protected function getConnection(string|Socket $search): HappyEyeballsConnection|null
+    protected function getConnection(string|Socket $search): ?HappyEyeballsConnection
     {
         if (is_string($search)) {
             return $this->connections[$search] ?? null;
@@ -159,11 +163,11 @@ class HappyEyeballsConnector {
                     if ($connector->isServiceAvailable()) {
                         Log::info("Successfully connected to the first available IP: $ip");
                         Fiber::suspend($ip); // return IP to the caller
+
                         return;
                     }
                 }
             } while ($ready === true);
-
         } catch (Throwable $e) {
             throw $e;
         } finally {

@@ -58,7 +58,7 @@ class TestHappyEyeballs extends LnmsCommand
             return 0;
         }
 
-        $this->error("Failed to connect to any IP address within the timeout.");
+        $this->error('Failed to connect to any IP address within the timeout.');
 
         return 1;
     }

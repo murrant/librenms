@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NtpConnector.php
  *
@@ -45,7 +46,7 @@ class NtpConnector extends BaseConnector
         $this->waitForRead();
 
         if ($bytesSent === false) {
-            throw new \RuntimeException("Failed to send NTP packet to $this ".socket_strerror(socket_last_error()));
+            throw new \RuntimeException("Failed to send NTP packet to $this " . socket_strerror(socket_last_error()));
         }
 
         return true;
@@ -61,10 +62,10 @@ class NtpConnector extends BaseConnector
 
         if ($bytesReceived > 0 && strlen((string) $response) == 48 && $from === $this->ip) {
             Log::info("Received valid NTP response from the first responsive IP: $this->ip");
+
             return true;
         }
 
         throw new \RuntimeException("Failed to verify peer for $this " . socket_strerror(socket_last_error($this->socket)));
     }
-
 }
