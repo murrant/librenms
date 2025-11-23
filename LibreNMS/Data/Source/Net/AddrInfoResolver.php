@@ -1,4 +1,5 @@
 <?php
+
 /**
  * AddrInfoResolver.php
  *
@@ -46,8 +47,8 @@ class AddrInfoResolver implements ExecutorInterface
             try {
                 $cacheKey = $query->describe();
 
-                if (!array_key_exists($cacheKey, $this->cache)) {
-                    $hints = match($query->type) {
+                if (! array_key_exists($cacheKey, $this->cache)) {
+                    $hints = match ($query->type) {
                         Message::TYPE_A => ['ai_family' => AF_INET, 'ai_socktype' => SOCK_DGRAM],
                         Message::TYPE_AAAA => ['ai_family' => AF_INET6, 'ai_socktype' => SOCK_DGRAM],
                         default => ['ai_socktype' => SOCK_DGRAM],
@@ -69,7 +70,6 @@ class AddrInfoResolver implements ExecutorInterface
 
                 // Call $resolve with the result
                 $resolve($message);
-
             } catch (\Throwable $e) {
                 // Call $reject if there's an error
                 $reject($e);

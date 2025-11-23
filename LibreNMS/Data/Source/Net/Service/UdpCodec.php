@@ -1,4 +1,5 @@
 <?php
+
 /**
  * UdpCodec.php
  *

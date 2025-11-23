@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DnsCodec.php
  *
@@ -74,6 +75,7 @@ class DnsCodec implements UdpCodec
 
         // Check QR bit (should be 1 for response)
         $flags = unpack('n', substr($payload, 2, 2))[1];
+
         return ($flags & 0x8000) !== 0;
     }
 }

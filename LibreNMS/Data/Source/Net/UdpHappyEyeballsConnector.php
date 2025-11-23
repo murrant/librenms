@@ -1,4 +1,5 @@
 <?php
+
 /**
  * UdpHappyEyeballsConnector.php
  *
@@ -62,11 +63,15 @@ class UdpHappyEyeballsConnector
         $mode = LibrenmsConfig::get('dns.resolution_mode');
 
         $ipv4Promise = $this->resolver && $mode !== 'ipv6_only'
-            ? $this->resolver->resolveAll($hostname, \React\Dns\Model\Message::TYPE_A)->then(null, function() { return []; })
+            ? $this->resolver->resolveAll($hostname, \React\Dns\Model\Message::TYPE_A)->then(null, function () {
+                return [];
+            })
             : \React\Promise\resolve([]);
 
         $ipv6Promise = $this->resolver && $mode !== 'ipv4_only'
-            ? $this->resolver->resolveAll($hostname, \React\Dns\Model\Message::TYPE_AAAA)->then(null, function() { return []; })
+            ? $this->resolver->resolveAll($hostname, \React\Dns\Model\Message::TYPE_AAAA)->then(null, function () {
+                return [];
+            })
             : \React\Promise\resolve([]);
 
         \React\Promise\all([$ipv4Promise, $ipv6Promise])->then(
@@ -76,6 +81,7 @@ class UdpHappyEyeballsConnector
                 // Make sure we have at least one address
                 if (empty($ipv4Addresses) && empty($ipv6Addresses)) {
                     $deferred->reject(new \RuntimeException("DNS resolution failed: No addresses found for $hostname"));
+
                     return;
                 }
 
@@ -108,7 +114,8 @@ class UdpHappyEyeballsConnector
         $addresses = $this->interleaveAddresses($ipv6Addresses, $ipv4Addresses);
 
         if (empty($addresses)) {
-            $deferred->reject(new \RuntimeException("No addresses to connect to"));
+            $deferred->reject(new \RuntimeException('No addresses to connect to'));
+
             return;
         }
 
@@ -124,7 +131,7 @@ class UdpHappyEyeballsConnector
 
             $this->connectToAddress($address, $port, $requestMessage)->then(
                 function ($result) use ($deferred, $cleanup, &$resolved) {
-                    if (!$resolved) {
+                    if (! $resolved) {
                         $cleanup();
                         $deferred->resolve($result);
                     }
@@ -133,17 +140,17 @@ class UdpHappyEyeballsConnector
                     $attempts[$index]['error'] = $error;
 
                     // Check if all attempts have failed
-                    if (!$resolved && count($attempts) === count($addresses)) {
+                    if (! $resolved && count($attempts) === count($addresses)) {
                         $allFailed = true;
                         foreach ($attempts as $attempt) {
-                            if (!isset($attempt['error'])) {
+                            if (! isset($attempt['error'])) {
                                 $allFailed = false;
                                 break;
                             }
                         }
                         if ($allFailed) {
                             $cleanup();
-                            $deferred->reject(new \RuntimeException("All connection attempts failed"));
+                            $deferred->reject(new \RuntimeException('All connection attempts failed'));
                         }
                     }
                 }
@@ -162,9 +169,9 @@ class UdpHappyEyeballsConnector
 
         // Overall timeout
         $timers[] = Loop::addTimer($this->timeout, function () use ($deferred, $cleanup, &$resolved) {
-            if (!$resolved) {
+            if (! $resolved) {
                 $cleanup();
-                $deferred->reject(new \RuntimeException("Connection timeout"));
+                $deferred->reject(new \RuntimeException('Connection timeout'));
             }
         });
     }
@@ -181,7 +188,7 @@ class UdpHappyEyeballsConnector
                 $resolved = false;
 
                 $client->on('message', function ($message) use ($client, $deferred, $requestMessage, &$timer, &$resolved) {
-                    if (!$resolved && $requestMessage->validateResponse($message)) {
+                    if (! $resolved && $requestMessage->validateResponse($message)) {
                         $resolved = true;
                         if ($timer) {
                             Loop::cancelTimer($timer);
@@ -189,7 +196,7 @@ class UdpHappyEyeballsConnector
                         $deferred->resolve([
                             'socket' => $client,
                             'response' => $message,
-                            'address' => $client->getRemoteAddress()
+                            'address' => $client->getRemoteAddress(),
                         ]);
                     }
                 });
@@ -199,10 +206,10 @@ class UdpHappyEyeballsConnector
 
                 // Timeout for this specific connection
                 $timer = Loop::addTimer($this->responseTimeout, function () use ($client, $deferred, &$resolved) {
-                    if (!$resolved) {
+                    if (! $resolved) {
                         $resolved = true;
                         $client->close();
-                        $deferred->reject(new \RuntimeException("UDP request timeout"));
+                        $deferred->reject(new \RuntimeException('UDP request timeout'));
                     }
                 });
             },
@@ -227,7 +234,6 @@ class UdpHappyEyeballsConnector
             default => [$ipv6, $ipv4],
         };
 
-
         for ($i = 0; $i < $maxCount; $i++) {
             if (isset($first[$i])) {
                 $result[] = $first[$i];
@@ -237,7 +243,7 @@ class UdpHappyEyeballsConnector
             }
         }
 
-        Log::debug("Resolved addresses: " . implode(", ", $result));
+        Log::debug('Resolved addresses: ' . implode(', ', $result));
 
         return $result;
     }
