@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ManipulatesModuleTestData.php
  *
@@ -64,6 +65,7 @@ trait ManipulatesModuleTestData
         }
 
         ksort($reindexed);
+
         return $reindexed;
     }
 

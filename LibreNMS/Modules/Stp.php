@@ -120,7 +120,7 @@ class Stp implements Module
 
     public function getSortColumns(string $table): array
     {
-        return match($table) {
+        return match ($table) {
             'stp' => ['bridgeAddress'],
             'ports_stp' => ['port_index'],
             default => [],

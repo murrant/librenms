@@ -274,8 +274,9 @@ class AppServiceProvider extends ServiceProvider
          */
         Builder::macro('orderByColumns', function (array $columns, string $direction = 'asc') {
             foreach ($columns as $column) {
-                   $this->orderBy($column, $direction);
+                $this->orderBy($column, $direction);
             }
+
             return $this;
         });
     }
