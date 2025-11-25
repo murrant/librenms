@@ -142,7 +142,7 @@ class Vlans implements Module
 
     public function getSortColumns(string $table): array
     {
-        return match($table) {
+        return match ($table) {
             'vlans' => ['vlan_vlan'],
             'ports_vlans' => ['vlan', 'baseport'],
             default => [],
