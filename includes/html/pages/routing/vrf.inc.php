@@ -49,6 +49,7 @@ if (! Auth::user()->hasGlobalRead()) {
         'etherlike' => 'Etherlike',
     ];
 
+    $type_sep = '';
     foreach ($graph_types as $type => $descr) {
         echo "$type_sep";
         if ($vars['graph'] == $type) {
@@ -115,7 +116,7 @@ if (! Auth::user()->hasGlobalRead()) {
             echo '<td width=100 class=box-desc>' . $vrf['mplsVpnVrfRouteDistinguisher'] . '</td>';
             echo '<td><table border=0 cellspacing=0 cellpadding=5 width=100%>';
             $x = 1;
-            foreach ($vrf_devices[$vrf['vrf_name']][$vrf['mplsVpnVrfRouteDistinguisher']] as $device) {
+            foreach ($vrf_devices[$vrf['vrf_name']][$vrf['mplsVpnVrfRouteDistinguisher']] ?? [] as $device) {
                 if ($i % 2) {
                     if ($x % 2) {
                         $dev_colour = LibrenmsConfig::get('list_colour.even_alt');
