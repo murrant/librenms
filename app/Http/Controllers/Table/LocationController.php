@@ -59,7 +59,7 @@ class LocationController extends TableController
      */
     public function baseQuery($request)
     {
-       return Location::hasAccess($request->user())->withCount([
+        return Location::hasAccess($request->user())->withCount([
             'devices',
             'devices as down_count' => fn ($q) => (new Device)->scopeIsDown($q),
         ]);
