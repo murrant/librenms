@@ -107,8 +107,8 @@ class CustomMap extends BaseModel
         }
 
         // Only show maps where ALL device nodes are accessible by the user
-        return $query->whereHas('nodes', fn($q) => $q->whereNotNull('device_id'))
-            ->whereDoesntHave('nodes', fn($q) => $q->whereNotNull('device_id')->whereNotIn('device_id', \Permissions::devicesForUser($user)));
+        return $query->whereHas('nodes', fn ($q) => $q->whereNotNull('device_id'))
+            ->whereDoesntHave('nodes', fn ($q) => $q->whereNotNull('device_id')->whereNotIn('device_id', \Permissions::devicesForUser($user)));
     }
 
     /**
