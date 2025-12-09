@@ -501,13 +501,13 @@ class Rrd extends BaseDatastore
             array_pop($files); // remove rrdcached status line
             $prepend = str_replace($this->rrd_dir . '/', '', $dir) . '/';
 
-            return array_map(fn($file) => $prepend . $file, $files);
+            return array_map(fn ($file) => $prepend . $file, $files);
         }
 
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
         $rrdFiles = new \RegexIterator($iterator, '/\.rrd$/');
 
-        return array_map(fn(\SplFileInfo $file) => str_replace($this->rrd_dir . '/', '', $file), iterator_to_array($rrdFiles, false));
+        return array_map(fn (\SplFileInfo $file) => str_replace($this->rrd_dir . '/', '', $file), iterator_to_array($rrdFiles, false));
     }
 
     /**

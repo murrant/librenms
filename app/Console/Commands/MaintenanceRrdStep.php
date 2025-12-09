@@ -95,7 +95,7 @@ class MaintenanceRrdStep extends LnmsCommand
         $this->line(__('commands.maintenance:rrd-step.summary', [
             'converted' => $converted,
             'failed' => $failed,
-            'skipped' => $skipped
+            'skipped' => $skipped,
         ]));
 
         return $failed > 0 ? 1 : 0;
