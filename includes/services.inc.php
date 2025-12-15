@@ -24,7 +24,7 @@ function add_service($device, $type, $desc, $ip = '', $param = '', $ignore = 0, 
         'service_ds' => '{}',
         'service_disabled' => $disabled,
         'service_template_id' => $template_id,
-        'service_name' => $name
+        'service_name' => $name,
     ]);
 }
 

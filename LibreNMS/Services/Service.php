@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Service.php
  *
@@ -34,18 +35,19 @@ use LibreNMS\Util\Clean;
 
 class Service
 {
-
     public function __construct(
         public readonly string $type = '',
-    ) {}
+    ) {
+    }
 
     /**
      * @param  Device  $device
      * @param  array<string, string>  $values
      * @return string[]
+     *
      * @throws ServiceException
      */
-    public function buildCommand(Device $device, Service $service,array $values = []): array
+    public function buildCommand(Device $device, Service $service, array $values = []): array
     {
         $bin = $this->getExecutable();
 
@@ -90,13 +92,13 @@ class Service
 
         return [
             new ServiceDataSet($ds, '', [
-               'DEF:DS=' . $rrd_filename . ':' . $ds . ':AVERAGE',
-               'DEF:DS_MAX=' . $rrd_filename . ':' . $ds . ':MAX',
-               'AREA:DS_MAX#' . $color_max . ':',
-               'AREA:DS#' . $color_avg . ':' . str_pad(substr(ucfirst($ds), 0, 15), 15),
-               'GPRINT:DS:LAST:%5.2lf%s',
-               'GPRINT:DS:AVERAGE:%5.2lf%s',
-               'GPRINT:DS_MAX:MAX:%5.2lf%s\\l',
+                'DEF:DS=' . $rrd_filename . ':' . $ds . ':AVERAGE',
+                'DEF:DS_MAX=' . $rrd_filename . ':' . $ds . ':MAX',
+                'AREA:DS_MAX#' . $color_max . ':',
+                'AREA:DS#' . $color_avg . ':' . str_pad(substr(ucfirst($ds), 0, 15), 15),
+                'GPRINT:DS:LAST:%5.2lf%s',
+                'GPRINT:DS:AVERAGE:%5.2lf%s',
+                'GPRINT:DS_MAX:MAX:%5.2lf%s\\l',
             ]),
         ];
     }

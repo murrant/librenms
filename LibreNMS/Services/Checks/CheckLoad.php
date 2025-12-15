@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CheckLoad.php
  *
@@ -38,7 +39,7 @@ class CheckLoad extends Service
             new ServiceOption('warning', 'w', default: '5,5,5'),
             new ServiceOption('critical', 'c', default: '10,10,10'),
             new ServiceOption('percpu', 'p', ['percpu' => 'int']),
-            new ServiceOption('procs-to-show', )
+            new ServiceOption('procs-to-show'),
         ];
     }
 
@@ -46,21 +47,21 @@ class CheckLoad extends Service
     {
         return [
             new ServiceDataSet('load', 'processes', [
-                    'DEF:DS0=' . $rrd_filename . ':load1:AVERAGE',
-                    'LINE1.25:DS0#' . LibrenmsConfig::get('graph_colours.mixed.0') . ':' . str_pad(substr('Load 1', 0, 15), 15),
-                    'GPRINT:DS0:LAST:%5.2lf%s',
-                    'GPRINT:DS0:AVERAGE:%5.2lf%s',
-                    'GPRINT:DS0:MAX:%5.2lf%s\\l',
-                    'DEF:DS1=' . $rrd_filename . ':load5:AVERAGE',
-                    'LINE1.25:DS1#' . LibrenmsConfig::get('graph_colours.mixed.1') . ':' . str_pad(substr('Load 5', 0, 15), 15),
-                    'GPRINT:DS1:LAST:%5.2lf%s',
-                    'GPRINT:DS1:AVERAGE:%5.2lf%s',
-                    'GPRINT:DS1:MAX:%5.2lf%s\\l',
-                    'DEF:DS2=' . $rrd_filename . ':load15:AVERAGE',
-                    'LINE1.25:DS2#' . LibrenmsConfig::get('graph_colours.mixed.2') . ':' . str_pad(substr('Load 15', 0, 15), 15),
-                    'GPRINT:DS2:LAST:%5.2lf%s',
-                    'GPRINT:DS2:AVERAGE:%5.2lf%s',
-                    'GPRINT:DS2:MAX:%5.2lf%s\\l',
+                'DEF:DS0=' . $rrd_filename . ':load1:AVERAGE',
+                'LINE1.25:DS0#' . LibrenmsConfig::get('graph_colours.mixed.0') . ':' . str_pad(substr('Load 1', 0, 15), 15),
+                'GPRINT:DS0:LAST:%5.2lf%s',
+                'GPRINT:DS0:AVERAGE:%5.2lf%s',
+                'GPRINT:DS0:MAX:%5.2lf%s\\l',
+                'DEF:DS1=' . $rrd_filename . ':load5:AVERAGE',
+                'LINE1.25:DS1#' . LibrenmsConfig::get('graph_colours.mixed.1') . ':' . str_pad(substr('Load 5', 0, 15), 15),
+                'GPRINT:DS1:LAST:%5.2lf%s',
+                'GPRINT:DS1:AVERAGE:%5.2lf%s',
+                'GPRINT:DS1:MAX:%5.2lf%s\\l',
+                'DEF:DS2=' . $rrd_filename . ':load15:AVERAGE',
+                'LINE1.25:DS2#' . LibrenmsConfig::get('graph_colours.mixed.2') . ':' . str_pad(substr('Load 15', 0, 15), 15),
+                'GPRINT:DS2:LAST:%5.2lf%s',
+                'GPRINT:DS2:AVERAGE:%5.2lf%s',
+                'GPRINT:DS2:MAX:%5.2lf%s\\l',
             ]),
         ];
     }

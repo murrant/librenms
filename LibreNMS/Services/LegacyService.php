@@ -1,4 +1,5 @@
 <?php
+
 /**
  * LegacyService.php
  *
@@ -32,7 +33,8 @@ class LegacyService extends Service
     private string $check_ds;
     private array $check_graph;
 
-    public function __construct(public readonly string $type) {
+    public function __construct(public readonly string $type)
+    {
         $vars = $this->loadScript();
         $this->params = $vars['params'] ?? '';
         $this->check_cmd = $vars['check_cmd'] ?? '';
@@ -42,9 +44,7 @@ class LegacyService extends Service
 
     public function buildCommand(Device $device, \App\Models\Service $service, array $parameters = []): array
     {
-
     }
-
 
     private function loadScript(array $vars = []): array
     {
