@@ -15,6 +15,10 @@
  * @author     LibreNMS Contributors
 */
 
+use App\Models\Device;
+use LibreNMS\Enum\Severity;
+use LibreNMS\Util\Html;
+
 $pagetitle[] = 'Services';
 
 require_once 'includes/html/modal/new_service.inc.php';
@@ -126,59 +130,30 @@ require_once 'includes/html/modal/delete_service.inc.php';
                 $host_sql = 'SELECT `D`.`device_id`,`D`.`hostname`,`D`.`sysName` FROM devices AS D, services AS S WHERE D.device_id = S.device_id ' . $perms_sql . ' GROUP BY `D`.`hostname`, `D`.`device_id`, `D`.`sysName` ORDER BY D.hostname';
 
                 $shift = 1;
-                foreach (dbFetchRows($host_sql, $host_par) as $device) {
-                    $device_id = $device['device_id'];
-                    $device_hostname = $device['hostname'];
-                    $device_sysName = htmlspecialchars((string) $device['sysName']);
-                    $devlink = generate_device_link($device, null, ['tab' => 'services']);
-                    if ($shift == 1) {
-                        array_unshift($sql_param, $device_id);
-                        $shift = 0;
-                    } else {
-                        $sql_param[0] = $device_id;
+                foreach (Device::query()->with('services')->whereHas('services')->hasAccess(Auth::user())->orderBy('hostname')->get() as $device) {
+                    $devlink = \LibreNMS\Util\Url::deviceLink($device, vars: ['tab' => 'services']);
+
+                    if ($device->services->isNotEmpty()) {
+                        echo '<div class="panel panel-default">';
+                        echo '<div class="panel-heading"><h3 class="panel-title">' . $devlink . '</h3>' . $device->sysName . '</div>';
+                        echo '<table class="table table-hover table-condensed">';
+                        echo '<thead>';
+                        echo '<th style="width:1%;max-width:1%;"></th>';
+                        echo '<th style="width:10%;max-width: 10%;">Name</th>';
+                        echo '<th style="width:10%;max-width: 10%;">Check Type</th>';
+                        echo '<th style="width:10%;max-width: 15%;">Remote Host</th>';
+                        echo '<th >Message</th>';
+                        echo '<th style="width:16%;max-width: 25%;">Description</th>';
+                        echo '<th style="width:15%;max-width: 15%;">Last Changed</th>';
+                        echo '<th style="width:2%;max-width: 2%;">Alert</th>';
+                        echo '<th style="width:4%;max-width: 4%;">Status</th>';
+                        echo '<th style="width:100px;max-width: 100px;"></th>';
+                        echo '</thead>';
                     }
 
-                    $header = true;
-
-                    $service_iteration = 0;
-                    $services = dbFetchRows("SELECT * FROM `services` WHERE `device_id` = ? $where ORDER BY service_type, service_name", $sql_param);
-                    $services_count = count($services);
-                    foreach ($services as $service) {
-                        if ($service['service_status'] == '2') {
-                            $label = 'label-danger';
-                            $title = 'CRITICAL';
-                        } elseif ($service['service_status'] == '1') {
-                            $label = 'label-warning';
-                            $title = 'WARNING';
-                        } elseif ($service['service_status'] == '0') {
-                            $label = 'label-success';
-                            $title = 'OK';
-                        } else {
-                            $label = 'label-info';
-                            $title = 'UNKNOWN';
-                        }
-
-                        $service_iteration++;
-
-                        if ($service_iteration < 2 && $header) {
-                            echo '<div class="panel panel-default">';
-                            echo '<div class="panel-heading"><h3 class="panel-title">' . $devlink . '</h3>' . $device_sysName . '</div>';
-                            echo '<table class="table table-hover table-condensed">';
-                            echo '<thead>';
-                            echo '<th style="width:1%;max-width:1%;"></th>';
-                            echo '<th style="width:10%;max-width: 10%;">Name</th>';
-                            echo '<th style="width:10%;max-width: 10%;">Check Type</th>';
-                            echo '<th style="width:10%;max-width: 15%;">Remote Host</th>';
-                            echo '<th >Message</th>';
-                            echo '<th style="width:16%;max-width: 25%;">Description</th>';
-                            echo '<th style="width:15%;max-width: 15%;">Last Changed</th>';
-                            echo '<th style="width:2%;max-width: 2%;">Alert</th>';
-                            echo '<th style="width:4%;max-width: 4%;">Status</th>';
-                            echo '<th style="width:100px;max-width: 100px;"></th>';
-                            echo '</thead>';
-                        }
-
-                        $header = false;
+                    foreach ($device->services->sortBy(['service_type', 'service_name']) as $service) {
+                        $label = Html::severityLabelClass($service->status?->asSeverity() ?? Severity::Unknown);
+                        $title = $service->service_status?->name ?? 'UNKNOWN';
 
                         echo '<tr id="row_' . $service['service_id'] . '">';
                         echo '<td><span data-toggle="tooltip" title="' . $title . '" class="alert-status ' . $label . '"></span></td>';
@@ -187,7 +162,7 @@ require_once 'includes/html/modal/delete_service.inc.php';
                         echo '<td>' . nl2br(\LibreNMS\Util\Clean::html($service['service_ip'], [])) . '</td>';
                         echo '<td>' . nl2br(\LibreNMS\Util\Clean::html($service['service_message'], [])) . '</td>';
                         echo '<td>' . nl2br(\LibreNMS\Util\Clean::html($service['service_desc'], [])) . '</td>';
-                        echo '<td>' . \LibreNMS\Util\Time::formatInterval(time() - $service['service_changed']) . '</td>';
+                        echo '<td>' . \LibreNMS\Util\Time::formatInterval($service->changed_at) . '</td>';
 
                         $service_checked = '';
                         $ico = 'pause';
@@ -227,11 +202,11 @@ require_once 'includes/html/modal/delete_service.inc.php';
                                     </td>";
                         }
                         echo '</tr>';
+                    }
 
-                        if ($service_iteration >= $services_count) {
-                            echo '</table>';
-                            echo '</div>';
-                        }
+                    if ($device->services->isNotEmpty()) {
+                        echo '</table>';
+                        echo '</div>';
                     }
                 }
                 unset($samehost);

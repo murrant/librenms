@@ -30,7 +30,7 @@ use App\Facades\LibrenmsConfig;
 use App\Models\Eventlog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Blade;
-use LibreNMS\Enum\Severity;
+use LibreNMS\Util\Html;
 use LibreNMS\Util\Url;
 
 class EventlogController extends TableController
@@ -117,26 +117,10 @@ class EventlogController extends TableController
     private function formatDatetime($eventlog)
     {
         $output = "<span class='alert-status ";
-        $output .= $this->severityLabel($eventlog->severity);
+        $output .= Html::severityLabelClass($eventlog->severity);
         $output .= " eventlog-status'></span>";
         $output .= (new Carbon($eventlog->datetime))->setTimezone(session('preferences.timezone'))->format(LibrenmsConfig::get('dateformat.compact'));
 
         return $output;
-    }
-
-    /**
-     * @param  Severity  $eventlog_severity
-     * @return string $eventlog_severity_icon
-     */
-    private function severityLabel($eventlog_severity)
-    {
-        return match ($eventlog_severity) {
-            Severity::Ok => 'label-success',
-            Severity::Info => 'label-info',
-            Severity::Notice => 'label-primary',
-            Severity::Warning => 'label-warning',
-            Severity::Error => 'label-danger',
-            default => 'label-default', // Unknown
-        };
     }
 }

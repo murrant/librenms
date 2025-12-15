@@ -23,7 +23,7 @@ if (! Auth::check()) {
 
 Debug::set(isset($_REQUEST['debug']));
 
-$ajax_form = match ($_POST['type'] ?? '') {
+$ajax_form = match ($_REQUEST['type'] ?? '') {
     'alert-notes' => 'includes/html/forms/alert-notes.inc.php',
     'alert-templates' => 'includes/html/forms/alert-templates.inc.php',
     'alert-transports' => 'includes/html/forms/alert-transports.inc.php',

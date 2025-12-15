@@ -54,6 +54,20 @@ class ServicesController implements DeviceTab
 
     public function data(Device $device, Request $request): array
     {
-        return [];
+        $device->load('services');
+
+        return [
+            'views' => [
+                'basic' => [
+                    'link' => route('device', ['device' => $device->device_id, 'tab' => 'services', 'view' => 'basic']),
+                    'text' => __('Basic'),
+                ],
+                'details' => [
+                    'link' => route('device', ['device' => $device->device_id, 'tab' => 'services', 'view' => 'details']),
+                    'text' => __('Details'),
+                ],
+            ],
+            'view' => $request->input('view', 'basic'),
+        ];
     }
 }

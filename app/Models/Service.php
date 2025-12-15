@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use LibreNMS\Enum\Severity;
 
 class Service extends DeviceRelatedModel
 {
-    public $timestamps = false;
     protected $primaryKey = 'service_id';
     protected $fillable = [
-        'service_id',
         'device_id',
         'service_ip',
         'service_type',
@@ -17,21 +16,33 @@ class Service extends DeviceRelatedModel
         'service_param',
         'service_ignore',
         'service_status',
-        'service_changed',
         'service_message',
         'service_disabled',
         'service_ds',
         'service_template_id',
         'service_name',
     ];
+    protected $casts = [
+        'service_ignore' => 'bool',
+        'service_disabled' => 'bool',
+        'service_status' => 'int',
+    ];
+
+    // ---- Helper Functions ----
+
+    public function statusAsSeverity(): Severity
+    {
+        return match ($this->service_status) {
+            0 => Severity::Ok,
+            1 => Severity::Warning,
+            2 => Severity::Error,
+            default => Severity::Unknown,
+        };
+    }
 
     // ---- Query Scopes ----
 
-    /**
-     * @param  Builder  $query
-     * @return Builder
-     */
-    public function scopeIsActive($query)
+    public function scopeIsActive(Builder $query): Builder
     {
         return $query->where([
             ['service_ignore', '=', 0],
@@ -39,11 +50,7 @@ class Service extends DeviceRelatedModel
         ]);
     }
 
-    /**
-     * @param  Builder  $query
-     * @return Builder
-     */
-    public function scopeIsOk($query)
+    public function scopeIsOk(Builder $query): Builder
     {
         return $query->where([
             ['service_ignore', '=', 0],
@@ -52,11 +59,7 @@ class Service extends DeviceRelatedModel
         ]);
     }
 
-    /**
-     * @param  Builder  $query
-     * @return Builder
-     */
-    public function scopeIsCritical($query)
+    public function scopeIsCritical(Builder $query): Builder
     {
         return $query->where([
             ['service_ignore', '=', 0],
@@ -65,11 +68,7 @@ class Service extends DeviceRelatedModel
         ]);
     }
 
-    /**
-     * @param  Builder  $query
-     * @return Builder
-     */
-    public function scopeIsWarning($query)
+    public function scopeIsWarning(Builder $query): Builder
     {
         return $query->where([
             ['service_ignore', '=', 0],
@@ -78,11 +77,7 @@ class Service extends DeviceRelatedModel
         ]);
     }
 
-    /**
-     * @param  Builder  $query
-     * @return Builder
-     */
-    public function scopeIsIgnored($query)
+    public function scopeIsIgnored(Builder $query): Builder
     {
         return $query->where([
             ['service_ignore', '=', 1],
@@ -90,11 +85,7 @@ class Service extends DeviceRelatedModel
         ]);
     }
 
-    /**
-     * @param  Builder  $query
-     * @return Builder
-     */
-    public function scopeIsDisabled($query)
+    public function scopeIsDisabled(Builder $query): Builder
     {
         return $query->where('service_disabled', 1);
     }

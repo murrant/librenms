@@ -241,6 +241,10 @@ Route::middleware(['auth'])->group(function (): void {
         Route::get('search/bgp', Ajax\BgpSearchController::class);
         Route::get('search/device', Ajax\DeviceSearchController::class);
         Route::get('search/port', Ajax\PortSearchController::class);
+        Route::resource('service', Ajax\ServiceController::class)
+            ->only(['show', 'update'])
+            ->name('show', 'ajax.service.show')
+            ->name('update', 'ajax.service.update');
         Route::post('set_map_group', [Ajax\AvailabilityMapController::class, 'setGroup']);
         Route::post('set_map_view', [Ajax\AvailabilityMapController::class, 'setView']);
         Route::post('set_resolution', [Ajax\SessionController::class, 'resolution']);

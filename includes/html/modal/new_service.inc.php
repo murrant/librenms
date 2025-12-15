@@ -147,28 +147,27 @@ $('#create-service').on('show.bs.modal', function (e) {
     var modal = $(this)
     $('#service_id').val(service_id);
     $.ajax({
-        type: "POST",
-        url: "ajax_form.php",
-        data: { type: "parse-service", service_id: service_id },
+        type: "GET",
+        url: "<?php echo route('ajax.service.show', [':service_id']); ?>".replace(':service_id', service_id),
         dataType: "json",
         success: function(output) {
-            $('#stype').val(output['stype']);
+            $('#stype').val(output.service_type);
             $("#stype").prop("disabled", true);
-            $('#ip').val(output['ip']);
-            $('#desc').val(output['desc']);
-            $('#param').val(output['param']);
-            $('#ignore').val(output['ignore']);
-            $('#disabled').val(output['disabled']);
-            $('#ignore_box').val(output['ignore']);
-            $('#disabled_box').val(output['disabled']);
+            $('#ip').val(output.service_ip);
+            $('#desc').val(output.service_desc);
+            $('#param').val(output.service_param);
+            $('#ignore').val(output.service_ignore);
+            $('#disabled').val(output.service_disabled);
+            $('#ignore_box').val(output.service_ignore);
+            $('#disabled_box').val(output.service_disabled);
             if ($('#ignore').attr('value') == 1) {
                 $('#ignore_box').prop("checked", true);
             }
             if ($('#disabled').attr('value') == 1) {
                 $('#disabled_box').prop("checked", true);
             }
-            $('#service_template_id').val(output['service_template_id']);
-            $('#name').val(output['name']);
+            $('#service_template_id').val(output.service_template_id);
+            $('#name').val(output.service_name);
         }
     });
 

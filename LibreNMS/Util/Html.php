@@ -188,7 +188,14 @@ class Html
 
     public static function severityToLabel(Severity $severity, string $text): string
     {
-        $state_label = match ($severity) {
+        $state_label = self::severityLabelClass($severity);
+
+        return "<span class=\"label $state_label\">$text</span>";
+    }
+
+    public static function severityLabelClass(Severity $severity): string
+    {
+        return match ($severity) {
             Severity::Ok => 'label-success',
             Severity::Info => 'label-info',
             Severity::Notice => 'label-primary',
@@ -196,7 +203,5 @@ class Html
             Severity::Error => 'label-danger',
             default => 'label-default',
         };
-
-        return "<span class=\"label $state_label\">$text</span>";
     }
 }

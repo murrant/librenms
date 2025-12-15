@@ -14,12 +14,12 @@ if (isset($rrd_filename)) {
     $check_graph['rta'] .= ' GPRINT:DS0:LAST:%5.2lf%s ';
     $check_graph['rta'] .= ' GPRINT:DS0:AVERAGE:%5.2lf%s ';
     $check_graph['rta'] .= ' GPRINT:DS0:MAX:%5.2lf%s\\l ';
-    $check_graph['rtmax'] .= ' DEF:DS1=' . $rrd_filename . ':rtmax:AVERAGE ';
+    $check_graph['rtmax'] = ' DEF:DS1=' . $rrd_filename . ':rtmax:AVERAGE ';
     $check_graph['rtmax'] .= ' LINE1.25:DS1#' . \App\Facades\LibrenmsConfig::get('graph_colours.mixed.1') . ":'" . str_pad(substr('Round Trip Max', 0, 15), 15) . "' ";
     $check_graph['rtmax'] .= ' GPRINT:DS1:LAST:%5.2lf%s ';
     $check_graph['rtmax'] .= ' GPRINT:DS1:AVERAGE:%5.2lf%s ';
     $check_graph['rtmax'] .= ' GPRINT:DS1:MAX:%5.2lf%s\\l ';
-    $check_graph['rtmin'] .= ' DEF:DS2=' . $rrd_filename . ':rtmin:AVERAGE ';
+    $check_graph['rtmin'] = ' DEF:DS2=' . $rrd_filename . ':rtmin:AVERAGE ';
     $check_graph['rtmin'] .= ' LINE1.25:DS2#' . \App\Facades\LibrenmsConfig::get('graph_colours.mixed.2') . ":'" . str_pad(substr('Round Trip Min', 0, 15), 15) . "' ";
     $check_graph['rtmin'] .= ' GPRINT:DS2:LAST:%5.2lf%s ';
     $check_graph['rtmin'] .= ' GPRINT:DS2:AVERAGE:%5.2lf%s ';

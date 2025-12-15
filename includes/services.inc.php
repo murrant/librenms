@@ -13,13 +13,19 @@ function add_service($device, $type, $desc, $ip = '', $param = '', $ignore = 0, 
 {
     $device = DeviceCache::get(is_array($device) ? $device['device_id'] : $device);
 
-    if (empty($ip)) {
-        $ip = $device->pollerTarget();
-    }
-
-    $insert = ['device_id' => $device->device_id, 'service_ip' => $ip, 'service_type' => $type, 'service_desc' => $desc, 'service_param' => $param, 'service_ignore' => $ignore, 'service_status' => 3, 'service_message' => 'Service not yet checked', 'service_ds' => '{}', 'service_disabled' => $disabled, 'service_template_id' => $template_id, 'service_name' => $name];
-
-    return Service::create($insert);
+    return $device->services()->create([
+        'service_ip' => $ip ?: $device->pollerTarget(),
+        'service_type' => $type,
+        'service_desc' => $desc,
+        'service_param' => $param,
+        'service_ignore' => $ignore,
+        'service_status' => 3,
+        'service_message' => 'Service not yet checked',
+        'service_ds' => '{}',
+        'service_disabled' => $disabled,
+        'service_template_id' => $template_id,
+        'service_name' => $name
+    ]);
 }
 
 function service_get($device = null, $service = null)
@@ -135,7 +141,6 @@ function poll_service($service)
 
     if ($old_status != $new_status) {
         // Status has changed, update.
-        $update['service_changed'] = time();
         $update['service_status'] = $new_status;
         $update['service_message'] = $msg;
 

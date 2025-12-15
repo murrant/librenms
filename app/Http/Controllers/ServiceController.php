@@ -16,34 +16,16 @@ class ServiceController extends Controller
      */
     public function store(Request $request, ToastInterface $toast)
     {
-        $request = [
+        $service = Service::create($request->validate([
             'service_name' => 'required|string|unique:service',
             'device_id' => 'integer',
             'service_type' => 'string',
             'service_param' => 'nullable|string',
             'service_ip' => 'nullable|string',
             'service_desc' => 'nullable|string',
-            'service_changed' => 'integer',
             'service_disabled' => 'integer',
             'service_ignore' => 'integer',
-        ];
-
-        $service = Service::make(
-            $request->only(
-                [
-                    'service_name',
-                    'device_id',
-                    'service_type',
-                    'service_param',
-                    'service_ip',
-                    'service_desc',
-                    'service_changed',
-                    'service_disabled',
-                    'service_ignore',
-                ]
-            )
-        );
-        $service->save();
+        ]));
 
         $toast->success(__('Service :name created', ['name' => $service->service_name]));
 
