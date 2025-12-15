@@ -120,7 +120,7 @@ class SyslogController extends TableController
     }
 
     /**
-     * @param  int  $syslog_priority
+     * @param  string  $syslog_priority
      * @return string
      */
     private function priorityLabel($syslog_priority)

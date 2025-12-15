@@ -19,18 +19,18 @@ if ($multiplier) {
         $multiplier_action = '*';
     }
 
-    $rrd_options[] = 'DEF:' . $ds . '_o=' . $rrd_filename . ':' . $ds . ':AVERAGE';
-    $rrd_options[] = 'CDEF:' . $ds . '=' . $ds . "_o,$multiplier,$multiplier_action";
+    $rrd_options[] = 'DEF:' . $name . '_o=' . $rrd_filename . ':' . $name . ':AVERAGE';
+    $rrd_options[] = 'CDEF:' . $name . '=' . $name . "_o,$multiplier,$multiplier_action";
 } else {
-    $rrd_options[] = 'DEF:' . $ds . '=' . $rrd_filename . ':' . $ds . ':AVERAGE';
+    $rrd_options[] = 'DEF:' . $name . '=' . $rrd_filename . ':' . $name . ':AVERAGE';
 }
 
 if ($print_total) {
-    $rrd_options[] = 'VDEF:' . $ds . '_total=' . $ds . ',TOTAL';
+    $rrd_options[] = 'VDEF:' . $name . '_total=' . $name . ',TOTAL';
 }
 
 if ($percentile) {
-    $rrd_options[] = 'VDEF:' . $ds . '_percentile=' . $ds . ',' . $percentile . ',PERCENT';
+    $rrd_options[] = 'VDEF:' . $name . '_percentile=' . $name . ',' . $percentile . ',PERCENT';
 }
 
 if ($previous) {
@@ -39,20 +39,20 @@ if ($previous) {
             $multiplier_action = '*';
         }
 
-        $rrd_options[] = 'DEF:' . $ds . '_oX=' . $rrd_filename . ':' . $ds . ':AVERAGE:start=' . $prev_from . ':end=' . $from;
-        $rrd_options[] = 'SHIFT:' . $ds . "_oX:$period";
-        $rrd_options[] = 'CDEF:' . $ds . 'X=' . $ds . "_oX,$multiplier,*";
+        $rrd_options[] = 'DEF:' . $name . '_oX=' . $rrd_filename . ':' . $name . ':AVERAGE:start=' . $prev_from . ':end=' . $from;
+        $rrd_options[] = 'SHIFT:' . $name . "_oX:$period";
+        $rrd_options[] = 'CDEF:' . $name . 'X=' . $name . "_oX,$multiplier,*";
     } else {
-        $rrd_options[] = 'DEF:' . $ds . 'X=' . $rrd_filename . ':' . $ds . ':AVERAGE:start=' . $prev_from . ':end=' . $from;
-        $rrd_options[] = 'SHIFT:' . $ds . "X:$period";
+        $rrd_options[] = 'DEF:' . $name . 'X=' . $rrd_filename . ':' . $name . ':AVERAGE:start=' . $prev_from . ':end=' . $from;
+        $rrd_options[] = 'SHIFT:' . $name . "X:$period";
     }
 
     if ($print_total) {
-        $rrd_options[] = 'VDEF:' . $ds . '_totalX=' . $ds . ',TOTAL';
+        $rrd_options[] = 'VDEF:' . $name . '_totalX=' . $name . ',TOTAL';
     }
 
     if ($percentile) {
-        $rrd_options[] = 'VDEF:' . $ds . '_percentileX=' . $ds . ',' . $percentile . ',PERCENT';
+        $rrd_options[] = 'VDEF:' . $name . '_percentileX=' . $name . ',' . $percentile . ',PERCENT';
     }
 
     // if ($graph_max)
@@ -61,7 +61,7 @@ if ($previous) {
     // }
 }//end if
 
-$rrd_options[] = 'AREA:' . $ds . '#' . $colour_area . ':';
+$rrd_options[] = 'AREA:' . $name . '#' . $colour_area . ':';
 
 if ($percentile) {
     $rrd_options[] = 'COMMENT:' . $unit_text . 'Now       Ave      Max     ' . $percentile . 'th %\n';
@@ -69,26 +69,26 @@ if ($percentile) {
     $rrd_options[] = 'COMMENT:' . $unit_text . 'Now       Ave      Max\n';
 }
 
-$rrd_options[] = 'LINE1.25:' . $ds . '#' . $colour_line . ':' . $line_text;
-$rrd_options[] = 'GPRINT:' . $ds . ':LAST:%6.' . $float_precision . 'lf%s';
-$rrd_options[] = 'GPRINT:' . $ds . ':AVERAGE:%6.' . $float_precision . 'lf%s';
-$rrd_options[] = 'GPRINT:' . $ds . ':MAX:%6.' . $float_precision . 'lf%s';
+$rrd_options[] = 'LINE1.25:' . $name . '#' . $colour_line . ':' . $line_text;
+$rrd_options[] = 'GPRINT:' . $name . ':LAST:%6.' . $float_precision . 'lf%s';
+$rrd_options[] = 'GPRINT:' . $name . ':AVERAGE:%6.' . $float_precision . 'lf%s';
+$rrd_options[] = 'GPRINT:' . $name . ':MAX:%6.' . $float_precision . 'lf%s';
 
 if ($percentile) {
-    $rrd_options[] = 'GPRINT:' . $ds . '_percentile:%6.' . $float_precision . 'lf%s';
+    $rrd_options[] = 'GPRINT:' . $name . '_percentile:%6.' . $float_precision . 'lf%s';
 }
 
 $rrd_options[] = 'COMMENT:\\n\\n';
 
 if ($print_total) {
-    $rrd_options[] = 'GPRINT:' . $ds . '_total:Total" %6.' . $float_precision . 'lf%s"\\l';
+    $rrd_options[] = 'GPRINT:' . $name . '_total:Total" %6.' . $float_precision . 'lf%s"\\l';
 }
 
 if ($percentile) {
-    $rrd_options[] = 'LINE1:' . $ds . '_percentile#aa0000';
+    $rrd_options[] = 'LINE1:' . $name . '_percentile#aa0000';
 }
 
 if ($previous) {
-    $rrd_options[] = 'LINE1.25:' . $ds . 'X#666666:Prev \\n';
-    $rrd_options[] = 'AREA:' . $ds . 'X#99999966:';
+    $rrd_options[] = 'LINE1.25:' . $name . 'X#666666:Prev \\n';
+    $rrd_options[] = 'AREA:' . $name . 'X#99999966:';
 }

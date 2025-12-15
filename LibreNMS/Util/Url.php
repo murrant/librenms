@@ -43,7 +43,7 @@ class Url
     /**
      * Provisional device link generation
      */
-    public static function modernDeviceLink(?Device $device, string $text = '', string $extra = ''): string
+    public static function modernDeviceLink(?Device $device, string $text = '', array $vars = [], string $extra = ''): string
     {
         if ($device === null) {
             return e($text);
@@ -56,7 +56,7 @@ class Url
         };
 
         return sprintf('<a href="%s" class="%s" x-data="deviceLink()">%s</a>%s',
-            route('device', $device->device_id),
+            route('device', ['device' => $device->device_id, ...$vars]),
             $class,
             e($text ?: $device->displayName()),
             $extra ? '<br />' . e($extra) : $extra

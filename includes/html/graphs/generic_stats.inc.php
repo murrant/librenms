@@ -157,7 +157,7 @@ if ($munge) {
     $id = 'dsm0';
 }
 
-$rrd_options[] = 'DEF:ds0' . "=$filename:$ds:AVERAGE";
+$rrd_options[] = 'DEF:ds0' . "=$filename:$name:AVERAGE";
 
 $munge_helper = '';
 if ($munge) {
@@ -173,9 +173,9 @@ $rrd_optionsb [] = 'LINE1.25:' . $id . '#' . $colour . ":$descr";
 
 if ($height > 25) {
     if (! $no_hourly) {
-        $rrd_options[] = 'DEF:' . $id . "1h$munge_helper=$filename:$ds:AVERAGE:step=3600";
-        $rrd_options[] = 'DEF:' . $id . "1hmin$munge_helper=$filename:$ds:MIN:step=3600";
-        $rrd_options[] = 'DEF:' . $id . "1hmax$munge_helper=$filename:$ds:MAX:step=3600";
+        $rrd_options[] = 'DEF:' . $id . "1h$munge_helper=$filename:$name:AVERAGE:step=3600";
+        $rrd_options[] = 'DEF:' . $id . "1hmin$munge_helper=$filename:$name:MIN:step=3600";
+        $rrd_options[] = 'DEF:' . $id . "1hmax$munge_helper=$filename:$name:MAX:step=3600";
     }
     if ($munge) {
         $rrd_options[] = 'CDEF:dsm01h=dsm01hds,' . $munge_opts;
@@ -196,9 +196,9 @@ if ($height > 25) {
     // displays nan if less than 17 hours
     if (! $no_daily) {
         if ($time_diff >= 129600) {
-            $rrd_options[] = 'DEF:' . $id . "1d$munge_helper=$filename:$ds:AVERAGE:step=86400";
-            $rrd_options[] = 'DEF:' . $id . "1dmin$munge_helper=$filename:$ds:MIN:step=86400";
-            $rrd_options[] = 'DEF:' . $id . "1dmax$munge_helper=$filename:$ds:MAX:step=86400";
+            $rrd_options[] = 'DEF:' . $id . "1d$munge_helper=$filename:$name:AVERAGE:step=86400";
+            $rrd_options[] = 'DEF:' . $id . "1dmin$munge_helper=$filename:$name:MIN:step=86400";
+            $rrd_options[] = 'DEF:' . $id . "1dmax$munge_helper=$filename:$name:MAX:step=86400";
             if ($munge) {
                 $rrd_options[] = 'CDEF:dsm01d=dsm01dds,' . $munge_opts;
                 $rrd_options[] = 'CDEF:dsm01dmin=dsm01dminds,' . $munge_opts;
@@ -210,9 +210,9 @@ if ($height > 25) {
     // weekly breaks and causes issues if it is less than 8 days
     if (! $no_weekly) {
         if ($time_diff >= 691200) {
-            $rrd_options[] = 'DEF:' . $id . "1w$munge_helper=$filename:$ds:AVERAGE:step=604800";
-            $rrd_options[] = 'DEF:' . $id . "1wmin$munge_helper=$filename:$ds:MIN:step=604800";
-            $rrd_options[] = 'DEF:' . $id . "1wmax$munge_helper=$filename:$ds:MAX:step=604800";
+            $rrd_options[] = 'DEF:' . $id . "1w$munge_helper=$filename:$name:AVERAGE:step=604800";
+            $rrd_options[] = 'DEF:' . $id . "1wmin$munge_helper=$filename:$name:MIN:step=604800";
+            $rrd_options[] = 'DEF:' . $id . "1wmax$munge_helper=$filename:$name:MAX:step=604800";
             if ($munge) {
                 $rrd_options[] = 'CDEF:dsm01w=dsm01wds,' . $munge_opts;
                 $rrd_options[] = 'CDEF:dsm01wmin=dsm01dminds,' . $munge_opts;
