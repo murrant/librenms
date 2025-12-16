@@ -1,4 +1,5 @@
 <?php
+
 /**
  * LegacyService.php
  *
@@ -68,7 +69,7 @@ class LegacyService extends Service
             $graphs = $vars['check_graph'] ?? [];
             foreach ($sets as $name => $unit) {
                 $commands = $graphs[$name] ?? $this->defaultGraphCommands($rrd_filename, $name);
-                $dataSets[] = new ServiceDataSet($name, $unit,is_array($commands) ? $commands : [$commands]);
+                $dataSets[] = new ServiceDataSet($name, $unit, is_array($commands) ? $commands : [$commands]);
             }
 
             return $dataSets;

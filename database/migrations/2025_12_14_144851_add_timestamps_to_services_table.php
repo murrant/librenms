@@ -16,7 +16,7 @@ return new class extends Migration
     {
         if (! Schema::hasColumn($this->table, 'updated_at')) {
             Schema::table($this->table, function (Blueprint $table) {
-                    $table->timestamps();
+                $table->timestamps();
             });
         }
 

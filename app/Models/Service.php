@@ -37,13 +37,12 @@ class Service extends DeviceRelatedModel
 
                 if (is_array($params)) {
                     return $params;
-                };
+                }
 
                 $params = [];
                 $values = explode(' ', $value);
                 foreach ($values as $index => $value) {
                     if (str_starts_with($value, '-')) {
-
                     }
                 }
 
