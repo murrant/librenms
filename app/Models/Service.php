@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use LibreNMS\Enum\Severity;
 
 class Service extends DeviceRelatedModel
@@ -27,6 +28,29 @@ class Service extends DeviceRelatedModel
         'service_disabled' => 'bool',
         'service_status' => 'int',
     ];
+
+    protected function serviceParam(): Attribute
+    {
+        return Attribute::make(
+            get: function (string $value): array {
+                $params = json_decode($value, true);
+
+                if (is_array($params)) {
+                    return $params;
+                };
+
+                $params = [];
+                $values = explode(' ', $value);
+                foreach ($values as $index => $value) {
+                    if (str_starts_with($value, '-')) {
+
+                    }
+                }
+
+                return $params;
+            },
+        );
+    }
 
     // ---- Helper Functions ----
 

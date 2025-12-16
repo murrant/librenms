@@ -34,18 +34,19 @@ use LibreNMS\Util\Clean;
 
 class Service
 {
+    protected bool $allowsTarget = true;
 
     public function __construct(
         public readonly string $type = '',
     ) {}
 
     /**
-     * @param  Device  $device
-     * @param  array<string, string>  $values
+     * @param Device $device
+     * @param \App\Models\Service $service
      * @return string[]
      * @throws ServiceException
      */
-    public function buildCommand(Device $device, Service $service,array $values = []): array
+    public function buildCommand(\App\Models\Service $service): array
     {
         $bin = $this->getExecutable();
 
@@ -67,6 +68,11 @@ class Service
         return $command;
     }
 
+    protected function getExecutable(): string
+    {
+        return LibrenmsConfig::get('nagios_plugins') . '/check_' . Clean::fileName(strtolower($this->type));
+    }
+
     /**
      * @return array<ServiceArgument|ServiceOption>
      */
@@ -84,33 +90,25 @@ class Service
             return [];
         }
 
+        return [
+            new ServiceDataSet($ds, '', $this->defaultGraphCommands($rrd_filename, $ds)),
+        ];
+    }
+
+    protected function defaultGraphCommands(string $rrd_filename, string $ds): array
+    {
         $tint = preg_match('/loss/i', $ds) ? 'pinks' : 'blues';
         $color_avg = LibrenmsConfig::get("graph_colours.$tint.2");
         $color_max = LibrenmsConfig::get("graph_colours.$tint.0");
 
         return [
-            new ServiceDataSet($ds, '', [
-               'DEF:DS=' . $rrd_filename . ':' . $ds . ':AVERAGE',
-               'DEF:DS_MAX=' . $rrd_filename . ':' . $ds . ':MAX',
-               'AREA:DS_MAX#' . $color_max . ':',
-               'AREA:DS#' . $color_avg . ':' . str_pad(substr(ucfirst($ds), 0, 15), 15),
-               'GPRINT:DS:LAST:%5.2lf%s',
-               'GPRINT:DS:AVERAGE:%5.2lf%s',
-               'GPRINT:DS_MAX:MAX:%5.2lf%s\\l',
-            ]),
+            'DEF:DS=' . $rrd_filename . ':' . $ds . ':AVERAGE',
+            'DEF:DS_MAX=' . $rrd_filename . ':' . $ds . ':MAX',
+            'AREA:DS_MAX#' . $color_max . ':',
+            'AREA:DS#' . $color_avg . ':' . str_pad(substr(ucfirst($ds), 0, 15), 15),
+            'GPRINT:DS:LAST:%5.2lf%s',
+            'GPRINT:DS:AVERAGE:%5.2lf%s',
+            'GPRINT:DS_MAX:MAX:%5.2lf%s\\l',
         ];
-    }
-
-    /**
-     * @return array<string, array{unit: string, commands: string[]}>
-     */
-    public function graph(string $rrd_filename = ''): array
-    {
-        return [];
-    }
-
-    protected function getExecutable(): string
-    {
-        return LibrenmsConfig::get('nagios_plugins') . '/check_' . Clean::fileName(strtolower($this->type));
     }
 }

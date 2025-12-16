@@ -25,37 +25,83 @@
 
 namespace LibreNMS\Services;
 
+use App\Facades\DeviceCache;
+use LibreNMS\Util\Clean;
+
 class LegacyService extends Service
 {
-    private string $params;
-    private string $check_cmd;
-    private string $check_ds;
-    private array $check_graph;
+    private string $script;
 
-    public function __construct(public readonly string $type) {
-        $vars = $this->loadScript();
-        $this->params = $vars['params'] ?? '';
-        $this->check_cmd = $vars['check_cmd'] ?? '';
-        $this->check_ds = $vars['check_ds'] ?? '';
-        $this->check_graph = $vars['check_graph'] ?? [];
-    }
-
-    public function buildCommand(Device $device, \App\Models\Service $service, array $parameters = []): array
+    public function __construct(string $type)
     {
-
+        parent::__construct($type);
+        $this->script = self::getScriptPath($type);
     }
 
+    public static function getScriptPath(string $type): string
+    {
+        return base_path('includes/services/check_' . Clean::fileName($type) . '.inc.php');
+    }
+
+    public function buildCommand(\App\Models\Service $service): array
+    {
+        $data = [
+            'service' => array_merge(DeviceCache::get($service->device_id)->toArray(), $service->toArray()),
+        ];
+
+        $vars = $this->loadScript($data);
+
+        if (isset($vars['check_cmd'])) {
+            return explode(' ', $vars['check_cmd']);
+        }
+
+        return parent::buildCommand($service);
+    }
+
+    public function dataSets(string $rrd_filename = '', ?string $ds = null): array
+    {
+        $vars = $this->loadScript(['rrd_filename' => $rrd_filename]);
+
+        if (isset($vars['check_ds'])) {
+            $dataSets = [];
+            $sets = json_decode($vars['check_ds'], true);
+            $graphs = $vars['check_graph'] ?? [];
+            foreach ($sets as $name => $unit) {
+                $commands = $graphs[$name] ?? $this->defaultGraphCommands($rrd_filename, $name);
+                $dataSets[] = new ServiceDataSet($name, $unit,is_array($commands) ? $commands : [$commands]);
+            }
+
+            return $dataSets;
+        }
+
+        return parent::dataSets($rrd_filename, $ds);
+    }
 
     private function loadScript(array $vars = []): array
     {
-        $check_script = $this->getExecutable();
-        if (! is_file($check_script)) {
-            return [];
+        if (empty($vars['service'])) {
+            $vars['service'] = [
+                'service_id' => 0,
+                'device_id' => 0,
+                'service_ip' => '',
+                'service_type' => "$this->type",
+                'service_desc' => '',
+                'service_param' => '',
+                'service_ignore' => false,
+                'service_status' => 0,
+                'service_message' => 'message',
+                'service_disabled' => false,
+                'service_ds' => '{}',
+                'service_template_id' => 0,
+                'service_name' => 'name',
+                'hostname' => '127.0.0.1',
+                'overwrite_ip' => '',
+            ];
         }
 
         extract($vars);
 
-        include $check_script;
+        include $this->script;
 
         return get_defined_vars();
     }

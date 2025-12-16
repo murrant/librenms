@@ -37,6 +37,10 @@ class ServiceFactory
             return new $class;
         }
 
+        if (is_file(LegacyService::getScriptPath($check))) {
+            return new LegacyService($check);
+        }
+
         return new Service;
     }
 }
