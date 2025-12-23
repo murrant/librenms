@@ -45,7 +45,7 @@ class NetSnmpQuery implements SnmpQueryInterface
 {
     private const DEFAULT_FLAGS = '-OQXUte';
 
-    /** @var string[] $commandCleanupPatterns */
+    /** @var string[] */
     private array $commandCleanupPatterns = [
         '/-c\' \'[\S]+\'/',
         '/-u\' \'[\S]+\'/',
@@ -57,7 +57,7 @@ class NetSnmpQuery implements SnmpQueryInterface
         '/(udp|udp6|tcp|tcp6):([^:]+):([\d]+)/',
     ];
 
-    /** @var string[] $commandCleanupReplacements */
+    /** @var string[] */
     private array $commandReplacementPatterns = [
         '-c\' \'COMMUNITY\'',
         '-u\' \'USER\'',
