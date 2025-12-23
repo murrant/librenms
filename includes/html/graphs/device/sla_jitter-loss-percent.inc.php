@@ -11,6 +11,7 @@
  * option) any later version.  Please see LICENSE.txt at the top level of
  * the source code distribution for details.
  */
+
 use App\Models\Sla;
 
 $sla_nr = Sla::where('sla_id', $vars['id'])->value('sla_nr');
@@ -19,6 +20,7 @@ if ($sla_nr) {
     require 'includes/html/graphs/common.inc.php';
     $graph_params->scale_min = -100;
     $graph_params->scale_max = 100;
+    $graph_params->sloped = true;
     $graph_params->scale_rigid = true;
     $rrd_filename_1 = Rrd::name($device['hostname'], ['sla', $sla_nr, 'jitter']);
     $rrd_filename_2 = Rrd::name($device['hostname'], ['sla', $sla_nr, 'NumPackets']);

@@ -16,6 +16,7 @@ require 'includes/html/graphs/common.inc.php';
 
 $graph_params->scale_min = 0;
 $graph_params->scale_max = 100;
+$graph_params->sloped = true;
 $graph_params->base = 1024;
 
 $iter = '1';

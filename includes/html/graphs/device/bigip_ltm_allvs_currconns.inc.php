@@ -22,6 +22,7 @@ $components = $components[$device['device_id']];
 
 include 'includes/html/graphs/common.inc.php';
 $graph_params->scale_min = 0;
+$graph_params->sloped = true;
 
 $rrd_options[] = 'COMMENT:VS Current Connections       Now      Avg      Max\\n';
 $colours = array_merge(\App\Facades\LibrenmsConfig::get('graph_colours.mixed'), \App\Facades\LibrenmsConfig::get('graph_colours.manycolours'));

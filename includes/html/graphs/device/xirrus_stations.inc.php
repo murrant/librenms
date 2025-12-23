@@ -22,6 +22,7 @@ $pallette = [
 ];
 
 $graph_params->scale_min = 0;
+$graph_params->sloped = true;
 
 $rrd_options[] = 'COMMENT:Associated Stations    Cur     Min    Max\\n';
 $radioId = 1;

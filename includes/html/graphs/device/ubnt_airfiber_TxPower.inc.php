@@ -3,6 +3,7 @@
 require 'includes/html/graphs/common.inc.php';
 
 $graph_params->scale_min = 0;
+$graph_params->sloped = true;
 
 $rrdfilename = Rrd::name($device['hostname'], 'ubnt-airfiber-mib');
 

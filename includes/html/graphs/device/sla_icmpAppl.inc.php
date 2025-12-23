@@ -16,6 +16,7 @@ $sla = dbFetchRow('SELECT `sla_nr` FROM `slas` WHERE `sla_id` = ?', [$vars['id']
 
 require 'includes/html/graphs/common.inc.php';
 $graph_params->scale_min = 0;
+$graph_params->sloped = true;
 $rrd_filename = Rrd::name($device['hostname'], ['sla', $sla['sla_nr'], 'icmpAppl']);
 
 if (Rrd::checkRrdExists($rrd_filename)) {
