@@ -155,7 +155,7 @@ function discover_device(&$device, $force_module = false)
     /** @var \App\Polling\Measure\MeasurementManager $measurements */
     $measurements = app(\App\Polling\Measure\MeasurementManager::class);
     $measurements->checkpoint(); // don't count previous stats
-    Event::listen(OsChangedEvent::class, function($event) use (&$device) {
+    Event::listen(OsChangedEvent::class, function ($event) use (&$device) {
         $loaded_os_type = LibrenmsConfig::getOsSetting($event->device->os, 'type');
         if (! $event->device->getAttrib('override_device_type') && $loaded_os_type != $device['type']) {
             $device['type'] = $loaded_os_type;
