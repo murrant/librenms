@@ -165,6 +165,35 @@ class Cisco extends OS implements
         if (empty($device->hardware) && $device->sysObjectID) {
             $device->hardware = SnmpQuery::mibDir('cisco')->mibs(['SNMPv2-MIB', 'CISCO-PRODUCTS-MIB'])->hideMib()->translate($device->sysObjectID);
         }
+
+        // Determine device type based on sysObjectID and sysDescr
+        if (preg_match('/catalyst/i', $device->sysDescr) ||
+            preg_match('/cisco.*switch/i', $device->sysDescr) ||
+            str_starts_with($device->sysObjectID, '.1.3.6.1.4.1.9.1.516') || // Catalyst switches
+            str_starts_with($device->sysObjectID, '.1.3.6.1.4.1.9.1.1208')) { // Nexus switches
+            $device->type = 'network';
+        } elseif (preg_match('/firewall|asa|pix|fwsm/i', $device->sysDescr) ||
+            str_starts_with($device->sysObjectID, '.1.3.6.1.4.1.9.1.745') || // ASA 5500 series
+            str_starts_with($device->sysObjectID, '.1.3.6.1.4.1.9.1.2406')) { // ASA 5500-X series
+            $device->type = 'firewall';
+        } elseif (preg_match('/router|isr|asr|csr/i', $device->sysDescr) ||
+            str_starts_with($device->sysObjectID, '.1.3.6.1.4.1.9.1.1') || // Various routers
+            preg_match('/cisco.*router/i', $device->sysDescr)) {
+            $device->type = 'network';
+        } elseif (preg_match('/wireless|wlc|controller/i', $device->sysDescr) ||
+            str_starts_with($device->sysObjectID, '.1.3.6.1.4.1.9.1.1279') || // WLC 5500 series
+            str_starts_with($device->sysObjectID, '.1.3.6.1.4.1.9.1.1631')) { // WLC 2500 series
+            $device->type = 'wireless';
+        } elseif (preg_match('/unified communications|ucm|unity/i', $device->sysDescr)) {
+            $device->type = 'collaboration';
+        } elseif (preg_match('/power|ups/i', $device->sysDescr)) {
+            $device->type = 'power';
+        } else {
+            // Default to network for unknown Cisco devices
+            $device->type = 'network';
+        }
+
+        $device->type = 'wireless';
     }
 
     public function discoverMempools()
