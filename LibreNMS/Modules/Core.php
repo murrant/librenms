@@ -26,6 +26,7 @@
 
 namespace LibreNMS\Modules;
 
+use App\Events\OsChangedEvent;
 use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use App\Models\Eventlog;
@@ -81,6 +82,10 @@ class Core implements Module
 
         // detect OS
         $device->os = self::detectOS($device, false);
+
+        if ($device->isDirty('os')) {
+            OsChangedEvent::dispatch($device);
+        }
     }
 
     public function shouldPoll(OS $os, ModuleStatus $status): bool

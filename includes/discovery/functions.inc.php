@@ -14,6 +14,7 @@
 
 use App\Actions\Device\CheckDeviceAvailability;
 use App\Actions\Device\ValidateDeviceAndCreate;
+use App\Events\OsChangedEvent;
 use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use App\Models\Eventlog;
@@ -154,6 +155,14 @@ function discover_device(&$device, $force_module = false)
     /** @var \App\Polling\Measure\MeasurementManager $measurements */
     $measurements = app(\App\Polling\Measure\MeasurementManager::class);
     $measurements->checkpoint(); // don't count previous stats
+    Event::listen(OsChangedEvent::class, function($event) use (&$device) {
+        $loaded_os_type = LibrenmsConfig::getOsSetting($event->device->os, 'type');
+        if (! $event->device->getAttrib('override_device_type') && $loaded_os_type != $device['type']) {
+            $device['type'] = $loaded_os_type;
+            $event->device->type = $loaded_os_type;
+            Log::debug("Device type changed to $loaded_os_type!");
+        }
+    });
 
     foreach ($discovery_modules as $module => $module_status) {
         $os_module_status = LibrenmsConfig::getOsSetting($device['os'], "discovery_modules.$module");
