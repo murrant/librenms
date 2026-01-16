@@ -1,4 +1,5 @@
 <?php
+
 /**
  * AjaxServiceController.php
  *
@@ -65,7 +66,6 @@ class ServiceController extends Controller
     public function update(UpdateServiceRequest $request, Service $service): JsonResponse
     {
         $service->fill($request->validated())->save();
-
 
         return response()->json($service);
     }
