@@ -287,6 +287,8 @@ Route::middleware(['auth'])->group(function (): void {
 
         // jquery bootgrid data controllers
         Route::prefix('table')->group(function (): void {
+            Route::post('alertlog', Table\AlertLogController::class)->name('table.alertlog');
+            Route::get('alertlog/export', [Table\AlertLogController::class, 'export'])->name('table.alertlog.export');
             Route::post('alert-schedule', Table\AlertScheduleController::class);
             Route::post('customers', Table\CustomersController::class);
             Route::post('diskio', Table\DiskioController::class)->name('table.diskio');
