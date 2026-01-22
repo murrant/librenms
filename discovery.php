@@ -138,7 +138,7 @@ if (! isset($options['q'])) {
     app(\App\Polling\Measure\MeasurementManager::class)->printStats();
 }
 
-logfile($string);
+Log::debug($string);
 
 if ($doing !== 'new' && $discovered_devices == 0) {
     // No discoverable devices, either down or disabled
