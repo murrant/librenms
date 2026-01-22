@@ -61,10 +61,10 @@ class RrdProcess
      */
     public function run(string $command, string $waitFor = self::COMMAND_COMPLETE): string
     {
-        $this->runAsync($command);
+        $this->sendCommand($command);
 
-        $this->process->clearOutput();
-        $this->process->waitUntil(function ($type, $buffer) use ($waitFor) {
+        $output = '';
+        $this->process->waitUntil(function ($type, $buffer) use ($waitFor, &$output) {
             if ($type === Process::ERR) {
                 throw new RrdException($buffer);
             }
@@ -74,19 +74,22 @@ class RrdProcess
                 throw new RrdException($matches[1]);
             }
 
-            return str_contains($buffer, $waitFor);
+            $output .= $buffer;
+
+            return str_contains($output, $waitFor);
         });
 
-        $output = $this->process->getOutput();
+        $this->process->clearOutput();
 
         if ($waitFor === self::COMMAND_COMPLETE) {
-            $output = substr($output, 0, strrpos($output, $waitFor)); // remove OK line
+            $pos = strpos($output, self::COMMAND_COMPLETE);
+            $output = substr($output, 0, $pos);
         }
 
         return rtrim($output);
     }
 
-    public function runAsync(string $command): void
+    private function sendCommand(string $command): void
     {
         $this->start();
 
