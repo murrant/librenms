@@ -89,7 +89,7 @@ class Processors implements Module
             Log::info("$processor->processor_descr: $usage%");
 
             $rrd_name = ['processor', $processor->processor_type, $processor->processor_index];
-            $tags = ['processor_type' =>  $processor->processor_type, 'processor_index' => $processor->processor_index, 'rrd_name' => $rrd_name, 'rrd_def' => $rrd_def];
+            $tags = ['processor_type' => $processor->processor_type, 'processor_index' => $processor->processor_index, 'rrd_name' => $rrd_name, 'rrd_def' => $rrd_def];
             $fields = ['usage' => $usage];
             $datastore->put($os->getDeviceArray(), 'processors', $tags, $fields);
 
