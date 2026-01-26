@@ -20714,7 +20714,6 @@
         "discovery": {
             "processors": [
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.0",
                     "processor_index": "0",
@@ -20725,7 +20724,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.1",
                     "processor_index": "1",
@@ -20736,7 +20734,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.10",
                     "processor_index": "10",
@@ -20747,7 +20744,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.11",
                     "processor_index": "11",
@@ -20758,7 +20754,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.12",
                     "processor_index": "12",
@@ -20769,7 +20764,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.13",
                     "processor_index": "13",
@@ -20780,7 +20774,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.14",
                     "processor_index": "14",
@@ -20791,7 +20784,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.15",
                     "processor_index": "15",
@@ -20802,7 +20794,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.16",
                     "processor_index": "16",
@@ -20813,7 +20804,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.17",
                     "processor_index": "17",
@@ -20824,7 +20814,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.18",
                     "processor_index": "18",
@@ -20835,7 +20824,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.19",
                     "processor_index": "19",
@@ -20846,7 +20834,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.2",
                     "processor_index": "2",
@@ -20857,7 +20844,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.20",
                     "processor_index": "20",
@@ -20868,7 +20854,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.21",
                     "processor_index": "21",
@@ -20879,7 +20864,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.22",
                     "processor_index": "22",
@@ -20890,7 +20874,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.23",
                     "processor_index": "23",
@@ -20901,7 +20884,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.24",
                     "processor_index": "24",
@@ -20912,7 +20894,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.25",
                     "processor_index": "25",
@@ -20923,7 +20904,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.26",
                     "processor_index": "26",
@@ -20934,7 +20914,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.27",
                     "processor_index": "27",
@@ -20945,7 +20924,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.28",
                     "processor_index": "28",
@@ -20956,7 +20934,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.29",
                     "processor_index": "29",
@@ -20967,7 +20944,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.3",
                     "processor_index": "3",
@@ -20978,7 +20954,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.30",
                     "processor_index": "30",
@@ -20989,7 +20964,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.31",
                     "processor_index": "31",
@@ -21000,7 +20974,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.4",
                     "processor_index": "4",
@@ -21011,7 +20984,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.5",
                     "processor_index": "5",
@@ -21022,7 +20994,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.6",
                     "processor_index": "6",
@@ -21033,7 +21004,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.7",
                     "processor_index": "7",
@@ -21044,7 +21014,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.8",
                     "processor_index": "8",
@@ -21055,7 +21024,6 @@
                     "processor_perc_warn": 75
                 },
                 {
-                    "entPhysicalIndex": 0,
                     "hrDeviceIndex": 0,
                     "processor_oid": ".1.3.6.1.4.1.14823.2.2.1.2.1.13.1.3.9",
                     "processor_index": "9",
