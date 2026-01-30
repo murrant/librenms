@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Option.php
  *
@@ -45,10 +46,10 @@ readonly class ServiceOption
      */
     public function format(float|bool|int|string|null $value): array
     {
-        if ($value)
-
-        if ($this->short) {
-            return [$this->short, (string) $value];
+        if ($value) {
+            if ($this->short) {
+                return [$this->short, (string) $value];
+            }
         }
 
         if ($this->long) {

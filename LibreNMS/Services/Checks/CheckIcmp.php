@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CheckIcmp.php
  *
@@ -33,7 +34,6 @@ use Symfony\Component\Console\Input\InputOption;
 
 class CheckIcmp extends Service
 {
-
     public function parameters(): array
     {
         return [
@@ -53,8 +53,8 @@ class CheckIcmp extends Service
             new ServiceOption('outgoing-ttl', 'l', ['outgoing-ttl' => 'int|min:0']),
             new ServiceOption('timeout', 't'),
             new ServiceOption('bytes', 'b'),
-            new ServiceOption('verbose', 'v', mode: InputOption::VALUE_NONE|InputOption::VALUE_IS_ARRAY),
-            new ServiceOption('Host', 'H', ['Host' => 'required|ip_or_hostname'], mode: InputOption::VALUE_IS_ARRAY)
+            new ServiceOption('verbose', 'v', mode: InputOption::VALUE_NONE | InputOption::VALUE_IS_ARRAY),
+            new ServiceOption('Host', 'H', ['Host' => 'required|ip_or_hostname'], mode: InputOption::VALUE_IS_ARRAY),
         ];
     }
 
@@ -91,7 +91,7 @@ class CheckIcmp extends Service
             ]),
         ];
 
-        return array_filter($dataSets, fn($dataSet) => $ds === null || $ds === $dataSet->name);
+        return array_filter($dataSets, fn ($dataSet) => $ds === null || $ds === $dataSet->name);
     }
 
     public function graph(string $rrd_filename = ''): array
@@ -100,11 +100,11 @@ class CheckIcmp extends Service
             'rta' => [
                 'unit' => 's',
                 'commands' => [
-                     'DEF:DS0=' . $rrd_filename . ':rta:AVERAGE',
-                     'LINE1.25:DS0#' . LibrenmsConfig::get('graph_colours.mixed.0') . ':' . str_pad(substr('Round Trip Average', 0, 15), 15),
-                     'GPRINT:DS0:LAST:%5.2lf%s',
-                     'GPRINT:DS0:AVERAGE:%5.2lf%s',
-                     'GPRINT:DS0:MAX:%5.2lf%s\\l',
+                    'DEF:DS0=' . $rrd_filename . ':rta:AVERAGE',
+                    'LINE1.25:DS0#' . LibrenmsConfig::get('graph_colours.mixed.0') . ':' . str_pad(substr('Round Trip Average', 0, 15), 15),
+                    'GPRINT:DS0:LAST:%5.2lf%s',
+                    'GPRINT:DS0:AVERAGE:%5.2lf%s',
+                    'GPRINT:DS0:MAX:%5.2lf%s\\l',
                 ],
             ],
             'rtmax' => [
@@ -115,7 +115,7 @@ class CheckIcmp extends Service
                     'GPRINT:DS1:LAST:%5.2lf%s',
                     'GPRINT:DS1:AVERAGE:%5.2lf%s',
                     'GPRINT:DS1:MAX:%5.2lf%s\\l',
-                ]
+                ],
             ],
             'rtmin' => [
                 'unit' => 's',
@@ -133,7 +133,7 @@ class CheckIcmp extends Service
                 'GPRINT:DS0:LAST:%5.2lf%s',
                 'GPRINT:DS0:AVERAGE:%5.2lf%s',
                 'GPRINT:DS0:MAX:%5.2lf%s\\l',
-            ]
+            ],
         ];
     }
 }
