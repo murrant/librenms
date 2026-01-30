@@ -27,6 +27,7 @@ class Service extends DeviceRelatedModel
         'service_ignore' => 'bool',
         'service_disabled' => 'bool',
         'service_status' => 'int',
+        'service_ds' => 'array',
     ];
 
     protected function serviceParam(): Attribute

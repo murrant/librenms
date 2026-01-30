@@ -35,6 +35,7 @@ $graph_params->sloped = true;
 $rrd_options[] = 'COMMENT:                      Now     Avg      Max\\n';
 
 $check = ServiceFactory::make($service->service_type);
-foreach ($check->dataSets($rrd_filename, $vars['ds'] ?? null) as $ds) {
+$dataSets = isset($vars['ds']) ? [$vars['ds']] : array_keys($service->service_ds);
+foreach ($check->dataSets($rrd_filename, $dataSets) as $ds) {
     $rrd_options = array_merge($rrd_options, $ds->graphCommands);
 }

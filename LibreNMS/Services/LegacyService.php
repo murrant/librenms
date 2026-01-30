@@ -58,7 +58,7 @@ class LegacyService extends Service
         return parent::buildCommand($service);
     }
 
-    public function dataSets(string $rrd_filename = '', ?string $ds = null): array
+    public function dataSets(string $rrd_filename = '', array $ds = []): array
     {
         $vars = $this->loadScript(['rrd_filename' => $rrd_filename]);
 

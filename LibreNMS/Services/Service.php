@@ -82,17 +82,12 @@ class Service
     }
 
     /**
+     * @param  $ds  string[]
      * @return array<ServiceDataSet>
      */
-    public function dataSets(string $rrd_filename = '', ?string $ds = null): array
+    public function dataSets(string $rrd_filename = '', array $ds = []): array
     {
-        if (empty($ds)) {
-            return [];
-        }
-
-        return [
-            new ServiceDataSet($ds, '', $this->defaultGraphCommands($rrd_filename, $ds)),
-        ];
+        return array_map(fn ($d) => new ServiceDataSet($d, '', $this->defaultGraphCommands($rrd_filename, $d)), $ds);
     }
 
     protected function defaultGraphCommands(string $rrd_filename, string $ds): array
