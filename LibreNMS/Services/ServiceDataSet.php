@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ServiceDataSet.php
  *
@@ -31,5 +32,6 @@ readonly class ServiceDataSet
         public string $name,
         public string $unit,
         public array $graphCommands,
-    ) {}
+    ) {
+    }
 }
