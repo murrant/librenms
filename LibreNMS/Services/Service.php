@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Service.php
  *
@@ -38,12 +39,14 @@ class Service
 
     public function __construct(
         public readonly string $type = '',
-    ) {}
+    ) {
+    }
 
     /**
-     * @param Device $device
-     * @param \App\Models\Service $service
+     * @param  Device  $device
+     * @param  \App\Models\Service  $service
      * @return string[]
+     *
      * @throws ServiceException
      */
     public function buildCommand(\App\Models\Service $service): array
