@@ -18,7 +18,6 @@ use LibreNMS\Util\IPv4;
 
 class DiscoveryArp implements Module
 {
-
     /**
      * @inheritDoc
      */
