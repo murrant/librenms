@@ -42,7 +42,6 @@ modules:
                     state_name: fapPoeModeOper
                     index: fapPoeModeOper
                     descr: 'Operating PoE Mode'
-                    value: FORTINET-FORTIAP-MIB::fapPoeModeOper
                     states:
                         - { value: 0, descr: 'Autodetect', graph: 1, generic: 0 }
                         - { value: 1, descr: '802.3af', graph: 1, generic: 1 }
@@ -58,7 +57,6 @@ modules:
                     state_name: fapFsmState
                     index: fapFsmState
                     descr: 'Current CAPWAP state'
-                    value: FORTINET-FORTIAP-MIB::fapFsmState
                     states:
                         - { value: 0, descr: 'RUN', graph: 1, generic: 0 }
                         - { value: 1, descr: 'RUN_STANDBY', graph: 1, generic: 0, }
