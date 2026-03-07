@@ -107,7 +107,7 @@ trait VminfoLibvirt
 
                         // libvirt does not supply this
                         exec(LibrenmsConfig::get('virsh') . ' -rc ' . $uri . ' domstate ' . $dom_id, $vm_state);
-                        $vmwVmState = PowerState::STATES[strtolower($vm_state[0])] ?? PowerState::UNKNOWN;
+                        $vmwVmState = PowerState::parse($vm_state[0]);
 
                         $vmwVmMemSize = $xml->memory;
                         // Convert memory size to MiB
