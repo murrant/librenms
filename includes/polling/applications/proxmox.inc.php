@@ -32,7 +32,7 @@ try {
     }
 } catch (JsonAppParsingFailedException $e) {
     $status = 'OK';
-    $pmxlines = explode("\n", Str::chopStart($e->getOutput(), "<<<app-proxmox>>>"));
+    $pmxlines = explode("\n", Str::chopStart($e->getOutput(), '<<<app-proxmox>>>'));
     $pmxcluster = array_shift($pmxlines);
     foreach ($pmxlines as $pmxline) {
         $vm_ports[] = explode('/', $pmxline, 5);

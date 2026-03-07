@@ -16,7 +16,6 @@
  * See https://www.gnu.org/licenses/gpl.txt for the full license
  */
 
-
 /**
  * Fetch all info about a Proxmox VM
  *
