@@ -1,4 +1,5 @@
 <?php
+
 /**
  * IpSystemStats.php
  *
@@ -100,10 +101,10 @@ class IpSystemStats implements Module
         ];
 
         $hcSubstitutions = [
-            'IP-MIB::ipSystemStatsHCInReceives'       => 'IP-MIB::ipSystemStatsInReceives',
-            'IP-MIB::ipSystemStatsHCInForwDatagrams'  => 'IP-MIB::ipSystemStatsInForwDatagrams',
-            'IP-MIB::ipSystemStatsHCInDelivers'       => 'IP-MIB::ipSystemStatsInDelivers',
-            'IP-MIB::ipSystemStatsHCOutRequests'      => 'IP-MIB::ipSystemStatsOutRequests',
+            'IP-MIB::ipSystemStatsHCInReceives' => 'IP-MIB::ipSystemStatsInReceives',
+            'IP-MIB::ipSystemStatsHCInForwDatagrams' => 'IP-MIB::ipSystemStatsInForwDatagrams',
+            'IP-MIB::ipSystemStatsHCInDelivers' => 'IP-MIB::ipSystemStatsInDelivers',
+            'IP-MIB::ipSystemStatsHCOutRequests' => 'IP-MIB::ipSystemStatsOutRequests',
             'IP-MIB::ipSystemStatsHCOutForwDatagrams' => 'IP-MIB::ipSystemStatsOutForwDatagrams',
         ];
 
