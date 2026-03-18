@@ -167,7 +167,7 @@
 
                         @admin
                         <li role="presentation" class="divider"></li>
-                        @can('viewAny', \App\Models\DeviceGroup::class)
+                        @can(['viewAny', 'view'], \App\Models\DeviceGroup::class)
                             <li><a href="{{ url('device-groups') }}"><i class="fa fa-th fa-fw fa-lg"
                                                                         aria-hidden="true"></i> {{ __('Manage Groups') }}
                                 </a></li>
@@ -560,20 +560,26 @@
                                                                 aria-hidden="true"></i> {{ __('Alert History') }}</a></li>
                         <li><a href="{{ url('alert-stats') }}"><i class="fa fa-bar-chart fa-fw fa-lg"
                                                                   aria-hidden="true"></i> {{ __('Statistics') }}</a></li>
-                        @admin
                         <li role="presentation" class="divider"></li>
-                        <li><a href="{{ url('alert-rules') }}"><i class="fa fa-list fa-fw fa-lg"
+                        @canany(['viewAny', 'view'], \App\Models\AlertRule::class)
+                            <li><a href="{{ url('alert-rules') }}"><i class="fa fa-list fa-fw fa-lg"
                                                                   aria-hidden="true"></i> {{ __('Alert Rules') }}</a></li>
-                        <li><a href="{{ url('alert-schedule') }}"><i class="fa fa-calendar fa-fw fa-lg"
+                        @endcanany
+                        @canany(['viewAny', 'view'], \App\Models\AlertSchedule::class)
+                            <li><a href="{{ url('alert-schedule') }}"><i class="fa fa-calendar fa-fw fa-lg"
                                                                      aria-hidden="true"></i> {{ __('Scheduled Maintenance') }}
                             </a></li>
-                        <li><a href="{{ url('templates') }}"><i class="fa fa-file fa-fw fa-lg"
+                        @endcanany
+                        @canany(['viewAny', 'view'], \App\Models\AlertTemplate::class)
+                            <li><a href="{{ url('templates') }}"><i class="fa fa-file fa-fw fa-lg"
                                                                 aria-hidden="true"></i> {{ __('Alert Templates') }}</a>
-                        </li>
-                        <li><a href="{{ url('alert-transports') }}"><i class="fa fa-bus fa-fw fa-lg"
+                            </li>
+                        @endcanany
+                        @canany(['viewAny', 'view'], \App\Models\AlertTransport::class)
+                            <li><a href="{{ url('alert-transports') }}"><i class="fa fa-bus fa-fw fa-lg"
                                                                        aria-hidden="true"></i> {{ __('Alert Transports') }}
                             </a></li>
-                        @endadmin
+                        @endcanany
                     </ul>
                 </li>
                 @includeIf('menu.custom')

@@ -14,6 +14,8 @@
  * @author     LibreNMS Contributors
 */
 
+use App\Models\Alert;
+use Illuminate\Support\Facades\Gate;
 use LibreNMS\Util\Time;
 
 $where = ' `devices`.`disabled` = 0';
@@ -131,11 +133,13 @@ foreach (dbFetchRows($sql, $param) as $alert) {
     [$fault_detail, $max_row_length] = alert_details($log);
     $info = json_decode((string) $alert['info'], true);
 
-    $alert_to_ack = '<button type="button" class="btn btn-danger command-ack-alert fa fa-eye" aria-hidden="true" title="Mark as acknowledged" data-target="ack-alert" data-state="' . $alert['state'] . '" data-alert_id="' . $alert['id'] . '" data-alert_state="' . $alert['state'] . '" name="ack-alert"></button>';
-    $alert_to_nack = '<button type="button" class="btn btn-primary command-ack-alert fa fa-eye-slash" aria-hidden="true" title="Mark as not acknowledged" data-target="ack-alert" data-state="' . $alert['state'] . '" data-alert_id="' . $alert['id'] . '" data-alert_state="' . $alert['state'] . '" name="ack-alert"></button>';
-    $alert_to_unack = '<button type="button" class="btn btn-primary command-ack-alert fa fa-eye" aria-hidden="true" title="Mark as not acknowledged" data-target="ack-alert" data-state="' . $alert['state'] . '" data-alert_id="' . $alert['id'] . '" data-alert_state="' . $alert['state'] . '" name="ack-alert"></button>';
-
-    $ack_ico = $alert_to_ack;
+    $alert_to_ack = '';
+    if (Gate::allows('update', Alert::class)) {
+        $alert_to_ack = '<button type="button" class="btn btn-danger command-ack-alert fa fa-eye" aria-hidden="true" title="Mark as acknowledged" data-target="ack-alert" data-state="' . $alert['state'] . '" data-alert_id="' . $alert['id'] . '" data-alert_state="' . $alert['state'] . '" name="ack-alert"></button>';
+        $alert_to_nack = '<button type="button" class="btn btn-primary command-ack-alert fa fa-eye-slash" aria-hidden="true" title="Mark as not acknowledged" data-target="ack-alert" data-state="' . $alert['state'] . '" data-alert_id="' . $alert['id'] . '" data-alert_state="' . $alert['state'] . '" name="ack-alert"></button>';
+        $alert_to_unack = '<button type="button" class="btn btn-primary command-ack-alert fa fa-eye" aria-hidden="true" title="Mark as not acknowledged" data-target="ack-alert" data-state="' . $alert['state'] . '" data-alert_id="' . $alert['id'] . '" data-alert_state="' . $alert['state'] . '" name="ack-alert"></button>';
+    }
+        $ack_ico = $alert_to_ack;
 
     if ((int) $alert['state'] === 0) {
         $msg = '';
@@ -193,6 +197,11 @@ foreach (dbFetchRows($sql, $param) as $alert) {
         $note_class = 'warning';
     }
 
+    $note = '';
+    if (Gate::allows('update', Alert::class)) {
+        $note = "<button type='button' class='btn btn-$note_class fa fa-sticky-note-o command-alert-note' aria-label='Notes' id='alert-notes' data-alert_id='{$alert['id']}'></button>";
+    }
+
     $response[] = [
         'id' => $rulei++,
         'rule' => '<i title="' . htmlentities((string) $alert['builder']) . '"><a href="' . \LibreNMS\Util\Url::generate(['page' => 'alert-rules']) . '">' . htmlentities((string) $alert['name']) . '</a></i>',
@@ -206,7 +215,7 @@ foreach (dbFetchRows($sql, $param) as $alert) {
         'alert_id' => $alert['id'],
         'ack_ico' => $ack_ico,
         'proc' => $has_proc,
-        'notes' => "<button type='button' class='btn btn-$note_class fa fa-sticky-note-o command-alert-note' aria-label='Notes' id='alert-notes' data-alert_id='{$alert['id']}'></button>",
+        'notes' => $note,
     ];
 }
 

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Gate;
 
 header('Content-type: application/json');
 
-if (Gate::denies('view', AlertTransport::class)) {
+if (Gate::denies('viewAny', AlertTransport::class)) {
     exit(json_encode([
         'status' => 'error',
         'message' => 'You need permission',

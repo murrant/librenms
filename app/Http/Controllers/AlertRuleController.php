@@ -6,6 +6,7 @@ use App\Http\Requests\AlertRuleRequest;
 use App\Models\AlertRule;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use LibreNMS\Alerting\QueryBuilderParser;
 use LibreNMS\Util\Time;
@@ -17,6 +18,12 @@ class AlertRuleController extends Controller
      */
     public function store(AlertRuleRequest $request): JsonResponse
     {
+        if (Gate::denies('create', AlertRule::class)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not authorized to create alert rules',
+            ], 403);
+        }
         try {
             $alertRule = new AlertRule;
             $this->fillAlertRule($alertRule, $request);
@@ -69,6 +76,12 @@ class AlertRuleController extends Controller
      */
     public function update(AlertRuleRequest $request, AlertRule $alertRule): JsonResponse
     {
+        if (Gate::denies('update', AlertRule::class)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You are not authorized to update alert rules',
+            ], 403);
+        }
         try {
             $this->fillAlertRule($alertRule, $request);
 
