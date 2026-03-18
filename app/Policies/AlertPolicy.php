@@ -23,28 +23,35 @@ class AlertPolicy
      */
     public function view(User $user, Alert $alert): bool
     {
+        if ($this->hasGlobalPermission($user, 'viewAny')) {
+            return true;
+        }
+
         return $this->hasGlobalPermission($user, 'view')
-            || Permissions::canAccessDevice($alert->device_id, $user);
+            && Permissions::canAccessDevice($alert->device_id, $user);
     }
 
-    public function detail(User $user): bool
+    public function detail(User $user, Alert $alert): bool
     {
-        return $this->hasGlobalPermission($user, 'detail');
+        return $this->hasGlobalPermission($user, 'detail') &&
+            Permissions::canAccessDevice($alert->device_id, $user);
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user): bool
+    public function update(User $user, Alert $alert): bool
     {
-        return $this->hasGlobalPermission($user, 'update');
+        return $this->hasGlobalPermission($user, 'update') &&
+            Permissions::canAccessDevice($alert->device_id, $user);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user): bool
+    public function delete(User $user, Alert $alert): bool
     {
-        return $this->hasGlobalPermission($user, 'delete');
+        return $this->hasGlobalPermission($user, 'delete') &&
+            Permissions::canAccessDevice($alert->device_id, $user);
     }
 }
