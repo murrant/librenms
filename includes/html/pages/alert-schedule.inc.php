@@ -13,6 +13,7 @@
  */
 
 use App\Models\AlertSchedule;
+use Illuminate\Support\Facades\Gate;
 
 $pagetitle[] = 'Alert Schedule';
 $no_refresh = true;

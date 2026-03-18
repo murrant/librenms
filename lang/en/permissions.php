@@ -42,6 +42,7 @@ return [
 
     'alert-template' => [
         'title' => 'Alert Templates',
+        'viewAny' => ['label' => 'View Alert Templates',   'description' => 'View the list of all alert templates'],
         'view' => ['label' => 'View Alert Templates',   'description' => 'View alert templates'],
         'create' => ['label' => 'Create Alert Templates', 'description' => 'Create new alert templates'],
         'update' => ['label' => 'Edit Alert Templates',   'description' => 'Modify existing alert templates'],
@@ -50,6 +51,7 @@ return [
 
     'alert-transport' => [
         'title' => 'Alert Transports',
+        'viewAny' => ['label' => 'View Alert Transports',   'description' => 'View the list of all alert transports'],
         'view' => ['label' => 'View Alert Transports',   'description' => 'View alert transports'],
         'create' => ['label' => 'Create Alert Transports', 'description' => 'Create new alert transports'],
         'update' => ['label' => 'Edit Alert Transports',   'description' => 'Modify existing alert transports'],

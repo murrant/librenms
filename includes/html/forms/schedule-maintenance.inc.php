@@ -15,6 +15,7 @@
 use App\Facades\LibrenmsConfig;
 use App\Models\AlertSchedule;
 use App\Models\UserPref;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use LibreNMS\Enum\MaintenanceBehavior;
 
@@ -196,8 +197,8 @@ if ($sub_type == 'new-maintenance') {
         'schedule_id' => $alert_schedule->schedule_id ?? null,
     ];
 } elseif ($sub_type == 'parse-maintenance') {
-    Gate::authorize('view', AlertSchedule::class);
     $alert_schedule = AlertSchedule::findOrFail($_POST['schedule_id']);
+    Gate::authorize('view', $alert_schedule);
     $items = [];
 
     foreach (dbFetchRows('SELECT `alert_schedulable_type`, `alert_schedulable_id` FROM `alert_schedulables` WHERE `schedule_id`=?', [$alert_schedule->schedule_id]) as $target) {

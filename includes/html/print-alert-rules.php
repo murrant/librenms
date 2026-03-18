@@ -26,6 +26,7 @@
 
 use App\Facades\DeviceCache;
 use App\Models\AlertRule;
+use Illuminate\Support\Facades\Gate;
 use LibreNMS\Alerting\QueryBuilderParser;
 use LibreNMS\Enum\AlertState;
 
@@ -35,14 +36,10 @@ if (Gate::denies('viewAny', AlertRule::class)) {
 
 $no_refresh = true;
 
-?>
-<div class="row">
-    <div class="col-sm-12">
-        <span id="message"></span>
-    </div>
-</div>
-<?php
 if (isset($_POST['create-default'])) {
+    if (Gate::denies('create', AlertRule::class)) {
+        exit('ERROR: You need to be admin');
+    }
     $default_rules = array_filter(get_rules_from_json(), fn ($rule) => isset($rule['default']) && $rule['default']);
 
     $default_extra = [
@@ -75,6 +72,14 @@ if (isset($_POST['create-default'])) {
     unset($qb);
 }
 
+?>
+<div class="row">
+    <div class="col-sm-12">
+        <span id="message"></span>
+    </div>
+</div>
+
+<?php
 require_once 'includes/html/modal/new_alert_rule.inc.php';
 require_once 'includes/html/modal/delete_alert_rule.inc.php'; // Also dies if !Auth::user()->hasGlobalAdmin()
 require_once 'includes/html/modal/alert_rule_collection.inc.php'; // Also dies if !Auth::user()->hasGlobalAdmin()
@@ -408,8 +413,12 @@ foreach ($rule_list as $rule) {
         $enabled_msg = htmlentities((string) $rule['name']) . ' is ON';
     }
 
+    $disabled_attr = '';
+    if (! Gate::allows('update', AlertRule::class)) {
+        $disabled_attr = 'disabled';
+    }
     echo "<div id='on-off-checkbox-" . $rule['id'] . "' data-toggle='popover' data-placement='$enabled_popover' data-content='" . $enabled_msg . "' class='btn-group btn-group-sm' role='group'>";
-    echo "<input id='" . $rule['id'] . "' type='checkbox' name='alert-rule' data-orig_class='" . $orig_class . "' data-orig_colour='" . $orig_col . "' data-orig_state='" . $orig_ico . "' data-alert_id='" . $rule['id'] . "' data-alert_name='" . htmlentities((string) $rule['name']) . "' data-alert_status='" . $status_msg . "' " . $alert_checked . " data-size='small' data-toggle='modal'>";
+    echo "<input id='" . $rule['id'] . "' type='checkbox' name='alert-rule' data-orig_class='" . $orig_class . "' data-orig_colour='" . $orig_col . "' data-orig_state='" . $orig_ico . "' data-alert_id='" . $rule['id'] . "' data-alert_name='" . htmlentities((string) $rule['name']) . "' data-alert_status='" . $status_msg . "' " . $alert_checked . " data-size='small' data-toggle='modal' $disabled_attr>";
     echo '</div>';
     echo '</td>';
 
@@ -455,7 +464,7 @@ echo '<input type="hidden" name="page_number" id="page_number" value="' . htmlsp
     <input type="hidden" name="results_amount" id="results_amount" value="' . htmlspecialchars((string) $results) . '">
     </form>';
 
-if ($count < 1) {
+if ($count < 1 && Gate::allows('create', AlertRule::class)) {
     echo '<div class="row">
         <div class="col-sm-12">
         <form role="form" method="post">

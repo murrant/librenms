@@ -21,12 +21,14 @@ groups:
         - alert-schedule.delete
 
     alert-template:
+        - alert-template.viewAny
         - alert-template.view
         - alert-template.create
         - alert-template.update
         - alert-template.delete
 
     alert-transport:
+        - alert-transport.viewAny
         - alert-transport.view
         - alert-transport.create
         - alert-transport.update

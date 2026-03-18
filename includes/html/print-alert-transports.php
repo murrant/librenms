@@ -52,7 +52,9 @@ foreach (\App\Models\AlertTransport::orderBy('transport_name', 'asc')->get() as 
         if (Gate::allows('delete', AlertTransport::class)) {
             echo "<button type='button' class='btn btn-danger btn-sm' aria-label='Delete' data-toggle='modal' data-target='#delete-alert-transport' data-transport_id='" . $transport->transport_id . "' name='delete-alert-transport' data-popover='popover' data-content='Delete transport'><i class='fa fa-lg fa-trash' aria-hidden='true'></i></button>";
         }
-        echo "<button type='button' class='btn btn-warning btn-sm' data-transport_id='" . $transport->transport_id . "' data-transport='{$transport->transport_type}' name='test-transport' id='test-transport' data-popover='popover' data-content='Test transport'><i class='fa fa-lg fa-check' aria-hidden='true'></i></button> ";
+        if (Gate::allows('update', AlertTransport::class)) {
+            echo "<button type='button' class='btn btn-warning btn-sm' data-transport_id='" . $transport->transport_id . "' data-transport='{$transport->transport_type}' name='test-transport' id='test-transport' data-popover='popover' data-content='Test transport'><i class='fa fa-lg fa-check' aria-hidden='true'></i></button> ";
+        }
         echo '</div>';
     }
     echo '</td>';

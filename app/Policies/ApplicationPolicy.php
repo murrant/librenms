@@ -2,6 +2,8 @@
 
 namespace App\Policies;
 
+use App\Facades\Permissions;
+use App\Models\Application;
 use App\Models\User;
 
 class ApplicationPolicy
@@ -19,16 +21,21 @@ class ApplicationPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user): bool
+    public function view(User $user, Application $application): bool
     {
-        return $this->hasGlobalPermission($user, 'view');
+        if ($this->hasGlobalPermission($user, 'viewAny')) {
+            return true;
+        }
+
+        return $this->hasGlobalPermission($user, 'view') && Permissions::canAccessDevice($application->device_id, $user);
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user): bool
+    public function update(User $user, Application $application): bool
     {
-        return $this->hasGlobalPermission($user, 'update');
+        return $this->hasGlobalPermission($user, 'update') && 
+            Permissions::canAccessDevice($application->device_id, $user);
     }
 }
