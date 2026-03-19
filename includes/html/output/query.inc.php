@@ -49,6 +49,11 @@ switch ($type) {
             if (empty($rule['query'])) {
                 $rule['query'] = QueryBuilderParser::fromJson($rule['builder'])->toSql();
             }
+            if (empty($rule['query'])) {
+                $output .= 'ERROR: Alert rule malformed: ' . $rule['name'] . PHP_EOL . PHP_EOL;
+                continue;
+            }
+
             $sql = $rule['query'];
             $qry = dbFetchRow($sql, [$device_id]);
             if (is_array($qry)) {
