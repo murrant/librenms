@@ -326,13 +326,19 @@ class RunAlerts
         foreach ($this->loadAlerts('alerts.state > ' . AlertState::CLEAR . ' && alerts.open = 0') as $alert) {
             if ($alert['state'] != AlertState::ACKNOWLEDGED || ($alert['info']['until_clear'] === false)) {
                 $rextra = json_decode((string) $alert['extra'], true);
-                if ($rextra['invert']) {
-                    continue;
+                if (! empty($rextra['invert'])) {
+                    continue; // why do we do this?
                 }
 
                 if (empty($alert['query'])) {
                     $alert['query'] = QueryBuilderParser::fromJson($alert['builder'])->toSql();
                 }
+
+                if (empty($alert['query'])) {
+                    Eventlog::log('Alert Rule malformed: ' . $alert['name'], $alert['device_id'], 'alert', Severity::Error);
+                    continue;
+                }
+
                 $chk = dbFetchRows($alert['query'], [$alert['device_id']]);
                 //make sure we can json_encode all the datas later
                 $current_alert_count = count($chk);
