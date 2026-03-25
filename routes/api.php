@@ -63,6 +63,15 @@ Route::prefix('v0')->group(function (): void {
 
     // admin required
     Route::middleware(['can:admin'])->group(function (): void {
+        Route::get('credentials/{credential}/unmask/{field}', [App\Http\Controllers\Api\CredentialController::class, 'unmask'])->name('api.credentials.unmask');
+        Route::apiResource('credentials', App\Http\Controllers\Api\CredentialController::class)->names([
+            'index' => 'api.credentials.index',
+            'store' => 'api.credentials.store',
+            'show' => 'api.credentials.show',
+            'update' => 'api.credentials.update',
+            'destroy' => 'api.credentials.destroy',
+        ]);
+
         Route::prefix('devices')->group(function (): void {
             Route::post('', [App\Api\Controllers\LegacyApiController::class, 'add_device'])->name('add_device');
             Route::delete('{hostname}', [App\Api\Controllers\LegacyApiController::class, 'del_device'])->name('del_device');

@@ -42,11 +42,15 @@ if (! empty($_POST['hostname'])) {
             }
 
             $additional = [];
+            $secureCredentials = $_POST['secure_credentials'] ?? [];
             if (! $snmp_enabled) {
                 $new_device->snmp_disable = 1;
                 $new_device->os = $_POST['os'] ? strip_tags((string) $_POST['os']) : 'ping';
                 $new_device->hardware = strip_tags((string) $_POST['hardware']);
                 $new_device->sysName = strip_tags((string) $_POST['sysName']);
+            } elseif (! empty($secureCredentials)) {
+                // Use secure credentials if provided
+                print_message('Adding host ' . htmlentities($hostname) . ' using secure credentials');
             } elseif ($_POST['snmpver'] === 'v2c' || $_POST['snmpver'] === 'v1') {
                 $new_device->snmpver = strip_tags($_POST['snmpver']);
                 $communities = LibrenmsConfig::get('snmp.community');
@@ -75,6 +79,14 @@ if (! empty($_POST['hostname'])) {
 
                 $force_add = (isset($_POST['force_add']) && $_POST['force_add'] == 'on');
                 $result = (new ValidateDeviceAndCreate($new_device, $force_add))->execute();
+
+                if ($result && ! empty($secureCredentials)) {
+                    $syncData = [];
+                    foreach ($secureCredentials as $index => $id) {
+                        $syncData[$id] = ['order' => $index];
+                    }
+                    $new_device->secureCredentials()->sync($syncData);
+                }
 
                 if ($result) {
                     $link = \LibreNMS\Util\Url::deviceUrl($new_device->device_id);
@@ -144,6 +156,24 @@ $pagetitle[] = 'Add host';
         </div>
     </div>
     <div id="snmp_conf" style="display: block;">
+        <?php
+        $all_credentials = \App\Models\Credential::all();
+        $default_credentials = $all_credentials->where('is_default', true);
+        ?>
+        <div class="form-group">
+            <label class="col-sm-3 control-label"><?php echo __('Secure Credentials') ?></label>
+            <div class="col-sm-9">
+                <select name="secure_credentials[]" class="form-control select2" multiple>
+                    <?php foreach ($all_credentials as $credential) {
+                        $type = $credential->getCredentialType();
+                        $typeName = $type ? $type->name() : $credential->type;
+                        $selected = $default_credentials->contains('id', $credential->id) ? ' selected' : '';
+                        echo "<option value=\"{$credential->id}\"{$selected}>" . htmlspecialchars($credential->name) . " ({$typeName})</option>";
+                    } ?>
+                </select>
+                <p class="help-block"><?php echo __('Select credentials to use for this device. Defaults are pre-selected.') ?></p>
+            </div>
+        </div>
         <div class="form-group">
           <label for="snmpver" class="col-sm-3 control-label">SNMP Version</label>
           <div class="col-sm-3">

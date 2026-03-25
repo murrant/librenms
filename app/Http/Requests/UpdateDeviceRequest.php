@@ -26,6 +26,8 @@ class UpdateDeviceRequest extends FormRequest
             'type' => 'nullable|string',
             'parent_id' => 'nullable|array',
             'parent_id.*' => 'integer',
+            'secure_credentials' => 'nullable|array',
+            'secure_credentials.*' => 'integer|exists:credentials,id',
             'poller_group' => 'nullable|int',
             'override_sysLocation' => 'nullable|boolean',
             'sysLocation' => 'nullable|string',

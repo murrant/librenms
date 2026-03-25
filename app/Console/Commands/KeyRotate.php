@@ -115,7 +115,7 @@ class KeyRotate extends LnmsCommand
             return 1;
         }
 
-        $success = $this->rekeyConfigData('validation.encryption.test');
+        $success = $this->rekeyConfigData('validation.encryption.test') && $this->rekeyCredentials();
 
         if (! $success) {
             $this->line(trans('commands.key:rotate.old_key', ['key' => $old]));
@@ -164,5 +164,29 @@ class KeyRotate extends LnmsCommand
                 return false;
             }
         }
+    }
+
+    private function rekeyCredentials(): bool
+    {
+        $credentials = \App\Models\Credential::all();
+        foreach ($credentials as $credential) {
+            try {
+                $raw_data = $credential->getAttributes()['data'];
+                $decrypted = $this->decrypt->decryptString($raw_data);
+                $credential->setRawAttributes(['data' => $this->encrypt->encryptString($decrypted)], true);
+                $credential->save();
+            } catch (DecryptException) {
+                try {
+                    $this->encrypt->decryptString($credential->getAttributes()['data']);
+                    continue; // already rotated
+                } catch (DecryptException) {
+                    $this->warn(trans('commands.key:rotate.decrypt-failed', ['item' => "Credential: {$credential->name}"]));
+
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

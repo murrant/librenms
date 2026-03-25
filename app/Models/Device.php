@@ -694,6 +694,13 @@ class Device extends BaseModel
     /**
      * @return HasMany<AccessPoint, $this>
      */
+    public function secureCredentials(): BelongsToMany
+    {
+        return $this->belongsToMany(Credential::class, 'credential_device', 'device_id', 'credential_id')
+            ->withPivot('order')
+            ->orderBy('order');
+    }
+
     public function accessPoints(): HasMany
     {
         return $this->hasMany(AccessPoint::class, 'device_id');

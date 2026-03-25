@@ -107,6 +107,10 @@ Route::middleware(['auth'])->group(function (): void {
     Route::get('locations', [LocationController::class, 'index']);
     Route::resource('preferences', UserPreferencesController::class)->only('index', 'store');
     Route::resource('users', UserController::class);
+    Route::get('credentials/schema/{type}', [\App\Http\Controllers\CredentialManagementController::class, 'schema'])->name('credentials.schema');
+    Route::get('credentials/{credential}/devices', [\App\Http\Controllers\CredentialManagementController::class, 'devices'])->name('credentials.devices');
+    Route::get('credentials/{credential}/unmask/{field}', [\App\Http\Controllers\CredentialManagementController::class, 'unmask'])->name('credentials.unmask');
+    Route::resource('credentials', \App\Http\Controllers\CredentialManagementController::class);
     Route::get('about', [AboutController::class, 'index'])->name('about');
     Route::delete('reporting', [AboutController::class, 'clearReportingData'])->name('reporting.clear');
     Route::get('authlog', [UserController::class, 'authlog']);
@@ -126,6 +130,7 @@ Route::middleware(['auth'])->group(function (): void {
         Route::post('/device/{device}/edit/health/sensor/{sensor}/alert', [Device\EditHealthController::class, 'updateAlert'])->name('device.edit.health.sensor.alert')->scopeBindings();
         Route::get('/device/{device}/edit/misc', [Device\EditMiscController::class, 'index'])->name('device.edit.misc');
         Route::put('/device/{device}/edit/misc', [Device\EditMiscController::class, 'update'])->name('device.edit.misc.update');
+        Route::get('/device/{device}/edit/credentials', [Device\EditDeviceController::class, 'credentials'])->name('device.edit.credentials');
         Route::post('/device/{device}/rediscover', [DeviceController::class, 'rediscover'])->name('device.rediscover');
     });
 

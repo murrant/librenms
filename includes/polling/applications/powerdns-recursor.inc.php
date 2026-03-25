@@ -26,6 +26,7 @@
  */
 
 use App\Facades\LibrenmsConfig;
+use LibreNMS\Credentials\PowerDnsCredentialType;
 use LibreNMS\RRD\RrdDefinition;
 
 $data = '';
@@ -33,20 +34,34 @@ $name = 'powerdns-recursor';
 
 if (! empty($agent_data['app'][$name])) {
     $data = $agent_data['app'][$name];
-} elseif (LibrenmsConfig::has('apps.powerdns-recursor.api-key')) {
-    $port = LibrenmsConfig::get('apps.powerdns-recursor.port', 8082);
-    $scheme = LibrenmsConfig::get('apps.powerdns-recursor.https') ? 'https://' : 'http://';
-
-    d_echo("\nNo Agent Data. Attempting to connect directly to the powerdns-recursor server $scheme" . $device['hostname'] . ":$port\n");
-    $context = stream_context_create(['http' => ['header' => 'X-API-Key: ' . LibrenmsConfig::get('apps.powerdns-recursor.api-key')]]);
-    $data = file_get_contents($scheme . $device['hostname'] . ':' . $port . '/api/v1/servers/localhost/statistics', false, $context);
-    if ($data === false) {
-        $data = file_get_contents($scheme . $device['hostname'] . ':' . $port . '/servers/localhost/statistics', false, $context);
-    }
 } else {
-    // nsExtendOutputFull."powerdns-recursor"
-    $oid = '.1.3.6.1.4.1.8072.1.3.2.3.1.2.17.112.111.119.101.114.100.110.115.45.114.101.99.117.114.115.111.114';
-    $data = stripslashes(snmp_get($device, $oid, '-Oqv'));
+    $credential = $device->secureCredentials->where('type', PowerDnsCredentialType::class)->first();
+    if ($credential) {
+        $port = $credential->data['port'] ?? 8082;
+        $scheme = ($credential->data['https'] ?? false) ? 'https://' : 'http://';
+        $apiKey = $credential->data['api_key'] ?? '';
+
+        d_echo("\nNo Agent Data. Attempting to connect directly to the powerdns-recursor server $scheme" . $device['hostname'] . ":$port using secure credentials\n");
+        $context = stream_context_create(['http' => ['header' => 'X-API-Key: ' . $apiKey]]);
+        $data = file_get_contents($scheme . $device['hostname'] . ':' . $port . '/api/v1/servers/localhost/statistics', false, $context);
+        if ($data === false) {
+            $data = file_get_contents($scheme . $device['hostname'] . ':' . $port . '/servers/localhost/statistics', false, $context);
+        }
+    } elseif (LibrenmsConfig::has('apps.powerdns-recursor.api-key')) {
+        $port = LibrenmsConfig::get('apps.powerdns-recursor.port', 8082);
+        $scheme = LibrenmsConfig::get('apps.powerdns-recursor.https') ? 'https://' : 'http://';
+
+        d_echo("\nNo Agent Data. Attempting to connect directly to the powerdns-recursor server $scheme" . $device['hostname'] . ":$port\n");
+        $context = stream_context_create(['http' => ['header' => 'X-API-Key: ' . LibrenmsConfig::get('apps.powerdns-recursor.api-key')]]);
+        $data = file_get_contents($scheme . $device['hostname'] . ':' . $port . '/api/v1/servers/localhost/statistics', false, $context);
+        if ($data === false) {
+            $data = file_get_contents($scheme . $device['hostname'] . ':' . $port . '/servers/localhost/statistics', false, $context);
+        }
+    } else {
+        // nsExtendOutputFull."powerdns-recursor"
+        $oid = '.1.3.6.1.4.1.8072.1.3.2.3.1.2.17.112.111.119.101.114.100.110.115.45.114.101.99.117.114.115.111.114';
+        $data = stripslashes(snmp_get($device, $oid, '-Oqv'));
+    }
 }
 
 if (! empty($data)) {

@@ -143,6 +143,7 @@
                 </div>
             </div>
 
+
             @config('distributed_poller')
             <div class="form-group">
                 <label for="poller_group" class="col-sm-2 control-label">{{ __('device.edit.poller_group') }}</label>

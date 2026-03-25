@@ -50,6 +50,14 @@ groups:
     component:
         - component.update
 
+    credential:
+        - credential.viewAll
+        - credential.view
+        - credential.create
+        - credential.update
+        - credential.delete
+        - credential.unmask
+
     custom-map:
         - custom-map.viewAll
         - custom-map.view
@@ -175,7 +183,7 @@ groups:
         - vminfo.view
         - vminfo.update
 
-    wireless-sensor:
+wireless-sensor:
         - wireless-sensor.update
         - wireless-sensor.delete
 

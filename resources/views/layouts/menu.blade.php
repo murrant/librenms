@@ -652,6 +652,11 @@
                         </li>
                         @endcan
                         @can('auth-log.view')
+                        @can('viewAny', \App\Models\Credential::class)
+                        <li><a href="{{ route('credentials.index') }}"><i class="fa fa-key fa-fw fa-lg"
+                                                                    aria-hidden="true"></i> {{ __('Credentials') }}</a>
+                        </li>
+                        @endcan
                         <li><a href="{{ url('authlog') }}"><i class="fa fa-shield fa-fw fa-lg"
                                                               aria-hidden="true"></i> {{ __('Auth History') }}</a></li>
                         @endcan

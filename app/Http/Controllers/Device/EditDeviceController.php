@@ -29,6 +29,7 @@ namespace App\Http\Controllers\Device;
 use App\Facades\LibrenmsConfig;
 use App\Facades\Rrd;
 use App\Http\Requests\UpdateDeviceRequest;
+use App\Models\Credential;
 use App\Models\Device;
 use App\Models\DeviceGroup;
 use App\Models\PollerGroup;
@@ -88,6 +89,16 @@ class EditDeviceController
             'exclusive_maintenance_id' => $exclusive_schedule_id,
             'rrd_size' => Number::formatBi($rrd_size),
             'rrd_num' => $rrd_num,
+            'secure_credentials' => Credential::all(),
+        ]);
+    }
+
+    public function credentials(Device $device): View
+    {
+        return view('device.edit.credentials', [
+            'device' => $device,
+            'all_credentials' => Credential::all(),
+            'current_credentials' => $device->secureCredentials,
         ]);
     }
 
@@ -96,6 +107,13 @@ class EditDeviceController
         $device->fill($request->validated());
 
         $device->parents()->sync($request->input('parent_id', [])); // TODO avoid loops!
+
+        $secureCredentials = $request->input('secure_credentials', []);
+        $syncData = [];
+        foreach ($secureCredentials as $index => $id) {
+            $syncData[$id] = ['order' => $index];
+        }
+        $device->secureCredentials()->sync($syncData);
 
         // sync groups without removing dynamic groups
         $dynamic_groups = $device->groups()->where('type', 'dynamic')->pluck('id')->toArray();

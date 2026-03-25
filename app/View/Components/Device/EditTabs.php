@@ -51,6 +51,10 @@ class EditTabs extends Component
                 'text' => 'SNMP',
                 'link' => url('/device/device=' . $this->device->device_id . '/tab=edit/section=snmp/'),
             ],
+            'credentials' => [
+                'text' => __('Credentials'),
+                'link' => route('device.edit.credentials', $this->device->device_id),
+            ],
         ];
 
         if (! $device->snmp_disable) {
