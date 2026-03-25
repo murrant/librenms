@@ -13,8 +13,9 @@ readonly class MetricEntry
      * @param  float|int  $value
      */
     public function __construct(
-        public object    $model,
-        public string    $metric,
+        public object $model,
+        public string $metric,
         public float|int $value,
-    ) {}
+    ) {
+    }
 }

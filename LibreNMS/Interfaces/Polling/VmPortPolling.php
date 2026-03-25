@@ -1,6 +1,5 @@
 <?php
 
-
 namespace LibreNMS\Interfaces\Polling;
 
 use App\Models\VmPort;
