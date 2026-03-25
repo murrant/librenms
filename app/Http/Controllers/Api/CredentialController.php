@@ -43,7 +43,7 @@ class CredentialController extends Controller
 
         return response()->json([
             'message' => 'Credential created',
-            'credential' => $this->formatCredential($credential, true)
+            'credential' => $this->formatCredential($credential, true),
         ], 201);
     }
 
@@ -89,7 +89,7 @@ class CredentialController extends Controller
 
         return response()->json([
             'message' => 'Credential updated',
-            'credential' => $this->formatCredential($credential, true)
+            'credential' => $this->formatCredential($credential, true),
         ]);
     }
 

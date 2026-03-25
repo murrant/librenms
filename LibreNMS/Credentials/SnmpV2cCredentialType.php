@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SnmpV2cCredentialType.php
  *

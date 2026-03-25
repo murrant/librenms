@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Credential.php
  *
@@ -63,7 +64,6 @@ class Credential extends BaseModel
 
         return null;
     }
-
 
     public function devices(): BelongsToMany
     {

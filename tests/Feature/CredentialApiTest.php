@@ -27,7 +27,7 @@ class CredentialApiTest extends TestCase
 
     public function test_can_list_credentials(): void
     {
-        Gate::before(fn() => true);
+        Gate::before(fn () => true);
 
         Credential::create([
             'name' => 'Test Cred',
@@ -47,7 +47,7 @@ class CredentialApiTest extends TestCase
 
     public function test_can_create_credential(): void
     {
-        Gate::before(fn() => true);
+        Gate::before(fn () => true);
 
         $response = $this->withHeader('X-Auth-Token', $this->token)
             ->postJson('/api/v0/credentials', [
@@ -66,10 +66,10 @@ class CredentialApiTest extends TestCase
         $credential = Credential::create([
             'name' => 'Secret Cred',
             'type' => SnmpV2cCredentialType::class,
-            'data' => ['community' => 'topsecret']
+            'data' => ['community' => 'topsecret'],
         ]);
 
-        Gate::before(fn() => true);
+        Gate::before(fn () => true);
 
         $response = $this->withHeader('X-Auth-Token', $this->token)
             ->getJson("/api/v0/credentials/{$credential->id}/unmask/community");
@@ -83,7 +83,7 @@ class CredentialApiTest extends TestCase
         $credential = Credential::create([
             'name' => 'Secret Cred',
             'type' => SnmpV2cCredentialType::class,
-            'data' => ['community' => 'topsecret']
+            'data' => ['community' => 'topsecret'],
         ]);
 
         // Don't use Gate::before(fn() => true);

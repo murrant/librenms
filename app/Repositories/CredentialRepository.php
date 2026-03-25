@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CredentialRepository.php
  *
@@ -58,7 +59,7 @@ class CredentialRepository
     /**
      * Get the schema and UI for a specific credential type.
      *
-     * @param string $typeClass
+     * @param  string  $typeClass
      * @return array|null
      */
     public function getTypeInfo(string $typeClass): ?array
@@ -84,8 +85,8 @@ class CredentialRepository
     /**
      * Parse and validate data for a credential type.
      *
-     * @param string $typeClass
-     * @param array $data
+     * @param  string  $typeClass
+     * @param  array  $data
      * @return array
      */
     public function parseData(string $typeClass, array $data): array
@@ -100,15 +101,16 @@ class CredentialRepository
         }
 
         $instance = new $typeClass;
+
         return $instance->parse($data);
     }
 
     /**
      * Compare data against a credential type schema.
      *
-     * @param string $typeClass
-     * @param array $data1
-     * @param array $data2
+     * @param  string  $typeClass
+     * @param  array  $data1
+     * @param  array  $data2
      * @return bool
      */
     public function dataMatches(string $typeClass, array $data1, array $data2): bool
@@ -133,8 +135,8 @@ class CredentialRepository
     /**
      * Format credential data, masking secret fields if requested.
      *
-     * @param Credential $credential
-     * @param bool $unmask
+     * @param  Credential  $credential
+     * @param  bool  $unmask
      * @return array
      */
     public function formatData(Credential $credential, bool $unmask = false): array
@@ -162,8 +164,8 @@ class CredentialRepository
     /**
      * Prepare data for update, preserving secret fields if they are missing in the new data.
      *
-     * @param Credential $credential
-     * @param array $newData
+     * @param  Credential  $credential
+     * @param  array  $newData
      * @return array
      */
     public function prepareUpdateData(Credential $credential, array $newData): array
