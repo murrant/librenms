@@ -15,3 +15,5 @@ discovery:
             oid: SUPERCAPBATTERY-MIB::BMS01-AmbientTemperature
             op: 'regex'
             value: '/^\d+$/'
+snmp:
+    check_oid: SUPERCAPBATTERY-MIB::BMS01-AmbientTemperature

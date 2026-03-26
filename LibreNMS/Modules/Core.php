@@ -57,7 +57,16 @@ class Core implements Module
 
     public function shouldDiscover(OS $os, ModuleStatus $status): bool
     {
-        return ! $os->getDevice()->snmp_disable && $os->getDevice()->status;
+        if ($os->getDevice()->snmp_disable) {
+            return false;
+        }
+
+        if ($os->getDevice()->status) {
+            return true;
+        }
+
+        // this check allows for detection of OS that don't return sysObjectID
+        return $os->getDevice()->status_reason === 'snmp' && $os->getDevice()->os === 'generic';
     }
 
     public function discover(OS $os): void

@@ -412,7 +412,8 @@
             "max_repeaters": {
                 "type": "integer",
                 "minimum": 1
-            }
+            },
+            "check_oid": {"$ref": "oid_types.json#/$defs/oid"}
         },
         "additionalProperties": false
     },
