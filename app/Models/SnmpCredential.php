@@ -64,7 +64,7 @@ class SnmpCredential extends Credential
         return $new;
     }
 
-    public static function makeV3(string $level, string $auth_name = 'root', string $auth_pass = null, string $auth_algo = null, string $crypto_pass = null, string $crypto_algo = null, string $transport = 'udp', int $port = 161): SnmpCredential
+    public static function makeV3(string $level, string $auth_name = 'root', ?string $auth_pass = null, ?string $auth_algo = null, ?string $crypto_pass = null, ?string $crypto_algo = null, string $transport = 'udp', int $port = 161): SnmpCredential
     {
         $new = new static;
         $new->credentials = [
@@ -100,18 +100,22 @@ class SnmpCredential extends Credential
                         // fallthrough
                     case 'noauthnopriv':
                         array_push($options, '-u', $this->auth_name);
+
                         return $options;
                     default:
                         \Log::debug("Unsupported SNMPv3 AuthLevel: {$this->auth_level}");
+
                         return $options;
                 }
             case 'v1':
                 // fallthrough
             case 'v2c':
                 array_push($options, '-' . $this->version, '-c', $context ? "{$this->community}@$context" : $this->community);
+
                 return $options;
             default:
                 \Log::debug("Unsupported SNMP Version: {$this->version}");
+
                 return $options;
         }
     }

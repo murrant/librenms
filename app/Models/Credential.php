@@ -46,7 +46,8 @@ class Credential extends Model
     {
         try {
             return \Crypt::decrypt($value);
-        } catch (DecryptException $e) {}
+        } catch (DecryptException $e) {
+        }
 
         return [];
     }
@@ -55,6 +56,7 @@ class Credential extends Model
     {
         try {
             $this->attributes['credentials'] = \Crypt::encrypt($credentials);
-        } catch (EncryptException $e) {}
+        } catch (EncryptException $e) {
+        }
     }
 }

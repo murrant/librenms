@@ -82,5 +82,4 @@ class MigrateSnmpCredentials extends Migration
 //            }
 //        });
     }
-
 }
