@@ -46,7 +46,7 @@ class Rrd extends BaseDatastore
 {
     private $disabled = false;
 
-    private ?RrdProcess $rrd = null;
+    private RrdProcess $rrd;
 
     /** @var string */
     private $rrd_dir;
@@ -59,10 +59,11 @@ class Rrd extends BaseDatastore
     /** @var int */
     private $step;
 
-    public function __construct()
+    public function __construct(?RrdProcess $rrd = null)
     {
         parent::__construct();
         $this->loadConfig();
+        $this->rrd = $rrd ?? app(RrdProcess::class, ['timeout' => 600]);
     }
 
     public function getName(): string
@@ -88,11 +89,6 @@ class Rrd extends BaseDatastore
             ' RRA:LAST:0.5:1:2016 '
         )));
         $this->version = LibrenmsConfig::get('rrdtool_version', '1.4');
-    }
-
-    public function init(int $timeout = 600): void
-    {
-        $this->rrd ??= app(RrdProcess::class, ['timeout' => $timeout]);
     }
 
     /**
@@ -354,7 +350,6 @@ class Rrd extends BaseDatastore
             return $output;
         }
 
-        $this->init();
         $output = $this->rrd->run(implode(' ', $cmd));
 
         if (Debug::isVerbose()) {
@@ -505,7 +500,6 @@ class Rrd extends BaseDatastore
         try {
             $command = $this->buildCommand('graph', '-', $options);
 
-            $this->init(300);
             $image = $this->rrd->run('"' . implode('" "', $command) . '"');
             $this->rrd->stop();
 
