@@ -46,7 +46,7 @@ class Rrd extends BaseDatastore
 {
     private $disabled = false;
 
-    private RrdProcess $rrd;
+    private readonly RrdProcess $rrd;
 
     /** @var string */
     private $rrd_dir;
@@ -375,6 +375,7 @@ class Rrd extends BaseDatastore
      */
     public function buildCommand(string $command, string $filename, array $options = []): array
     {
+        $this->loadConfig();
         if ($command == 'create') {
             // <1.4.3 doesn't support -O, so make sure the file doesn't exist
             if (version_compare($this->version, '1.4.3', '<')) {

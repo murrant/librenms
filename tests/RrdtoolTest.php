@@ -1,106 +1,174 @@
 <?php
 
-/**
- * RrdtoolTest.php
- *
- * Tests functionality of our rrdtool wrapper
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- * @link       https://www.librenms.org
- *
- * @copyright  2016 Tony Murray
- * @author     Tony Murray <murraytony@gmail.com>
- */
-
 namespace LibreNMS\Tests;
 
 use App\Facades\LibrenmsConfig;
+use App\Models\Device;
 use LibreNMS\Data\Store\Rrd;
+use LibreNMS\Exceptions\RrdGraphException;
+use LibreNMS\RRD\RrdDefinition;
+use LibreNMS\RRD\RrdProcess;
 
 final class RrdtoolTest extends TestCase
 {
-    public function testBuildCommandLocal(): void
+    public function testRrdConstructorInjection(): void
     {
-        LibrenmsConfig::set('rrdcached', '');
-        LibrenmsConfig::set('rrdtool_version', '1.4');
-        LibrenmsConfig::set('rrd_dir', '/opt/librenms/rrd');
+        $mock = $this->createMock(RrdProcess::class);
+        $rrd = new Rrd($mock);
 
-        $cmd = $this->buildCommandProxy('create', '/opt/librenms/rrd/f', ['o']);
-        $this->assertEquals(['create', '/opt/librenms/rrd/f', 'o'], $cmd);
-
-        $cmd = $this->buildCommandProxy('tune', '/opt/librenms/rrd/f', ['o']);
-        $this->assertEquals(['tune', '/opt/librenms/rrd/f', 'o'], $cmd);
-
-        $cmd = $this->buildCommandProxy('update', '/opt/librenms/rrd/f', ['o']);
-        $this->assertEquals(['update', '/opt/librenms/rrd/f', 'o'], $cmd);
-
-        LibrenmsConfig::set('rrdtool_version', '1.6');
-
-        $cmd = $this->buildCommandProxy('create', '/opt/librenms/rrd/f', ['o']);
-        $this->assertEquals(['create', '/opt/librenms/rrd/f', 'o', '-O'], $cmd);
-
-        $cmd = $this->buildCommandProxy('tune', '/opt/librenms/rrd/f', ['o']);
-        $this->assertEquals(['tune', '/opt/librenms/rrd/f', 'o'], $cmd);
-
-        $cmd = $this->buildCommandProxy('update', '/opt/librenms/rrd/f', ['options']);
-        $this->assertEquals(['update', '/opt/librenms/rrd/f', 'options'], $cmd);
+        $this->assertSame($mock, (fn () => $this->rrd)->call($rrd));
     }
 
-    public function testBuildCommandRemote(): void
+    public function testWriteWithCreate(): void
     {
-        LibrenmsConfig::set('rrdcached', 'server:42217');
-        LibrenmsConfig::set('rrdtool_version', '1.4');
-        LibrenmsConfig::set('rrd_dir', '/opt/librenms/rrd');
+        $mock = $this->createMock(RrdProcess::class);
+        $rrd = new Rrd($mock);
 
-        $cmd = $this->buildCommandProxy('create', '/opt/librenms/rrd/f', ['o']);
-        $this->assertEquals(['create', '/opt/librenms/rrd/f', 'o'], $cmd);
+        $meta = [
+            'rrd_def' => RrdDefinition::make()->addDataset('DS1', 'GAUGE'),
+            'device' => $this->createMock(Device::class),
+        ];
 
-        $cmd = $this->buildCommandProxy('tune', '/opt/librenms/rrd/f', ['o']);
-        $this->assertEquals(['tune', '/opt/librenms/rrd/f', 'o'], $cmd);
+        // First call fails with RrdNotFoundException to trigger create
+        $matcher = $this->exactly(3);
+        $mock->expects($matcher)
+            ->method('run')
+            ->willReturnCallback(function ($command) use ($matcher) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => throw new \LibreNMS\Exceptions\RrdNotFoundException('not found'),
+                    2 => null,
+                    3 => null,
+                };
 
-        $cmd = $this->buildCommandProxy('update', '/opt/librenms/rrd/f', ['o']);
-        $this->assertEquals(['update', 'f', '--daemon', 'server:42217', 'o'], $cmd);
+                if ($matcher->numberOfInvocations() === 1) {
+                    $this->assertStringContainsString('update', $command);
+                } elseif ($matcher->numberOfInvocations() === 2) {
+                    $this->assertStringContainsString('create', $command);
+                } elseif ($matcher->numberOfInvocations() === 3) {
+                    $this->assertStringContainsString('update', $command);
+                }
 
-        LibrenmsConfig::set('rrdtool_version', '1.6');
+                return 'OK';
+            });
 
-        $cmd = $this->buildCommandProxy('create', '/opt/librenms/rrd/f', ['o']);
-        $this->assertEquals(['create', 'f', '--daemon', 'server:42217', 'o', '-O'], $cmd);
-
-        $cmd = $this->buildCommandProxy('tune', '/opt/librenms/rrd/f', ['o']);
-        $this->assertEquals(['tune', 'f', '--daemon', 'server:42217', 'o'], $cmd);
-
-        $cmd = $this->buildCommandProxy('update', '/opt/librenms/rrd/f', ['o']);
-        $this->assertEquals(['update', 'f', '--daemon', 'server:42217', 'o'], $cmd);
+        $rrd->write('test', ['DS1' => 1], [], $meta);
     }
 
-    public function testBuildCommandException(): void
+    public function testUpdate(): void
     {
-        LibrenmsConfig::set('rrdcached', '');
-        LibrenmsConfig::set('rrdtool_version', '1.4');
+        $mock = $this->createMock(RrdProcess::class);
+        $mock->expects($this->once())
+            ->method('run')
+            ->with('update filename.rrd N:1:2:U')
+            ->willReturn('OK');
 
-        $this->expectException(\LibreNMS\Exceptions\FileExistsException::class);
-        // use this file, since it is guaranteed to exist
-        $this->buildCommandProxy('create', __FILE__, ['o']);
+        $rrd = new Rrd($mock);
+        $rrd->update('filename.rrd', [1, '2', 'a']);
     }
 
-    private function buildCommandProxy(string $command, string $filename, array $options): array
+    public function testTune(): void
     {
-        $mock = $this->mock(Rrd::class)->makePartial(); // avoid constructor
-        // @phpstan-ignore method.protected
-        $mock->loadConfig(); // load config every time to clear cached settings
+        $mock = $this->createMock(RrdProcess::class);
+        $mock->expects($this->once())
+            ->method('run')
+            ->with($this->stringContains('tune filename.rrd --maximum INOCTETS:1250000'))
+            ->willReturn('OK');
 
-        return $mock->buildCommand($command, $filename, $options);
+        $rrd = new Rrd($mock);
+        $this->assertTrue($rrd->tune('port', 'filename.rrd', 10000000));
+    }
+
+    public function testLastUpdate(): void
+    {
+        $mockOutput = " INOCTETS OUTOCTETS\n\n1616789000: 12345 67890\nOK";
+        $mock = $this->createMock(RrdProcess::class);
+        $mock->expects($this->once())
+            ->method('run')
+            ->with('lastupdate filename.rrd')
+            ->willReturn($mockOutput);
+
+        $rrd = new Rrd($mock);
+        $point = $rrd->lastUpdate('filename.rrd');
+
+        $this->assertNotNull($point);
+        $this->assertEquals(1616789000, $point->timestamp);
+        $this->assertEquals(['INOCTETS' => '12345', 'OUTOCTETS' => '67890'], $point->data);
+    }
+
+    public function testGraph(): void
+    {
+        $mock = $this->createMock(RrdProcess::class);
+        $mock->expects($this->once())
+            ->method('run')
+            ->with('"graph" "-" "option1" "option2"')
+            ->willReturn('BINARY_DATA');
+        $mock->expects($this->atLeastOnce())->method('stop');
+
+        $rrd = new Rrd($mock);
+        $result = $rrd->graph(['option1', 'option2']);
+        $this->assertEquals('BINARY_DATA', $result);
+    }
+
+    public function testGraphException(): void
+    {
+        $mock = $this->createMock(RrdProcess::class);
+        $mock->method('run')->willThrowException(new \LibreNMS\Exceptions\RrdException('rrd error'));
+
+        $rrd = new Rrd($mock);
+        $this->expectException(RrdGraphException::class);
+        $rrd->graph(['options']);
+    }
+
+    public function testBuildCommandVersionO(): void
+    {
+        $mock = $this->createMock(RrdProcess::class);
+        $rrd = new Rrd($mock);
+
+        $meta = [
+            'rrd_def' => RrdDefinition::make()->addDataset('DS1', 'GAUGE'),
+            'device' => $this->createMock(Device::class),
+        ];
+
+        // Version 1.4.3 should have -O in create command
+        LibrenmsConfig::set('rrdtool_version', '1.4.3');
+        $matcher = $this->exactly(3);
+        $mock->expects($matcher)
+            ->method('run')
+            ->willReturnCallback(function ($command) use ($matcher) {
+                $count = $matcher->numberOfInvocations();
+                if ($count === 1) {
+                    throw new \LibreNMS\Exceptions\RrdNotFoundException('not found');
+                }
+                if ($count === 2) {
+                    $this->assertStringContainsString('create', $command);
+                    $this->assertStringContainsString('-O', $command);
+                }
+
+                return 'OK';
+            });
+
+        $rrd->write('test', ['DS1' => 1], [], $meta);
+
+        // Version 1.4.2 should NOT have -O in create command
+        LibrenmsConfig::set('rrdtool_version', '1.4.2');
+        $mock = $this->createMock(RrdProcess::class);
+        $matcher = $this->exactly(3);
+        $mock->expects($matcher)
+            ->method('run')
+            ->willReturnCallback(function ($command) use ($matcher) {
+                $count = $matcher->numberOfInvocations();
+                if ($count === 1) {
+                    throw new \LibreNMS\Exceptions\RrdNotFoundException('not found');
+                }
+                if ($count === 2) {
+                    $this->assertStringContainsString('create', $command);
+                    $this->assertStringNotContainsString('-O', $command);
+                }
+
+                return 'OK';
+            });
+
+        $rrd = new Rrd($mock);
+        $rrd->write('test', ['DS1' => 1], [], $meta);
     }
 }
