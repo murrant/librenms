@@ -6,6 +6,7 @@ use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use LibreNMS\Data\Store\Rrd;
 use LibreNMS\Exceptions\RrdGraphException;
+use LibreNMS\Exceptions\RrdNotFoundException;
 use LibreNMS\RRD\RrdDefinition;
 use LibreNMS\RRD\RrdProcess;
 
@@ -34,14 +35,9 @@ final class RrdtoolTest extends TestCase
         $mock->expects($matcher)
             ->method('run')
             ->willReturnCallback(function ($command) use ($matcher) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => throw new \LibreNMS\Exceptions\RrdNotFoundException('not found'),
-                    2 => null,
-                    3 => null,
-                };
-
                 if ($matcher->numberOfInvocations() === 1) {
                     $this->assertStringContainsString('update', $command);
+                    throw new RrdNotFoundException('not found');
                 } elseif ($matcher->numberOfInvocations() === 2) {
                     $this->assertStringContainsString('create', $command);
                 } elseif ($matcher->numberOfInvocations() === 3) {
@@ -137,7 +133,7 @@ final class RrdtoolTest extends TestCase
             ->willReturnCallback(function ($command) use ($matcher) {
                 $count = $matcher->numberOfInvocations();
                 if ($count === 1) {
-                    throw new \LibreNMS\Exceptions\RrdNotFoundException('not found');
+                    throw new RrdNotFoundException('not found');
                 }
                 if ($count === 2) {
                     $this->assertStringContainsString('create', $command);
@@ -158,7 +154,7 @@ final class RrdtoolTest extends TestCase
             ->willReturnCallback(function ($command) use ($matcher) {
                 $count = $matcher->numberOfInvocations();
                 if ($count === 1) {
-                    throw new \LibreNMS\Exceptions\RrdNotFoundException('not found');
+                    throw new RrdNotFoundException('not found');
                 }
                 if ($count === 2) {
                     $this->assertStringContainsString('create', $command);

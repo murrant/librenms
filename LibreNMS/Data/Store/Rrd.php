@@ -97,7 +97,7 @@ class Rrd extends BaseDatastore
      */
     public function terminate(): void
     {
-        $this->rrd?->stop();
+        $this->rrd->stop();
     }
 
     /**

@@ -47,8 +47,6 @@ class PortTune extends LnmsCommand
             }
         }
 
-        Rrd::terminate();
-
         return 0;
     }
 
