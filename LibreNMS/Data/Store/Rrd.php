@@ -344,9 +344,6 @@ class Rrd extends BaseDatastore
             return $output;
         }
 
-        $commandLine = implode(' ', $cmd);
-        Log::debug('RRD[%g' . $commandLine . '%n]', ['color' => true]);
-
         // do not write rrd files, but allow read-only commands
         $ro_commands = ['graph', 'graphv', 'dump', 'fetch', 'first', 'last', 'lastupdate', 'info', 'xport'];
         if ($this->disabled && ! in_array($command, $ro_commands)) {
@@ -358,7 +355,7 @@ class Rrd extends BaseDatastore
         }
 
         $this->init();
-        $output = $this->rrd->run($commandLine);
+        $output = $this->rrd->run(implode(' ', $cmd));
 
         if (Debug::isVerbose()) {
             Log::debug('RRDtool Output: ' . $output);
