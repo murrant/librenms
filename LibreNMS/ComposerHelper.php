@@ -107,7 +107,7 @@ class ComposerHelper
     /**
      * Initially populate .env file
      */
-    private static function populateEnv()
+    private static function populateEnv(): void
     {
         $config = [
             'db_host' => '',
@@ -160,6 +160,8 @@ class ComposerHelper
 
     /**
      * Run a command or array of commands and echo the command and output
+     *
+     * @param  string[]  $cmds
      */
     private static function exec(array $cmds): int
     {
@@ -169,6 +171,11 @@ class ComposerHelper
         return $result_code;
     }
 
+    /**
+     * @param  string[]  $command
+     * @param  array<string, string|int|float>  $env
+     * @return int
+     */
     private static function execComposerCommand(array $command, array $env = []): int
     {
         $cli = [];
