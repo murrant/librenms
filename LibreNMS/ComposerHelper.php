@@ -177,7 +177,7 @@ class ComposerHelper
         }
         $cli[] = PHP_BINARY;
         $cli[] = realpath(__DIR__ . '/../../scripts/composer_wrapper.php');
-        foreach($command as $word) {
+        foreach ($command as $word) {
             $cli[] = escapeshellarg($word);
         }
 
