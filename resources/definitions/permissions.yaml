@@ -50,12 +50,12 @@ groups:
     component:
         - component.update
 
-    credentials:
-        - credentials.view
-        - credentials.create
-        - credentials.update
-        - credentials.delete
-        - credentials.unmask
+    credential:
+        - credential.view
+        - credential.create
+        - credential.update
+        - credential.delete
+        - credential.unmask
 
     custom-map:
         - custom-map.viewAll
