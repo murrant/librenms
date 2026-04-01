@@ -54,4 +54,40 @@ class IpmiCredentialData extends CredentialData
             'auth_type' => 'required|in:NONE,MD2,MD5,PASSWORD,OEM',
         ];
     }
+
+    public static function getUiSchema(): array
+    {
+        return [
+            'username' => [
+                'type' => 'text',
+                'label' => 'Username',
+            ],
+            'password' => [
+                'type' => 'password',
+                'label' => 'Password',
+            ],
+            'auth_level' => [
+                'type' => 'select',
+                'label' => 'Authentication Level',
+                'options' => [
+                    'CALLBACK' => 'Callback',
+                    'USER' => 'User',
+                    'OPERATOR' => 'Operator',
+                    'ADMIN' => 'Admin',
+                    'OEM' => 'OEM',
+                ],
+            ],
+            'auth_type' => [
+                'type' => 'select',
+                'label' => 'Authentication Type',
+                'options' => [
+                    'NONE' => 'None',
+                    'MD2' => 'MD2',
+                    'MD5' => 'MD5',
+                    'PASSWORD' => 'Password',
+                    'OEM' => 'OEM',
+                ],
+            ],
+        ];
+    }
 }

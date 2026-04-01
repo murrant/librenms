@@ -13,6 +13,7 @@ use App\Http\Controllers\ApiAccessController;
 use App\Http\Controllers\Auth;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\AuthLogController;
+use App\Http\Controllers\CredentialController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardWidgetController;
 use App\Http\Controllers\Device;
@@ -148,6 +149,7 @@ Route::middleware(['auth'])->group(function (): void {
         Route::post('bill', [UserPermissionsController::class, 'attachBill'])->name('bill.attach');
         Route::delete('bill/{bill}', [UserPermissionsController::class, 'detachBill'])->name('bill.detach')->whereNumber('bill');
     });
+    Route::resource('credentials', CredentialController::class)->except(['show']);
     Route::get('about', [AboutController::class, 'index'])->name('about');
     Route::delete('reporting', [AboutController::class, 'clearReportingData'])->name('reporting.clear');
     Route::get('authlog', [AuthLogController::class, 'index'])->name('auth-log');

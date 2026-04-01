@@ -15,7 +15,7 @@ class Credential extends Model
         'description',
         'credential_type',
         'default',
-        'credentials',
+        'data',
     ];
 
     public $casts = [

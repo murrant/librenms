@@ -68,4 +68,100 @@ class SnmpCredentialData extends CredentialData
             'snmp_v3_crypto_algo' => 'required_if:snmp_v3_auth_level,authPriv|in:DES,AES,AES-192,AES-256,AES-192-C,AES-256-C',
         ];
     }
+
+    public static function getUiSchema(): array
+    {
+        return [
+            'snmp_version' => [
+                'type' => 'select',
+                'label' => 'SNMP Version',
+                'options' => [
+                    'v1' => 'v1',
+                    'v2c' => 'v2c',
+                    'v3' => 'v3',
+                ],
+            ],
+            'snmp_community' => [
+                'type' => 'password',
+                'label' => 'Community',
+                'visible_if' => [
+                    'snmp_version' => ['$in' => ['v1', 'v2c']],
+                ],
+            ],
+            'snmp_v3_auth_name' => [
+                'type' => 'text',
+                'label' => 'Auth Name',
+                'visible_if' => [
+                    'snmp_version' => 'v3',
+                ],
+            ],
+            'snmp_v3_auth_level' => [
+                'type' => 'select',
+                'label' => 'Auth Level',
+                'options' => [
+                    'noAuthNoPriv' => 'No Authentication, No Privacy',
+                    'authNoPriv' => 'Authentication, No Privacy',
+                    'authPriv' => 'Authentication, Privacy',
+                ],
+                'visible_if' => [
+                    'snmp_version' => 'v3',
+                ],
+            ],
+            'snmp_v3_auth_pass' => [
+                'type' => 'password',
+                'label' => 'Auth Password',
+                'visible_if' => [
+                    'snmp_version' => 'v3',
+                    'snmp_v3_auth_level' => ['$in' => ['authNoPriv', 'authPriv']],
+                ],
+            ],
+            'snmp_v3_auth_algo' => [
+                'type' => 'select',
+                'label' => 'Auth Algorithm',
+                'options' => [
+                    'MD5' => 'MD5',
+                    'SHA' => 'SHA',
+                    'SHA-224' => 'SHA-224',
+                    'SHA-256' => 'SHA-256',
+                    'SHA-384' => 'SHA-384',
+                    'SHA-512' => 'SHA-512',
+                ],
+                'visible_if' => [
+                    'snmp_version' => 'v3',
+                    'snmp_v3_auth_level' => ['$in' => ['authNoPriv', 'authPriv']],
+                ],
+            ],
+            'snmp_v3_crypto_pass' => [
+                'type' => 'password',
+                'label' => 'Crypto Password',
+                'visible_if' => [
+                    'snmp_version' => 'v3',
+                    'snmp_v3_auth_level' => 'authPriv',
+                ],
+            ],
+            'snmp_v3_crypto_algo' => [
+                'type' => 'select',
+                'label' => 'Crypto Algorithm',
+                'options' => [
+                    'DES' => 'DES',
+                    'AES' => 'AES',
+                    'AES-192' => 'AES-192',
+                    'AES-256' => 'AES-256',
+                    'AES-192-C' => 'AES-192-C',
+                    'AES-256-C' => 'AES-256-C',
+                ],
+                'visible_if' => [
+                    'snmp_version' => 'v3',
+                    'snmp_v3_auth_level' => 'authPriv',
+                ],
+            ],
+            'snmp_v3_context' => [
+                'type' => 'text',
+                'label' => 'Context',
+                'visible_if' => [
+                    'snmp_version' => 'v3',
+                ],
+            ],
+        ];
+    }
 }
