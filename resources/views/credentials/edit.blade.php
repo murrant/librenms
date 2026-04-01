@@ -35,7 +35,7 @@
                     </div>
                 </div>
 
-                @include('credentials._form_fields', ['schema' => $schema, 'model' => $model])
+                @include('credentials._form_fields', ['schema' => $schema, 'data' => $data])
 
                 <div class="tw:mt-6">
                     <button type="submit" class="btn btn-primary">

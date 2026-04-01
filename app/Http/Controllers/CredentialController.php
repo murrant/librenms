@@ -96,14 +96,14 @@ class CredentialController extends Controller
 
         $credentialType = $credential->credential_type;
         $schema = $credentialType->credentialClass()::getUiSchema();
-        $model = Gate::allows('unmask', $credential)
+        $data = Gate::allows('unmask', $credential)
             ? $credential->data
             : $this->maskPasswordFields($credential->data, $schema);
 
         return view('credentials.edit', [
             'credential' => $credential,
             'schema' => $schema,
-            'model' => $model,
+            'data' => $data,
         ]);
     }
 
