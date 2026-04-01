@@ -4,14 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCredentialsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('credentials', function (Blueprint $table) {
             $table->id();
@@ -19,17 +17,15 @@ class CreateCredentialsTable extends Migration
             $table->string('description');
             $table->string('credential_type')->index();
             $table->boolean('default')->default(false);
-            $table->text('credentials');
+            $table->text('data');
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('credentials');
     }
-}
+};

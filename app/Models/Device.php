@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Data\DeviceCredentialRepository;
 use App\View\SimpleTemplate;
 use Carbon\Carbon;
 use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
@@ -186,6 +187,14 @@ class Device extends BaseModel
         }
 
         return false; // no known snmpver
+    }
+
+    /**
+     * Conveinence method.  It is better to use dependency injection
+     */
+    public function getCredentials(): DeviceCredentialRepository
+    {
+        return new DeviceCredentialRepository($this);
     }
 
     /**
@@ -788,11 +797,12 @@ class Device extends BaseModel
     }
 
     /**
-     * @return HasMany<HrDevice, $this>
+     * @return BelongsToMany<Credential, $this>
      */
     public function credentials(): BelongsToMany
     {
-        return $this->belongsToMany(Credential::class);
+        return $this->belongsToMany(Credential::class, 'device_credential', 'device_id', 'credential_id')
+            ->withPivot('credential_type');
     }
 
     public function hostResources(): HasMany
@@ -1325,11 +1335,6 @@ class Device extends BaseModel
     public function slas(): HasMany
     {
         return $this->hasMany(Sla::class, 'device_id');
-    }
-
-    public function snmpCredentials(): HasOne
-    {
-        return $this->hasOne(SnmpCredential::class, 'id', 'snmp_credential_id');
     }
 
     /**
