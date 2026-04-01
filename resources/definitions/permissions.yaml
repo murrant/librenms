@@ -56,6 +56,13 @@ groups:
     component:
         - component.update
 
+    credentials:
+        - credentials.view
+        - credentials.create
+        - credentials.update
+        - credentials.delete
+        - credentials.unmask
+
     custom-map:
         - custom-map.viewAll
         - custom-map.view
