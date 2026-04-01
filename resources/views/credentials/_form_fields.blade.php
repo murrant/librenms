@@ -1,30 +1,25 @@
 @foreach($schema as $field => $config)
-    @php
-        $value = old($field, $model[$field] ?? '');
-        $type = $config['type'] ?? 'text';
-        $label = $config['label'] ?? ucfirst($field);
-        $options = $config['options'] ?? [];
-        $visibleIf = isset($config['visible_if']) ? json_encode($config['visible_if']) : 'null';
-    @endphp
-    <div class="form-group dynamic-field {{ $errors->has($field) ? 'has-error' : '' }}" data-visible-if="{{ $visibleIf }}" id="group-{{ $field }}">
-        <label for="{{ $field }}" class="control-label">{{ __($label) }}</label>
-        @if($type === 'select')
+    <div class="form-group dynamic-field {{ $errors->has($field) ? 'has-error' : '' }}"
+         data-visible-if="{{ isset($config['visible_if']) ? json_encode($config['visible_if']) : 'null' }}"
+         id="group-{{ $field }}">
+        <label for="{{ $field }}" class="control-label">{{ __($config['label'] ?? ucfirst($field)) }}</label>
+
+        @if(($config['type'] ?? 'text') === 'select')
             <select name="{{ $field }}" id="{{ $field }}" class="form-control">
-                @foreach($options as $val => $text)
-                    <option value="{{ $val }}" {{ (string)$value === (string)$val ? 'selected' : '' }}>
+                @foreach($config['options'] ?? [] as $val => $text)
+                    <option value="{{ $val }}" {{ (string)old($field, $model[$field] ?? '') === (string)$val ? 'selected' : '' }}>
                         {{ __($text) }}
                     </option>
                 @endforeach
             </select>
-        @elseif($type === 'password')
-            @can('unmask', $credential)
+        @elseif(($config['type'] ?? 'text') === 'password')
+            @can('unmask', \App\Models\Credential::class)
                 <div class="input-group">
                     <input type="password"
                            class="form-control"
                            id="{{ $field }}"
                            name="{{ $field }}"
-                           value="{{ $value }}"
-                           placeholder="{{ __('Leave blank to keep existing') }}"
+                           value="{{ old($field, $data[$field] ?? '') }}"
                            data-bwignore="true"
                            data-lpignore="true"
                            data-1p-ignore="true"
@@ -43,15 +38,18 @@
                        class="form-control"
                        id="{{ $field }}"
                        name="{{ $field }}"
-                       value="{{ $value }}"
-                       placeholder="{{ __('Leave blank to keep existing') }}"
+                       value="{{ old($field, $data[$field] ?? '') }}"
                        data-bwignore="true"
                        data-lpignore="true"
                        data-1p-ignore="true"
                        autocomplete="new-password">
             @endcan
         @else
-            <input type="{{ $type }}" class="form-control" id="{{ $field }}" name="{{ $field }}" value="{{ $value }}">
+            <input type="{{ $config['type'] ?? 'text' }}"
+                   class="form-control"
+                   id="{{ $field }}"
+                   name="{{ $field }}"
+                   value="{{ old($field, $data[$field] ?? '') }}">
         @endif
 
         @if($errors->has($field))
