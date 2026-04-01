@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CredentialController.php
  *
@@ -70,7 +71,7 @@ class CredentialController extends Controller
         ]);
 
         $credentialType = CredentialType::tryFrom($validated['credential_type']);
-        if (!$credentialType) {
+        if (! $credentialType) {
             abort(400, 'Invalid credential type.');
         }
 
@@ -113,7 +114,7 @@ class CredentialController extends Controller
 
         $validated = $request->validate([
             'description' => 'required|string|max:255',
-            'default'     => 'boolean',
+            'default' => 'boolean',
         ]);
 
         $credentialType = $credential->credential_type;
@@ -127,8 +128,8 @@ class CredentialController extends Controller
 
         $credential->update([
             'description' => $validated['description'],
-            'default'     => $request->boolean('default'),
-            'data'        => $data,
+            'default' => $request->boolean('default'),
+            'data' => $data,
         ]);
 
         $toast->success(__('Credential updated'));

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DeviceCredentialRepository.php
  *
@@ -39,6 +40,7 @@ readonly class DeviceCredentialRepository
 
     /**
      * @template T of CredentialData
+     *
      * @param  class-string<T>  $credentialClass
      * @return T|null
      */

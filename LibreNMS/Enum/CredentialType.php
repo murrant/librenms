@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CredentialType.php
  *
@@ -49,7 +50,7 @@ enum CredentialType: string
     /** @return class-string<CredentialData> */
     public function credentialClass(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Snmp => SnmpCredentialData::class,
             self::Ipmi => IpmiCredentialData::class,
         };
