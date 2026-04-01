@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Contracts\Encryption\EncryptException;
+use App\Casts\EncryptedArray;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +10,9 @@ class Credential extends Model
 {
     use HasFactory;
 
-    protected $table = 'credentials';
+    protected $casts = [
+        'credentials' => EncryptedArray::class,
+    ];
 
     // ---- Helper Functions ----
 
@@ -38,23 +39,5 @@ class Credential extends Model
     public function getToken(): string
     {
         return $this->credentials['token'] ?? '';
-    }
-
-    // ---- Accessors/Mutators ----
-
-    public function getCredentialsAttribute(string $value): array
-    {
-        try {
-            return \Crypt::decrypt($value);
-        } catch (DecryptException $e) {}
-
-        return [];
-    }
-
-    public function setCredentialsAttribute(array $credentials): void
-    {
-        try {
-            $this->attributes['credentials'] = \Crypt::encrypt($credentials);
-        } catch (EncryptException $e) {}
     }
 }
