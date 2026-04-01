@@ -8,6 +8,7 @@ use App\Http\Controllers\AlertRuleTemplateController;
 use App\Http\Controllers\AlertTransportController;
 use App\Http\Controllers\Auth;
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\CredentialController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardWidgetController;
 use App\Http\Controllers\Device;
@@ -110,6 +111,7 @@ Route::middleware(['auth'])->group(function (): void {
     Route::resource('ssl-certificates', SslCertificateController::class)->except(['edit']);
     Route::resource('preferences', UserPreferencesController::class)->only('index', 'store');
     Route::resource('users', UserController::class);
+    Route::resource('credentials', CredentialController::class)->except(['show']);
     Route::get('about', [AboutController::class, 'index'])->name('about');
     Route::delete('reporting', [AboutController::class, 'clearReportingData'])->name('reporting.clear');
     Route::get('authlog', [UserController::class, 'authlog']);
