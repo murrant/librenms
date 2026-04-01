@@ -1,16 +1,13 @@
 @foreach($schema as $field => $config)
     @php
-        // $model is now an array
         $value = old($field, $model[$field] ?? '');
         $type = $config['type'] ?? 'text';
         $label = $config['label'] ?? ucfirst($field);
         $options = $config['options'] ?? [];
         $visibleIf = isset($config['visible_if']) ? json_encode($config['visible_if']) : 'null';
     @endphp
-
     <div class="form-group dynamic-field {{ $errors->has($field) ? 'has-error' : '' }}" data-visible-if="{{ $visibleIf }}" id="group-{{ $field }}">
         <label for="{{ $field }}" class="control-label">{{ __($label) }}</label>
-
         @if($type === 'select')
             <select name="{{ $field }}" id="{{ $field }}" class="form-control">
                 @foreach($options as $val => $text)
@@ -19,6 +16,40 @@
                     </option>
                 @endforeach
             </select>
+        @elseif($type === 'password')
+            @can('unmask', $credential)
+                <div class="input-group">
+                    <input type="password"
+                           class="form-control"
+                           id="{{ $field }}"
+                           name="{{ $field }}"
+                           value="{{ $value }}"
+                           placeholder="{{ __('Leave blank to keep existing') }}"
+                           data-bwignore="true"
+                           data-lpignore="true"
+                           data-1p-ignore="true"
+                           autocomplete="new-password">
+                    <span class="input-group-btn">
+                        <button type="button"
+                                class="btn btn-default btn-toggle-password"
+                                data-target="{{ $field }}"
+                                title="{{ __('Show/hide') }}">
+                            <i class="fa fa-eye-slash"></i>
+                        </button>
+                    </span>
+                </div>
+            @else
+                <input type="password"
+                       class="form-control"
+                       id="{{ $field }}"
+                       name="{{ $field }}"
+                       value="{{ $value }}"
+                       placeholder="{{ __('Leave blank to keep existing') }}"
+                       data-bwignore="true"
+                       data-lpignore="true"
+                       data-1p-ignore="true"
+                       autocomplete="new-password">
+            @endcan
         @else
             <input type="{{ $type }}" class="form-control" id="{{ $field }}" name="{{ $field }}" value="{{ $value }}">
         @endif
@@ -30,14 +61,29 @@
 @endforeach
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // --- Password toggle (show/hide) ---
+        document.querySelectorAll('.btn-toggle-password').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const input = document.getElementById(this.dataset.target);
+                const icon = this.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                }
+            });
+        });
+
+        // --- Visibility conditions ---
         const fields = document.querySelectorAll('.dynamic-field');
 
         function evaluateCondition(condition, fieldValue) {
             if (typeof condition === 'object' && condition !== null) {
-                if (condition.$in) {
-                    return condition.$in.includes(fieldValue);
-                }
+                if (condition.$in) return condition.$in.includes(fieldValue);
             }
             return fieldValue === condition;
         }
@@ -49,26 +95,16 @@
                     try {
                         const conditions = JSON.parse(conditionStr);
                         let isVisible = true;
-
                         for (const [depField, condition] of Object.entries(conditions)) {
                             const depElement = document.getElementById(depField);
-                            if (depElement) {
-                                if (!evaluateCondition(condition, depElement.value)) {
-                                    isVisible = false;
-                                    break;
-                                }
+                            if (depElement && !evaluateCondition(condition, depElement.value)) {
+                                isVisible = false;
+                                break;
                             }
                         }
-
-                        if (isVisible) {
-                            field.style.display = 'block';
-                            const innerInputs = field.querySelectorAll('input, select');
-                            innerInputs.forEach(input => input.disabled = false);
-                        } else {
-                            field.style.display = 'none';
-                            const innerInputs = field.querySelectorAll('input, select');
-                            innerInputs.forEach(input => input.disabled = true);
-                        }
+                        const innerInputs = field.querySelectorAll('input, select');
+                        field.style.display = isVisible ? 'block' : 'none';
+                        innerInputs.forEach(input => input.disabled = !isVisible);
                     } catch (e) {
                         console.error('Error parsing visibility conditions', e);
                     }
@@ -76,8 +112,7 @@
             });
         }
 
-        const allInputs = document.querySelectorAll('input, select');
-        allInputs.forEach(input => {
+        document.querySelectorAll('input, select').forEach(input => {
             input.addEventListener('change', checkVisibility);
         });
 
