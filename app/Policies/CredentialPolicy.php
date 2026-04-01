@@ -13,7 +13,7 @@ class CredentialPolicy
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user)
+    public function viewAny(User $user): bool
     {
         return $this->hasGlobalPermission($user, 'view')
             || $this->hasGlobalPermission($user, 'create')
@@ -24,7 +24,7 @@ class CredentialPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user)
+    public function view(User $user): bool
     {
         return $this->hasGlobalPermission($user, 'view');
     }
@@ -32,7 +32,7 @@ class CredentialPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user)
+    public function create(User $user): bool
     {
         return $this->hasGlobalPermission($user, 'create');
     }
@@ -40,7 +40,7 @@ class CredentialPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user)
+    public function update(User $user): bool
     {
         return $this->hasGlobalPermission($user, 'update');
     }
@@ -48,7 +48,7 @@ class CredentialPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user)
+    public function delete(User $user): bool
     {
         return $this->hasGlobalPermission($user, 'delete');
     }
@@ -56,7 +56,7 @@ class CredentialPolicy
     /**
      * Determine whether the user can unmask the credential data.
      */
-    public function unmask(User $user)
+    public function unmask(User $user): bool
     {
         return $this->hasGlobalPermission($user, 'unmask');
     }
