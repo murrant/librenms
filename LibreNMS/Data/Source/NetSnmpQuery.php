@@ -318,9 +318,8 @@ class NetSnmpQuery implements SnmpQueryInterface
         }
 
         // authentication
-        /** @var \App\Models\SnmpCredential $credentials */
-        $credentials = $this->device->snmpCredentials;
-        $auth = $credentials->toNetSnmpOptions($this->context);
+        $auth = $this->device->getSecrets()->snmp()
+            ->toNetSnmpOptions($this->context);
 
         $cmd = array_merge($cmd, $auth, $this->options);
 
@@ -335,7 +334,7 @@ class NetSnmpQuery implements SnmpQueryInterface
         }
 
         $hostname = Rewrite::addIpv6Brackets((string) ($this->device->overwrite_ip ?: $this->device->hostname));
-        $cmd[] = $credentials->transport . ':' . $hostname . ':' . $credentials->port;
+        $cmd[] = $this->device->transport . ':' . $hostname . ':' . $this->device->port;
 
         return array_merge($cmd, $oids);
     }

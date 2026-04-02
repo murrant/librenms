@@ -50,13 +50,6 @@ groups:
     component:
         - component.update
 
-    credential:
-        - credential.view
-        - credential.create
-        - credential.update
-        - credential.delete
-        - credential.unmask
-
     custom-map:
         - custom-map.viewAll
         - custom-map.view
@@ -149,6 +142,13 @@ groups:
         - routing.viewAll
         - routing.view
         - routing.update
+
+    secret:
+        - secret.view
+        - secret.create
+        - secret.update
+        - secret.delete
+        - secret.unmask
 
     service:
         - service.viewAll

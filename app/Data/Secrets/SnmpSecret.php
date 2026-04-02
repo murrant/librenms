@@ -1,6 +1,6 @@
 <?php
 /**
- * SnmpCredentialData.php
+ * SnmpSecretData.php
  *
  * -Description-
  *
@@ -23,9 +23,9 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace App\Data\Credentials;
+namespace App\Data\Secrets;
 
-class SnmpCredentialData extends CredentialData
+class SnmpSecret extends SecretData
 {
     public function __construct(
         public string $snmp_version = 'v2c',
@@ -38,6 +38,52 @@ class SnmpCredentialData extends CredentialData
         public string $snmp_v3_crypto_algo = 'AES',
         public ?string $snmp_v3_context = null,
     ) {
+    }
+
+    /**
+     * Create an array of arguments to send to net-snmp commands
+     *
+     * @param  string|null  $context
+     * @return string[]
+     */
+    public function toNetSnmpOptions(?string $context = null): array
+    {
+        $options = ['-' . $this->snmp_version];
+
+        if ($this->snmp_version === 'v3') {
+            if ($this->snmp_v3_auth_name !== null) {
+                array_push($options, '-u', $this->snmp_v3_auth_name);
+            }
+
+            array_push($options, '-l', $this->snmp_v3_auth_level);
+
+            if (in_array($this->snmp_v3_auth_level, ['authNoPriv', 'authPriv'])) {
+                array_push($options, '-a', $this->snmp_v3_auth_algo);
+
+                if ($this->snmp_v3_auth_pass !== null) {
+                    array_push($options, '-A', $this->snmp_v3_auth_pass);
+                }
+            }
+
+            if ($this->snmp_v3_auth_level === 'authPriv') {
+                array_push($options, '-x', $this->snmp_v3_crypto_algo);
+
+                if ($this->snmp_v3_crypto_pass !== null) {
+                    array_push($options, '-X', $this->snmp_v3_crypto_pass);
+                }
+            }
+
+            $resolvedContext = $context ?? $this->snmp_v3_context;
+            if ($resolvedContext !== null) {
+                array_push($options, '-n', $resolvedContext);
+            }
+        } else {
+            if ($this->snmp_community !== null) {
+                array_push($options, '-c', $this->snmp_community);
+            }
+        }
+
+        return $options;
     }
 
     public static function fromArray(array $data): static
