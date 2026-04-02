@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('device_credentials', function (Blueprint $table) {
+        Schema::create('device_secrets', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('device_id');
-            $table->foreignId('credential_id')->constrained('credentials')->cascadeOnDelete();
-            $table->string('credential_type');
-            $table->unique(['device_id', 'credential_type']);
+            $table->foreignId('secret_id')->constrained('secrets')->cascadeOnDelete();
+            $table->string('secret_type');
+            $table->unique(['device_id', 'secret_type']);
 
             $table->foreign('device_id')->references('device_id')->on('devices')->cascadeOnDelete();
         });
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('device_credentials');
+        Schema::dropIfExists('device_secrets');
     }
 };

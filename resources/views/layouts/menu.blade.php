@@ -692,8 +692,8 @@
                                                                     aria-hidden="true"></i> {{ __('Manage Users') }}</a>
                         </li>
                         @endcan
-                        @can('viewAny', \App\Models\Credential::class)
-                            <li><a href="{{ route('credentials.index') }}"><i class="fa fa-key fa-fw fa-lg" aria-hidden="true"></i> {{ __('Credentials') }}</a></li>
+                        @can('viewAny', \App\Models\Secret::class)
+                            <li><a href="{{ route('secrets.index') }}"><i class="fa fa-key fa-fw fa-lg" aria-hidden="true"></i> {{ __('Secrets') }}</a></li>
                         @endcan
                         @can('auth-log.view')
                         <li><a href="{{ route('auth-log') }}"><i class="fa fa-shield fa-fw fa-lg"

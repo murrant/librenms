@@ -5,7 +5,7 @@ namespace App\Policies;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class CredentialPolicy
+class SecretPolicy
 {
     use HandlesAuthorization;
     use ChecksGlobalPermissions;
@@ -54,7 +54,7 @@ class CredentialPolicy
     }
 
     /**
-     * Determine whether the user can unmask the credential data.
+     * Determine whether the user can unmask the secret data.
      */
     public function unmask(User $user): bool
     {

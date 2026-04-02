@@ -1,6 +1,6 @@
 <?php
 /**
- * CredentialData.php
+ * SecretData.php
  *
  * -Description-
  *
@@ -23,13 +23,13 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace App\Data\Credentials;
+namespace App\Data\Secrets;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use JsonSerializable;
 
-abstract class CredentialData implements Arrayable, Jsonable, JsonSerializable
+abstract class SecretData implements Arrayable, Jsonable, JsonSerializable
 {
     /**
      * Create a new DTO instance from an array.
