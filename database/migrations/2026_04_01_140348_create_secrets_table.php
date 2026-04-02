@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('description');
-            $table->string('credential_type')->index();
+            $table->string('secret_type')->index();
             $table->boolean('default')->default(false);
             $table->text('data');
         });
