@@ -1,6 +1,6 @@
 <?php
 /**
- * IpmiCredentialData.php
+ * IpmiSecretData.php
  *
  * -Description-
  *
@@ -23,9 +23,9 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace App\Data\Credentials;
+namespace App\Data\Secrets;
 
-class IpmiCredentialData extends CredentialData
+class IpmiSecret extends SecretData
 {
     public function __construct(
         public ?string $username = null,

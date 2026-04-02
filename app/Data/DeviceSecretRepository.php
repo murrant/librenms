@@ -1,6 +1,6 @@
 <?php
 /**
- * DeviceCredentialRepository.php
+ * DeviceSecretRepository.php
  *
  * -Description-
  *
@@ -25,43 +25,43 @@
 
 namespace App\Data;
 
-use App\Data\Credentials\CredentialData;
-use App\Data\Credentials\IpmiCredentialData;
-use App\Data\Credentials\SnmpCredentialData;
+use App\Data\Secrets\IpmiSecret;
+use App\Data\Secrets\SecretData;
+use App\Data\Secrets\SnmpSecret;
 use App\Models\Device;
-use LibreNMS\Enum\CredentialType;
+use LibreNMS\Enum\SecretType;
 
-readonly class DeviceCredentialRepository
+readonly class DeviceSecretRepository
 {
     public function __construct(private Device $device)
     {
     }
 
     /**
-     * @template T of CredentialData
-     * @param  class-string<T>  $credentialClass
+     * @template T of SecretData
+     * @param  class-string<T>  $secretClass
      * @return T|null
      */
-    public function getCredential(string $credentialClass): ?CredentialData
+    public function getSecret(string $secretClass): ?SecretData
     {
-        $type = CredentialType::fromClass($credentialClass);
-        $data = $this->getRawCredentialData($type->value);
+        $type = SecretType::fromClass($secretClass);
+        $data = $this->getRawSecretData($type->value);
 
-        return $data !== null ? $credentialClass::fromArray($data) : null;
+        return $data !== null ? $secretClass::fromArray($data) : null;
     }
 
-    public function ipmi(): ?IpmiCredentialData
+    public function ipmi(): ?IpmiSecret
     {
-        return $this->getCredential(IpmiCredentialData::class);
+        return $this->getSecret(IpmiSecret::class);
     }
 
-    public function snmp(): ?SnmpCredentialData
+    public function snmp(): ?SnmpSecret
     {
-        return $this->getCredential(SnmpCredentialData::class);
+        return $this->getSecret(SnmpSecret::class);
     }
 
-    private function getRawCredentialData(string $type): ?array
+    private function getRawSecretData(string $type): ?array
     {
-        return $this->device->credentials->firstWhere('credential_type', $type)?->data;
+        return $this->device->secrets->firstWhere('secret_type', $type)?->data;
     }
 }

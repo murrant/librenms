@@ -5,7 +5,7 @@
 @section('content')
     <div class="container">
         <div class="tw:mb-4">
-            <a href="{{ route('credentials.index') }}" class="btn btn-default">
+            <a href="{{ route('secrets.index') }}" class="btn btn-default">
                 <i class="fas fa-arrow-left tw:mr-1"></i> {{ __('Back to Credentials') }}
             </a>
         </div>
@@ -16,7 +16,7 @@
             </x-slot>
 
             <div class="tw:mb-6">
-                <form method="GET" action="{{ route('credentials.create') }}" class="tw:flex tw:items-center tw:gap-4">
+                <form method="GET" action="{{ route('secrets.create') }}" class="tw:flex tw:items-center tw:gap-4">
                     <label for="type_selector" class="tw:font-medium tw:mb-0">{{ __('Select Credential Type:') }}</label>
                     <select id="type_selector" name="type" class="form-control tw:w-auto" onchange="this.form.submit()">
                         @foreach($types as $type)
@@ -30,9 +30,9 @@
 
             <hr class="tw:my-6">
 
-            <form method="POST" action="{{ route('credentials.store') }}">
+            <form method="POST" action="{{ route('secrets.store') }}">
                 @csrf
-                <input type="hidden" name="credential_type" value="{{ $currentType->value }}">
+                <input type="hidden" name="secret_type" value="{{ $currentType->value }}">
 
                 <div class="form-group {{ $errors->has('description') ? 'has-error' : '' }}">
                     <label for="description" class="control-label">{{ __('Description') }}</label>
@@ -50,7 +50,7 @@
                     </div>
                 </div>
 
-                @include('credentials._form_fields', ['schema' => $schema, 'data' => []])
+                @include('secrets._form_fields', ['schema' => $schema, 'data' => []])
 
                 <div class="tw:mt-6">
                     <button type="submit" class="btn btn-primary">

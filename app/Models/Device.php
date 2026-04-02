@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Facades\LibrenmsConfig;
 use App\Models\Traits\Filterable;
 use App\Data\DeviceCredentialRepository;
+use App\Data\DeviceSecretRepository;
 use App\View\SimpleTemplate;
 use Carbon\Carbon;
 use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
@@ -217,9 +218,9 @@ class Device extends BaseModel
     /**
      * Conveinence method.  It is better to use dependency injection
      */
-    public function getCredentials(): DeviceCredentialRepository
+    public function getSecrets(): DeviceSecretRepository
     {
-        return new DeviceCredentialRepository($this);
+        return new DeviceSecretRepository($this);
     }
 
     /**
@@ -848,12 +849,12 @@ class Device extends BaseModel
     }
 
     /**
-     * @return BelongsToMany<Credential, $this>
+     * @return BelongsToMany<Secret, $this>
      */
-    public function credentials(): BelongsToMany
+    public function secrets(): BelongsToMany
     {
-        return $this->belongsToMany(Credential::class, 'device_credential', 'device_id', 'credential_id')
-            ->withPivot('credential_type');
+        return $this->belongsToMany(Secret::class, 'device_secret', 'device_id', 'secret_id')
+            ->withPivot('secret_type');
     }
 
     public function hostResources(): HasMany

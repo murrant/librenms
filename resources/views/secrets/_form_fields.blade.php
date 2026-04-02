@@ -7,13 +7,14 @@
         @if(($config['type'] ?? 'text') === 'select')
             <select name="{{ $field }}" id="{{ $field }}" class="form-control">
                 @foreach($config['options'] ?? [] as $val => $text)
-                    <option value="{{ $val }}" {{ (string)old($field, $model[$field] ?? '') === (string)$val ? 'selected' : '' }}>
+                    <option
+                        value="{{ $val }}" {{ (string)old($field, $model[$field] ?? '') === (string)$val ? 'selected' : '' }}>
                         {{ __($text) }}
                     </option>
                 @endforeach
             </select>
         @elseif(($config['type'] ?? 'text') === 'password')
-            @can('unmask', \App\Models\Credential::class)
+            @can('unmask', \App\Models\Secret::class)
                 <div class="input-group">
                     <input type="password"
                            class="form-control"

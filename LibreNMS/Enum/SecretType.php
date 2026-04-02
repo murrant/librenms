@@ -1,6 +1,6 @@
 <?php
 /**
- * CredentialType.php
+ * SecretType.php
  *
  * -Description-
  *
@@ -25,33 +25,33 @@
 
 namespace LibreNMS\Enum;
 
-use App\Data\Credentials\CredentialData;
-use App\Data\Credentials\IpmiCredentialData;
-use App\Data\Credentials\SnmpCredentialData;
+use App\Data\Secrets\IpmiSecret;
+use App\Data\Secrets\SecretData;
+use App\Data\Secrets\SnmpSecret;
 
-enum CredentialType: string
+enum SecretType: string
 {
     case Snmp = 'snmp';
     case Ipmi = 'ipmi';
 
-    /** @param class-string<CredentialData> $class */
+    /** @param class-string<SecretData> $class */
     public static function fromClass(string $class): self
     {
         foreach (self::cases() as $case) {
-            if ($case->credentialClass() === $class) {
+            if ($case->secretClass() === $class) {
                 return $case;
             }
         }
 
-        throw new \InvalidArgumentException("Unregistered credential class: $class");
+        throw new \InvalidArgumentException("Unregistered secret class: $class");
     }
 
-    /** @return class-string<CredentialData> */
-    public function credentialClass(): string
+    /** @return class-string<SecretData> */
+    public function secretClass(): string
     {
         return match($this) {
-            self::Snmp => SnmpCredentialData::class,
-            self::Ipmi => IpmiCredentialData::class,
+            self::Snmp => SnmpSecret::class,
+            self::Ipmi => IpmiSecret::class,
         };
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * CredentialController.php
+ * SecretController.php
  *
  * -Description-
  *
@@ -26,125 +26,125 @@
 namespace App\Http\Controllers;
 
 use App\Http\Interfaces\ToastInterface;
-use App\Models\Credential;
+use App\Models\Secret;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use LibreNMS\Enum\CredentialType;
+use LibreNMS\Enum\SecretType;
 
-class CredentialController extends Controller
+class SecretController extends Controller
 {
     public function index(): View
     {
-        Gate::authorize('viewAny', Credential::class);
+        Gate::authorize('viewAny', Secret::class);
 
-        return view('credentials.index', [
-            'credentials' => Credential::orderBy('description')->get(),
+        return view('secrets.index', [
+            'secrets' => Secret::orderBy('description')->get(),
         ]);
     }
 
     public function create(Request $request): View
     {
-        Gate::authorize('create', Credential::class);
+        Gate::authorize('create', Secret::class);
 
         $type = $request->query('type', 'snmp');
-        $credentialType = CredentialType::tryFrom($type) ?? CredentialType::Snmp;
-        $schema = $credentialType->credentialClass()::getUiSchema();
+        $secretType = SecretType::tryFrom($type) ?? SecretType::Snmp;
+        $schema = $secretType->secretClass()::getUiSchema();
 
-        return view('credentials.create', [
-            'types' => CredentialType::cases(),
-            'currentType' => $credentialType,
+        return view('secrets.create', [
+            'types' => SecretType::cases(),
+            'currentType' => $secretType,
             'schema' => $schema,
         ]);
     }
 
     public function store(Request $request, ToastInterface $toast): RedirectResponse
     {
-        Gate::authorize('create', Credential::class);
+        Gate::authorize('create', Secret::class);
 
         $validated = $request->validate([
             'description' => 'required|string|max:255',
-            'credential_type' => 'required|string',
+            'secret_type' => 'required|string',
             'default' => 'boolean',
         ]);
 
-        $credentialType = CredentialType::tryFrom($validated['credential_type']);
-        if (!$credentialType) {
-            abort(400, 'Invalid credential type.');
+        $secretType = SecretType::tryFrom($validated['secret_type']);
+        if (!$secretType) {
+            abort(400, 'Invalid secret type.');
         }
 
-        $class = $credentialType->credentialClass();
+        $class = $secretType->secretClass();
         $rules = $class::rules();
         $data = $request->validate($rules);
 
-        Credential::create([
+        Secret::create([
             'description' => $validated['description'],
-            'credential_type' => $credentialType,
+            'secret_type' => $secretType,
             'default' => $request->boolean('default'),
             'data' => $data,
         ]);
 
-        $toast->success(__('Credential created'));
+        $toast->success(__('Secret created'));
 
-        return redirect()->route('credentials.index');
+        return redirect()->route('secrets.index');
     }
 
-    public function edit(Credential $credential): View
+    public function edit(Secret $secret): View
     {
-        Gate::authorize('update', $credential);
+        Gate::authorize('update', $secret);
 
-        $credentialType = $credential->credential_type;
-        $schema = $credentialType->credentialClass()::getUiSchema();
-        $data = Gate::allows('unmask', $credential)
-            ? $credential->data
-            : $this->maskPasswordFields($credential->data, $schema);
+        $secretType = $secret->secret_type;
+        $schema = $secretType->secretClass()::getUiSchema();
+        $data = Gate::allows('unmask', $secret)
+            ? $secret->data
+            : $this->maskPasswordFields($secret->data, $schema);
 
-        return view('credentials.edit', [
-            'credential' => $credential,
+        return view('secrets.edit', [
+            'secret' => $secret,
             'schema' => $schema,
             'data' => $data,
         ]);
     }
 
-    public function update(Request $request, Credential $credential, ToastInterface $toast): RedirectResponse
+    public function update(Request $request, Secret $secret, ToastInterface $toast): RedirectResponse
     {
-        Gate::authorize('update', $credential);
+        Gate::authorize('update', $secret);
 
         $validated = $request->validate([
             'description' => 'required|string|max:255',
             'default'     => 'boolean',
         ]);
 
-        $credentialType = $credential->credential_type;
-        $class = $credentialType->credentialClass();
+        $secretType = $secret->secret_type;
+        $class = $secretType->secretClass();
         $data = $request->validate($class::rules());
 
-        if (! Gate::allows('unmask', $credential)) {
+        if (! Gate::allows('unmask', $secret)) {
             $schema = $class::getUiSchema();
-            $data = $this->restoreMaskedFields($data, $credential->data, $schema);
+            $data = $this->restoreMaskedFields($data, $secret->data, $schema);
         }
 
-        $credential->update([
+        $secret->update([
             'description' => $validated['description'],
             'default'     => $request->boolean('default'),
             'data'        => $data,
         ]);
 
-        $toast->success(__('Credential updated'));
+        $toast->success(__('Secret updated'));
 
-        return redirect()->route('credentials.index');
+        return redirect()->route('secrets.index');
     }
 
-    public function destroy(Credential $credential, ToastInterface $toast): RedirectResponse
+    public function destroy(Secret $secret, ToastInterface $toast): RedirectResponse
     {
-        Gate::authorize('delete', $credential);
+        Gate::authorize('delete', $secret);
 
-        $credential->delete();
+        $secret->delete();
 
-        $toast->success(__('Credential deleted'));
+        $toast->success(__('Secret deleted'));
 
-        return redirect()->route('credentials.index');
+        return redirect()->route('secrets.index');
     }
 
     private function maskPasswordFields(array $data, array $schema): array
