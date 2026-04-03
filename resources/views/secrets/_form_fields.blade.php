@@ -8,7 +8,7 @@
             <select name="{{ $field }}" id="{{ $field }}" class="form-control">
                 @foreach($config['options'] ?? [] as $val => $text)
                     <option
-                        value="{{ $val }}" {{ (string)old($field, $model[$field] ?? '') === (string)$val ? 'selected' : '' }}>
+                        value="{{ $val }}" {{ (string)old($field, $data[$field] ?? '') === (string)$val ? 'selected' : '' }}>
                         {{ __($text) }}
                     </option>
                 @endforeach
