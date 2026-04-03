@@ -28,15 +28,15 @@ namespace App\Data\Secrets;
 class SnmpSecret extends SecretData
 {
     public function __construct(
-        public string $snmp_version = 'v2c',
-        public ?string $snmp_community = null,
-        public ?string $snmp_v3_auth_name = null,
-        public ?string $snmp_v3_auth_pass = null,
-        public string $snmp_v3_auth_level = 'noAuthNoPriv',
-        public string $snmp_v3_auth_algo = 'SHA',
-        public ?string $snmp_v3_crypto_pass = null,
-        public string $snmp_v3_crypto_algo = 'AES',
-        public ?string $snmp_v3_context = null,
+        public string $version = 'v2c',
+        public ?string $community = null,
+        public ?string $authname = null,
+        public ?string $authpass = null,
+        public string $authlevel = 'noAuthNoPriv',
+        public string $authalgo = 'SHA',
+        public ?string $cryptopass = null,
+        public string $cryptoalgo = 'AES',
+        public ?string $context = null,
     ) {
     }
 
@@ -48,38 +48,38 @@ class SnmpSecret extends SecretData
      */
     public function toNetSnmpOptions(?string $context = null): array
     {
-        $options = ['-' . $this->snmp_version];
+        $options = ['-' . $this->version];
 
-        if ($this->snmp_version === 'v3') {
-            if ($this->snmp_v3_auth_name !== null) {
-                array_push($options, '-u', $this->snmp_v3_auth_name);
+        if ($this->version === 'v3') {
+            if ($this->authname !== null) {
+                array_push($options, '-u', $this->authname);
             }
 
-            array_push($options, '-l', $this->snmp_v3_auth_level);
+            array_push($options, '-l', $this->authlevel);
 
-            if (in_array($this->snmp_v3_auth_level, ['authNoPriv', 'authPriv'])) {
-                array_push($options, '-a', $this->snmp_v3_auth_algo);
+            if (in_array($this->authlevel, ['authNoPriv', 'authPriv'])) {
+                array_push($options, '-a', $this->authalgo);
 
-                if ($this->snmp_v3_auth_pass !== null) {
-                    array_push($options, '-A', $this->snmp_v3_auth_pass);
+                if ($this->authpass !== null) {
+                    array_push($options, '-A', $this->authpass);
                 }
             }
 
-            if ($this->snmp_v3_auth_level === 'authPriv') {
-                array_push($options, '-x', $this->snmp_v3_crypto_algo);
+            if ($this->authlevel === 'authPriv') {
+                array_push($options, '-x', $this->cryptoalgo);
 
-                if ($this->snmp_v3_crypto_pass !== null) {
-                    array_push($options, '-X', $this->snmp_v3_crypto_pass);
+                if ($this->cryptopass !== null) {
+                    array_push($options, '-X', $this->cryptopass);
                 }
             }
 
-            $resolvedContext = $context ?? $this->snmp_v3_context;
+            $resolvedContext = $context ?? $this->context;
             if ($resolvedContext !== null) {
                 array_push($options, '-n', $resolvedContext);
             }
         } else {
-            if ($this->snmp_community !== null) {
-                array_push($options, '-c', $this->snmp_community);
+            if ($this->community !== null) {
+                array_push($options, '-c', $this->community);
             }
         }
 
@@ -89,36 +89,36 @@ class SnmpSecret extends SecretData
     public static function fromArray(array $data): static
     {
         return new static(
-            snmp_version: $data['snmp_version'] ?? 'v2c',
-            snmp_community: $data['snmp_community'] ?? null,
-            snmp_v3_auth_name: $data['snmp_v3_auth_name'] ?? null,
-            snmp_v3_auth_pass: $data['snmp_v3_auth_pass'] ?? null,
-            snmp_v3_auth_level: $data['snmp_v3_auth_level'] ?? 'noAuthNoPriv',
-            snmp_v3_auth_algo: $data['snmp_v3_auth_algo'] ?? 'SHA',
-            snmp_v3_crypto_pass: $data['snmp_v3_crypto_pass'] ?? null,
-            snmp_v3_crypto_algo: $data['snmp_v3_crypto_algo'] ?? 'AES',
-            snmp_v3_context: $data['snmp_v3_context'] ?? null,
+            version: $data['version'] ?? 'v2c',
+            community: $data['community'] ?? null,
+            authname: $data['authname'] ?? null,
+            authpass: $data['authpass'] ?? null,
+            authlevel: $data['authlevel'] ?? 'noAuthNoPriv',
+            authalgo: $data['authalgo'] ?? 'SHA',
+            cryptopass: $data['cryptopass'] ?? null,
+            cryptoalgo: $data['cryptoalgo'] ?? 'AES',
+            context: $data['context'] ?? null,
         );
     }
 
     public static function rules(): array
     {
         return [
-            'snmp_version' => 'required|in:v1,v2c,v3',
-            'snmp_community' => 'required_if:snmp_version,v1,v2c|string|nullable',
-            'snmp_v3_auth_name' => 'required_if:snmp_version,v3|string|nullable',
-            'snmp_v3_auth_pass' => 'required_if:snmp_v3_auth_level,authNoPriv,authPriv|string|nullable',
-            'snmp_v3_auth_level' => 'required_if:snmp_version,v3|in:noAuthNoPriv,authNoPriv,authPriv',
-            'snmp_v3_auth_algo' => 'required_if:snmp_v3_auth_level,authNoPriv,authPriv|in:MD5,SHA,SHA-224,SHA-256,SHA-384,SHA-512',
-            'snmp_v3_crypto_pass' => 'required_if:snmp_v3_auth_level,authPriv|string|nullable',
-            'snmp_v3_crypto_algo' => 'required_if:snmp_v3_auth_level,authPriv|in:DES,AES,AES-192,AES-256,AES-192-C,AES-256-C',
+            'version' => 'required|in:v1,v2c,v3',
+            'community' => 'required_if:version,v1,v2c|string|nullable',
+            'authname' => 'required_if:version,v3|string|nullable',
+            'authpass' => 'required_if:authlevel,authNoPriv,authPriv|string|nullable',
+            'authlevel' => 'required_if:version,v3|in:noAuthNoPriv,authNoPriv,authPriv',
+            'authalgo' => 'required_if:authlevel,authNoPriv,authPriv|in:MD5,SHA,SHA-224,SHA-256,SHA-384,SHA-512',
+            'cryptopass' => 'required_if:authlevel,authPriv|string|nullable',
+            'cryptoalgo' => 'required_if:authlevel,authPriv|in:DES,AES,AES-192,AES-256,AES-192-C,AES-256-C',
         ];
     }
 
     public static function getUiSchema(): array
     {
         return [
-            'snmp_version' => [
+            'version' => [
                 'type' => 'select',
                 'label' => 'SNMP Version',
                 'options' => [
@@ -127,21 +127,21 @@ class SnmpSecret extends SecretData
                     'v3' => 'v3',
                 ],
             ],
-            'snmp_community' => [
+            'community' => [
                 'type' => 'password',
                 'label' => 'Community',
                 'visible_if' => [
-                    'snmp_version' => ['$in' => ['v1', 'v2c']],
+                    'version' => ['$in' => ['v1', 'v2c']],
                 ],
             ],
-            'snmp_v3_auth_name' => [
+            'authname' => [
                 'type' => 'text',
                 'label' => 'Auth Name',
                 'visible_if' => [
-                    'snmp_version' => 'v3',
+                    'version' => 'v3',
                 ],
             ],
-            'snmp_v3_auth_level' => [
+            'authlevel' => [
                 'type' => 'select',
                 'label' => 'Auth Level',
                 'options' => [
@@ -150,18 +150,18 @@ class SnmpSecret extends SecretData
                     'authPriv' => 'Authentication, Privacy',
                 ],
                 'visible_if' => [
-                    'snmp_version' => 'v3',
+                    'version' => 'v3',
                 ],
             ],
-            'snmp_v3_auth_pass' => [
+            'authpass' => [
                 'type' => 'password',
                 'label' => 'Auth Password',
                 'visible_if' => [
-                    'snmp_version' => 'v3',
-                    'snmp_v3_auth_level' => ['$in' => ['authNoPriv', 'authPriv']],
+                    'version' => 'v3',
+                    'authlevel' => ['$in' => ['authNoPriv', 'authPriv']],
                 ],
             ],
-            'snmp_v3_auth_algo' => [
+            'authalgo' => [
                 'type' => 'select',
                 'label' => 'Auth Algorithm',
                 'options' => [
@@ -173,19 +173,19 @@ class SnmpSecret extends SecretData
                     'SHA-512' => 'SHA-512',
                 ],
                 'visible_if' => [
-                    'snmp_version' => 'v3',
-                    'snmp_v3_auth_level' => ['$in' => ['authNoPriv', 'authPriv']],
+                    'version' => 'v3',
+                    'authlevel' => ['$in' => ['authNoPriv', 'authPriv']],
                 ],
             ],
-            'snmp_v3_crypto_pass' => [
+            'cryptopass' => [
                 'type' => 'password',
                 'label' => 'Crypto Password',
                 'visible_if' => [
-                    'snmp_version' => 'v3',
-                    'snmp_v3_auth_level' => 'authPriv',
+                    'version' => 'v3',
+                    'authlevel' => 'authPriv',
                 ],
             ],
-            'snmp_v3_crypto_algo' => [
+            'cryptoalgo' => [
                 'type' => 'select',
                 'label' => 'Crypto Algorithm',
                 'options' => [
@@ -197,15 +197,15 @@ class SnmpSecret extends SecretData
                     'AES-256-C' => 'AES-256-C',
                 ],
                 'visible_if' => [
-                    'snmp_version' => 'v3',
-                    'snmp_v3_auth_level' => 'authPriv',
+                    'version' => 'v3',
+                    'authlevel' => 'authPriv',
                 ],
             ],
-            'snmp_v3_context' => [
+            'context' => [
                 'type' => 'text',
                 'label' => 'Context',
                 'visible_if' => [
-                    'snmp_version' => 'v3',
+                    'version' => 'v3',
                 ],
             ],
         ];
