@@ -47,6 +47,15 @@ class Package extends DeviceRelatedModel implements Keyable
         return "$this->manager-$this->name-$this->arch";
     }
 
+    public function tags(): array
+    {
+        return [
+            'manager' => $this->manager,
+            'name' => $this->name,
+            'arch' => $this->arch,
+        ];
+    }
+
     public function __toString(): string
     {
         return $this->name . ' (' . $this->arch . ') version ' . $this->version . ($this->build ? "-$this->build" : '');
