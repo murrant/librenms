@@ -68,28 +68,27 @@ class Proxmox extends OS implements VminfoDiscovery, VminfoPolling
 //            ]);
             $metrics->record($vm, 'vm.diskio', $this->aggregateDiskStats($status));
 
-
             // Disk usage
             // prefer guest agent (accurate per-filesystem data),
             // fall back to hypervisor-level values if agent is absent/unavailable.
             $fsInfo = $api->getVmFsInfo($vm->vmwVmVMID);
 
-            if (!empty($fsInfo)) {
+            if (! empty($fsInfo)) {
                 // Aggregate across all real filesystems, skipping pseudo-mounts
                 $skipTypes = ['tmpfs', 'devtmpfs', 'squashfs', 'overlay', 'proc', 'sysfs', 'cgroup', 'cgroup2'];
-                $diskUsed  = 0;
+                $diskUsed = 0;
                 $diskTotal = 0;
 
                 foreach ($fsInfo as $fs) {
                     if (in_array($fs['type'] ?? '', $skipTypes, true)) {
                         continue;
                     }
-                    $diskUsed  += $fs['used-bytes']  ?? 0;
+                    $diskUsed += $fs['used-bytes'] ?? 0;
                     $diskTotal += $fs['total-bytes'] ?? 0;
                 }
 
                 $metrics->record($vm, 'vm.disk', [
-                    'used' =>  $diskUsed,
+                    'used' => $diskUsed,
                     'total' => $diskTotal,
                 ]);
             } else {
