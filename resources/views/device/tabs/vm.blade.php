@@ -33,6 +33,18 @@
                 <td>{{ $vm->memoryFormatted }}</td>
                 <td>{{ $vm->vmwVmCpus }}</td>
             </tr>
+            <tr>
+                <td colspan="5">
+                    <div class="tw:flex tw:flex-wrap tw:gap-2">
+                        <x-graph type="vminfo_cpu" :vars="['id' => $vm->id]" />
+                        <x-graph type="vminfo_mem" :vars="['id' => $vm->id]" />
+                        <x-graph type="vminfo_disk" :vars="['id' => $vm->id]" />
+                        <x-graph type="vminfo_diskio_bits" :vars="['id' => $vm->id]" />
+                        <x-graph type="vminfo_diskio_ops" :vars="['id' => $vm->id]" />
+                        <x-graph type="vminfo_net" :vars="['id' => $vm->id]" />
+                    </div>
+                </td>
+            </tr>
         @endforeach
         </tbody>
     </table>
