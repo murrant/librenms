@@ -15,7 +15,7 @@ readonly class ProxmoxApi
     public function __construct(
         private string $hostname,
         private int $timeout = 10,
-    ){
+    ) {
         $this->base_uri = "https://$this->hostname:8006/api2/json";
         $this->tokenName = LibrenmsConfig::get('proxmox.token_id');
         $this->tokenSecret = LibrenmsConfig::get('proxmox.secret');
