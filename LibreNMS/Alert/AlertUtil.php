@@ -223,7 +223,7 @@ class AlertUtil
                             });
                     })
                     // Inverted mapping (invert_map = 1)
-                    ->orWhere(function ($q) use ($device_id, $location_id,) {
+                    ->orWhere(function ($q) use ($device_id, $location_id) {
                         $q->where('invert_map', 1)
                             ->where(function ($q) use ($device_id, $location_id) {
                                 $q->whereDoesntHave('devices', fn ($q) => $q->where('alert_device_map.device_id', $device_id))
