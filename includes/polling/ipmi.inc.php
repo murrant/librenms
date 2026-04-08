@@ -9,38 +9,36 @@ if (is_array($ipmi_rows)) {
     d_echo($ipmi_rows);
 
     if ($ipmi_hostname = DeviceCache::getPrimary()->getAttrib('ipmi_hostname')) {
-        $ipmi['host'] = $ipmi_hostname;
-        $ipmi_port = DeviceCache::getPrimary()->getAttrib('ipmi_port');
-        $ipmi['port'] = filter_var($ipmi_port, FILTER_VALIDATE_INT) ? $ipmi_port : '623';
-        $ipmi['user'] = DeviceCache::getPrimary()->getAttrib('ipmi_username');
-        $ipmi['password'] = DeviceCache::getPrimary()->getAttrib('ipmi_password');
-        $ipmi['kg_key'] = DeviceCache::getPrimary()->getAttrib('ipmi_kg_key');
-        $ipmi['ciphersuite'] = DeviceCache::getPrimary()->getAttrib('ipmi_ciphersuite');
-        $ipmi_timeout = DeviceCache::getPrimary()->getAttrib('ipmi_timeout');
-        $ipmi['timeout'] = filter_var($ipmi_timeout, FILTER_VALIDATE_INT) ? $ipmi_timeout : '3';
-        $ipmi['type'] = DeviceCache::getPrimary()->getAttrib('ipmi_type');
+        $deviceModel = DeviceCache::getPrimary();
+        $ipmiSecret = $deviceModel->getSecrets()->ipmi();
+
+        $ipmi_port = filter_var($deviceModel->getAttrib('ipmi_port'), FILTER_VALIDATE_INT) ?: '623';
+        $ipmi_timeout = filter_var($deviceModel->getAttrib('ipmi_timeout'), FILTER_VALIDATE_INT) ?: '3';
+        $ipmi_kg_key = $deviceModel->getAttrib('ipmi_kg_key');
+        $ipmi_ciphersuite = $deviceModel->getAttrib('ipmi_ciphersuite');
+        $ipmi_type = $deviceModel->getAttrib('ipmi_type');
 
         echo 'Fetching IPMI sensor data...';
 
         $cmd = [LibrenmsConfig::get('ipmitool', 'ipmitool')];
-        if (LibrenmsConfig::get('own_hostname') != $device['hostname'] || $ipmi['host'] != 'localhost') {
-            if (empty($ipmi['kg_key']) || is_null($ipmi['kg_key'])) {
-                array_push($cmd, '-H', $ipmi['host'], '-U', $ipmi['user'], '-P', $ipmi['password'], '-L', 'USER', '-p', $ipmi['port']);
-            } else {
-                array_push($cmd, '-H', $ipmi['host'], '-U', $ipmi['user'], '-P', $ipmi['password'], '-L', 'USER', '-p', $ipmi['port'], '-y', $ipmi['kg_key']);
+        if (LibrenmsConfig::get('own_hostname') != $device['hostname'] || $ipmi_hostname != 'localhost') {
+            array_push($cmd, '-H', $ipmi_hostname, '-U', $ipmiSecret->username, '-P', $ipmiSecret->password, '-L', $ipmiSecret->auth_level, '-p', $ipmi_port);
+
+            if (! empty($ipmi_kg_key)) {
+                array_push($cmd, '-y', $ipmi_kg_key);
             }
-            if (! empty($ipmi['ciphersuite'])) {
-                array_push($cmd, '-C', $ipmi['ciphersuite']);
+            if (! empty($ipmi_ciphersuite)) {
+                array_push($cmd, '-C', $ipmi_ciphersuite);
             }
-            if (! empty($ipmi['timeout'])) {
-                array_push($cmd, '-N', $ipmi['timeout']);
+            if (! empty($ipmi_timeout)) {
+                array_push($cmd, '-N', $ipmi_timeout);
             }
         }
 
         // Check to see if we know which IPMI interface to use
         // so we dont use wrong arguments for ipmitool
-        if ($ipmi['type'] != '') {
-            array_push($cmd, '-I', $ipmi['type'], '-c', 'sdr');
+        if ($ipmi_type != '') {
+            array_push($cmd, '-I', $ipmi_type, '-c', 'sdr');
             $results = trim((string) external_exec($cmd));
             d_echo($results);
             echo " done.\n";

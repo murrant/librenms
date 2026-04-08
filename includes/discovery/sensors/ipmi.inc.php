@@ -5,27 +5,29 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 // IPMI - We can discover this on poll!
-if ($ipmi['host'] = get_dev_attrib($device, 'ipmi_hostname')) {
+if ($ipmi_hostname = DeviceCache::getPrimary()->getAttrib('ipmi_hostname')) {
+    $deviceModel = DeviceCache::getPrimary();
+    $ipmiSecret = $deviceModel->getSecrets()->ipmi();
+
     echo 'IPMI : ';
-    $ipmi['port'] = filter_var(get_dev_attrib($device, 'ipmi_port'), FILTER_VALIDATE_INT) ?: '623';
-    $ipmi['user'] = get_dev_attrib($device, 'ipmi_username');
-    $ipmi['password'] = get_dev_attrib($device, 'ipmi_password');
-    $ipmi['kg_key'] = get_dev_attrib($device, 'ipmi_kg_key');
-    $ipmi['ciphersuite'] = get_dev_attrib($device, 'ipmi_ciphersuite');
-    $ipmi['timeout'] = filter_var(get_dev_attrib($device, 'ipmi_timeout'), FILTER_VALIDATE_INT) ?: '3';
+    $ipmi_port = filter_var($deviceModel->getAttrib('ipmi_port'), FILTER_VALIDATE_INT) ?: '623';
+    $ipmi_timeout = filter_var($deviceModel->getAttrib('ipmi_timeout'), FILTER_VALIDATE_INT) ?: '3';
+    $ipmi_kg_key = $deviceModel->getAttrib('ipmi_kg_key');
+    $ipmi_ciphersuite = $deviceModel->getAttrib('ipmi_ciphersuite');
+    $ipmi_type = $deviceModel->getAttrib('ipmi_type');
 
     $cmd = [LibrenmsConfig::get('ipmitool', 'ipmitool')];
-    if (LibrenmsConfig::get('own_hostname') != $device['hostname'] || $ipmi['host'] != 'localhost') {
-        if (empty($ipmi['kg_key']) || is_null($ipmi['kg_key'])) {
-            array_push($cmd, '-H', $ipmi['host'], '-p', $ipmi['port'], '-U', $ipmi['user'], '-P', $ipmi['password'], '-L', 'USER');
-        } else {
-            array_push($cmd, '-H', $ipmi['host'], '-p', $ipmi['port'], '-U', $ipmi['user'], '-P', $ipmi['password'], '-y', $ipmi['kg_key'], '-L', 'USER');
+    if (LibrenmsConfig::get('own_hostname') != $device['hostname'] || $ipmi_hostname != 'localhost') {
+        array_push($cmd, '-H', $ipmi_hostname, '-U', $ipmiSecret->username, '-P', $ipmiSecret->password, '-L', $ipmiSecret->auth_level, '-p', $ipmi_port);
+
+        if (! empty($ipmi_kg_key)) {
+            array_push($cmd, '-y', $ipmi_kg_key);
         }
-        if (! empty($ipmi['ciphersuite'])) {
-            array_push($cmd, '-C', $ipmi['ciphersuite']);
+        if (! empty($ipmi_ciphersuite)) {
+            array_push($cmd, '-C', $ipmi_ciphersuite);
         }
-        if (! empty($ipmi['timeout'])) {
-            array_push($cmd, '-N', $ipmi['timeout']);
+        if (! empty($ipmi_timeout)) {
+            array_push($cmd, '-N', $ipmi_timeout);
         }
     }
 
@@ -38,7 +40,7 @@ if ($ipmi['host'] = get_dev_attrib($device, 'ipmi_hostname')) {
             $results = array_values(array_filter($results, fn ($line) => ! Str::contains($line, 'discrete') && trim((string) $line) !== ''));
 
             if (! empty($results)) {
-                set_dev_attrib($device, 'ipmi_type', $ipmi_type);
+                $deviceModel->setAttrib('ipmi_type', $ipmi_type);
                 echo "$ipmi_type ";
                 break;
             }
