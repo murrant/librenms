@@ -12,9 +12,8 @@ if (is_array($ipmi_rows)) {
         $deviceModel = DeviceCache::getPrimary();
         $ipmiSecret = $deviceModel->getSecrets()->ipmi();
 
-        $ipmi_port = filter_var($deviceModel->getAttrib('ipmi_port'), FILTER_VALIDATE_INT) ?: '623';
-        $ipmi_timeout = filter_var($deviceModel->getAttrib('ipmi_timeout'), FILTER_VALIDATE_INT) ?: '3';
-        $ipmi_kg_key = $deviceModel->getAttrib('ipmi_kg_key');
+        $ipmi_port = filter_var($deviceModel->getAttrib('ipmi_port'), FILTER_VALIDATE_INT);
+        $ipmi_timeout = filter_var($deviceModel->getAttrib('ipmi_timeout'), FILTER_VALIDATE_INT);
         $ipmi_ciphersuite = $deviceModel->getAttrib('ipmi_ciphersuite');
         $ipmi_type = $deviceModel->getAttrib('ipmi_type');
 
@@ -22,15 +21,18 @@ if (is_array($ipmi_rows)) {
 
         $cmd = [LibrenmsConfig::get('ipmitool', 'ipmitool')];
         if (LibrenmsConfig::get('own_hostname') != $device['hostname'] || $ipmi_hostname != 'localhost') {
-            array_push($cmd, '-H', $ipmi_hostname, '-U', $ipmiSecret->username, '-P', $ipmiSecret->password, '-L', $ipmiSecret->auth_level, '-p', $ipmi_port);
+            array_push($cmd, '-H', $ipmi_hostname, '-U', $ipmiSecret->username, '-P', $ipmiSecret->password, '-L', 'USER');
 
-            if (! empty($ipmi_kg_key)) {
-                array_push($cmd, '-y', $ipmi_kg_key);
+            if ($ipmiSecret->kg_key) {
+                array_push($cmd, '-y', $ipmiSecret->kg_key);
             }
-            if (! empty($ipmi_ciphersuite)) {
+            if ($ipmi_ciphersuite) {
                 array_push($cmd, '-C', $ipmi_ciphersuite);
             }
-            if (! empty($ipmi_timeout)) {
+            if ($ipmi_port) {
+                array_push($cmd, '-p', $ipmi_port);
+            }
+            if ($ipmi_timeout) {
                 array_push($cmd, '-N', $ipmi_timeout);
             }
         }

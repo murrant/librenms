@@ -13,13 +13,9 @@ return new class extends Migration
     {
         $attributes = [
             'ipmi_hostname',
-            'ipmi_port',
             'ipmi_username',
             'ipmi_password',
             'ipmi_kg_key',
-            'ipmi_ciphersuite',
-            'ipmi_timeout',
-            'ipmi_type',
         ];
 
         DB::table('devices_attribs')
@@ -39,13 +35,12 @@ return new class extends Migration
                     $data = [
                         'username' => $attribs['ipmi_username'] ?? '',
                         'password' => $attribs['ipmi_password'] ?? '',
-                        'auth_level' => 'USER', // default in ipmi.inc.php was -L USER
-                        'auth_type' => 'NONE', // default in IpmiSecret
+                        'kg_key' => $attribs['ipmi_kg_key'] ?? null,
                     ];
 
                     try {
                         $hostname = DB::table('devices')->where('device_id', $deviceId)->value('hostname');
-                        $description = "IPMI for device " . ($hostname ?: $deviceId);
+                        $description = "IPMI for device " . $hostname;
 
                         $secretId = DB::table('secrets')->insertGetId([
                             'description' => $description,

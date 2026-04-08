@@ -30,8 +30,7 @@ class IpmiSecret extends SecretData
     public function __construct(
         public ?string $username = null,
         public ?string $password = null,
-        public ?string $auth_level = 'OPERATOR',
-        public ?string $auth_type = 'NONE',
+        public ?string $kg_key = null,
     ) {
     }
 
@@ -40,8 +39,7 @@ class IpmiSecret extends SecretData
         return new static(
             username: $data['username'] ?? null,
             password: $data['password'] ?? null,
-            auth_level: $data['auth_level'] ?? 'OPERATOR',
-            auth_type: $data['auth_type'] ?? 'NONE',
+            kg_key: $data['kg_key'] ?? null,
         );
     }
 
@@ -50,8 +48,7 @@ class IpmiSecret extends SecretData
         return [
             'username' => 'required|string',
             'password' => 'required|string',
-            'auth_level' => 'required|in:CALLBACK,USER,OPERATOR,ADMIN,OEM',
-            'auth_type' => 'required|in:NONE,MD2,MD5,PASSWORD,OEM',
+            'kg_key' => 'string|size:40|regex:/^[a-fA-F0-9]$/',
         ];
     }
 
@@ -66,28 +63,11 @@ class IpmiSecret extends SecretData
                 'type' => 'password',
                 'label' => 'Password',
             ],
-            'auth_level' => [
-                'type' => 'select',
-                'label' => 'Authentication Level',
-                'options' => [
-                    'CALLBACK' => 'Callback',
-                    'USER' => 'User',
-                    'OPERATOR' => 'Operator',
-                    'ADMIN' => 'Admin',
-                    'OEM' => 'OEM',
-                ],
+            'kg_key' => [
+                'type' => 'password',
+                'label' => 'KG/BMC Key',
             ],
-            'auth_type' => [
-                'type' => 'select',
-                'label' => 'Authentication Type',
-                'options' => [
-                    'NONE' => 'None',
-                    'MD2' => 'MD2',
-                    'MD5' => 'MD5',
-                    'PASSWORD' => 'Password',
-                    'OEM' => 'OEM',
-                ],
-            ],
+
         ];
     }
 }
