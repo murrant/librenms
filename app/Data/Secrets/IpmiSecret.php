@@ -30,8 +30,8 @@ class IpmiSecret extends SecretData
     public function __construct(
         public ?string $username = null,
         public ?string $password = null,
-        public ?string $auth_level = 'OPERATOR',
-        public ?string $auth_type = 'NONE',
+        public string $auth_level = 'USER',
+        public string $auth_type = 'NONE',
     ) {
     }
 
@@ -40,7 +40,7 @@ class IpmiSecret extends SecretData
         return new static(
             username: $data['username'] ?? null,
             password: $data['password'] ?? null,
-            auth_level: $data['auth_level'] ?? 'OPERATOR',
+            auth_level: $data['auth_level'] ?? 'USER',
             auth_type: $data['auth_type'] ?? 'NONE',
         );
     }

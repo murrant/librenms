@@ -44,17 +44,22 @@ class Ipmitool
     private readonly string $password;
     private readonly ?string $kg_key;
     private readonly ?int $ciphersuite;
+    private readonly string $level;
     private readonly int $timeout;
     private ?string $type;
 
     public function __construct(
         private readonly Device $device,
     ) {
+        $ipmiSecret = $this->device->getSecrets()->ipmi();
+        $this->username = $ipmiSecret->username;
+        $this->password = $ipmiSecret->password;
+        $this->level = $ipmiSecret->auth_level;
+
+
         $this->binary = LibrenmsConfig::get('ipmitool', 'ipmitool');
         $this->hostname = $device->getAttrib('ipmi_hostname', $device->hostname);
         $this->port = filter_var($device->getAttrib('ipmi_port'), FILTER_VALIDATE_INT) ?: 0;
-        $this->username = $device->getAttrib('ipmi_username', '');
-        $this->password = $device->getAttrib('ipmi_password', '');
         $this->kg_key = $device->getAttrib('ipmi_kg_key');
         $this->ciphersuite = $device->getAttrib('ipmi_ciphersuite');
         $this->timeout = filter_var($device->getAttrib('ipmi_timeout'), FILTER_VALIDATE_INT) ?: 0;
@@ -153,7 +158,7 @@ class Ipmitool
         $cmd = [$this->binary];
 
         if (! $this->isLocalhost()) {
-            array_push($cmd, '-H', $this->hostname, '-U', $this->username, '-P', $this->password, '-L', 'USER');
+            array_push($cmd, '-H', $this->hostname, '-U', $this->username, '-P', $this->password, '-L', $this->level);
 
             if ($this->port) {
                 array_push($cmd, '-p', $this->port);
