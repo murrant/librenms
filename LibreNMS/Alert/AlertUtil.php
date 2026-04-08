@@ -27,12 +27,14 @@
 namespace LibreNMS\Alert;
 
 use App\Facades\LibrenmsConfig;
+use App\Models\AlertRule;
 use App\Models\Device;
 use App\Models\DeviceGroup;
 use App\Models\User;
 use DeviceCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use LibreNMS\Enum\MaintenanceStatus;
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -186,23 +188,55 @@ class AlertUtil
         })->pluck('realname', 'email')->all();
     }
 
-    public static function getRules($device_id)
+    /**
+     * @param  ?int  $device_id
+     * @return Collection<AlertRule>
+     */
+    public static function getRules(?int $device_id): Collection
     {
-        $query = 'SELECT DISTINCT a.* FROM alert_rules a
-        LEFT JOIN alert_device_map d ON a.id=d.rule_id AND (a.invert_map = 0 OR a.invert_map = 1 AND d.device_id = ?)
-        LEFT JOIN alert_group_map g ON a.id=g.rule_id AND (a.invert_map = 0 OR a.invert_map = 1 AND g.group_id IN (SELECT DISTINCT device_group_id FROM device_group_device WHERE device_id = ?))
-        LEFT JOIN alert_location_map l ON a.id=l.rule_id AND (a.invert_map = 0 OR a.invert_map = 1 AND l.location_id IN (SELECT DISTINCT location_id FROM devices WHERE device_id = ?))
-        LEFT JOIN devices ld ON l.location_id=ld.location_id AND ld.device_id = ?
-        LEFT JOIN device_group_device dg ON g.group_id=dg.device_group_id AND dg.device_id = ?
-        WHERE a.disabled = 0 AND (
-            (d.device_id IS NULL AND g.group_id IS NULL AND l.location_id IS NULL)
-            OR (a.invert_map = 0 AND (d.device_id=? OR dg.device_id=? OR ld.device_id=?))
-            OR (a.invert_map = 1  AND (d.device_id != ? OR d.device_id IS NULL) AND (dg.device_id != ? OR dg.device_id IS NULL) AND (ld.device_id != ? OR ld.device_id IS NULL))
-        )';
+        if ($device_id === null) {
+            return AlertRule::all();
+        }
 
-        $params = [$device_id, $device_id, $device_id, $device_id, $device_id, $device_id, $device_id, $device_id, $device_id, $device_id, $device_id];
+        $location_id = DeviceCache::get($device_id)->location_id;
 
-        return dbFetchRows($query, $params);
+        return AlertRule::query()
+            ->where('disabled', 0)
+            ->where(function ($q) use ($device_id, $location_id) {
+                // No mappings at all
+                $q->where(function ($q) {
+                    $q->whereDoesntHave('devices')
+                        ->whereDoesntHave('groups')
+                        ->whereDoesntHave('locations');
+                })
+                    // Normal mapping (invert_map = 0)
+                    ->orWhere(function ($q) use ($device_id, $location_id) {
+                        $q->where('invert_map', 0)
+                            ->where(function ($q) use ($device_id, $location_id) {
+                                $q->whereHas('devices', fn ($q) => $q->where('alert_device_map.device_id', $device_id))
+                                    ->orWhereHas('groups', fn ($q) => $q->whereIn('group_id', function ($q) use ($device_id) {
+                                        $q->select('device_group_id')
+                                            ->from('device_group_device')
+                                            ->where('device_id', $device_id);
+                                    }))
+                                    ->orWhereHas('locations', fn ($q) => $q->where('location_id', $location_id));
+                            });
+                    })
+                    // Inverted mapping (invert_map = 1)
+                    ->orWhere(function ($q) use ($device_id, $location_id,) {
+                        $q->where('invert_map', 1)
+                            ->where(function ($q) use ($device_id, $location_id) {
+                                $q->whereDoesntHave('devices', fn ($q) => $q->where('alert_device_map.device_id', $device_id))
+                                    ->whereDoesntHave('groups', fn ($q) => $q->whereIn('group_id', function ($q) use ($device_id) {
+                                        $q->select('device_group_id')
+                                            ->from('device_group_device')
+                                            ->where('device_id', $device_id);
+                                    }))
+                                    ->whereDoesntHave('locations', fn ($q) => $q->where('location_id', $location_id));
+                            });
+                    });
+            })
+            ->get();
     }
 
     /**
