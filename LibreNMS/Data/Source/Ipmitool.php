@@ -1,4 +1,5 @@
 <?php
+
 /**
  * IpmitoolCommand.php
  *
@@ -47,12 +48,11 @@ class Ipmitool
 
     public function __construct(
         private Device $device,
-    )
-    {
+    ) {
         $this->binary = LibrenmsConfig::get('ipmitool', 'ipmitool');
         $this->hostname = $device->getAttrib('ipmi_hostname', $device->hostname);
         $this->port = filter_var($device->getAttrib('ipmi_port'), FILTER_VALIDATE_INT) ?: 0;
-        $this->username = $device->getAttrib('ipmi_username', '') ;
+        $this->username = $device->getAttrib('ipmi_username', '');
         $this->password = $device->getAttrib('ipmi_password', '');
         $this->kg_key = $device->getAttrib('ipmi_kg_key');
         $this->ciphersuite = $device->getAttrib('ipmi_ciphersuite');
@@ -74,6 +74,7 @@ class Ipmitool
     /**
      * @param  string[]  $commands
      * @return string
+     *
      * @throws IpmiConnectionFailed
      */
     public function command(array $commands): string
@@ -112,7 +113,7 @@ class Ipmitool
         $output = $this->command(['-c', 'sdr']);
 
         return array_map(
-            fn(string $line): array => array_values(array_map(trim(...), str_getcsv($line, escape: ''))),
+            fn (string $line): array => array_values(array_map(trim(...), str_getcsv($line, escape: ''))),
             array_filter(explode("\n", trim($output)))
         );
     }
@@ -122,7 +123,7 @@ class Ipmitool
         $output = $this->command(['sensor']);
 
         return array_map(
-            fn(string $line): array => array_map(trim(...), explode('|', $line)),
+            fn (string $line): array => array_map(trim(...), explode('|', $line)),
             explode("\n", trim($output))
         );
     }
@@ -181,7 +182,8 @@ class Ipmitool
      * @param  mixed  $ipmi_type
      * @return ProcessResult
      */
-    private function runCommand(array $commands, mixed $ipmi_type): ProcessResult {
+    private function runCommand(array $commands, mixed $ipmi_type): ProcessResult
+    {
         $cmd = $this->createCommand($commands, $ipmi_type);
         Log::debug('IPMI[%m' . implode(' ', $cmd) . '%n]', ['color' => true]);
 
