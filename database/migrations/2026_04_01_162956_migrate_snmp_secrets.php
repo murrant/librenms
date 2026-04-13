@@ -62,7 +62,7 @@ return new class extends Migration
                         'cryptoalgo' => $v3['cryptoalgo'] ?? 'AES',
                     ];
                     $id = DB::table('secrets')->insertGetId([
-                        'description' => "Global SNMP v3 User: " . ($v3['authname'] ?? '<unnamed>'),
+                        'description' => 'Global SNMP v3 User: ' . ($v3['authname'] ?? '<unnamed>'),
                         'secret_type' => 'snmp',
                         'default' => true,
                         'data' => encrypt(json_encode($data)),
@@ -98,7 +98,7 @@ return new class extends Migration
                         $secretId = $globalSecrets[$hash];
                     } else {
                         // Create per-device secret
-                        $description = "SNMP for device " . $device->hostname;
+                        $description = 'SNMP for device ' . $device->hostname;
                         $secretId = DB::table('secrets')->insertGetId([
                             'description' => $description,
                             'secret_type' => 'snmp',
@@ -113,7 +113,8 @@ return new class extends Migration
                         ['device_id' => $device->device_id, 'secret_type' => 'snmp'],
                         ['secret_id' => $secretId]
                     );
-                } catch (EncryptException) {}
+                } catch (EncryptException) {
+                }
             }
         });
     }
