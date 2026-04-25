@@ -50,15 +50,6 @@
                     @enderror
                 </div>
             </div>
-            <div class="form-group @error('override_Unixagent_port') has-error @enderror">
-                <label for="override_Unixagent_port" class="col-sm-4 control-label">Unix agent port</label>
-                <div class="col-sm-1">
-                    <input type="text" name="override_Unixagent_port" id="override_Unixagent_port" class="form-control" value="{{ old('override_Unixagent_port', $override_Unixagent_port) }}">
-                    @error('override_Unixagent_port')
-                        <span class="help-block">{{ $message }}</span>
-                    @enderror
-                </div>
-            </div>
             <div class="form-group">
                 <label for="override_rrdtool_tune" class="col-sm-4 control-label">Enable RRD Tune for all ports?</label>
                 <div class="col-sm-8">
