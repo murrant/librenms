@@ -40,7 +40,7 @@ return new class extends Migration
 
                     try {
                         $hostname = DB::table('devices')->where('device_id', $deviceId)->value('hostname');
-                        $description = "IPMI for device " . $hostname;
+                        $description = 'IPMI for device ' . $hostname;
 
                         $secretId = DB::table('secrets')->insertGetId([
                             'description' => $description,

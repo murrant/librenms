@@ -15,7 +15,7 @@ class Snmp implements PollingMethod
         $start_time = microtime(true);
         $response = SnmpQuery::device($device)->get('SNMPv2-MIB::sysObjectID.0');
 
-        if ($response->getExitCode() !== 0 && !$response->isValid()) {
+        if ($response->getExitCode() !== 0 && ! $response->isValid()) {
             return ProbeResult::failure('SNMP query failed');
         }
 

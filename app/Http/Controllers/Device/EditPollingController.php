@@ -145,12 +145,13 @@ class EditPollingController
 
         if ($methodType === 'unix-agent') {
             if ($device->hasAttrib('override_Unixagent_port')) {
-                 throw ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'method_type' => __('This polling method is already configured for this device.'),
                 ]);
             }
             $device->setAttrib('override_Unixagent_port', 6556);
             $toast->success(__('Polling method added'));
+
             return redirect()->route('device.edit.polling', $device);
         }
 
@@ -281,7 +282,7 @@ class EditPollingController
                 $device->features = null;
                 $device->hardware = $validated['hardware'] ?? null;
                 $device->icon = null;
-                $device->os = !empty($validated['os']) ? strip_tags($validated['os']) : 'ping';
+                $device->os = ! empty($validated['os']) ? strip_tags($validated['os']) : 'ping';
                 $device->sysName = $validated['sysName'] ?? null;
                 $device->version = null;
                 $device->save();
@@ -298,7 +299,7 @@ class EditPollingController
                 $forceSave = (bool) ($validated['force_save'] ?? false);
                 $deviceIsSnmpable = false;
 
-                if (!$forceSave) {
+                if (! $forceSave) {
                     $deviceIsSnmpable = app(DeviceIsSnmpable::class)->execute($device);
                 }
 
@@ -329,9 +330,10 @@ class EditPollingController
         $pollingMethod = app($methodConfig['class']);
 
         if ($methodType === 'unix-agent') {
-             $device->forgetAttrib('override_Unixagent_port');
-             $toast->success(__('Polling method removed'));
-             return redirect()->route('device.edit.polling', $device);
+            $device->forgetAttrib('override_Unixagent_port');
+            $toast->success(__('Polling method removed'));
+
+            return redirect()->route('device.edit.polling', $device);
         }
 
         if ($methodType === 'ipmi') {
@@ -394,7 +396,6 @@ class EditPollingController
         ]);
     }
 
-
     private function formatDeviceSettings(Device $device, array $settings): array
     {
         return collect($settings)->map(function (array $setting) use ($device): array {
@@ -424,7 +425,7 @@ class EditPollingController
                 $value = $setting['default'] ?? null;
             }
 
-            if (($setting['storage']) === 'attrib') {
+            if ($setting['storage'] === 'attrib') {
                 if ($value === null || $value === '') {
                     $device->forgetAttrib($setting['key']);
                 } else {
@@ -435,5 +436,4 @@ class EditPollingController
             }
         }
     }
-
 }
