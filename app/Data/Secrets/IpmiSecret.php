@@ -46,9 +46,9 @@ class IpmiSecret extends SecretData
     public static function rules(): array
     {
         return [
-            'username' => 'required|string',
-            'password' => 'required|string',
-            'kg_key' => 'string|size:40|regex:/^[a-fA-F0-9]$/',
+            'username' => 'nullable|string',
+            'password' => 'nullable|string',
+            'kg_key' => 'nullable|string|size:40|regex:/^[a-fA-F0-9]+$/',
         ];
     }
 

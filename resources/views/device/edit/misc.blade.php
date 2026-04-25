@@ -18,12 +18,6 @@
             @csrf
             @method('PUT')
             <div class="form-group">
-                <label for="override_icmp_disable" class="col-sm-4 control-label">Disable ICMP Test?</label>
-                <div class="col-sm-8">
-                    <input type="checkbox" name="override_icmp_disable" id="override_icmp_disable" data-size="small" {{ old('override_icmp_disable', $override_icmp_disable == 'true') ? 'checked' : '' }}>
-                </div>
-            </div>
-            <div class="form-group">
                 <label for="override_Oxidized_disable" class="col-sm-4 control-label">Exclude from Oxidized?</label>
                 <div class="col-sm-8">
                     <input type="checkbox" name="override_Oxidized_disable" id="override_Oxidized_disable" data-size="small" {{ old('override_Oxidized_disable', $override_Oxidized_disable == 'true') ? 'checked' : '' }}>

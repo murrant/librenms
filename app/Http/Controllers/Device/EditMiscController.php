@@ -37,7 +37,6 @@ class EditMiscController
     {
         return view('device.edit.misc', [
             'device' => $device,
-            'override_icmp_disable' => $device->getAttrib('override_icmp_disable'),
             'override_Oxidized_disable' => $device->getAttrib('override_Oxidized_disable'),
             'override_device_ssh_port' => $device->getAttrib('override_device_ssh_port'),
             'override_device_telnet_port' => $device->getAttrib('override_device_telnet_port'),
@@ -50,7 +49,6 @@ class EditMiscController
 
     public function update(UpdateDeviceMiscRequest $request, Device $device): RedirectResponse
     {
-        $this->updateAttribute($device, 'override_icmp_disable', $request->validated('override_icmp_disable'));
         $this->updateAttribute($device, 'override_Oxidized_disable', $request->validated('override_Oxidized_disable'));
         $this->updateAttribute($device, 'override_device_ssh_port', $request->validated('override_device_ssh_port'));
         $this->updateAttribute($device, 'override_device_telnet_port', $request->validated('override_device_telnet_port'));
