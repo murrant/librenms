@@ -34,28 +34,20 @@ class Icmp implements PollingMethod
         };
     }
 
-    public function getDeviceSettings(): array
+    public function getSettingsSchema(): array
     {
         return [];
     }
 
-    public function isEnabled(Device $device): bool
+    public function getDefaults(): array
     {
-        return $device->status_reason !== 'icmp';
+        return [
+            'affects_availability' => true,
+        ];
     }
 
-    public function isConfigured(Device $device): bool
+    public function getRules(): array
     {
-        return true;
-    }
-
-    public function lastCheckSuccessful(Device $device): ?bool
-    {
-        return $device->last_ping_timetaken !== null; // TODO data not available
-    }
-
-    public function getSecret(Device $device): null
-    {
-        return null;
+        return [];
     }
 }

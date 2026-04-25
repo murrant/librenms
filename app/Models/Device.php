@@ -1117,6 +1117,11 @@ class Device extends BaseModel
         return $this->belongsToMany(self::class, 'device_relationships', 'child_device_id', 'parent_device_id');
     }
 
+    public function pollingMethods(): HasMany
+    {
+        return $this->hasMany(DevicePollingMethod::class, 'device_id');
+    }
+
     /**
      * @return HasMany<Port, $this>
      */

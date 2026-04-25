@@ -31,30 +31,35 @@ class UnixAgent implements PollingMethod
         }
     }
 
-    public function getDeviceSettings(): array
+    public function getSettingsSchema(): array
     {
         return [
-            [
-                'name' => 'port',
+            'port' => [
                 'type' => 'number',
                 'default' => 6556,
-                'required' => true,
-                'rules' => ['nullable', 'integer', 'min:1', 'max:65535'],
-                'description' => 'Unix agent port',
-                'storage' => 'attrib',
-                'key' => 'override_Unixagent_port',
+                'min' => 1,
+                'max' => 65535,
             ],
+        ];
+    }
+
+    public function getDefaults(): array
+    {
+        return [
+            'port' => 6556,
+        ];
+    }
+
+    public function getRules(): array
+    {
+        return [
+            'port' => ['nullable', 'integer', 'min:1', 'max:65535'],
         ];
     }
 
     public function isEnabled(Device $device): bool
     {
         return true;
-    }
-
-    public function isConfigured(Device $device): bool
-    {
-        return $device->hasAttrib('override_Unixagent_port');
     }
 
     public function lastCheckSuccessful(Device $device): ?bool
