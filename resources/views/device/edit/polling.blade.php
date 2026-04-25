@@ -39,7 +39,7 @@
                 </div>
 
                 <!-- Right Content -->
-                <div class="tw:w-full tw:md:w-3/4 tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:rounded-lg tw:shadow-sm tw:p-6 tw:flex-grow">
+                <div class="tw:w-full tw:md:w-3/4 tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:rounded-lg tw:shadow-sm tw:p-6 tw:grow">
                     @foreach($configuredMethods as $method)
                         <div x-show="activeTab === '{{ $method["type"] }}'" style="display: none;" x-transition>
                             <h3 class="tw:text-xl tw:font-semibold tw:mb-6 tw:text-gray-800 tw:dark:text-dark-white-100 tw:border-b tw:pb-3 tw:dark:border-dark-gray-400">{{ $method['label'] }} {{ __('Settings') }}</h3>
@@ -50,7 +50,7 @@
 
                                 <div class="tw:mb-6" x-data="{ isDisabled: {{ !$method['enabled'] ? 'true' : 'false' }} }">
                                     <label class="tw:flex tw:items-center tw:cursor-pointer tw:group tw:px-4 tw:py-3 tw:rounded-lg tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:w-full tw:max-w-md">
-                                        <div class="tw:relative tw:flex-shrink-0">
+                                        <div class="tw:relative tw:shrink-0">
                                             <input type="checkbox" name="disabled" value="1" class="tw:sr-only" x-model="isDisabled">
                                             <div class="tw:block tw:w-10 tw:h-6 tw:rounded-full tw:transition-colors tw:duration-200" :class="isDisabled ? 'tw:bg-blue-600 tw:dark:bg-blue-500' : 'tw:bg-gray-300 tw:dark:bg-dark-gray-400'"></div>
                                             <div class="tw:absolute tw:left-1 tw:top-1 tw:w-4 tw:h-4 tw:rounded-full tw:transition-transform tw:duration-200 tw:bg-white" :class="isDisabled ? 'tw:translate-x-4' : 'tw:translate-x-0'"></div>
@@ -97,17 +97,6 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
-                                                    @if(\App\Facades\LibrenmsConfig::get('distributed_poller'))
-                                                        <div>
-                                                            <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Poller Group') }}</label>
-                                                            <select name="poller_group" class="form-control">
-                                                                <option value="0">{{ __('Default poller group') }}</option>
-                                                                @foreach($pollerGroups as $group)
-                                                                    <option value="{{ $group->id }}" {{ $device->poller_group == $group->id ? 'selected' : '' }}>{{ $group->group_name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    @endif
                                                 @endif
                                             </div>
                                         </div>
