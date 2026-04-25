@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'affects_availability' => 'Affects availability',
     'methods' => [
         'snmp' => 'SNMP',
         'icmp' => 'ICMP',
