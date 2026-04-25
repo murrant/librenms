@@ -86,11 +86,11 @@ class Snmp implements PollingMethod
     {
         return [
             'transport' => ['required', 'string', 'in:udp,tcp,udp6,tcp6'],
-            'port' => ['required', 'integer', 'min:1', 'max:65535'],
-            'timeout' => ['required', 'integer', 'min:1', 'max:60'],
-            'retries' => ['required', 'integer', 'min:0', 'max:10'],
-            'max_repeaters' => ['required', 'integer', 'min:0', 'max:30'],
-            'max_oid' => ['required', 'integer', 'min:1', 'max:100'],
+            'port' => ['nullable', 'integer', 'min:1', 'max:65535'],
+            'timeout' => ['nullable', 'integer', 'min:1', 'max:60'],
+            'retries' => ['nullable', 'integer', 'min:0', 'max:10'],
+            'max_repeaters' => ['nullable', 'integer', 'min:0', 'max:30'],
+            'max_oid' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
 }

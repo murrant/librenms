@@ -126,17 +126,19 @@ class EditPollingController
         $row           = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
 
         $validated = $request->validate([
-            'enabled'            => ['nullable', 'boolean'],
+            'enabled' => ['nullable', 'boolean'],
+            'affects_availability' => ['nullable', 'boolean'],
             'secret_update_mode' => ['nullable', 'string', 'in:update,create'],
-            'secret_id'          => ['nullable', 'integer', 'exists:secrets,id'],
-            'force_save'         => ['nullable', 'boolean'],
-            'settings'           => ['nullable', 'array'],
+            'secret_id' => ['nullable', 'integer', 'exists:secrets,id'],
+            'force_save' => ['nullable', 'boolean'],
+            'settings' => ['nullable', 'array'],
             ...collect($pollingMethod->getRules())
                 ->mapWithKeys(fn (array|string $rule, string $key): array => ["settings.$key" => $rule])
                 ->all(),
         ]);
 
-        $row->enabled  = (bool) ($validated['enabled'] ?? true);
+        $row->enabled = (bool) ($validated['enabled'] ?? true);
+        $row->affects_availability = (bool) ($validated['affects_availability'] ?? false);
         $row->settings = array_merge(
             $row->settings ?? [],
             collect($pollingMethod->getSettingsSchema())
@@ -210,6 +212,7 @@ class EditPollingController
             )->all(),
             'settings_fields'  => $this->buildSchemaFields($settingsSchema, 'settingsData'),
             'settings'         => $row?->settings ?? [],
+            'affects_availability' => $row?->affects_availability ?? (bool) ($pollingMethod->getDefaults()['affects_availability'] ?? false),
             'secret'           => $secret,
             'secret_form_data' => collect($schema)->mapWithKeys(
                 fn (array $field, string $key): array => [

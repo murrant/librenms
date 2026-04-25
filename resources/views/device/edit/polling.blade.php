@@ -43,6 +43,7 @@
                     @foreach($configuredMethods as $method)
                         <div x-data="{
                                 enabled: {{ $method['enabled'] ? 'true' : 'false' }},
+                                affectsAvailability: {{ $method['affects_availability'] ? 'true' : 'false' }},
                                 updateMode: 'update',
                                 formData: {{ json_encode($method['secret_form_data']) }},
                                 settingsData: {{ json_encode($method['settings']) }}
@@ -65,7 +66,17 @@
                                             <div class="tw:block tw:w-10 tw:h-6 tw:rounded-full tw:transition-colors tw:duration-200" :class="enabled ? 'tw:bg-blue-600 tw:dark:bg-blue-500' : 'tw:bg-gray-300 tw:dark:bg-dark-gray-400'"></div>
                                             <div class="tw:absolute tw:left-1 tw:top-1 tw:w-4 tw:h-4 tw:rounded-full tw:transition-transform tw:duration-200 tw:bg-white" :class="enabled ? 'tw:translate-x-4' : 'tw:translate-x-0'"></div>
                                         </div>
-                                        <span class="tw:ml-3 tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Enable polling for') }} {{ $method['label'] }}</span>
+                                        <span class="tw:ml-3 tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Enabled') }}</span>
+                                    </label>
+
+                                    <label class="tw:flex tw:items-center tw:cursor-pointer tw:group tw:px-4 tw:py-3 tw:rounded-lg tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:w-full tw:max-w-md tw:mt-3">
+                                        <div class="tw:relative tw:shrink-0">
+                                            <input type="hidden" name="affects_availability" value="0">
+                                            <input type="checkbox" name="affects_availability" value="1" class="tw:sr-only" x-model="affectsAvailability">
+                                            <div class="tw:block tw:w-10 tw:h-6 tw:rounded-full tw:transition-colors tw:duration-200" :class="affectsAvailability ? 'tw:bg-blue-600 tw:dark:bg-blue-500' : 'tw:bg-gray-300 tw:dark:bg-dark-gray-400'"></div>
+                                            <div class="tw:absolute tw:left-1 tw:top-1 tw:w-4 tw:h-4 tw:rounded-full tw:transition-transform tw:duration-200 tw:bg-white" :class="affectsAvailability ? 'tw:translate-x-4' : 'tw:translate-x-0'"></div>
+                                        </div>
+                                        <span class="tw:ml-3 tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('poller.affects_availability') }}</span>
                                     </label>
 
                                     @if(!empty($method['settings_fields']))
@@ -96,23 +107,11 @@
                                                         @endif
                                                     </div>
                                                 @endforeach
-
-                                                @if($method['type'] === 'snmp')
-                                                    <div>
-                                                        <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Port Association Mode') }}</label>
-                                                        <select name="port_association_mode" class="form-control">
-                                                            @foreach(\LibreNMS\Enum\PortAssociationMode::getModes() as $pam_id => $pam)
-                                                                <option value="{{ $pam_id }}" {{ $device->port_association_mode == $pam_id ? 'selected' : '' }}>{{ $pam }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                @endif
                                             </div>
                                         </div>
                                     @endif
 
                                     @if($method['type'] === 'snmp')
-
                                         <!-- SNMP Disabled Overrides -->
                                         <div x-show="!enabled" class="tw:mt-6 tw:pt-6 tw:border-t tw:border-gray-200 tw:dark:border-dark-gray-400" style="display: none;">
                                             <h4 class="tw:font-semibold tw:text-lg tw:mb-4 tw:text-gray-800 tw:dark:text-dark-white-100">{{ __('Manual Overrides') }}</h4>
