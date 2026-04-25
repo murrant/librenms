@@ -853,7 +853,7 @@ class Device extends BaseModel
      */
     public function secrets(): BelongsToMany
     {
-        return $this->belongsToMany(Secret::class, 'device_secret', 'device_id', 'secret_id')
+        return $this->belongsToMany(Secret::class, 'device_secrets', 'device_id', 'secret_id')
             ->withPivot('secret_type');
     }
 

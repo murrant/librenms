@@ -162,6 +162,10 @@ Route::middleware(['auth'])->group(function (): void {
     Route::post('/device/{device}/edit/health/sensor/{sensor}/alert', [Device\EditHealthController::class, 'updateAlert'])->name('device.edit.health.sensor.alert')->scopeBindings();
     Route::get('/device/{device}/edit/misc', [Device\EditMiscController::class, 'index'])->name('device.edit.misc');
     Route::put('/device/{device}/edit/misc', [Device\EditMiscController::class, 'update'])->name('device.edit.misc.update');
+    Route::get('/device/{device}/edit/polling', [Device\EditPollingController::class, 'index'])->name('device.edit.polling');
+    Route::post('/device/{device}/edit/polling', [Device\EditPollingController::class, 'store'])->name('device.edit.polling.store');
+    Route::put('/device/{device}/edit/polling/{methodType}', [Device\EditPollingController::class, 'update'])->name('device.edit.polling.update');
+    Route::delete('/device/{device}/edit/polling/{methodType}', [Device\EditPollingController::class, 'destroy'])->name('device.edit.polling.destroy');
     Route::post('/device/{device}/rediscover', [DeviceController::class, 'rediscover'])->name('device.rediscover');
 
     Route::get('/device/delete', [DeviceController::class, 'deleteIndex'])->name('device.delete');
