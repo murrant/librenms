@@ -14,7 +14,6 @@ if (Gate::denies('device.update')) {
     print_error('Insufficient Privileges');
 } else {
     $panes['device'] = 'Device Settings';
-    $panes['snmp'] = 'SNMP';
     $panes['polling'] = 'Polling';
     if (! $device['snmp_disable']) {
         $panes['ports'] = 'Port Settings';
@@ -39,8 +38,6 @@ if (Gate::denies('device.update')) {
     if (\App\Facades\LibrenmsConfig::get('show_services')) {
         $panes['services'] = 'Services';
     }
-
-    $panes['ipmi'] = 'IPMI';
 
     if (Sensor::where('device_id', $device['device_id'])->where('sensor_deleted', 0)->exists()) {
         $panes['health'] = 'Health';
