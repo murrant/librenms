@@ -25,6 +25,7 @@
 
 namespace LibreNMS\Enum;
 
+use App\Data\Secrets\IcmpSecret;
 use App\Data\Secrets\IpmiSecret;
 use App\Data\Secrets\SecretData;
 use App\Data\Secrets\SnmpSecret;
@@ -33,6 +34,7 @@ enum SecretType: string
 {
     case Snmp = 'snmp';
     case Ipmi = 'ipmi';
+    case Icmp = 'icmp';
 
     /** @param class-string<SecretData> $class */
     public static function fromClass(string $class): self
@@ -52,6 +54,7 @@ enum SecretType: string
         return match($this) {
             self::Snmp => SnmpSecret::class,
             self::Ipmi => IpmiSecret::class,
+            self::Icmp => IcmpSecret::class,
         };
     }
 }
