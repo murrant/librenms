@@ -25,7 +25,7 @@ class Icmp implements PollingMethod
             return ProbeResult::success($status->avg_latency);
         }
 
-        return match($status->exit_code) {
+        return match ($status->exit_code) {
             FpingResponse::UNREACHABLE => ProbeResult::failure('Device unreachable'),
             FpingResponse::INVALID_HOST => ProbeResult::failure('Invalid hostname/IP'),
             FpingResponse::INVALID_ARGS => ProbeResult::failure('Invalid arguments'),

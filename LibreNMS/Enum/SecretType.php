@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SecretType.php
  *
@@ -25,11 +26,9 @@
 
 namespace LibreNMS\Enum;
 
-use App\Data\Secrets\IcmpSecret;
 use App\Data\Secrets\IpmiSecret;
 use App\Data\Secrets\SecretData;
 use App\Data\Secrets\SnmpSecret;
-use App\Data\Secrets\UnixAgentSecret;
 
 enum SecretType: string
 {
@@ -51,7 +50,7 @@ enum SecretType: string
     /** @return class-string<SecretData> */
     public function secretClass(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Snmp => SnmpSecret::class,
             self::Ipmi => IpmiSecret::class,
         };

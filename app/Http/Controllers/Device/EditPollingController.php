@@ -34,10 +34,10 @@ class EditPollingController
         );
 
         return view('device.edit.polling', [
-            'device'              => $device,
-            'configuredMethods'   => $allMethods->filter(fn (array $m): bool => $m['configured'])->values(),
+            'device' => $device,
+            'configuredMethods' => $allMethods->filter(fn (array $m): bool => $m['configured'])->values(),
             'unconfiguredMethods' => $allMethods->filter(fn (array $m): bool => ! $m['configured'])->values(),
-            'availableSecrets'    => Secret::query()->orderBy('description')->get()->groupBy(
+            'availableSecrets' => Secret::query()->orderBy('description')->get()->groupBy(
                 fn (Secret $s): string => $s->secret_type->value
             ),
         ]);
@@ -52,14 +52,14 @@ class EditPollingController
         $this->authorize('update', $device);
 
         $validated = $request->validate([
-            'method_type'     => ['required', Rule::enum(PollingMethodType::class)],
+            'method_type' => ['required', Rule::enum(PollingMethodType::class)],
             'credential_mode' => ['nullable', Rule::in(['existing', 'new'])],
-            'secret_id'       => ['nullable', 'integer', 'exists:secrets,id'],
-            'description'     => ['nullable', 'string', 'max:255'],
-            'default'         => ['nullable', 'boolean'],
+            'secret_id' => ['nullable', 'integer', 'exists:secrets,id'],
+            'description' => ['nullable', 'string', 'max:255'],
+            'default' => ['nullable', 'boolean'],
         ]);
 
-        $type          = PollingMethodType::from($validated['method_type']);
+        $type = PollingMethodType::from($validated['method_type']);
         $pollingMethod = app($type->methodClass());
 
         if ($device->pollingMethods()->where('method_type', $type->value)->exists()) {
@@ -84,12 +84,12 @@ class EditPollingController
         }
 
         $row = new DevicePollingMethod([
-            'device_id'            => $device->device_id,
-            'method_type'          => $type,
-            'enabled'              => true,
+            'device_id' => $device->device_id,
+            'method_type' => $type,
+            'enabled' => true,
             'affects_availability' => (bool) ($pollingMethod->getDefaults()['affects_availability'] ?? false),
-            'secret_id'            => $secret?->id,
-            'settings'             => [],
+            'secret_id' => $secret?->id,
+            'settings' => [],
         ]);
 
         $row->setRelation('device', $device);
@@ -121,9 +121,9 @@ class EditPollingController
     {
         $this->authorize('update', $device);
 
-        $type          = PollingMethodType::tryFrom($methodType) ?? abort(404);
+        $type = PollingMethodType::tryFrom($methodType) ?? abort(404);
         $pollingMethod = app($type->methodClass());
-        $row           = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
+        $row = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
 
         $validated = $request->validate([
             'enabled' => ['nullable', 'boolean'],
@@ -177,7 +177,7 @@ class EditPollingController
         $this->authorize('update', $device);
 
         $type = PollingMethodType::tryFrom($methodType) ?? abort(404);
-        $row  = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
+        $row = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
 
         if ($type->hasSecret()) {
             $this->authorize('delete', Secret::class);
@@ -195,33 +195,33 @@ class EditPollingController
     private function buildMethodData(Device $device, PollingMethodType $type): array
     {
         $pollingMethod = app($type->methodClass());
-        $row           = $device->pollingMethods->firstWhere('method_type', $type);
-        $secret        = $row?->secret;
-        $schema        = $type->hasSecret() ? $type->secretClass()::getUiSchema() : [];
-        $schemaFields  = $this->buildSchemaFields($schema);
+        $row = $device->pollingMethods->firstWhere('method_type', $type);
+        $secret = $row?->secret;
+        $schema = $type->hasSecret() ? $type->secretClass()::getUiSchema() : [];
+        $schemaFields = $this->buildSchemaFields($schema);
         $settingsSchema = $pollingMethod->getSettingsSchema();
 
         return [
-            'type'             => $type->value,
-            'label'            => __('poller.methods.' . $type->value),
-            'schema_fields'    => $schemaFields,
-            'schema_defaults'  => collect($schema)->mapWithKeys(
+            'type' => $type->value,
+            'label' => __('poller.methods.' . $type->value),
+            'schema_fields' => $schemaFields,
+            'schema_defaults' => collect($schema)->mapWithKeys(
                 fn (array $field, string $key): array => [
                     $key => $field['default'] ?? (isset($field['options']) ? array_key_first($field['options']) : ''),
                 ]
             )->all(),
-            'settings_fields'  => $this->buildSchemaFields($settingsSchema, 'settingsData'),
-            'settings'         => $row?->settings ?? [],
+            'settings_fields' => $this->buildSchemaFields($settingsSchema, 'settingsData'),
+            'settings' => $row?->settings ?? [],
             'affects_availability' => $row?->affects_availability ?? (bool) ($pollingMethod->getDefaults()['affects_availability'] ?? false),
-            'secret'           => $secret,
+            'secret' => $secret,
             'secret_form_data' => collect($schema)->mapWithKeys(
                 fn (array $field, string $key): array => [
                     $key => (string) data_get($secret?->data, $key, ''),
                 ]
             )->all(),
-            'usage_count'           => $secret?->devices()->count() ?? 0,
-            'configured'            => $row !== null,
-            'enabled'               => $row?->enabled ?? false,
+            'usage_count' => $secret?->devices()->count() ?? 0,
+            'configured' => $row !== null,
+            'enabled' => $row?->enabled ?? false,
             'last_check_successful' => $row?->last_check_successful,
         ];
     }
@@ -237,6 +237,7 @@ class EditPollingController
                         if (is_array($condVal) && isset($condVal['$in'])) {
                             return json_encode(array_values($condVal['$in'])) . '.includes(__DATA_VAR__[' . json_encode($condKey) . '])';
                         }
+
                         return '__DATA_VAR__[' . json_encode($condKey) . '] === ' . json_encode($condVal);
                     })->implode(' && ');
 
@@ -245,8 +246,8 @@ class EditPollingController
 
             return [
                 ...$field,
-                'key'                   => $key,
-                'field_type'            => $field['type'] ?? 'text',
+                'key' => $key,
+                'field_type' => $field['type'] ?? 'text',
                 'visible_if_expression' => $visibleIfExpression,
             ];
         })->values()->all();
@@ -278,13 +279,13 @@ class EditPollingController
         $rules = collect($class::rules())
             ->mapWithKeys(fn ($rule, $key) => ["secret_data.{$key}" => $rule])
             ->all();
-        $data  = $request->validate($rules)['secret_data'] ?? [];
+        $data = $request->validate($rules)['secret_data'] ?? [];
 
         return Secret::query()->create([
             'description' => $validated['description'] ?: strtoupper($type->value) . ' ' . $request->user()?->user_id,
             'secret_type' => $type->value,
-            'default'     => (bool) ($validated['default'] ?? false),
-            'data'        => $data,
+            'default' => (bool) ($validated['default'] ?? false),
+            'data' => $data,
         ]);
     }
 
@@ -295,7 +296,7 @@ class EditPollingController
         $rules = collect($class::rules())
             ->mapWithKeys(fn ($rule, $key) => ["secret_data.{$key}" => $rule])
             ->all();
-        $data  = $request->validate($rules)['secret_data'] ?? [];
+        $data = $request->validate($rules)['secret_data'] ?? [];
 
         $existing = $row->secret;
 
@@ -308,9 +309,10 @@ class EditPollingController
             $new = Secret::query()->create([
                 'description' => 'Custom ' . strtoupper($type->value) . ' for ' . $row->device->hostname,
                 'secret_type' => $type->value,
-                'default'     => false,
-                'data'        => $data,
+                'default' => false,
+                'data' => $data,
             ]);
+
             return $new;
         }
 
