@@ -3,7 +3,6 @@
 namespace LibreNMS\Interfaces;
 
 use App\Data\Polling\ProbeResult;
-use App\Data\Secrets\SecretData;
 use App\Models\Device;
 
 interface PollingMethod
@@ -11,18 +10,21 @@ interface PollingMethod
     /** Actively probe reachability and credential validity for this device. */
     public function probe(Device $device): ProbeResult;
 
-    /** Whether this method is enabled for the device (config/feature flag). */
-    public function isEnabled(Device $device): bool;
+    /**
+     * UI/form schema for device-specific settings.
+     * @return array<string, array{type: string, options?: array<string,string>, visible_if: array}>
+     */
+    public function getSettingsSchema(): array;
 
-    /** Whether this method has sufficient configuration to attempt polling. */
-    public function isConfigured(Device $device): bool;
+    /**
+     * Defaults for polling method per-device settings
+     * @return array<string, mixed>
+     */
+    public function getDefaults(): array;
 
-    /** null = unknown, true/false = last known result. */
-    public function lastCheckSuccessful(Device $device): ?bool;
-
-    /** UI/form schema for device-specific settings. */
-    public function getDeviceSettings(): array;
-
-    /** Resolved credentials for this device, or null if not applicable. */
-    public function getSecret(Device $device): ?SecretData;
+    /**
+     * Validation rules for polling method per-device settings
+     * @return array<string, array|string>
+     */
+    public function getRules(): array;
 }
