@@ -117,7 +117,6 @@ class EditPollingController
             'availableSecrets' => Secret::query()->orderBy('description')->get()->groupBy(
                 fn (Secret $secret): string => $secret->secret_type->value
             ),
-            'pollerGroups' => LibrenmsConfig::get('distributed_poller') ? \App\Models\PollerGroup::select(['id', 'group_name'])->get() : collect(),
         ]);
     }
 
@@ -212,7 +211,6 @@ class EditPollingController
             'hardware' => ['nullable', 'string'],
             'os' => ['nullable', 'string'],
             'port_association_mode' => ['nullable', 'integer'],
-            'poller_group' => ['nullable', 'integer'],
             'secret_update_mode' => ['nullable', 'string', 'in:update,create'],
             ...$deviceSettingsRules,
         ]);
@@ -275,7 +273,6 @@ class EditPollingController
         } elseif ($methodType === 'snmp') {
             $snmpDisabled = (bool) ($validated['disabled'] ?? false);
             $device->snmp_disable = $snmpDisabled;
-            $device->poller_group = (int) ($validated['poller_group'] ?? 0);
 
             if ($snmpDisabled) {
                 $device->features = null;
