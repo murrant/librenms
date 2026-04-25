@@ -36,7 +36,7 @@ use LibreNMS\RRD\RrdDefinition;
 
 class FpingResponse implements \Stringable
 {
-    const SUCESS = 0;
+    const SUCCESS = 0;
     const UNREACHABLE = 1;
     const INVALID_HOST = 2;
     const INVALID_ARGS = 3;
@@ -115,7 +115,7 @@ class FpingResponse implements \Stringable
             (float) $max,
             (float) $avg,
             substr_count($output, 'duplicate'),
-            $code ?? ($loss100 ? self::UNREACHABLE : self::SUCESS),
+            $code ?? ($loss100 ? self::UNREACHABLE : self::SUCCESS),
             $host,
         );
     }

@@ -5,14 +5,14 @@
         <x-device.edit-tabs :device="$device" />
 
         @if($configuredMethods->isNotEmpty())
-            <div x-data="{ activeTab: '{{ $configuredMethods->first()['type']->value }}' }" class="tw:flex tw:flex-col tw:md:flex-row tw:gap-6 tw:mt-6">
+            <div x-data="{ activeTab: '{{ $configuredMethods->first()["type"] }}' }" class="tw:flex tw:flex-col tw:md:flex-row tw:gap-6 tw:mt-6">
                 <!-- Left Tabs -->
-                <div class="tw:w-full tw:md:w-1/4 tw:flex-shrink-0">
+                <div class="tw:w-full tw:md:w-1/4 tw:shrink-0">
                     <ul class="tw:flex tw:flex-col tw:space-y-2">
                         @foreach($configuredMethods as $method)
                             <li>
-                                <button type="button" @click="activeTab = '{{ $method['type']->value }}'"
-                                        :class="activeTab === '{{ $method['type']->value }}' ? 'tw:bg-blue-600 tw:text-white tw:border-blue-600 tw:dark:bg-blue-800' : 'tw:text-gray-700 tw:border-gray-200 tw:hover:bg-gray-50 tw:dark:text-dark-white-200 tw:dark:border-dark-gray-400 tw:dark:hover:bg-dark-gray-400'"
+                                <button type="button" @click="activeTab = '{{ $method["type"] }}'"
+                                        :class="activeTab === '{{ $method["type"] }}' ? 'tw:bg-blue-600 tw:text-white tw:border-blue-600 tw:dark:bg-blue-800' : 'tw:text-gray-700 tw:border-gray-200 tw:hover:bg-gray-50 tw:dark:text-dark-white-200 tw:dark:border-dark-gray-400 tw:dark:hover:bg-dark-gray-400'"
                                         class="tw:w-full tw:text-left tw:px-4 tw:py-3 tw:border tw:rounded-lg tw:flex tw:justify-between tw:items-center tw:transition-colors tw:shadow-sm">
                                     <span class="tw:font-medium">{{ $method['label'] }}</span>
                                     <div class="tw:flex tw:items-center">
@@ -41,10 +41,10 @@
                 <!-- Right Content -->
                 <div class="tw:w-full tw:md:w-3/4 tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:rounded-lg tw:shadow-sm tw:p-6 tw:flex-grow">
                     @foreach($configuredMethods as $method)
-                        <div x-show="activeTab === '{{ $method['type']->value }}'" style="display: none;" x-transition>
+                        <div x-show="activeTab === '{{ $method["type"] }}'" style="display: none;" x-transition>
                             <h3 class="tw:text-xl tw:font-semibold tw:mb-6 tw:text-gray-800 tw:dark:text-dark-white-100 tw:border-b tw:pb-3 tw:dark:border-dark-gray-400">{{ $method['label'] }} {{ __('Settings') }}</h3>
 
-                            <form method="POST" action="{{ route('device.edit.polling.update', ['device' => $device, 'methodType' => $method['type']->value]) }}">
+                            <form method="POST" action="{{ route('device.edit.polling.update', ['device' => $device, 'methodType' => $method['type']]) }}">
                                 @csrf
                                 @method('PUT')
 
@@ -58,87 +58,62 @@
                                         <span class="tw:ml-3 tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Disable polling for') }} {{ $method['label'] }}</span>
                                     </label>
 
-                                    @if($method['type']->value === 'ipmi')
-                                        <!-- IPMI specific device settings -->
+                                    @if(!empty($method['device_settings']))
                                         <div x-show="!isDisabled" class="tw:mt-6 tw:pt-6 tw:border-t tw:border-gray-200 tw:dark:border-dark-gray-400">
-                                            <h4 class="tw:font-semibold tw:text-lg tw:mb-4 tw:text-gray-800 tw:dark:text-dark-white-100">{{ __('IPMI Configuration') }}</h4>
+                                            <h4 class="tw:font-semibold tw:text-lg tw:mb-4 tw:text-gray-800 tw:dark:text-dark-white-100">{{ __($method['label'] . ' Configuration') }}</h4>
 
                                             <div class="tw:grid tw:grid-cols-1 tw:gap-4 tw:max-w-2xl">
-                                                <div>
-                                                    <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('IPMI/BMC Hostname') }}</label>
-                                                    <input type="text" name="ipmi_hostname" class="form-control" value="{{ $device->getAttrib('ipmi_hostname') }}">
-                                                </div>
-                                                <div>
-                                                    <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('IPMI/BMC Port') }}</label>
-                                                    <input type="number" name="ipmi_port" class="form-control" placeholder="623" value="{{ $device->getAttrib('ipmi_port') }}">
-                                                </div>
-                                                <div>
-                                                    <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('IPMI Cipher suite') }}</label>
-                                                    <input type="text" name="ipmi_ciphersuite" class="form-control" value="{{ $device->getAttrib('ipmi_ciphersuite') }}">
-                                                </div>
-                                                <div>
-                                                    <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('IPMI Timeout') }}</label>
-                                                    <input type="number" name="ipmi_timeout" class="form-control" placeholder="3" value="{{ $device->getAttrib('ipmi_timeout') }}">
-                                                </div>
+                                                @foreach($method['device_settings'] as $setting)
+                                                    <div>
+                                                        <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __($setting['description']) }}</label>
+                                                        @if(($setting['type'] ?? 'text') === 'select')
+                                                            <select name="{{ $setting['name'] }}" class="form-control">
+                                                                @foreach($setting['options'] ?? [] as $optVal => $optLabel)
+                                                                    <option value="{{ $optVal }}" {{ (string) ($setting['value'] ?? '') === (string) $optVal ? 'selected' : '' }}>{{ __($optLabel) }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        @elseif(($setting['type'] ?? 'text') === 'number')
+                                                            <input
+                                                                type="number"
+                                                                name="{{ $setting['name'] }}"
+                                                                class="form-control"
+                                                                @if(isset($setting['min'])) min="{{ $setting['min'] }}" @endif
+                                                                @if(isset($setting['max'])) max="{{ $setting['max'] }}" @endif
+                                                                placeholder="{{ $setting['default'] ?? '' }}"
+                                                                value="{{ $setting['value'] ?? '' }}"
+                                                            >
+                                                        @else
+                                                            <input type="text" name="{{ $setting['name'] }}" class="form-control" value="{{ $setting['value'] ?? '' }}">
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+
+                                                @if($method['type'] === 'snmp')
+                                                    <div>
+                                                        <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Port Association Mode') }}</label>
+                                                        <select name="port_association_mode" class="form-control">
+                                                            @foreach(\LibreNMS\Enum\PortAssociationMode::getModes() as $pam_id => $pam)
+                                                                <option value="{{ $pam_id }}" {{ $device->port_association_mode == $pam_id ? 'selected' : '' }}>{{ $pam }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    @if(\App\Facades\LibrenmsConfig::get('distributed_poller'))
+                                                        <div>
+                                                            <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Poller Group') }}</label>
+                                                            <select name="poller_group" class="form-control">
+                                                                <option value="0">{{ __('Default poller group') }}</option>
+                                                                @foreach($pollerGroups as $group)
+                                                                    <option value="{{ $group->id }}" {{ $device->poller_group == $group->id ? 'selected' : '' }}>{{ $group->group_name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    @endif
+                                                @endif
                                             </div>
                                         </div>
                                     @endif
 
-                                    @if($method['type']->value === 'snmp')
-                                        <!-- SNMP specific device settings -->
-                                        <div x-show="!isDisabled" class="tw:mt-6 tw:pt-6 tw:border-t tw:border-gray-200 tw:dark:border-dark-gray-400">
-                                            <h4 class="tw:font-semibold tw:text-lg tw:mb-4 tw:text-gray-800 tw:dark:text-dark-white-100">{{ __('SNMP Configuration') }}</h4>
-
-                                            <div class="tw:grid tw:grid-cols-1 tw:gap-4 tw:max-w-2xl">
-                                                <div>
-                                                    <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Transport') }}</label>
-                                                    <select name="transport" class="form-control">
-                                                        @foreach(\App\Facades\LibrenmsConfig::get('snmp.transports') as $transport)
-                                                            <option value="{{ $transport }}" {{ $device->transport === $transport ? 'selected' : '' }}>{{ $transport }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Port') }}</label>
-                                                    <input type="number" name="port" class="form-control" placeholder="{{ \App\Facades\LibrenmsConfig::get('snmp.port') }}" value="{{ $device->port == \App\Facades\LibrenmsConfig::get('snmp.port') ? '' : $device->port }}">
-                                                </div>
-                                                <div>
-                                                    <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Timeout (seconds)') }}</label>
-                                                    <input type="number" name="timeout" class="form-control" value="{{ $device->timeout }}">
-                                                </div>
-                                                <div>
-                                                    <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Retries') }}</label>
-                                                    <input type="number" name="retries" class="form-control" value="{{ $device->retries }}">
-                                                </div>
-                                                <div>
-                                                    <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Port Association Mode') }}</label>
-                                                    <select name="port_association_mode" class="form-control">
-                                                        @foreach(\LibreNMS\Enum\PortAssociationMode::getModes() as $pam_id => $pam)
-                                                            <option value="{{ $pam_id }}" {{ $device->port_association_mode == $pam_id ? 'selected' : '' }}>{{ $pam }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                @if(\App\Facades\LibrenmsConfig::get('distributed_poller'))
-                                                    <div>
-                                                        <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Poller Group') }}</label>
-                                                        <select name="poller_group" class="form-control">
-                                                            <option value="0">{{ __('Default poller group') }}</option>
-                                                            @foreach($pollerGroups as $group)
-                                                                <option value="{{ $group->id }}" {{ $device->poller_group == $group->id ? 'selected' : '' }}>{{ $group->group_name }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                @endif
-                                                <div>
-                                                    <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Max Repeaters') }}</label>
-                                                    <input type="number" name="max_repeaters" class="form-control" value="{{ $device->getAttrib('snmp_max_repeaters') }}">
-                                                </div>
-                                                <div>
-                                                    <label class="tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200 tw:mb-1">{{ __('Max OIDs') }}</label>
-                                                    <input type="number" name="max_oid" class="form-control" value="{{ $device->getAttrib('snmp_max_oid') }}">
-                                                </div>
-                                            </div>
-                                        </div>
+                                    @if($method['type'] === 'snmp')
 
                                         <!-- SNMP Disabled Overrides -->
                                         <div x-show="isDisabled" class="tw:mt-6 tw:pt-6 tw:border-t tw:border-gray-200 tw:dark:border-dark-gray-400" style="display: none;">
@@ -161,16 +136,8 @@
                                     @endif
                                 </div>
 
-                                @if($method['type']->value !== 'icmp')
-                                <div class="tw:mb-6" x-show="!isDisabled"
-                                    x-data="{
-                                        updateMode: 'update',
-                                        formData: {
-                                            @foreach($method['schema'] as $key => $field)
-                                                {{ $key }}: '{{ $method['secret']?->data[$key] ?? '' }}',
-                                            @endforeach
-                                        }
-                                    }">
+                                @if($method['type'] === 'snmp')
+                                <div class="tw:mb-6" x-show="!isDisabled" x-data="{ updateMode: 'update', formData: {{ json_encode($method['secret_form_data']) }} }">
                                     <h4 class="tw:font-semibold tw:text-lg tw:mb-3 tw:text-gray-700 tw:dark:text-dark-white-100">{{ __('Configured Secret') }}</h4>
 
                                     <div class="tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:p-5 tw:rounded-lg tw:text-sm">
@@ -205,47 +172,31 @@
                                         @endif
 
                                         <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-4 tw:max-w-2xl">
-                                            @foreach($method['schema'] as $key => $field)
-                                                @php
-                                                    $schemaFieldType = $field['type'] ?? 'text';
-                                                @endphp
-                                                <div class="tw:flex tw:flex-col"
-                                                    @if(isset($field['visible_if']))
-                                                        x-show="
-                                                        @foreach($field['visible_if'] as $condKey => $condVal)
-                                                            @if(is_array($condVal) && isset($condVal['$in']))
-                                                                {{ json_encode($condVal['$in']) }}.includes(formData['{{ $condKey }}'])
-                                                            @else
-                                                                formData['{{ $condKey }}'] === '{{ $condVal }}'
-                                                            @endif
-                                                            @if(!$loop->last) && @endif
-                                                        @endforeach
-                                                        "
-                                                    @endif
-                                                >
+                                            @foreach($method['schema_fields'] as $field)
+                                                <div class="tw:flex tw:flex-col" @if($field['visible_if_expression']) x-show='{{ $field['visible_if_expression'] }}' @endif>
                                                     <label class="tw:text-gray-500 tw:dark:text-dark-white-400 tw:uppercase tw:text-xs tw:font-bold tw:mb-1">{{ __($field['label']) }}</label>
 
-                                                    @if($schemaFieldType === 'select')
-                                                        <select name="secret_data[{{ $key }}]" x-model="formData['{{ $key }}']" class="form-control">
+                                                    @if($field['field_type'] === 'select')
+                                                        <select name="secret_data[{{ $field['key'] }}]" x-model="formData['{{ $field['key'] }}']" class="form-control">
                                                             @foreach($field['options'] as $optVal => $optLabel)
                                                                 <option value="{{ $optVal }}">{{ __($optLabel) }}</option>
                                                             @endforeach
                                                         </select>
-                                                    @elseif($schemaFieldType === 'password')
+                                                    @elseif($field['field_type'] === 'password')
                                                         @can('unmask', \App\Models\Secret::class)
                                                             <div class="input-group tw:w-full">
-                                                                <input type="password" id="secret_{{ $method['type']->value }}_{{ $key }}" name="secret_data[{{ $key }}]" x-model="formData['{{ $key }}']" class="form-control" autocomplete="new-password">
+                                                                <input type="password" id="secret_{{ $method['type'] }}_{{ $field['key'] }}" name="secret_data[{{ $field['key'] }}]" x-model="formData['{{ $field['key'] }}']" class="form-control" autocomplete="new-password">
                                                                 <span class="input-group-btn">
-                                                                    <button type="button" class="btn btn-default btn-toggle-password" onclick="togglePasswordVisibility('secret_{{ $method['type']->value }}_{{ $key }}', this)" title="{{ __('Show/hide') }}">
+                                                                    <button type="button" class="btn btn-default btn-toggle-password" onclick="togglePasswordVisibility('secret_{{ $method['type'] }}_{{ $field['key'] }}', this)" title="{{ __('Show/hide') }}">
                                                                         <i class="fa fa-eye-slash"></i>
                                                                     </button>
                                                                 </span>
                                                             </div>
                                                         @else
-                                                            <input type="password" name="secret_data[{{ $key }}]" value="********" class="form-control" readonly>
+                                                            <input type="password" name="secret_data[{{ $field['key'] }}]" value="********" class="form-control" readonly>
                                                         @endcan
                                                     @else
-                                                        <input type="text" name="secret_data[{{ $key }}]" x-model="formData['{{ $key }}']" class="form-control">
+                                                        <input type="text" name="secret_data[{{ $field['key'] }}]" x-model="formData['{{ $field['key'] }}']" class="form-control">
                                                     @endif
                                                 </div>
                                             @endforeach
@@ -259,7 +210,7 @@
                                         <i class="fa fa-save tw:mr-1"></i> {{ __('Save Settings') }}
                                     </button>
 
-                                    @if($method['type']->value === 'snmp')
+                                    @if($method['type'] === 'snmp')
                                         <button type="submit" name="force_save" value="1" class="btn btn-warning" x-show="!isDisabled">
                                             <i class="fa fa-exclamation-triangle tw:mr-1"></i> {{ __('Force Save') }}
                                         </button>
@@ -267,8 +218,8 @@
                                 </div>
                             </form>
 
-                            @if($method['type']->value !== 'icmp')
-                            <form method="POST" action="{{ route('device.edit.polling.destroy', ['device' => $device, 'methodType' => $method['type']->value]) }}" class="tw:mt-4">
+                            @if($method['type'] !== 'icmp')
+                            <form method="POST" action="{{ route('device.edit.polling.destroy', ['device' => $device, 'methodType' => $method['type']]) }}" class="tw:mt-4">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger" onclick="return confirm('{{ __('Are you sure you want to remove this polling method?') }}')">
