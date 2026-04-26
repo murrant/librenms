@@ -21,8 +21,8 @@ class EditPollingController
     use AuthorizesRequests;
 
     public function __construct(
-        private PollingMethodService $pollingService,
-        private SecretService $secretService,
+        private readonly PollingMethodService $pollingService,
+        private readonly SecretService        $secretService,
     ) {}
 
     /**
@@ -49,7 +49,7 @@ class EditPollingController
     }
 
     /**
-     * @throws AuthorizationException
+     * @throws AuthorizationException|ValidationException
      */
     public function store(StorePollingMethodRequest $request, Device $device, ToastInterface $toast): RedirectResponse
     {
@@ -77,11 +77,11 @@ class EditPollingController
 
         $toast->success(__('poller.method_added'));
 
-        return redirect()->route('device.edit.polling', $device);
+        return redirect()->route('device.edit.polling', ['device' => $device, 'tab' => $type->value]);
     }
 
     /**
-     * @throws AuthorizationException
+     * @throws AuthorizationException|ValidationException
      */
     public function update(UpdatePollingMethodRequest $request, Device $device, string $methodType, ToastInterface $toast): RedirectResponse
     {
@@ -91,7 +91,10 @@ class EditPollingController
         $row           = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
         $validated = $request->validated();
 
-        if ($type->hasSecret() && $request->has('secret_data')) {
+        if ($type->hasSecret() && array_key_exists('secret_id', $validated)) {
+            $this->authorize('update', Secret::class);
+            $row->secret_id = $this->resolveExistingSecret((int) $validated['secret_id'], $type)->id;
+        } elseif ($type->hasSecret() && $request->has('secret_data')) {
             $this->authorize('update', Secret::class);
             $mode = $validated['secret_update_mode'] ?? 'update';
             $row->secret_id = $this->secretService->updateOrCreate(
@@ -100,9 +103,6 @@ class EditPollingController
                 $request->validatedSecretData(),
                 $mode
             )->id;
-        } elseif ($type->hasSecret() && array_key_exists('secret_id', $validated)) {
-            $this->authorize('update', Secret::class);
-            $row->secret_id = $this->resolveExistingSecret((int) $validated['secret_id'], $type)->id;
         }
 
         $row->setRelation('device', $device);
@@ -110,7 +110,7 @@ class EditPollingController
 
         $toast->success(__('poller.method_updated'));
 
-        return redirect()->route('device.edit.polling', $device);
+        return redirect()->route('device.edit.polling', ['device' => $device, 'tab' => $type->value]);
     }
 
     /**
@@ -131,7 +131,7 @@ class EditPollingController
 
         $toast->success(__('poller.method_removed'));
 
-        return redirect()->route('device.edit.polling', $device);
+        return redirect()->route('device.edit.polling', ['device' => $device, 'tab' => $type->value]);
     }
 
     // ---- Private helpers ----
@@ -196,6 +196,9 @@ class EditPollingController
         })->values()->all();
     }
 
+    /**
+     * @throws ValidationException
+     */
     private function resolveExistingSecret(?int $secretId, PollingMethodType $type): Secret
     {
         if (! $secretId) {

@@ -5,7 +5,10 @@
         <x-device.edit-tabs :device="$device" />
 
         @if($configuredMethods->isNotEmpty())
-            <div x-data="{ activeTab: '{{ $configuredMethods->first()["type"] }}' }" class="tw:flex tw:flex-col tw:md:flex-row tw:gap-6 tw:mt-6">
+            <div
+                x-data="pollingTabs('{{ request('tab') }}', @js($configuredMethods->pluck('type')->values()), '{{ $configuredMethods->first()["type"] }}')"
+                class="tw:flex tw:flex-col tw:md:flex-row tw:gap-6 tw:mt-6"
+            >
                 <!-- Left Tabs -->
                 <div class="tw:w-full tw:md:w-1/4 tw:shrink-0">
                     <ul class="tw:flex tw:flex-col tw:space-y-2">
@@ -45,6 +48,8 @@
                                 enabled: {{ $method['enabled'] ? 'true' : 'false' }},
                                 affectsAvailability: {{ $method['affects_availability'] ? 'true' : 'false' }},
                                 updateMode: 'update',
+                                currentSecretId: '{{ (string) ($method['secret']?->id ?? '') }}',
+                                selectedSecretId: '{{ (string) ($method['secret']?->id ?? '') }}',
                                 formData: {{ json_encode($method['secret_form_data']) }},
                                 settingsData: {{ json_encode($method['settings']) }}
                              }"
@@ -57,6 +62,7 @@
                             <form method="POST" action="{{ route('device.edit.polling.update', ['device' => $device, 'methodType' => $method['type']]) }}">
                                 @csrf
                                 @method('PUT')
+                                <input type="hidden" name="tab" value="{{ $method['type'] }}">
 
                                 <div class="tw:mb-6">
                                     <label class="tw:flex tw:items-center tw:cursor-pointer tw:group tw:px-4 tw:py-3 tw:rounded-lg tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:w-full tw:max-w-md">
@@ -220,6 +226,7 @@
                                 <form method="POST" action="{{ route('device.edit.polling.destroy', ['device' => $device, 'methodType' => $method['type']]) }}" class="tw:mt-4">
                                     @csrf
                                     @method('DELETE')
+                                    <input type="hidden" name="tab" value="{{ $method['type'] }}">
                                     <button type="submit" class="btn btn-danger" onclick="return confirm('{{ __('Are you sure you want to remove this polling method?') }}')">
                                         <i class="fa fa-trash tw:mr-1"></i> {{ __('Remove') }} {{ $method['label'] }}
                                     </button>
@@ -243,6 +250,27 @@
     </x-device.page>
 
     <script>
+        function pollingTabs(requestedTab, configuredTabs, fallbackTab) {
+            var allTabs = configuredTabs.concat(['add']);
+            var urlTab = new URLSearchParams(window.location.search).get('tab');
+            var initialTab = requestedTab || urlTab || fallbackTab;
+
+            if (! allTabs.includes(initialTab)) {
+                initialTab = fallbackTab;
+            }
+
+            return {
+                activeTab: initialTab,
+                init() {
+                    this.$watch('activeTab', function (tab) {
+                        var url = new URL(window.location.href);
+                        url.searchParams.set('tab', tab);
+                        window.history.replaceState({}, '', url.toString());
+                    });
+                },
+            };
+        }
+
         function togglePasswordVisibility(inputId, btn) {
             var input = document.getElementById(inputId);
             var icon = btn.querySelector('i');
