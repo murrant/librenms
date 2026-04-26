@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Device;
 
-use App\Data\Secrets\SecretData;
+use App\Data\Polling\PollingMethodService;
+use App\Data\Secrets\SecretService;
 use App\Http\Interfaces\ToastInterface;
+use App\Http\Requests\StorePollingMethodRequest;
+use App\Http\Requests\UpdatePollingMethodRequest;
 use App\Models\Device;
-use App\Models\DevicePollingMethod;
 use App\Models\Secret;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use LibreNMS\Enum\PollingMethodType;
@@ -19,6 +19,11 @@ use LibreNMS\Enum\PollingMethodType;
 class EditPollingController
 {
     use AuthorizesRequests;
+
+    public function __construct(
+        private PollingMethodService $pollingService,
+        private SecretService $secretService,
+    ) {}
 
     /**
      * @throws AuthorizationException
@@ -45,68 +50,30 @@ class EditPollingController
 
     /**
      * @throws AuthorizationException
-     * @throws ValidationException
      */
-    public function store(Request $request, Device $device, ToastInterface $toast): RedirectResponse
+    public function store(StorePollingMethodRequest $request, Device $device, ToastInterface $toast): RedirectResponse
     {
         $this->authorize('update', $device);
 
-        $validated = $request->validate([
-            'method_type'     => ['required', Rule::enum(PollingMethodType::class)],
-            'credential_mode' => ['nullable', Rule::in(['existing', 'new'])],
-            'secret_id'       => ['nullable', 'integer', 'exists:secrets,id'],
-            'description'     => ['nullable', 'string', 'max:255'],
-            'default'         => ['nullable', 'boolean'],
-        ]);
-
-        $type          = PollingMethodType::from($validated['method_type']);
-        $pollingMethod = app($type->methodClass());
-
-        if ($device->pollingMethods()->where('method_type', $type->value)->exists()) {
-            throw ValidationException::withMessages([
-                'method_type' => __('poller.method_exists'),
-            ]);
-        }
-
-        $validatedSettings = $request->validate([
-            'settings' => ['nullable', 'array'],
-            ...collect($pollingMethod->getRules())
-                ->mapWithKeys(fn (array|string $rule, string $key): array => ["settings.$key" => $rule])
-                ->all(),
-        ])['settings'] ?? [];
+        $validated = $request->validated();
+        $type = $request->pollingType() ?? PollingMethodType::from($validated['method_type']);
 
         $secret = null;
         if ($type->hasSecret()) {
             $this->authorize('create', Secret::class);
             $secret = ($validated['credential_mode'] ?? 'existing') === 'existing'
                 ? $this->resolveExistingSecret($validated['secret_id'] ?? null, $type)
-                : $this->createSecret($request, $type, $validated);
+                : $this->secretService->create(
+                    $type,
+                    $request->validatedSecretData(),
+                    [
+                        'description' => $validated['description'] ?: strtoupper($type->value) . ' ' . $request->user()?->user_id,
+                        'default' => (bool) ($validated['default'] ?? false),
+                    ]
+                );
         }
 
-        $row = new DevicePollingMethod([
-            'device_id'            => $device->device_id,
-            'method_type'          => $type,
-            'enabled'              => true,
-            'affects_availability' => (bool) ($pollingMethod->getDefaults()['affects_availability'] ?? false),
-            'secret_id'            => $secret?->id,
-            'settings'             => [],
-        ]);
-
-        $row->setRelation('device', $device);
-
-        $schemaDefaults = collect($pollingMethod->getSettingsSchema())
-            ->mapWithKeys(fn (array $field, string $key): array => [
-                $key => $field['default'] ?? (isset($field['options']) ? array_key_first($field['options']) : null),
-            ])
-            ->reject(fn (mixed $value): bool => $value === null)
-            ->all();
-
-        $row->settings = array_merge(
-            $schemaDefaults,
-            collect($pollingMethod->getDefaults())->except('affects_availability')->all(),
-            $validatedSettings
-        );
-        $device->pollingMethods()->save($row);
+        $this->pollingService->create($device, $type, $request->validatedSettings(), $secret);
 
         $toast->success(__('poller.method_added'));
 
@@ -115,54 +82,31 @@ class EditPollingController
 
     /**
      * @throws AuthorizationException
-     * @throws ValidationException
      */
-    public function update(Request $request, Device $device, string $methodType, ToastInterface $toast): RedirectResponse
+    public function update(UpdatePollingMethodRequest $request, Device $device, string $methodType, ToastInterface $toast): RedirectResponse
     {
         $this->authorize('update', $device);
 
         $type          = PollingMethodType::tryFrom($methodType) ?? abort(404);
-        $pollingMethod = app($type->methodClass());
         $row           = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
-
-        $validated = $request->validate([
-            'enabled' => ['nullable', 'boolean'],
-            'affects_availability' => ['nullable', 'boolean'],
-            'secret_update_mode' => ['nullable', 'string', 'in:update,create'],
-            'secret_id' => ['nullable', 'integer', 'exists:secrets,id'],
-            'force_save' => ['nullable', 'boolean'],
-            'settings' => ['nullable', 'array'],
-            ...collect($pollingMethod->getRules())
-                ->mapWithKeys(fn (array|string $rule, string $key): array => ["settings.$key" => $rule])
-                ->all(),
-        ]);
-
-        $row->enabled = (bool) ($validated['enabled'] ?? true);
-        $row->affects_availability = (bool) ($validated['affects_availability'] ?? false);
-        $row->settings = array_merge(
-            $row->settings ?? [],
-            collect($pollingMethod->getSettingsSchema())
-                ->keys()
-                ->filter(fn (string $key): bool => array_key_exists($key, $validated['settings'] ?? []))
-                ->mapWithKeys(fn (string $key): array => [$key => $validated['settings'][$key]])
-                ->all()
-        );
+        $validated = $request->validated();
 
         if ($type->hasSecret() && $request->has('secret_data')) {
             $this->authorize('update', Secret::class);
-            $row->secret_id = $this->updateSecret($request, $row, $type, $validated)->id;
+            $mode = $validated['secret_update_mode'] ?? 'update';
+            $row->secret_id = $this->secretService->updateOrCreate(
+                $row,
+                $type,
+                $request->validatedSecretData(),
+                $mode
+            )->id;
         } elseif ($type->hasSecret() && array_key_exists('secret_id', $validated)) {
             $this->authorize('update', Secret::class);
             $row->secret_id = $this->resolveExistingSecret((int) $validated['secret_id'], $type)->id;
         }
 
-        $row->save();
-
-        // Sync device status fields if enabled state changed
-        if ($row->wasChanged('enabled')) {
-            $row->setRelation('device', $device);
-            $row->syncDeviceStatus();
-        }
+        $row->setRelation('device', $device);
+        $this->pollingService->update($row, $validated, $type);
 
         $toast->success(__('poller.method_updated'));
 
@@ -260,62 +204,6 @@ class EditPollingController
             ]);
         }
 
-        $secret = Secret::query()->findOrFail($secretId);
-
-        if ($secret->secret_type->value !== $type->value) {
-            throw ValidationException::withMessages([
-                'secret_id' => __('poller.credential_type_mismatch'),
-            ]);
-        }
-
-        return $secret;
-    }
-
-    private function createSecret(Request $request, PollingMethodType $type, array $validated): Secret
-    {
-        /** @var class-string<SecretData> $class */
-        $class = $type->secretClass();
-        $rules = collect($class::rules())
-            ->mapWithKeys(fn ($rule, $key) => ["secret_data.{$key}" => $rule])
-            ->all();
-        $data  = $request->validate($rules)['secret_data'] ?? [];
-
-        return Secret::query()->create([
-            'description' => $validated['description'] ?: strtoupper($type->value) . ' ' . $request->user()?->user_id,
-            'secret_type' => $type->value,
-            'default'     => (bool) ($validated['default'] ?? false),
-            'data'        => $data,
-        ]);
-    }
-
-    private function updateSecret(Request $request, DevicePollingMethod $row, PollingMethodType $type, array $validated): Secret
-    {
-        /** @var class-string<SecretData> $class */
-        $class = $type->secretClass();
-        $rules = collect($class::rules())
-            ->mapWithKeys(fn ($rule, $key) => ["secret_data.{$key}" => $rule])
-            ->all();
-        $data  = $request->validate($rules)['secret_data'] ?? [];
-
-        $existing = $row->secret;
-
-        if (! $existing) {
-            // No secret yet — create one
-            return $this->createSecret($request, $type, $validated);
-        }
-
-        if (($validated['secret_update_mode'] ?? 'update') === 'create') {
-            $new = Secret::query()->create([
-                'description' => 'Custom ' . strtoupper($type->value) . ' for ' . $row->device->hostname,
-                'secret_type' => $type->value,
-                'default'     => false,
-                'data'        => $data,
-            ]);
-            return $new;
-        }
-
-        $existing->update(['data' => $data]);
-
-        return $existing;
+        return $this->secretService->resolveExisting($secretId, $type);
     }
 }
