@@ -50,6 +50,11 @@
                                 updateMode: 'update',
                                 currentSecretId: '{{ (string) ($method['secret']?->id ?? '') }}',
                                 selectedSecretId: '{{ (string) ($method['secret']?->id ?? '') }}',
+                                pendingSecretId: '{{ (string) ($method['secret']?->id ?? '') }}',
+                                isChangingSecret: false,
+                                secretSelectionConfirmed: false,
+                                secretDescriptions: @js($method['secret_descriptions']),
+                                secretFormDataById: @js($method['secret_form_data_by_id']),
                                 formData: {{ json_encode($method['secret_form_data']) }},
                                 settingsData: {{ json_encode($method['settings']) }}
                              }"
@@ -145,9 +150,51 @@
                                         <h4 class="tw:font-semibold tw:text-lg tw:mb-3 tw:text-gray-700 tw:dark:text-dark-white-100">{{ __('Configured Secret') }}</h4>
 
                                         <div class="tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:p-5 tw:rounded-lg tw:text-sm">
+                                            <input type="hidden" name="secret_id" :value="selectedSecretId" :disabled="!secretSelectionConfirmed">
+
                                             <div class="tw:mb-4">
                                                 <span class="tw:text-gray-500 tw:dark:text-dark-white-400 tw:uppercase tw:text-xs tw:font-bold">{{ __('Description') }}</span>
-                                                <div class="tw:font-medium tw:text-gray-800 tw:dark:text-dark-white-100">{{ $method['secret']?->description }}</div>
+                                                <div x-show="!isChangingSecret" class="tw:flex tw:flex-wrap tw:items-center tw:gap-2">
+                                                    <div class="tw:font-medium tw:text-gray-800 tw:dark:text-dark-white-100" x-text="secretDescriptions[selectedSecretId] ?? '{{ __('None') }}'"></div>
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-default btn-sm"
+                                                        @click="pendingSecretId = selectedSecretId; isChangingSecret = true"
+                                                        title="{{ __('Change Secret') }}"
+                                                        aria-label="{{ __('Change Secret') }}"
+                                                    >
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                </div>
+
+                                                <div x-show="isChangingSecret" style="display: none;" class="tw:flex tw:flex-col tw:gap-2 tw:max-w-xl">
+                                                    <select x-model="pendingSecretId" class="form-control">
+                                                        @foreach(($availableSecrets[$method['type']] ?? collect()) as $secret)
+                                                            <option value="{{ (string) $secret->id }}">{{ $secret->description }}</option>
+                                                        @endforeach
+                                                    </select>
+
+                                                    <div class="tw:flex tw:items-center tw:gap-2">
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-primary btn-sm"
+                                                            @click="selectedSecretId = pendingSecretId; formData = { ...formData, ...(secretFormDataById[pendingSecretId] || {}) }; secretSelectionConfirmed = pendingSecretId !== currentSecretId; isChangingSecret = false"
+                                                            title="{{ __('Confirm') }}"
+                                                            aria-label="{{ __('Confirm') }}"
+                                                        >
+                                                            <i class="fa fa-check"></i>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-default btn-sm"
+                                                            @click="pendingSecretId = selectedSecretId; secretSelectionConfirmed = false; isChangingSecret = false"
+                                                            title="{{ __('Cancel') }}"
+                                                            aria-label="{{ __('Cancel') }}"
+                                                        >
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             @if($method['usage_count'] > 1)

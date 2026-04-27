@@ -12,6 +12,7 @@ use App\Models\Secret;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use LibreNMS\Enum\PollingMethodType;
@@ -141,9 +142,22 @@ class EditPollingController
         $pollingMethod = app($type->methodClass());
         $row           = $device->pollingMethods->firstWhere('method_type', $type);
         $secret        = $row?->secret;
+        $canUnmaskSecrets = Gate::allows('unmask', Secret::class);
         $schema        = $type->hasSecret() ? $type->secretClass()::getUiSchema() : [];
         $schemaFields  = $this->buildSchemaFields($schema);
         $settingsSchema = $pollingMethod->getSettingsSchema();
+        $secretsForType = Secret::query()
+            ->where('secret_type', $type->value)
+            ->orderBy('description')
+            ->get();
+        $secretDescriptions = $secretsForType->mapWithKeys(fn (Secret $availableSecret): array => [
+            (string) $availableSecret->id => $availableSecret->description,
+        ])->all();
+        $secretFormDataById = $secretsForType->mapWithKeys(fn (Secret $availableSecret): array => [
+            (string) $availableSecret->id => collect($schemaFields)->mapWithKeys(fn (array $field): array => [
+                $field['key'] => $canUnmaskSecrets ? (string) data_get($availableSecret->data, $field['key'], '') : '',
+            ])->all(),
+        ])->all();
 
         return [
             'type'             => $type->value,
@@ -160,9 +174,11 @@ class EditPollingController
             'secret'           => $secret,
             'secret_form_data' => collect($schema)->mapWithKeys(
                 fn (array $field, string $key): array => [
-                    $key => (string) data_get($secret?->data, $key, ''),
+                    $key => $canUnmaskSecrets ? (string) data_get($secret?->data, $key, '') : '',
                 ]
             )->all(),
+            'secret_descriptions'   => $secretDescriptions,
+            'secret_form_data_by_id' => $secretFormDataById,
             'usage_count'           => $secret?->devices()->count() ?? 0,
             'configured'            => $row !== null,
             'enabled'               => $row?->enabled ?? false,
