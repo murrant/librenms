@@ -27,6 +27,7 @@
 namespace App\Http\Controllers\Select;
 
 use App\Models\Port;
+use LibreNMS\Util\Number;
 
 class PortFieldController extends SelectController
 {
@@ -64,7 +65,7 @@ class PortFieldController extends SelectController
      */
     protected function searchFields($request)
     {
-        return [$request->input('field')];
+        return [$request->string('field')];
     }
 
     /**
@@ -75,7 +76,25 @@ class PortFieldController extends SelectController
      */
     protected function baseQuery($request)
     {
+        $field = $request->string('field');
         return Port::hasAccess($request->user())
-            ->select($request->input('field'))->distinct();
+            ->whereNotNull($field)
+            ->select($field)
+            ->distinct()
+            ->orderBy($field);
+    }
+
+    public function formatItem($model)
+    {
+        $value = array_first($model->getAttributes());
+        $key = array_key_first($model->getAttributes());
+
+        return [
+            'id' => $value,
+            'text' => match($key) {
+                'ifSpeed' => Number::formatSi($value, suffix: 'bps'),
+                default => $value,
+            },
+        ];
     }
 }

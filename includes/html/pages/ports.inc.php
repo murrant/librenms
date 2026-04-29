@@ -112,7 +112,7 @@ if ((isset($vars['searchbar']) && $vars['searchbar'] != 'hide') || ! isset($vars
             'options' => ['up', 'down', 'shutdown'],
         ],
         [
-            'key' => 'speed',
+            'key' => 'ifSpeed',
             'label' => 'Speed',
             'type' => 'select',
             'endpoint' => route('ajax.select.port-field'),
@@ -121,7 +121,7 @@ if ((isset($vars['searchbar']) && $vars['searchbar'] != 'hide') || ! isset($vars
             ],
         ],
         [
-            'key' => 'media',
+            'key' => 'ifType',
             'label' => 'Media',
             'type' => 'select',
             'endpoint' => route('ajax.select.port-field'),
