@@ -36,7 +36,7 @@ foreach ($menu_options as $option => $text) {
     if ($vars['format'] == 'list_' . $option) {
         $displayLists .= '<span class="pagemenu-selected">';
     }
-    $displayLists .= '<a href="' . \LibreNMS\Util\Url::generate($vars, ['format' => 'list_' . $option]) . '">' . $text . '</a>';
+    $displayLists .= '<a href="' . request()->fullUrlWithQuery(['format' => 'list_' . $option]) . '">' . $text . '</a>';
     if ($vars['format'] == 'list_' . $option) {
         $displayLists .= '</span>';
     }
@@ -64,8 +64,9 @@ foreach ($menu_options as $option => $text) {
 
 $displayLists .= '<div style="float: right;">';
 
-if (isset($vars['searchbar']) && $vars['searchbar'] == 'hide') {
-    $displayLists .= '<a href="' . request()->fullUrlWithoutQuery(['searchbar']) . '">Search</a>';
+$hideSearch = isset($vars['searchbar']) && $vars['searchbar'] == 'hide';
+if ($hideSearch) {
+    $displayLists .= '<a href="' . request()->fullUrlWithoutQuery('searchbar') . '">Search</a>';
 } else {
     $displayLists .= '<a href="' . request()->fullUrlWithQuery(['searchbar' => 'hide']) . '">Search</a>';
 }
@@ -73,7 +74,7 @@ if (isset($vars['searchbar']) && $vars['searchbar'] == 'hide') {
 $displayLists .= ' | ';
 
 if (isset($vars['bare']) && $vars['bare'] == 'yes') {
-    $displayLists .= '<a href="' . request()->fullUrlWithoutQuery(['bare' => '']) . '">Header</a>';
+    $displayLists .= '<a href="' . request()->fullUrlWithoutQuery('bare') . '">Header</a>';
 } else {
     $displayLists .= '<a href="' . request()->fullUrlWithQuery(['bare' => 'yes']) . '">Header</a>';
 }
@@ -85,8 +86,9 @@ $displayLists .= '<a href="ports/deleted=1/purge=all" title="Delete ports"> Purg
 
 $displayLists .= '</div>';
 
-if ((isset($vars['searchbar']) && $vars['searchbar'] != 'hide') || ! isset($vars['searchbar'])) {
-    $fields = [
+echo Blade::render('<template id="port-filter-template"><x-filter :fields="$fields" id="port-filter" :hide="$hide"/></template>', [
+    'hide' => $hideSearch,
+    'fields' => [
         [
             'key' => 'device_id',
             'label' => __('Device'),
@@ -166,10 +168,8 @@ if ((isset($vars['searchbar']) && $vars['searchbar'] != 'hide') || ! isset($vars
             'label' => 'Deleted',
             'type' => 'boolean',
         ],
-    ];
-
-    echo Blade::render('<template id="port-filter-template"><x-filter :fields="$fields" id="port-filter"/></template>', ['fields' => $fields]);
-}
+    ],
+]);
 
 if (isset($vars['purge'])) {
     if ($vars['purge'] === 'all') {
