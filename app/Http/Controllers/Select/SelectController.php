@@ -46,6 +46,7 @@ abstract class SelectController extends PaginatedAjaxController
             'limit' => 'int',
             'page' => 'int',
             'term' => 'nullable|string',
+            'id' => 'nullable|string',
         ];
     }
 

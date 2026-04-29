@@ -27,7 +27,9 @@
 namespace App\Http\Controllers\Select;
 
 use App\Models\Port;
+use Illuminate\Database\Eloquent\Builder;
 use LibreNMS\Util\Number;
+use LibreNMS\Util\Rewrite;
 
 class PortFieldController extends SelectController
 {
@@ -72,27 +74,29 @@ class PortFieldController extends SelectController
      * Defines the base query for this resource
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder
+     * @return Builder|\Illuminate\Database\Query\Builder
      */
     protected function baseQuery($request)
     {
-        $field = $request->string('field');
+        $this->idField = $request->string('field');
         return Port::hasAccess($request->user())
-            ->whereNotNull($field)
-            ->select($field)
+            ->whereNotNull($this->idField)
+            ->select($this->idField)
             ->distinct()
-            ->orderBy($field);
+            ->orderBy($this->idField);
     }
 
     public function formatItem($model)
     {
+        $field = array_key_first($model->getAttributes());
         $value = array_first($model->getAttributes());
-        $key = array_key_first($model->getAttributes());
+        \Debugbar::log("field: $field, value: $value");
 
         return [
             'id' => $value,
-            'text' => match($key) {
+            'text' => match($field) {
                 'ifSpeed' => Number::formatSi($value, suffix: 'bps'),
+                'ifType' => Rewrite::normalizeIfType($value),
                 default => $value,
             },
         ];
