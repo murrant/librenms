@@ -1,6 +1,8 @@
 <div class="row" style="margin-bottom: 15px;">
     <div class="col-md-12">
-        <x-filter :fields="$data['filterFields']" :reload="true"/>
+        <pre>{{ json_encode($data['filter']) }}</pre>
+        <x-filter id="device-port-filter" :fields="$data['filterFields']"  :initial="$data['filter']" :reload="false"/>
+        <pre id="filter-state"></pre>
     </div>
 </div>
 
@@ -40,3 +42,16 @@
         @endisset
     </div>
 </x-panel>
+
+@push('styles')
+<script>
+    window.addEventListener('filter:apply', (event) => {
+        console.log('filter:apply', event.detail);
+        document.getElementById('filter-state').textContent = JSON.stringify(event.detail.formatted)
+    });
+    window.addEventListener('filter:loaded', (event) => {
+        console.log('filter:loaded', event.detail);
+        document.getElementById('filter-state').textContent = JSON.stringify(event.detail.filters)
+    });
+</script>
+@endpush
