@@ -13,18 +13,18 @@ use LibreNMS\Interfaces\PollingMethod;
 
 enum PollingMethodType: string
 {
-    case Icmp      = 'icmp';
-    case Ipmi      = 'ipmi';
-    case Snmp      = 'snmp';
+    case Icmp = 'icmp';
+    case Ipmi = 'ipmi';
+    case Snmp = 'snmp';
     case UnixAgent = 'unix-agent';
 
     /** @return class-string<PollingMethod> */
     public function methodClass(): string
     {
-        return match($this) {
-            self::Icmp      => Icmp::class,
-            self::Ipmi      => Ipmi::class,
-            self::Snmp      => Snmp::class,
+        return match ($this) {
+            self::Icmp => Icmp::class,
+            self::Ipmi => Ipmi::class,
+            self::Snmp => Snmp::class,
             self::UnixAgent => UnixAgent::class,
         };
     }
@@ -32,10 +32,10 @@ enum PollingMethodType: string
     /** @return class-string<SecretData>|null */
     public function secretClass(): ?string
     {
-        return match($this) {
+        return match ($this) {
             self::Snmp => SnmpSecret::class,
             self::Ipmi => IpmiSecret::class,
-            default    => null,
+            default => null,
         };
     }
 

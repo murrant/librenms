@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SnmpSecretData.php
  *
@@ -103,6 +104,7 @@ class SnmpSecret extends SecretData
 
     /**
      * @deprecated
+     *
      * @param  array  $device
      * @return static
      */
@@ -119,7 +121,6 @@ class SnmpSecret extends SecretData
             cryptoalgo: $device['cryptoalgo'] ?? 'AES',
             context: $device['context'] ?? null,
         );
-
     }
 
     public static function rules(): array
