@@ -153,9 +153,8 @@
                                             <input type="hidden" name="secret_id" :value="selectedSecretId" :disabled="!secretSelectionConfirmed">
 
                                             <div class="tw:mb-4">
-                                                <span class="tw:text-gray-500 tw:dark:text-dark-white-400 tw:uppercase tw:text-xs tw:font-bold">{{ __('Description') }}</span>
                                                 <div x-show="!isChangingSecret" class="tw:flex tw:flex-wrap tw:items-center tw:gap-2">
-                                                    <div class="tw:font-medium tw:text-gray-800 tw:dark:text-dark-white-100" x-text="secretDescriptions[selectedSecretId] ?? '{{ __('None') }}'"></div>
+                                                    <div class="tw:font-medium tw:text-lg tw:text-gray-800 tw:dark:text-dark-white-100" x-text="secretDescriptions[selectedSecretId] ?? '{{ __('None') }}'"></div>
                                                     <button
                                                         type="button"
                                                         class="btn btn-default btn-sm"
