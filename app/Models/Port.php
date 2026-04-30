@@ -372,7 +372,7 @@ class Port extends DeviceRelatedModel
 
         $operator = $config['operator'] ?? '=';
 
-        $query->where(function($q) use ($value, $operator) {
+        $query->where(function ($q) use ($value, $operator) {
             $q->where('ifName', $operator, $value)
                 ->orWhere('ifAlias', $operator, $value)
                 ->orWhere('ifDescr', $operator, $value);
