@@ -17,6 +17,7 @@ import VueTabs from "vue-nav-tabs";
 import VModal from "vue-js-modal";
 // // Alpine Components
 import Alpine from "alpinejs";
+import intersect from "@alpinejs/intersect";
 // import popup from './components/alpine/popup.js'
 import popup from "./components/alpine/oldpopup.js";
 import deviceLink from "./components/alpine/deviceLink.js";
@@ -76,6 +77,7 @@ const app = new Vue({
     i18n,
 });
 
+Alpine.plugin(intersect);
 Alpine.data('popup', popup);
 Alpine.data('deviceLink', deviceLink);
 Alpine.data('portLink', portLink);
