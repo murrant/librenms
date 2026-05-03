@@ -1,7 +1,7 @@
 <x-panel class="tw:rounded-lg tw:overflow-hidden">
-    <x-slot name="title">
+    <x-slot:title>
         <x-logo class="logon-logo tw:h-auto tw:w-full" />
-    </x-slot>
+    </x-slot:title>
 
     @config('login_message')
     <x-slot name="footer" class="text-center">

@@ -12,7 +12,7 @@
                 </div>
             </div>
         </x-slot:title>
-        <x-slot:slot class="tw:pb-0!">
+        <x-slot:bare>
         <x-accordion accordionId="CustomMapGroups">
             @foreach($maps as $group_name => $group)
                 <x-accordion.item title="{{$group_name ?: 'Ungrouped'}}" id="{{uniqid()}}" open="{{($open_group == $group_name) || (count($maps) == 1)}}">
@@ -29,7 +29,7 @@
                 </x-accordion.item>
             @endforeach
         </x-accordion>
-        </x-slot:slot>
+        </x-slot:bare>
     </x-panel>
 </div>
 @endsection

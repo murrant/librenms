@@ -14,7 +14,7 @@
                 </select>
                 </h2>
             </x-slot:heading>
-            <x-slot:slot class="tw:p-0!">
+            <x-slot:bare>
             <x-tabs>
                 <x-tab name="{{ __('Devices') }}">
                     <table id="vlan-devices" class="table table-hover table-condensed table-striped">
@@ -44,7 +44,7 @@
                     </table>
                 </x-tab>
             </x-tabs>
-            </x-slot:slot>
+            </x-slot:bare>
         </x-panel>
     </div>
 @endsection

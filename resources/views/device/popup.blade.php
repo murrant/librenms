@@ -1,5 +1,5 @@
 <x-panel class="tw:p-0">
-    <x-slot name="heading" class="tw:p-0">
+    <x-slot:heading class="tw:p-0">
     <div class="tw:opacity-90 tw:p-3 tw:mb-0 tw:border-b-2 tw:border-solid tw:border-gray-200 tw:dark:border-dark-gray-200 tw:rounded-t-lg">
         <span class="tw:text-nowrap tw:pr-1">
             <a href="{{ $href }}" class="tw:text-xl tw:font-bold">{{ $device->displayName() }}</a>
@@ -24,7 +24,7 @@
             @endif
         </span>
     </div>
-    </x-slot>
+    </x-slot:heading>
     <div>
         @forelse($graphs as $graph)
             <x-graph-row :device="$device->device_id" :type="$graph['type']" :title="$graph['title']" :graphs="$graph['graphs']" />

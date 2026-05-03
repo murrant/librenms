@@ -1,5 +1,5 @@
 <x-panel>
-    <x-slot:slot class="tw:p-0!">
+    <x-slot:bare>
     <table id="port-security-table" class="table table-hover table-condensed table-striped tw:mt-1 tw:mb-0!">
         <thead>
             <tr>
@@ -17,7 +17,7 @@
             </tr>
         </thead>
     </table>
-    </x-slot:slot>
+    </x-slot:bare>
 </x-panel>
 
 <script>

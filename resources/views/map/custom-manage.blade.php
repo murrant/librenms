@@ -21,13 +21,13 @@
                 </div>
             </div>
         </x-slot:title>
-        <x-slot:slot class="tw:p-0!">
+        <x-slot:bare>
         @foreach($maps as $group_name => $group)
             <x-panel id="map-group-{{ $group_uuid = uniqid() }}">
                 @if($group_name)
                     <x-slot:title>{{ $group_name }}</x-slot:title>
                 @endif
-                <x-slot:slot class="tw:p-0!">
+                <x-slot:bare>
                 @foreach($group as $map)
                     <div id="map-{{ $map->custom_map_id }}" class="tw:even:bg-gray-50 tw:dark:even:bg-zinc-900">
                         <div class="tw:flex tw:justify-between tw:p-3 tw:items-center tw:hover:bg-gray-100 tw:dark:hover:bg-gray-600">
@@ -59,10 +59,10 @@
                         </div>
                     </div>
                 @endforeach
-                </x-slot:slot>
+                </x-slot:bare>
             </x-panel>
         @endforeach
-        </x-slot:slot>
+        </x-slot:bare>
     </x-panel>
 </div>
 @endsection

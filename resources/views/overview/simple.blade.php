@@ -96,7 +96,7 @@
     <div class="row">
         <div class="col-md-12">
             <x-panel title="{{ __('Syslog entries') }}">
-                <x-slot name="table">
+                <x-slot:bare>
                     <table class="table table-hover table-condensed table-striped">
                     @foreach ($syslog as $entry)
                         <tr>
@@ -106,7 +106,7 @@
                         </tr>
                     @endforeach
                     </table>
-                </x-slot>
+                </x-slot:bare>
             </x-panel>
         </div>
    </div>

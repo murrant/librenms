@@ -1,5 +1,5 @@
 <x-panel class="table-responsive">
-    <x-slot name="table">
+    <x-slot:bare>
         <table class="table table-hover table-condensed table-striped">
             <thead>
             <tr>
@@ -96,5 +96,5 @@
             </tr>
             </tbody>
         </table>
-    </x-slot>
+    </x-slot:bare>
 </x-panel>

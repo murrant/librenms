@@ -12,7 +12,7 @@
                 @endif
             </x-slot>
 
-            <x-slot:slot class="tw:p-0!">
+            <x-slot:bare>
             <table id="inventory" class="table table-hover table-condensed table-striped"
                 data-url="{{ route('table.inventory') }}">
                 <thead>
@@ -25,7 +25,7 @@
                 </tr>
                 </thead>
             </table>
-            </x-slot:slot>
+            </x-slot:bare>
         </x-panel>
     </div>
 @endsection

@@ -5,11 +5,11 @@
 @section('content')
 <div class="container-fluid">
     <x-panel>
-        <x-slot name="title">
+        <x-slot:title>
             <i class="fa fa-user-circle-o fa-fw fa-lg" aria-hidden="true"></i> {{ __('Manage Users') }}
-        </x-slot>
+        </x-slot:title>
 
-        <div class="table-responsive">
+        <x-slot:bare class="table-responsive">
             <table id="users" class="table table-bordered table-condensed">
                 <thead>
                 <tr>
@@ -57,7 +57,7 @@
                     @endforeach
                 </tbody>
             </table>
-        </div>
+        </x-slot:bare>
     </x-panel>
 </div>
 @endsection

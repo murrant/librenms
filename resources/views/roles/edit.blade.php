@@ -5,7 +5,7 @@
 @section('content')
     <div class="container" x-data="roleForm({{ json_encode($role->permissions->pluck('name')) }})">
         <x-panel>
-            <x-slot name="title">
+            <x-slot:title>
                 <div class="tw:flex tw:items-center tw:justify-between tw:w-full">
                     <div class="tw:flex tw:items-center">
                         <a href="{{ route('roles.index') }}" class="tw:mr-2 tw:text-inherit">
@@ -23,7 +23,7 @@
                         </button>
                     </div>
                 </div>
-            </x-slot>
+            </x-slot:title>
 
             <form action="{{ route('roles.update', $role->id) }}" method="POST" id="role-form" class="form-horizontal">
                 @csrf

@@ -4,7 +4,7 @@
 <x-device.page :device="$device">
     @if($data['smokeping']->hasGraphs())
         <x-panel class="with-nav-tabs">
-            <x-slot name="heading">
+            <x-slot:heading>
                 @if(\App\Facades\LibrenmsConfig::get('smokeping.url'))
                     <a href="{{ \App\Facades\LibrenmsConfig::get('smokeping.url') }}?target={{ $device->type }}.{{ str_replace('.','_',$device->hostname) }}" target="_blank"><span class="panel-title">{{ __('Smokeping') }} <i class="glyphicon glyphicon-share-alt"></i></span></a>
                 @else
@@ -16,7 +16,7 @@
                         <li @if($loop->first) class="active" @endif><a href="#{{ $tab }}" data-toggle="tab">{{ __('smokeping.' . $tab) }}</a></li>
                     @endforeach
                 </ul>
-            </x-slot>
+            </x-slot:heading>
 
             <div class="tab-content">
                 @foreach($data['smokeping_tabs'] as $direction)

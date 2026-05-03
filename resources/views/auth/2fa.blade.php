@@ -9,9 +9,9 @@
 <div class="row">
     <div class="col-md-6 col-md-offset-3">
         <x-panel>
-            <x-slot name="title">
+            <x-slot:title>
                 <x-logo class="logon-logo tw:h-auto tw:w-full" />
-            </x-slot>
+            </x-slot:title>
 
             <div class="container-fluid">
                 @if(session('twofactoradd'))

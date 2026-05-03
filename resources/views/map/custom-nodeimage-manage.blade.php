@@ -19,7 +19,7 @@
                 </div>
             </div>
         </x-slot:title>
-        <x-slot:slot class="tw:p-0"></x-slot:slot>
+        <x-slot:bare></x-slot:bare>
     </x-panel>
 </div>
 @endsection

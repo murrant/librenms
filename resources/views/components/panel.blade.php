@@ -13,6 +13,10 @@
         <div {{ $slot->attributes->class(['panel-body']) }}>
             {{ $slot }}
         </div>
+    @elseif(isset($bare))
+        <div {{ $bare->attributes }}>
+            {{ $bare }}
+        </div>
     @endif
 
     @isset($footer)

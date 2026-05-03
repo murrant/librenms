@@ -1,5 +1,5 @@
 <x-panel>
-    <x-slot:slot class="tw:p-0!">
+    <x-slot:bare>
     <table id="ports-fdb" class="table table-condensed table-hover table-striped tw:mt-1 tw:mb-0!">
         <thead>
         <tr>
@@ -15,7 +15,7 @@
         </tr>
         </thead>
     </table>
-    </x-slot:slot>
+    </x-slot:bare>
 </x-panel>
 
 <script>

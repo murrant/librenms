@@ -5,9 +5,9 @@
 @section('content')
     <div class="container-fluid">
         <x-panel id="manage-port-groups-panel">
-            <x-slot name="title">
+            <x-slot:title>
                 <i class="fa fa-th fa-fw fa-lg" aria-hidden="true"></i> {{ __('Port Groups') }}
-            </x-slot>
+            </x-slot:title>
 
             <div class="row">
                 <div class="col-md-12">

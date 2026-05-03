@@ -5,9 +5,9 @@
 @section('content')
 <div class="tw:max-w-4xl tw:mx-auto tw:px-4">
     <x-panel x-data="deviceDeleteButton">
-        <x-slot name="title">
+        <x-slot:title>
             {{ __('device.delete_device') }}
-        </x-slot>
+        </x-slot:title>
         @if (session('success'))
             <div class="tw:mb-6 tw:rounded-md tw:bg-green-50 tw:dark:bg-green-900/30 tw:border tw:border-green-200 tw:dark:border-green-700 tw:px-4 tw:py-3 tw:text-green-800 tw:dark:text-green-300">
                 {{ session('success') }}

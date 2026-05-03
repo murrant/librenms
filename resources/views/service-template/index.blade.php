@@ -4,13 +4,13 @@
 
 @section('content')
     <div class="container-fluid">
-        <x-panel id="manage-services-templates-panel">
-            <x-slot name="title">
+        <x-panel>
+            <x-slot:title>
                 <span class="fa-stack" aria-hidden="true">
                     <i class="fa fa-square fa-stack-2x"></i>
                     <i class="fa fa-cogs fa-stack-1x fa-inverse"></i>
                 </span> {{ __('Services Templates') }}
-            </x-slot>
+            </x-slot:title>
             <div class="row" style="padding-bottom: 16px;">
                 <div class="col-md-12">
                     <a type="button" class="btn btn-primary" href="{{ route('services.templates.create') }}">
@@ -83,10 +83,10 @@
             </div>
             @foreach($groups as $group)
                 <x-panel id="manage-services-templates-panel-dg">
-                    <x-slot name="title">
+                    <x-slot:title>
                         <i class="fa fa-th fa-fw fa-lg" aria-hidden="true"></i> {{ __($group->name) }}
-                    </x-slot>
-                    <div class="table-responsive">
+                    </x-slot:title>
+                    <x-slot:bare class="table-responsive">
                         <table id="manage-services-templates-table-dg-{{ $group->id }}" class="table table-condensed table-hover">
                             <thead>
                             <tr>
@@ -117,15 +117,15 @@
                                 @endforeach
                             </tbody>
                         </table>
-                    </div>
+                    </x-slot:bare>
                 </x-panel>
             @endforeach
             @foreach($devices as $device)
                 <x-panel id="manage-services-templates-panel-d">
-                    <x-slot name="title">
+                    <x-slot:title>
                         <i class="fa fa-server fa-fw fa-lg" aria-hidden="true"></i> {{ __($device->hostname) }}
-                    </x-slot>
-                    <div class="table-responsive">
+                    </x-slot:title>
+                    <x-slot:bar class="table-responsive">
                         <table id="manage-services-templates-table-d-{{ $device->id }}" class="table table-condensed table-hover">
                             <thead>
                             <tr>
@@ -156,7 +156,7 @@
                                 @endforeach
                             </tbody>
                         </table>
-                    </div>
+                    </x-slot:bar>
                 </x-panel>
             @endforeach
         </x-panel>
@@ -242,12 +242,4 @@
             return false;
         }
     </script>
-@endsection
-
-@section('css')
-    <style>
-        .table-responsive {
-            padding-top: 16px
-        }
-    </style>
 @endsection

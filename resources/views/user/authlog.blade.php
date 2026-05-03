@@ -5,13 +5,12 @@
 @section('content')
 <div class="container-fluid">
 
-
-<x-panel id="manage-authlog-panel">
-    <x-slot name="title">
+<x-panel>
+    <x-slot:title>
         <i class="fa fa-user-circle-o fa-fw fa-lg" aria-hidden="true"></i> {{ __('Authlog') }}
-    </x-slot>
+    </x-slot:title>
 
-    <div class="table-responsive">
+    <x-slot:bare class="table-responsive">
         <table id="authlog" class="table table-hover table-condensed table-striped" style="display: none;">
             <thead>
             <tr>
@@ -32,20 +31,14 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
+    </x-slot:bare>
 </x-panel>
 @endsection
 
 @section('scripts')
 <script>
-    var authlog_grid = $("#authlog");
-    authlog_grid.bootgrid();
-    authlog_grid.css('display', 'table'); // done loading, show
+    $("#authlog").bootgrid().on("loaded.rs.jquery.bootgrid", function() {
+        $(this).css('display', 'table'); // done loading, show
+    });;
 </script>
-@endsection
-
-@section('css')
-<style>
-    #manage-authlog-panel .panel-title { font-size: 18px; }
-</style>
 @endsection

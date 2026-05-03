@@ -10,9 +10,9 @@
             {{ __('permissions.rbac.beta_warning_message') }}
         </div>
         <x-panel>
-            <x-slot name="title">
+            <x-slot:title>
                 <i class="fas fa-shield-halved fa-fw fa-lg" aria-hidden="true"></i> {{ __('permissions.rbac.title') }}
-            </x-slot>
+            </x-slot:title>
 
             <div class="tw:flex tw:justify-between tw:items-center tw:mb-4">
                 <div class="tw:text-sm tw:text-slate-500 tw:dark:text-dark-white-400">
