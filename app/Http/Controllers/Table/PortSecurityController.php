@@ -23,6 +23,7 @@
 
 namespace App\Http\Controllers\Table;
 
+use App\Models\Port;
 use App\Models\PortSecurity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -56,6 +57,8 @@ class PortSecurityController extends TableController
      */
     protected function baseQuery($request)
     {
+        $this->authorize('viewAny', Port::class);
+
         return PortSecurity::hasAccess($request->user())
             ->with(['device', 'port'])
             ->select('port_security.*');

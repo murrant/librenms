@@ -50,6 +50,8 @@ class VminfoController extends TableController
      */
     public function baseQuery($request)
     {
+        $this->authorize('viewAny', Vminfo::class);
+
         return Vminfo::hasAccess($request->user())
             ->select('vminfo.*')
             ->with('device')

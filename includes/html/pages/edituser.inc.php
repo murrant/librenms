@@ -10,14 +10,13 @@ $no_refresh = true;
 echo "<div style='margin: 10px;'>";
 
 $pagetitle[] = 'Edit user';
+$user = User::findOrFail($vars['user_id']);
 
-if (Gate::denies('update', User::class)) {
+if (Gate::denies('update', $user)) {
     include 'includes/html/error-no-perm.inc.php';
 } else {
-    if ($vars['user_id'] && empty($vars['edit'])) {
+    if (empty($vars['edit'])) {
         $action = $vars['action'] ?? '';
-        /** @var User $user */
-        $user = User::find($vars['user_id']);
         $user_data = $user->toArray(); // for compatibility with current code
 
         echo '<p><h2>' . e($user_data['realname']) . '</h2></p>';

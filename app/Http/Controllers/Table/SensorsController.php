@@ -51,6 +51,8 @@ class SensorsController extends TableController
 
     protected function baseQuery(Request $request): Builder
     {
+        $this->authorize('viewAny', Sensor::class);
+
         $class = $request->input('class');
         $status = $request->input('status');
         $relations = [];

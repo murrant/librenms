@@ -72,6 +72,8 @@ class EventlogController extends TableController
      */
     public function baseQuery($request)
     {
+        $this->authorize('viewAny', Eventlog::class);
+
         return Eventlog::hasAccess($request->user())
             ->with('device')
             ->when($request->device_group, function ($query) use ($request): void {

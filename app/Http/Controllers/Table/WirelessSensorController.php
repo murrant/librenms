@@ -47,6 +47,8 @@ class WirelessSensorController extends SensorsController
      */
     protected function baseQuery(Request $request): Builder
     {
+        $this->authorize('viewAny', WirelessSensor::class);
+
         $class = $request->input('class');
 
         return WirelessSensor::query()

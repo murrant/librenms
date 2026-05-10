@@ -26,6 +26,8 @@
 
 namespace App\Http\Controllers\Select;
 
+use App\Models\Syslog;
+
 class SyslogController extends SelectController
 {
     /**
@@ -60,8 +62,10 @@ class SyslogController extends SelectController
      */
     protected function baseQuery($request)
     {
+        $this->authorize('viewAny', Syslog::class);
+
         /** @var \Illuminate\Database\Eloquent\Builder $query */
-        $query = \App\Models\Syslog::hasAccess($request->user())
+        $query = Syslog::hasAccess($request->user())
             ->select($request->input('field'))->distinct();
 
         if ($device_id = $request->input('device')) {

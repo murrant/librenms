@@ -62,6 +62,8 @@ class DeviceFieldController extends SelectController
      */
     protected function baseQuery($request)
     {
+        $this->authorize('viewAny', Device::class);
+
         $field = $request->input('field');
         $query = Device::hasAccess($request->user())
             ->select($field)->orderBy($field)->distinct();

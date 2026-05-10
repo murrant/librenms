@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Search;
 
 use App\Http\Controllers\Controller;
+use App\Models\Port;
 
 class PortSecuritySearchController extends Controller
 {
@@ -13,6 +14,8 @@ class PortSecuritySearchController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Port::class);
+
         return view('search.portsecurity', [
             'pagetitle' => __('Port Security'),
         ]);

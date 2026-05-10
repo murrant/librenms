@@ -62,6 +62,8 @@ class SensorController extends SelectController
      */
     protected function baseQuery($request)
     {
+        $this->authorize('viewAny', Sensor::class);
+
         /** @var \Illuminate\Database\Eloquent\Builder $query */
         $query = Sensor::hasAccess($request->user())
             ->has('device')

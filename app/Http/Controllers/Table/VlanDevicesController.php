@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Table;
 
 use App\Models\Device;
+use App\Models\Vlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use LibreNMS\Util\Url;
@@ -25,6 +26,8 @@ class VlanDevicesController extends TableController
 
     protected function baseQuery(Request $request)
     {
+        $this->authorize('viewAny', Vlan::class);
+
         $this->validate($request, ['vlan' => 'integer']);
         $this->vlanId = $request->input('vlan', 1);
 

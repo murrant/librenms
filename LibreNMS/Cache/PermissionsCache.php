@@ -28,7 +28,9 @@ namespace LibreNMS\Cache;
 use App\Facades\LibrenmsConfig;
 use App\Models\Bill;
 use App\Models\Device;
+use App\Models\DeviceGroup;
 use App\Models\Port;
+use App\Models\PortGroup;
 use App\Models\User;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -42,6 +44,9 @@ class PermissionsCache
 
     /** @var array<int, Collection<int>> */
     private array $deviceGroupMap = [];
+
+    /** @var array<int, Collection<int>> */
+    private array $portGroupPermissions = [];
 
     /** @var Collection<object{user_id: int, port_id: int}>|null */
     private ?Collection $portPermissions = null;
@@ -59,6 +64,12 @@ class PermissionsCache
             ->contains('device_id', $this->getDeviceId($device));
     }
 
+    public function canAccessDeviceGroup(DeviceGroup|int $deviceGroup, User|int|null $user = null): bool
+    {
+        return $this->deviceGroupsForUser($user)
+            ->contains(is_int($deviceGroup) ? $deviceGroup : $deviceGroup->id);
+    }
+
     /**
      * Check if a access can be accessed by user (non-global read/admin)
      * If no user is given, use the logged in user
@@ -69,6 +80,16 @@ class PermissionsCache
             ->where('user_id', $this->getUserId($user))
             ->where('port_id', $this->getPortId($port))
             ->isNotEmpty();
+    }
+
+    /**
+     * Check if a port group can be accessed by user (non-global read/admin)
+     * If no user is given, use the logged in user
+     */
+    public function canAccessPortGroup(PortGroup|int $portGroup, User|int|null $user = null): bool
+    {
+        return $this->portGroupsForUser($user)
+            ->contains(is_int($portGroup) ? $portGroup : $portGroup->id);
     }
 
     /**
@@ -163,6 +184,30 @@ class PermissionsCache
     }
 
     /**
+     * Get the ids of all port groups the user can access
+     *
+     * @return Collection<int>
+     */
+    public function portGroupsForUser(User|int|null $user = null): Collection
+    {
+        $user_id = $this->getUserId($user);
+
+        // if we don't have a map for this user yet, populate it.
+        if (! isset($this->portGroupPermissions[$user_id])) {
+            $this->portGroupPermissions[$user_id] = DB::table('port_group_port')
+                ->join('ports', 'ports.port_id', '=', 'port_group_port.port_id')
+                ->where(function ($query) use ($user): void {
+                    $query->whereIntegerInRaw('port_group_port.port_id', $this->portsForUser($user))
+                        ->orWhereIntegerInRaw('ports.device_id', $this->devicesForUser($user));
+                })
+                ->distinct('port_group_id')
+                ->pluck('port_group_id');
+        }
+
+        return $this->portGroupPermissions[$user_id];
+    }
+
+    /**
      * Get the cached data for device permissions.  Use helpers instead.
      *
      * @return Collection<object{user_id: int, device_id: int}>
@@ -217,6 +262,7 @@ class PermissionsCache
     {
         $this->devicePermissions = [];
         $this->deviceGroupMap = [];
+        $this->portGroupPermissions = [];
         $this->portPermissions = null;
         $this->billPermissions = null;
     }

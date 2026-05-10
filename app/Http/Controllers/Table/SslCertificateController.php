@@ -32,7 +32,10 @@ class SslCertificateController extends TableController
 
     public function baseQuery(Request $request)
     {
-        return SslCertificate::hasAccess($request->user())->with('device:device_id,hostname');
+        $this->authorize('viewAny', SslCertificate::class);
+
+        return SslCertificate::hasAccess($request->user())
+            ->with('device:device_id,hostname');
     }
 
     /**

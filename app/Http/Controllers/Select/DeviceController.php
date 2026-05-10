@@ -49,6 +49,8 @@ class DeviceController extends SelectController
 
     protected function baseQuery($request)
     {
+        $this->authorize('viewAny', Device::class);
+
         $this->id = $request->input('id', 'device_id');
         $user_id = $request->input('user');
 

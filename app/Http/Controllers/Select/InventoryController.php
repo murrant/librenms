@@ -50,6 +50,8 @@ class InventoryController extends SelectController
 
     protected function baseQuery($request)
     {
+        $this->authorize('viewAny', EntPhysical::class);
+
         $column = $this->fieldToColumn($request->input('field'));
 
         return EntPhysical::hasAccess($request->user())

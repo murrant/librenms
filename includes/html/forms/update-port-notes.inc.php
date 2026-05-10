@@ -11,9 +11,7 @@
  * the source code distribution for details.
  */
 
-use App\Models\Port;
-
-Gate::authorize('update', Port::class);
+Gate::authorize('port.update');
 
 header('Content-type: application/json');
 

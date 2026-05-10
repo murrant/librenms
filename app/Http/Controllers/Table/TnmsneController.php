@@ -26,6 +26,7 @@
 
 namespace App\Http\Controllers\Table;
 
+use App\Models\Device;
 use App\Models\TnmsneInfo;
 use Illuminate\Http\Request;
 
@@ -72,7 +73,9 @@ class TnmsneController extends TableController
      */
     protected function baseQuery(Request $request)
     {
-        return TnmsneInfo::query();
+        $this->authorize('viewAny', Device::class);
+
+        return TnmsneInfo::hasAccess($request->user());
     }
 
     /**

@@ -43,6 +43,8 @@ class BillController extends SelectController
      */
     protected function baseQuery($request)
     {
+        $this->authorize('viewAny', Bill::class);
+
         return Bill::hasAccess($request->user())
             ->select('bill_id', 'bill_name');
     }

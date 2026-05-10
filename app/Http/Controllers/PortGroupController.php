@@ -14,10 +14,13 @@ class PortGroupController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
+        $this->authorize('viewAny', PortGroup::class);
+
         return view('port-group.index', [
-            'port_groups' => PortGroup::orderBy('name')->withCount('ports')->get(),
+            'port_groups' => PortGroup::hasAccess($request->user())
+                ->orderBy('name')->withCount('ports')->get(),
         ]);
     }
 
@@ -28,6 +31,8 @@ class PortGroupController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', PortGroup::class);
+
         return view('port-group.create', [
             'port_group' => new PortGroup(),
         ]);
@@ -41,6 +46,8 @@ class PortGroupController extends Controller
      */
     public function store(Request $request, ToastInterface $toast)
     {
+        $this->authorize('create', PortGroup::class);
+
         $this->validate($request, [
             'name' => 'required|string|unique:port_groups',
         ]);
@@ -61,6 +68,8 @@ class PortGroupController extends Controller
      */
     public function edit(PortGroup $portGroup)
     {
+        $this->authorize('update', $portGroup);
+
         return view('port-group.edit', [
             'port_group' => $portGroup,
         ]);
@@ -75,6 +84,8 @@ class PortGroupController extends Controller
      */
     public function update(Request $request, PortGroup $portGroup, ToastInterface $toast)
     {
+        $this->authorize('update', $portGroup);
+
         $this->validate($request, [
             'name' => [
                 'required',
@@ -108,6 +119,8 @@ class PortGroupController extends Controller
      */
     public function destroy(PortGroup $portGroup)
     {
+        $this->authorize('delete', $portGroup);
+
         $portGroup->delete();
 
         $msg = __('Port Group :name deleted', ['name' => htmlentities($portGroup->name)]);

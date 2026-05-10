@@ -40,6 +40,8 @@ class AlertTransportController extends SelectController
 
     public function baseQuery(Request $request): Builder
     {
+        $this->authorize('viewAny', AlertTransport::class);
+
         return AlertTransport::query()
             ->select(['transport_id', 'transport_type', 'transport_name'])
             ->orderBy('transport_type')

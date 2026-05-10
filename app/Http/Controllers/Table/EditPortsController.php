@@ -26,6 +26,7 @@
 
 namespace App\Http\Controllers\Table;
 
+use App\Models\Port;
 use LibreNMS\Enum\IfOperStatus;
 
 class EditPortsController extends TableController
@@ -51,12 +52,15 @@ class EditPortsController extends TableController
 
     protected function baseQuery($request)
     {
-        return \App\Models\Port::where('device_id', $request->input('device_id'))
+        $this->authorize('viewAny', Port::class);
+
+        return Port::hasAccess($request->user())
+            ->where('device_id', $request->input('device_id'))
             ->with('groups');
     }
 
     /**
-     * @param  \App\Models\Port  $port
+     * @param  Port  $port
      * @return array
      */
     public function formatItem($port)

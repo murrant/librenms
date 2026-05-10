@@ -75,6 +75,8 @@ class PortFieldController extends SelectController
      */
     protected function baseQuery($request)
     {
+        $this->authorize('viewAny', Port::class);
+
         return Port::hasAccess($request->user())
             ->select($request->input('field'))->distinct();
     }

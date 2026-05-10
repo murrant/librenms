@@ -62,6 +62,8 @@ class PortController extends SelectController
      */
     protected function baseQuery($request)
     {
+        $this->authorize('viewAny', Port::class);
+
         /** @var \Illuminate\Database\Eloquent\Builder $query */
         $query = Port::hasAccess($request->user())
             ->isNotDeleted()

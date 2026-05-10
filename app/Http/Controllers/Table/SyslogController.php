@@ -72,6 +72,8 @@ class SyslogController extends TableController
      */
     public function baseQuery($request)
     {
+        $this->authorize('viewAny', Syslog::class);
+
         return Syslog::hasAccess($request->user())
             ->with('device')
             ->when($request->device_group, function ($query, $group): void {
