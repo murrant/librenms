@@ -98,6 +98,8 @@ class DeviceController extends TableController
      */
     protected function baseQuery(Request $request): Builder
     {
+        $this->authorize('viewAny', Device::class);
+
         /** @var Builder $query */
         $query = Device::hasAccess($request->user())
             ->with(['location', 'groups'])
@@ -273,7 +275,7 @@ class DeviceController extends TableController
             ],
         ];
 
-        if (Gate::allows('update', Device::class)) {
+        if (Gate::allows('device.update')) {
             $actions[0][] = [
                 'title' => 'Edit device',
                 'href' => Url::deviceUrl($device, ['tab' => 'edit']),
