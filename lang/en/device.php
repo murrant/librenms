@@ -28,6 +28,8 @@ return [
     'please_select' => 'Please select',
     'warning_monitored' => 'Warning, this will remove the device from being monitored!',
     'warning_data' => 'It will also remove historical data about this device such as:',
+    'show_filter' => 'Show Filter',
+    'show_header' => 'Show Header',
 
     'edit' => [
         'delete_device' => 'Delete Device',
