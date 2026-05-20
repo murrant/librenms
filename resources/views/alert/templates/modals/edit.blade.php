@@ -1,0 +1,210 @@
+<div class="modal fade bs-example-modal-lg" id="alert-template" tabindex="-1" role="dialog" aria-labelledby="Create">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" id="Create">Alert Template :: <a target="_blank" href="https://docs.librenms.org/Alerting/Templates/"><i class="fa fa-book fa-1x"></i> Docs</a></h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <input type="hidden" name="default_template" id="default_template" value="">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="name">Template name </label>
+                            <input type="text" class="form-control input-sm" id="name" name="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="template">Template </label>
+                            <textarea class="form-control" id="template" name="template" style="font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;" rows="15"></textarea>
+                        </div>
+                        <div class="form-group" id="rules-list-input">
+                            <label for="rules_list">Attach template to rules </label>
+                            <select id="rules_list" name="rules_list[]" class="form-control" multiple="multiple"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="title">Alert title </label>
+                            <input type="text" class="form-control input-sm" id="title" name="title" placeholder="Alert Title">
+                        </div>
+                        <div class="form-group">
+                            <label for="title_rec">Recovery title </label>
+                            <input type="text" class="form-control input-sm" id="title_rec" name="title_rec" placeholder="Recovery Title">
+                        </div>
+                        <button type="button" class="btn btn-primary btn-sm" name="create-template" id="create-template">Create template</button>
+                        <!--//FIXME remove Deprecated template-->
+                        <button type="button" class="btn btn-default btn-sm" name="convert-template" id="convert-template" title="Convert template to new syntax" style="display: none">Convert template</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+    <script type="text/javascript">
+        $('#alert-template').on('show.bs.modal', function (event) {
+            var template_id = $('#template_id').val();
+            var is_default = $('#default_template').val() == '1';
+
+            if (template_id != null && template_id != '') {
+                if (is_default) {
+                    $('#create-template').after('<span class="pull-right"><button class="btn btn-primary btn-sm" id="reset-default">Reset to Default</button></span>');
+                    $('#name').prop("disabled", true);
+                    $('#rules-list-input').hide();
+                }
+                $('#create-template').text('Update template');
+
+                $.ajax({
+                    type: "GET",
+                    url: "<?php echo route('alert-templates.show', ':template') ?>".replace(':template', template_id),
+                    dataType: "json",
+                    success: function (output) {
+                        $('#template').val(output['template']);
+                        $('#name').val(output['name']);
+                        $('#title').val(output['title']);
+                        $('#title_rec').val(output['title_rec']);
+
+                        $.each(output.rules, function (id, name) {
+                            $('#rules_list').append(
+                                $('<option>', {value: id, text: name}).prop('selected', true)
+                            );
+                        });
+                        $('#rules_list').trigger('change');
+
+                        // FIXME remove Deprecated template
+                        if (output['template'].indexOf("{/if}") >= 0) {
+                            toastr.info('The old template syntax is no longer supported. Please see https://docs.librenms.org/Alerting/Old_Templates/');
+                            $('#convert-template').show();
+                        }
+                    }
+                });
+            }
+
+            $('#rules_list').select2({
+                theme: "bootstrap",
+                dropdownAutoWidth: true,
+                width: "auto",
+                allowClear: true,
+                placeholder: "Nothing selected",
+                ajax: {
+                    url: "<?php echo route('ajax.select.alert-rule') ?>",
+                    dataType: "json",
+                }
+            });
+        });
+
+        $('#alert-template').on('hide.bs.modal', function(event) {
+            $('#template_id').val('');
+            $('#template').val('');
+            $('#line').val('');
+            $('#value').val('');
+            $('#name').val('');
+            $('#rules_list').find('option').remove().end().select2('destroy');
+            $('#rules-list-input').show();
+            $('#create-template').text('Create template');
+            $('#default_template').val('0');
+            $('#reset-default').remove();
+            $('#name').prop("disabled",false);
+            $('#error').val('');
+            //FIXME remove Deprecated template
+            $('#convert-template').hide();
+        });
+
+        $('#create-template').on("click", function(e) {
+            e.preventDefault();
+
+            var rules_items = $('#rules_list').select2('data');
+            var template = $("#template").val();
+            var template_id = $("#template_id").val();
+            var name = $("#name").val();
+            var title = $("#title").val();
+            var title_rec = $("#title_rec").val();
+
+            alertTemplateAjaxOps(template, name, template_id, title, title_rec, rules_items);
+        });
+
+        //FIXME remove Deprecated template
+        $('#convert-template').on("click", function(e) {
+            e.preventDefault();
+            var template = $("#template").val();
+            var title    = $("#title").val();
+            $.ajax({
+                type: "POST",
+                url: "ajax_form.php",
+                data: {type: "convert-template", template: template, title: title},
+                dataType: "json",
+                success: function(output) {
+                    if(output.status === 'ok') {
+                        toastr.success(output.message);
+                        $("#convert-template").hide();
+                        $("#template").val(output.template);
+                        $("#title").val(output.title);
+                    } else {
+                        toastr.error(output.message);
+                    }
+                },
+                error: function(){
+                    toastr.error('An error occurred updating this alert template.');
+                }
+            });
+        });
+
+        function alertTemplateAjaxOps(template, name, template_id, title, title_rec, rules) {
+            var rule_ajax = [];
+            var row_rules = [];
+            for (var i=0; i < rules.length; i++) {
+                rule_ajax.push(rules[i].id);
+                row_rules.push({id: rules[i].id, name: rules[i].text});
+            }
+
+            console.log(template_id);
+            var type = template_id ? 'PUT' : 'POST';
+            var url = template_id ?
+                "<?php echo route('alert-templates.update', ':template') ?>".replace(':template', template_id) :
+                "<?php echo route('alert-templates.store') ?>";
+
+            $.ajax({
+                type: type,
+                url: url,
+                data: {template: template, name: name, template_id: template_id, title: title, title_rec: title_rec, rules: rule_ajax},
+                dataType: "json",
+                success: function(output) {
+                    if(output.status == 'ok') {
+                        toastr.success(output.message);
+                        $("#alert-template").modal('hide');
+                        if(template_id != null && template_id != '') {
+                            $('#templatetable tbody tr').each(function (i, row) {
+                                if ($(row).children().eq(0).text() == template_id) {
+                                    $(row).children().eq(1).text(name);
+                                    return false;
+                                }
+                            });
+                        } else {
+
+                            var escaped_name = new Option(name).innerHTML;
+                            var newrow = [{id: output.newid, templatename: escaped_name, alert_rules: JSON.stringify(row_rules)}];
+                            $('#templatetable').bootgrid("append", newrow);
+                        }
+                    } else {
+                        toastr.error(output.message);
+                    }
+                },
+                error: function(xhr){
+                    if (xhr.status === 422) {
+                        var response = xhr.responseJSON;
+                        if (response.errors) {
+                            $.each(response.errors, function(key, value) {
+                                toastr.error(value[0]);
+                            });
+                        } else if (response.message) {
+                            toastr.error(response.message);
+                        } else {
+                            toastr.error('The given data was invalid.');
+                        }
+                    } else {
+                        toastr.error('An error occurred updating this alert template.');
+                    }
+                }
+            });
+        }
+    </script>
+@endpush

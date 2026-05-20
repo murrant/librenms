@@ -223,7 +223,7 @@ Route::middleware(['auth'])->group(function (): void {
     });
 
     Route::get('alert-operations', [AlertOperationController::class, 'index'])->name('alert-operations.index');
-    Route::resource('alert-templates', AlertTemplateController::class)->only(['show', 'store', 'update', 'destroy']);
+    Route::resource('alert-templates', AlertTemplateController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
 
     // admin pages
     Route::middleware('can:admin')->group(function (): void {

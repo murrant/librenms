@@ -3,12 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AlertTemplateRequest;
+use App\Models\AlertRule;
 use App\Models\AlertTemplate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class AlertTemplateController extends Controller
 {
+    public function index(): View
+    {
+        $templates = AlertTemplate::with('alert_rules')
+            ->select(['id', 'name', 'template'])
+            ->get();
+
+        $defaultTemplate = $templates->firstWhere('name', 'Default Alert Template');
+        if ($defaultTemplate) {
+            $unassociatedRules = AlertRule::whereDoesntHave('templateMaps')
+                ->orderBy('name')
+                ->get();
+
+            $defaultTemplate->setRelation('alert_rules', $unassociatedRules);
+        }
+
+        return view('alert.templates.index', [
+            'templates' => $templates,
+            'default_template_id' => (int) $defaultTemplate?->id,
+        ]);
+    }
+
     public function show(AlertTemplate $alertTemplate): JsonResponse
     {
         $this->authorize('view', $alertTemplate);
