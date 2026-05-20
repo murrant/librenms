@@ -18,10 +18,14 @@ class AlertTemplateController extends Controller
         return response()->json($output);
     }
 
-    public function destroy(AlertTemplate $alertTemplate)
+    public function destroy(AlertTemplate $alertTemplate): JsonResponse
     {
         $this->authorize('delete', $alertTemplate);
 
         $alertTemplate->delete();
+
+        return response()->json([
+            'message' => 'Alert template deleted.',
+        ]);
     }
 }

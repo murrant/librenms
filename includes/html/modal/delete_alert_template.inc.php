@@ -42,21 +42,20 @@ $('#alert-template-removal').on("click", function(event) {
     event.preventDefault();
     var template_id = $("#template_id").val();
     $.ajax({
-        type: 'POST',
-        url: 'ajax_form.php',
-        data: { type: "delete-alert-template", template_id: template_id },
-        dataType: "html",
-        success: function(msg) {
-            if(msg.indexOf("ERROR:") <= -1) {
-                $('[data-row-id="'+template_id+'"]').remove();
-            }
-            $("#template_id").val('');
-            toastr.success(msg);
-            $("#confirm-delete-alert-template").modal('hide');
+        type: 'DELETE',
+        url: '<?php echo route('alert-templates.destroy', ':template') ?>'.replace(':template', template_id),
+        success: function (response) {
+            $('[data-row-id="' + templateId + '"]').remove();
+
+            toastr.success(response.message);
+
+            $('#confirm-delete-alert-template').modal('hide');
+            $('#template_id').val('');
         },
-        error: function() {
-            toastr.error("The alert template could not be deleted.");
-            $("#confirm-delete-alert-template").modal('hide');
+        error: function () {
+            toastr.error('The alert template could not be deleted.');
+
+            $('#confirm-delete-alert-template').modal('hide');
         }
     });
 });

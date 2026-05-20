@@ -32,7 +32,6 @@ $ajax_form = match ($_POST['type'] ?? '') {
     'convert-template' => 'includes/html/forms/convert-template.inc.php',
     'create-service' => 'includes/html/forms/create-service.inc.php',
     'customoid' => 'includes/html/forms/customoid.inc.php',
-    'delete-alert-template' => 'includes/html/forms/delete-alert-template.inc.php',
     'delete-alert-transport' => 'includes/html/forms/delete-alert-transport.inc.php',
     'delete-cluster-poller' => 'includes/html/forms/delete-cluster-poller.inc.php',
     'delete-customoid' => 'includes/html/forms/delete-customoid.inc.php',
