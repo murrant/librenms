@@ -1,4 +1,5 @@
 <?php
+
 /**
  * AlertRuleController.php
  *
@@ -58,7 +59,7 @@ class AlertRuleController extends SelectController
     public function formatItem(Model $model): array
     {
         return [
-            'id'   => $model->id,
+            'id' => $model->id,
             'text' => $model->name,
         ];
     }

@@ -88,13 +88,12 @@ class AlertTemplateRequest extends FormRequest
             $test_data['alert'] = new AlertData(AlertData::testData($test_device));
 
             foreach ($fields as $fieldName => $templateString) {
-                if (empty($templateString) || !is_string($templateString)) {
+                if (empty($templateString) || ! is_string($templateString)) {
                     continue;
                 }
 
                 try {
                     Blade::render($templateString, $test_data, true); // unsafe
-
                 } catch (\Throwable $e) {
                     $v->errors()->add($fieldName, "The $fieldName field has invalid template syntax: " . $e->getMessage());
                 }
