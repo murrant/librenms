@@ -13,15 +13,16 @@
 
 ?>
 
-<div class="modal fade bs-example-modal-lg" id="alert-template" tabindex="-1" role="dialog" aria-labelledby="Create" aria-hidden="true">
+<div class="modal fade bs-example-modal-lg" id="alert-template" tabindex="-1" role="dialog" aria-labelledby="Create">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title" id="Create">Alert Template :: <a target="_blank" href="https://docs.librenms.org/Alerting/Templates/"><i class="fa fa-book fa-1x"></i> Docs</a></h4>
             </div>
             <div class="modal-body">
                 <div class="row">
+                <input type="hidden" name="default_template" id="default_template" value="">
                     <div class="col-md-12">
                         <div class="form-group">
                             <label for="name">Template name </label>
@@ -56,10 +57,10 @@
 <script type="text/javascript">
 $('#alert-template').on('show.bs.modal', function (event) {
     var template_id = $('#template_id').val();
-    var default_template = $('#default_template').val();
+    var is_default = $('#default_template').val() == '1';
 
     if (template_id != null && template_id != '') {
-        if (default_template == "1") {
+        if (is_default) {
             $('#create-template').after('<span class="pull-right"><button class="btn btn-primary btn-sm" id="reset-default">Reset to Default</button></span>');
             $('#name').prop("disabled", true);
             $('#rules-list-input').hide();
@@ -76,7 +77,6 @@ $('#alert-template').on('show.bs.modal', function (event) {
                 $('#title').val(output['title']);
                 $('#title_rec').val(output['title_rec']);
 
-                // Pre-populate select2 with already selected rules
                 $.each(output.rules, function (id, name) {
                     $('#rules_list').append(
                         $('<option>', {value: id, text: name}).prop('selected', true)
@@ -115,7 +115,7 @@ $('#alert-template').on('hide.bs.modal', function(event) {
     $('#rules_list').find('option').remove().end().select2('destroy');
     $('#rules-list-input').show();
     $('#create-template').text('Create template');
-    $('#default-template').val('0');
+    $('#default_template').val('0');
     $('#reset-default').remove();
     $('#name').prop("disabled",false);
     $('#error').val('');
