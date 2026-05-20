@@ -25,7 +25,6 @@ Debug::set(isset($_REQUEST['debug']));
 
 $ajax_form = match ($_POST['type'] ?? '') {
     'alert-notes' => 'includes/html/forms/alert-notes.inc.php',
-    'alert-templates' => 'includes/html/forms/alert-templates.inc.php',
     'alert-transports' => 'includes/html/forms/alert-transports.inc.php',
     'application-update' => 'includes/html/forms/application-update.inc.php',
     'component' => 'includes/html/forms/component.inc.php',

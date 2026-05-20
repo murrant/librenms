@@ -26,12 +26,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class AlertTemplate extends BaseModel
 {
     public $timestamps = false;
+
+    protected $fillable = ['name', 'template', 'title', 'title_rec'];
 
     // ---- Define Relationships ----
     /**
@@ -43,12 +45,11 @@ class AlertTemplate extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough<\App\Models\AlertRule, \App\Models\AlertTemplateMap, $this>
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\AlertRule, $this>
      */
-    public function alert_rules(): HasManyThrough
+    public function alert_rules(): BelongsToMany
     {
-        return $this->hasManyThrough(AlertRule::class, AlertTemplateMap::class, 'alert_templates_id', 'id', 'id', 'alert_rule_id')
-                    ->select(['id' => 'alert_rules.id', 'name' => 'alert_rules.name'])
-                    ->orderBy('alert_rules.name');
+        return $this->belongsToMany(AlertRule::class, 'alert_template_map', 'alert_templates_id', 'alert_rule_id')
+            ->orderBy('alert_rules.name');
     }
 }

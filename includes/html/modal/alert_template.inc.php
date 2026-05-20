@@ -170,10 +170,16 @@ function alertTemplateAjaxOps(template, name, template_id, title, title_rec, rul
         row_rules.push({id: rules[i].id, name: rules[i].text});
     }
 
+    console.log(template_id);
+    var type = template_id ? 'PUT' : 'POST';
+    var url = template_id ?
+        "<?php echo route('alert-templates.update', ':template') ?>".replace(':template', template_id) :
+        "<?php echo route('alert-templates.store') ?>";
+
     $.ajax({
-        type: "POST",
-        url: "ajax_form.php",
-        data: { type: "alert-templates", template: template, name: name, template_id: template_id, title: title, title_rec: title_rec, rules: rule_ajax.join(',')},
+        type: type,
+        url: url,
+        data: {template: template, name: name, template_id: template_id, title: title, title_rec: title_rec, rules: rule_ajax},
         dataType: "json",
         success: function(output) {
             if(output.status == 'ok') {
@@ -196,8 +202,21 @@ function alertTemplateAjaxOps(template, name, template_id, title, title_rec, rul
                 toastr.error(output.message);
             }
         },
-        error: function(){
-            toastr.error('An error occurred updating this alert template.');
+        error: function(xhr){
+            if (xhr.status === 422) {
+                var response = xhr.responseJSON;
+                if (response.errors) {
+                    $.each(response.errors, function(key, value) {
+                        toastr.error(value[0]);
+                    });
+                } else if (response.message) {
+                    toastr.error(response.message);
+                } else {
+                    toastr.error('The given data was invalid.');
+                }
+            } else {
+                toastr.error('An error occurred updating this alert template.');
+            }
         }
     });
 }

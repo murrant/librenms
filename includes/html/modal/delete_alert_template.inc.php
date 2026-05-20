@@ -45,7 +45,7 @@ $('#alert-template-removal').on("click", function(event) {
         type: 'DELETE',
         url: '<?php echo route('alert-templates.destroy', ':template') ?>'.replace(':template', template_id),
         success: function (response) {
-            $('[data-row-id="' + templateId + '"]').remove();
+            $('[data-row-id="' + template_id + '"]').remove();
 
             toastr.success(response.message);
 
