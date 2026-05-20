@@ -31,7 +31,7 @@
                             <label for="template">Template </label>
                             <textarea class="form-control" id="template" name="template" style="font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;" rows="15"></textarea>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" id="rules-list-input">
                             <label for="rules_list">Attach template to rules </label>
                             <select id="rules_list" name="rules_list[]" class="form-control" multiple="multiple"></select>
                         </div>
@@ -55,63 +55,53 @@
 
 <script type="text/javascript">
 $('#alert-template').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget);
     var template_id = $('#template_id').val();
     var default_template = $('#default_template').val();
 
-    if(template_id != null && template_id != '') {
-        if(default_template == "1") {
+    if (template_id != null && template_id != '') {
+        if (default_template == "1") {
             $('#create-template').after('<span class="pull-right"><button class="btn btn-primary btn-sm" id="reset-default">Reset to Default</button></span>');
-            $('#name').prop("disabled",true);
+            $('#name').prop("disabled", true);
+            $('#rules-list-input').hide();
         }
         $('#create-template').text('Update template');
-    }
-    $.ajax({
-        type: "GET",
-        url: "<?php echo route('alert-templates.show', ':template') ?>".replace(':template', template_id),
-        dataType: "json",
-        success: function(output) {
-            $('#template').val(output['template']);
-            $('#name').val(output['name']);
-            $('#title').val(output['title']);
-            $('#title_rec').val(output['title_rec']);
-            var selected_rules = [];
-            $.each(output.rules, function(i, rule) {
-                var ruleElem = $('<option>', {
-                    value: rule.id,
-                    text : rule.name
-                }).attr('data-usedby', '');
-                if (rule.selected) {
-                    selected_rules.push(parseInt(rule.id));
-                } else if (rule.used !== '') {
-                    ruleElem.attr('data-usedby', rule.used).prop("disabled", true);
+
+        $.ajax({
+            type: "GET",
+            url: "<?php echo route('alert-templates.show', ':template') ?>".replace(':template', template_id),
+            dataType: "json",
+            success: function (output) {
+                $('#template').val(output['template']);
+                $('#name').val(output['name']);
+                $('#title').val(output['title']);
+                $('#title_rec').val(output['title_rec']);
+
+                // Pre-populate select2 with already selected rules
+                $.each(output.rules, function (id, name) {
+                    $('#rules_list').append(
+                        $('<option>', {value: id, text: name}).prop('selected', true)
+                    );
+                });
+                $('#rules_list').trigger('change');
+
+                // FIXME remove Deprecated template
+                if (output['template'].indexOf("{/if}") >= 0) {
+                    toastr.info('The old template syntax is no longer supported. Please see https://docs.librenms.org/Alerting/Old_Templates/');
+                    $('#convert-template').show();
                 }
-                $('#rules_list').append(ruleElem);
-            });
-            $('#rules_list').select2({
-                theme: "bootstrap",
-                dropdownAutoWidth : true,
-                width: "auto",
-                allowClear: true,
-                placeholder: "Nothing selected",
-                templateResult: function(data) {
-                    if (data.id && data.element.dataset.usedby !== '') {
-                        return $(
-                            '<span>' + data.text + ' <span class="label label-default">Used in template "' + data.element.dataset.usedby + '"</span></span>'
-                        );
-                    } else if (data.id && data.selected) {
-                        return $(
-                            '<span><i class="fa fa-check"></i> ' + data.text + '</span>'
-                        );
-                    }
-                    return data.text;
-                }
-            }).val(selected_rules).trigger("change");
-            //FIXME remove Deprecated template
-            if(output['template'].indexOf("{/if}")>=0){
-                toastr.info('The old template syntax is no longer supported. Please see https://docs.librenms.org/Alerting/Old_Templates/');
-                $('#convert-template').show();
             }
+        });
+    }
+
+    $('#rules_list').select2({
+        theme: "bootstrap",
+        dropdownAutoWidth: true,
+        width: "auto",
+        allowClear: true,
+        placeholder: "Nothing selected",
+        ajax: {
+            url: "<?php echo route('ajax.select.alert-rule') ?>",
+            dataType: "json",
         }
     });
 });
@@ -123,6 +113,7 @@ $('#alert-template').on('hide.bs.modal', function(event) {
     $('#value').val('');
     $('#name').val('');
     $('#rules_list').find('option').remove().end().select2('destroy');
+    $('#rules-list-input').show();
     $('#create-template').text('Create template');
     $('#default-template').val('0');
     $('#reset-default').remove();

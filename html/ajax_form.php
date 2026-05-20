@@ -44,7 +44,6 @@ $ajax_form = match ($_POST['type'] ?? '') {
     'mempool-update' => 'includes/html/forms/mempool-update.inc.php',
     'notifications' => 'includes/html/forms/notifications.inc.php',
     'override-config' => 'includes/html/forms/override-config.inc.php',
-    'parse-alert-template' => 'includes/html/forms/parse-alert-template.inc.php',
     'parse-customoid' => 'includes/html/forms/parse-customoid.inc.php',
     'parse-poller-groups' => 'includes/html/forms/parse-poller-groups.inc.php',
     'parse-service' => 'includes/html/forms/parse-service.inc.php',

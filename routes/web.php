@@ -305,6 +305,7 @@ Route::middleware(['auth'])->group(function (): void {
             Route::get('alert-transport-group', Select\AlertTransportGroupController::class)->name('ajax.select.alert-transport-group');
             Route::get('alert-transports-groups', Select\AlertTransportsAndGroupsController::class)->name('ajax.select.alert-transports-groups');
             Route::get('alert-operation', Select\AlertOperationController::class)->name('ajax.select.alert-operation');
+            Route::get('alert-rule', Select\AlertRuleController::class)->name('ajax.select.alert-rule');
             Route::get('application', Select\ApplicationController::class)->name('ajax.select.application');
             Route::get('bill', Select\BillController::class)->name('ajax.select.bill');
             Route::get('custom-map', Select\CustomMapController::class)->name('ajax.select.custom-map');
