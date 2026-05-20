@@ -67,9 +67,8 @@ $('#alert-template').on('show.bs.modal', function (event) {
         $('#create-template').text('Update template');
     }
     $.ajax({
-        type: "POST",
-        url: "ajax_form.php",
-        data: { type: "parse-alert-template", template_id: template_id },
+        type: "GET",
+        url: "<?php echo route('alert-templates.show', ':template') ?>".replace(':template', template_id),
         dataType: "json",
         success: function(output) {
             $('#template').val(output['template']);

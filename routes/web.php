@@ -6,6 +6,7 @@ use App\Http\Controllers\AlertController;
 use App\Http\Controllers\AlertOperationController;
 use App\Http\Controllers\AlertRuleController;
 use App\Http\Controllers\AlertRuleTemplateController;
+use App\Http\Controllers\AlertTemplateController;
 use App\Http\Controllers\AlertTransportController;
 use App\Http\Controllers\ApiAccessController;
 use App\Http\Controllers\Auth;
@@ -222,6 +223,8 @@ Route::middleware(['auth'])->group(function (): void {
     });
 
     Route::get('alert-operations', [AlertOperationController::class, 'index'])->name('alert-operations.index');
+    Route::resource('alert-templates', AlertTemplateController::class)->only(['show', 'store', 'update', 'destroy']);
+
     // admin pages
     Route::middleware('can:admin')->group(function (): void {
         Route::get('settings/{tab?}/{section?}', [SettingsController::class, 'index'])->name('settings');
