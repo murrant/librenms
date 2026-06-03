@@ -12,7 +12,7 @@ class CredentialsDataTable extends DataTable
     /**
      * Build DataTable class.
      *
-     * @param mixed $query Results from query() method.
+     * @param  mixed  $query  Results from query() method.
      * @return \Yajra\DataTables\DataTableAbstract
      */
     public function dataTable($query)
@@ -25,7 +25,7 @@ class CredentialsDataTable extends DataTable
     /**
      * Get query source of dataTable.
      *
-     * @param \App\Models\Credential $model
+     * @param  \App\Models\Credential  $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function query(Credential $model)
@@ -48,8 +48,8 @@ class CredentialsDataTable extends DataTable
                         'bAutoWidth' => false,
                         'language' => [
                             'search' => '',
-                            'searchPlaceholder' => __('Search')
-                        ]
+                            'searchPlaceholder' => __('Search'),
+                        ],
                     ])
                     ->dom('Bfrtip')
                     ->orderBy(1)
