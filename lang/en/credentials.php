@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'title' => 'Credential Manager'
+    'title' => 'Credential Manager',
 ];
