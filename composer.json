@@ -43,10 +43,10 @@
         "librenms/laravel-vue-i18n-generator": "dev-master",
         "librenms/plugin-interfaces": "^1.0",
         "mews/purifier": "^3.4",
+        "mikepultz/netdns2": "^1.5",
         "nesbot/carbon": "^3.8",
         "nunomaduro/laravel-console-summary": "^1.13",
         "pear/console_color2": "^0.1",
-        "mikepultz/netdns2": "^1.5",
         "php-amqplib/php-amqplib": "^3.1",
         "phpmailer/phpmailer": "^7.0",
         "predis/predis": "^3.0",
@@ -55,9 +55,7 @@
         "spatie/laravel-permission": "^6.16",
         "symfony/yaml": "^7.2",
         "tightenco/ziggy": "^2.0",
-        "yajra/laravel-datatables-buttons": "^4.13",
-        "yajra/laravel-datatables-html": "^4.0",
-        "yajra/laravel-datatables-oracle": "~9.0"
+        "yajra/laravel-datatables-buttons": "^12.3"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.5",
