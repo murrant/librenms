@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
+use App\Data\DeviceSecretRepository;
 use App\Facades\LibrenmsConfig;
 use App\Models\Traits\Filterable;
-use App\Data\DeviceCredentialRepository;
-use App\Data\DeviceSecretRepository;
 use App\View\SimpleTemplate;
 use Carbon\Carbon;
 use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
