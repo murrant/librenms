@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Secret;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use LibreNMS\Enum\SecretType;
 
 class SecretFactory extends Factory
 {
@@ -22,9 +23,9 @@ class SecretFactory extends Factory
     public function definition(): array
     {
         return [
-            'secret_type' => $this->faker->randomElement(['snmp', 'ipmi', 'api', 'ssh', $this->faker->randomAscii()]),
+            'secret_type' => $this->faker->randomElement(SecretType::cases()),
             'description' => $this->faker->text(),
-            'secrets' => ['username' => 'username', 'password' => 'password'],
+            'data' => ['username' => 'username', 'password' => 'password'],
         ];
     }
 }

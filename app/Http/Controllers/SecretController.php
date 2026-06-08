@@ -40,7 +40,7 @@ class SecretController extends Controller
         Gate::authorize('viewAny', Secret::class);
 
         return view('secrets.index', [
-            'secrets' => Secret::orderBy('description')->get(),
+            'secrets' => Secret::withCount('devices')->orderBy('description')->get(),
         ]);
     }
 

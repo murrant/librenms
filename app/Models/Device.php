@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Facades\LibrenmsConfig;
-use App\Models\Traits\Filterable;
 use App\Data\DeviceCredentialRepository;
 use App\Data\DeviceSecretRepository;
+use App\Facades\LibrenmsConfig;
+use App\Models\Traits\Filterable;
 use App\View\SimpleTemplate;
 use Carbon\Carbon;
 use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;
@@ -110,6 +110,7 @@ class Device extends BaseModel
         'poller_group',
         'groups.id',
         'serviceTemplates.id',
+        'secrets.id',
         'search',
         'state',
     ];
@@ -596,6 +597,13 @@ class Device extends BaseModel
             $value,
             $config,
         );
+    }
+
+    public function filterSecretsId(Builder $query, mixed $value, array $config): void
+    {
+        $query->whereHas('secrets', function (Builder $q) use ($value, $config) {
+            $this->applyQueryLogic($q, 'secrets.id', $value, $config);
+        });
     }
 
     public function scopeIsUp($query)
