@@ -51,10 +51,10 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "OK u:0.01 s:0.02 r:0.03\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
         $output = $rrdProcess->run('info test.rrd');
 
-        $this->assertEquals("some output", $output);
+        $this->assertEquals('some output', $output);
     }
 
     public function testThrowsNotFoundExceptionWhenFileIsMissing(): void
@@ -63,7 +63,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "ERROR: No such file test.rrd\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdNotFoundException::class);
         $this->expectExceptionMessage('No such file test.rrd');
@@ -77,7 +77,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "ERROR: illegal attempt to update using time 123456789\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdUpdateTooFrequentException::class);
         $this->expectExceptionMessage('illegal attempt to update using time 123456789');
@@ -91,7 +91,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "ERROR: Unable to connect to rrdcached\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdCachedConnectionException::class);
         $this->expectExceptionMessage('Unable to connect to rrdcached');
@@ -105,7 +105,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "ERROR: Unable to connect to rrdcached: No such file or directory.\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdCachedConnectionException::class);
         $this->expectExceptionMessage('Unable to connect to rrdcached: No such file or directory.');
@@ -119,7 +119,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "ERROR: something went wrong\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdException::class);
         $this->expectExceptionMessage('something went wrong');
@@ -133,7 +133,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "ERROR: test.rrd: expected 2 data source readings (got 1) from N\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdDsMismatchException::class);
         $this->expectExceptionMessage('expected 2 data source readings (got 1) from N');
@@ -147,7 +147,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "ERROR: unknown DS name 'nonexistent'\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdDsMismatchException::class);
         $this->expectExceptionMessage("unknown DS name 'nonexistent'");
@@ -161,7 +161,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "ERROR: test.rrd: found extra data on update argument: 2:3\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdDsMismatchException::class);
         $this->expectExceptionMessage('found extra data on update argument: 2:3');
@@ -178,7 +178,7 @@ class RrdProcessTest extends TestCase
             );
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdDsMismatchException::class);
         $this->expectExceptionMessage(
@@ -194,7 +194,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "ERROR: opening 'test.rrd': Permission denied\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdPermissionException::class);
         $this->expectExceptionMessage("opening 'test.rrd': Permission denied");
@@ -208,7 +208,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "ERROR: reached EOF while loading header rrd->stat_head\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdCorruptionException::class);
         $this->expectExceptionMessage('reached EOF while loading header rrd->stat_head');
@@ -222,7 +222,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::ERR, "Some stderr error message\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdException::class);
         $this->expectExceptionMessage('Some stderr error message');
@@ -236,7 +236,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::ERR, "sh: line 1: exec: rrdtool: not found\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdExecutableNotFoundException::class);
         $this->expectExceptionMessage('sh: line 1: exec: rrdtool: not found');
@@ -250,7 +250,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "ERROR: something completely unexpected\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
 
         $this->expectException(RrdUnknownException::class);
         $this->expectExceptionMessage('something completely unexpected');
@@ -265,7 +265,7 @@ class RrdProcessTest extends TestCase
             return $callback(Process::OUT, "DONE\n");
         });
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
         $output = $rrdProcess->run('info test.rrd', 'DONE');
 
         $this->assertEquals("some output\nDONE", $output);
@@ -281,7 +281,7 @@ class RrdProcessTest extends TestCase
         $process->shouldReceive('isRunning')->andReturn(true);
         $process->shouldReceive('stop');
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $process);
         $rrdProcess->start(); // null -> start
         $rrdProcess->start(); // isRunning(true) -> don't start
 
@@ -292,7 +292,7 @@ class RrdProcessTest extends TestCase
     {
         $this->process->shouldReceive('stop')->once();
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
         $rrdProcess->start();
         $rrdProcess->stop();
 
@@ -308,10 +308,10 @@ class RrdProcessTest extends TestCase
         $this->process->shouldReceive('getOutput')->andReturn("OK u:0.01\n");
 
         $this->logger->shouldReceive('debug')
-            ->with("RRD[%gupdate /test.rrd N:1%n]", ['color' => true])
+            ->with('RRD[%gupdate /test.rrd N:1%n]', ['color' => true])
             ->once();
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
         $rrdProcess->run('update /opt/librenms/rrd/test.rrd N:1');
 
         $this->assertTrue(true);
@@ -321,7 +321,7 @@ class RrdProcessTest extends TestCase
     {
         $this->process->shouldReceive('stop')->once();
 
-        $rrdProcess = new RrdProcess($this->logger, 300, fn() => $this->process);
+        $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
         $rrdProcess->start();
 
         unset($rrdProcess);
