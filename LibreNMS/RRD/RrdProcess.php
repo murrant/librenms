@@ -3,6 +3,7 @@
 namespace LibreNMS\RRD;
 
 use App\Facades\LibrenmsConfig;
+use LibreNMS\Exceptions\RrdCachedConnectionException;
 use LibreNMS\Exceptions\RrdException;
 use LibreNMS\Exceptions\RrdNotFoundException;
 use LibreNMS\Exceptions\RrdUpdateTooFrequentException;
@@ -40,7 +41,7 @@ class RrdProcess
 
     public function start(): void
     {
-        if ($this->process === null) {
+        if ($this->process === null || ! $this->process->isRunning()) {
             $this->process = new Process(
                 command: [$this->rrdtool_exec, '-'],
                 cwd: $this->rrd_dir,
@@ -70,19 +71,22 @@ class RrdProcess
         $this->runAsync($command);
 
         $this->process->waitUntil(function ($type, $buffer) use ($waitFor) {
-            if ($type === Process::ERR) {
-                throw new RrdException($buffer);
-            }
-
-            if (str_contains($buffer, 'ERROR: ')) {
+            if ($type === Process::ERR || str_contains($buffer, 'ERROR: ')) {
                 preg_match('/ERROR: (.*)/', $buffer, $matches);
-                $error = $matches[1];
+                $error = trim($matches[1] ?? $buffer);
+
                 if (str_contains($error, 'No such file')) {
                     throw new RrdNotFoundException($error);
                 }
+
                 if (str_contains($error, 'illegal attempt to update using time')) {
                     throw new RrdUpdateTooFrequentException($error);
                 }
+
+                if (str_contains($error, 'Unable to connect to rrdcached')) {
+                    throw new RrdCachedConnectionException($error);
+                }
+
                 throw new RrdException($error);
             }
 
