@@ -1,12 +1,12 @@
 @extends('layouts.librenmsv1')
 
-@section('title', __('Credentials'))
+@section('title', __('Secrets'))
 
 @section('content')
     <div class="container">
         <x-panel>
             <x-slot name="title">
-                <i class="fas fa-key fa-fw fa-lg" aria-hidden="true"></i> {{ __('Credentials') }}
+                <i class="fas fa-key fa-fw fa-lg" aria-hidden="true"></i> {{ __('Secrets') }}
             </x-slot>
 
             <div class="tw:flex tw:justify-between tw:items-center tw:mb-4">
@@ -16,7 +16,7 @@
                 <div class="tw:flex tw:items-center tw:gap-2">
                     <a href="{{ route('secrets.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus tw:mr-1"></i>
-                        {{ __('Add Credential') }}
+                        {{ __('Add Secret') }}
                     </a>
                 </div>
             </div>
@@ -29,6 +29,7 @@
                                 <th>{{ __('Description') }}</th>
                                 <th>{{ __('Type') }}</th>
                                 <th>{{ __('Default') }}</th>
+                                <th class="tw:text-center">{{ __('Devices') }}</th>
                                 <th class="tw:w-32 tw:text-center">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
@@ -51,9 +52,14 @@
                                         @endif
                                     </td>
                                     <td class="tw:text-center tw:align-middle">
+                                        <a href="{{ route('devices', ['filter' => ['secrets.id' => ['eq' => $secret->id]]]) }}" class="tw:font-semibold tw:text-blue-600 tw:dark:text-blue-400 tw:hover:underline">
+                                            {{ $secret->devices_count }}
+                                        </a>
+                                    </td>
+                                    <td class="tw:text-center tw:align-middle">
                                         <div class="tw:flex tw:justify-center tw:gap-1">
                                             <a href="{{ route('secrets.edit', $secret->id) }}"
-                                               title="{{ __('Edit Credential') }}"
+                                               title="{{ __('Edit Secret') }}"
                                                class="btn btn-xs btn-warning">
                                                 <i class="fas fa-pencil"></i>
                                             </a>
@@ -63,7 +69,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                        title="{{ __('Delete Credential') }}"
+                                                        title="{{ __('Delete Secret') }}"
                                                         class="btn btn-xs btn-danger">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
