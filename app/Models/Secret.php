@@ -31,7 +31,7 @@ class Secret extends Model
      */
     public function devices(): BelongsToMany
     {
-        return $this->belongsToMany(Device::class, 'device_secrets', 'secret_id', 'device_id')
-            ->withPivot('secret_type');
+        return $this->belongsToMany(Device::class, 'device_polling_methods', 'secret_id', 'device_id')
+            ->withPivot('method_type');
     }
 }

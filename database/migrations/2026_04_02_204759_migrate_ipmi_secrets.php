@@ -27,6 +27,7 @@ return new class extends Migration
                     $devices[$row->device_id][$row->attrib_type] = $row->attrib_value;
                 }
 
+                $pollingMethods = [];
                 foreach ($devices as $deviceId => $attribs) {
                     if (empty($attribs['ipmi_hostname'])) {
                         continue;
@@ -51,10 +52,15 @@ return new class extends Migration
                             'updated_at' => now(),
                         ]);
 
-                        DB::table('device_secrets')->updateOrInsert(
-                            ['device_id' => $deviceId, 'secret_type' => 'ipmi'],
-                            ['secret_id' => $secretId]
-                        );
+                        $pollingMethods[] = [
+                            'device_id' => $deviceId,
+                            'method_type' => 'ipmi',
+                            'enabled' => true,
+                            'affects_availability' => false,
+                            'secret_id' => $secretId,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
 
                         DB::table('devices_attribs')
                             ->where('device_id', $deviceId)
@@ -64,6 +70,7 @@ return new class extends Migration
                         // ignore
                     }
                 }
+                DB::table('device_polling_methods')->insert($pollingMethods);
             });
     }
 };
