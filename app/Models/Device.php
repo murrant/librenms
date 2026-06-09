@@ -110,7 +110,6 @@ class Device extends BaseModel
         'poller_group',
         'groups.id',
         'serviceTemplates.id',
-        'secrets.id',
         'search',
         'state',
     ];
@@ -599,13 +598,6 @@ class Device extends BaseModel
         );
     }
 
-    public function filterSecretsId(Builder $query, mixed $value, array $config): void
-    {
-        $query->whereHas('secrets', function (Builder $q) use ($value, $config) {
-            $this->applyQueryLogic($q, 'secrets.id', $value, $config);
-        });
-    }
-
     public function scopeIsUp($query)
     {
         return $query->where([
@@ -866,8 +858,8 @@ class Device extends BaseModel
      */
     public function secrets(): BelongsToMany
     {
-        return $this->belongsToMany(Secret::class, 'device_secrets', 'device_id', 'secret_id')
-            ->withPivot('secret_type');
+        return $this->belongsToMany(Secret::class, 'device_polling_methods', 'device_id', 'secret_id')
+            ->withPivot('method_type');
     }
 
     public function hostResources(): HasMany
