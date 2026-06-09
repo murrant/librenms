@@ -58,7 +58,6 @@ final class RrdtoolTest extends TestCase
         $this->assertEquals(['update', '/opt/librenms/rrd/f', 'options'], $cmd);
     }
 
-
     public function testBuildCommandException(): void
     {
         LibrenmsConfig::set('rrdcached', '');
