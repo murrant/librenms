@@ -277,11 +277,19 @@ class RrdProcessTest extends TestCase
         $this->process->shouldReceive('getOutput')->andReturn("OK u:0.01\n");
 
         $this->logger->shouldReceive('debug')
-            ->with('RRD[%gupdate /test.rrd N:1%n]', ['color' => true])
+            ->with('RRD[%gupdate test.rrd N:1%n]', ['color' => true])
+            ->once();
+        $this->logger->shouldReceive('debug')
+            ->with('RRD[%gcreate test.rrd options%n]', ['color' => true])
+            ->once();
+        $this->logger->shouldReceive('debug')
+            ->with('RRD[%gtune test.rrd options%n]', ['color' => true])
             ->once();
 
         $rrdProcess = new RrdProcess($this->logger, 300, fn () => $this->process);
         $rrdProcess->run('update /opt/librenms/rrd/test.rrd N:1');
+        $rrdProcess->run('create /opt/librenms/rrd/test.rrd options');
+        $rrdProcess->run('tune /opt/librenms/rrd/test.rrd options');
 
         $this->expectNotToPerformAssertions();
     }
@@ -295,5 +303,30 @@ class RrdProcessTest extends TestCase
 
         unset($rrdProcess);
         $this->expectNotToPerformAssertions();
+    }
+
+    public function testDefaultProcessFactorySetsRrdcachedEnv(): void
+    {
+        \App\Facades\LibrenmsConfig::set('rrdcached', 'server:42217');
+        \App\Facades\LibrenmsConfig::set('rrd_dir', '/opt/librenms/rrd');
+        \App\Facades\LibrenmsConfig::set('rrdtool', 'rrdtool_bin');
+        session(['preferences.timezone' => 'UTC']);
+
+        $rrdProcess = new RrdProcess($this->logger);
+
+        $reflection = new \ReflectionClass($rrdProcess);
+        $property = $reflection->getProperty('processFactory');
+        $property->setAccessible(true);
+        /** @var callable $factory */
+        $factory = $property->getValue($rrdProcess);
+
+        /** @var Process $process */
+        $process = $factory();
+
+        $this->assertEquals("'rrdtool_bin' '-'", $process->getCommandLine());
+        $this->assertEquals('/opt/librenms/rrd/', $process->getWorkingDirectory());
+        $env = $process->getEnv();
+        $this->assertEquals('server:42217', $env['RRDCACHED_ADDRESS']);
+        $this->assertEquals('UTC', $env['TZ']);
     }
 }
