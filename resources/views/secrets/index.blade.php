@@ -52,7 +52,7 @@
                                         @endif
                                     </td>
                                     <td class="tw:text-center tw:align-middle">
-                                        <a href="{{ route('devices', ['filter' => ['secrets.id' => ['eq' => $secret->id]]]) }}" class="tw:font-semibold tw:text-blue-600 tw:dark:text-blue-400 tw:hover:underline">
+                                        <a href="{{ route('devices', ['filter' => ['secrets.secret_id' => ['eq' => $secret->id]]]) }}" class="tw:font-semibold tw:text-blue-600 tw:dark:text-blue-400 tw:hover:underline">
                                             {{ $secret->devices_count }}
                                         </a>
                                     </td>

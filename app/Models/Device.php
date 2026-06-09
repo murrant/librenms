@@ -110,6 +110,7 @@ class Device extends BaseModel
         'poller_group',
         'groups.id',
         'serviceTemplates.id',
+        'secrets.secret_id',
         'search',
         'state',
     ];
