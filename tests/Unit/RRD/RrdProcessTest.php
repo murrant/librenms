@@ -2,6 +2,8 @@
 
 namespace LibreNMS\Tests\Unit\RRD;
 
+use App\Facades\LibrenmsConfig;
+use Closure;
 use LibreNMS\Exceptions\RrdCachedConnectionException;
 use LibreNMS\Exceptions\RrdCorruptionException;
 use LibreNMS\Exceptions\RrdDsMismatchException;
@@ -270,8 +272,8 @@ class RrdProcessTest extends TestCase
 
     public function testRunAsyncReplacesDirWithRrdcached(): void
     {
-        \App\Facades\LibrenmsConfig::set('rrdcached', 'unix:/var/run/rrdcached.sock');
-        \App\Facades\LibrenmsConfig::set('rrd_dir', '/opt/librenms/rrd');
+        LibrenmsConfig::set('rrdcached', 'unix:/var/run/rrdcached.sock');
+        LibrenmsConfig::set('rrd_dir', '/opt/librenms/rrd');
 
         $this->process->shouldReceive('waitUntil')->andReturn(true);
         $this->process->shouldReceive('getOutput')->andReturn("OK u:0.01\n");
@@ -307,18 +309,19 @@ class RrdProcessTest extends TestCase
 
     public function testDefaultProcessFactorySetsRrdcachedEnv(): void
     {
-        \App\Facades\LibrenmsConfig::set('rrdcached', 'server:42217');
-        \App\Facades\LibrenmsConfig::set('rrd_dir', '/opt/librenms/rrd');
-        \App\Facades\LibrenmsConfig::set('rrdtool', 'rrdtool_bin');
+        LibrenmsConfig::set('rrdcached', 'server:42217');
+        LibrenmsConfig::set('rrd_dir', '/opt/librenms/rrd');
+        LibrenmsConfig::set('rrdtool', 'rrdtool_bin');
         session(['preferences.timezone' => 'UTC']);
 
-        $rrdProcess = new RrdProcess($this->logger);
+        $rrdProcess = new class($this->logger) extends RrdProcess {
+            public function getProcessFactory(): Closure
+            {
+                return $this->processFactory;
+            }
+        };
 
-        $reflection = new \ReflectionClass($rrdProcess);
-        $property = $reflection->getProperty('processFactory');
-        $property->setAccessible(true);
-        /** @var callable $factory */
-        $factory = $property->getValue($rrdProcess);
+        $factory = $rrdProcess->getProcessFactory();
 
         /** @var Process $process */
         $process = $factory();
