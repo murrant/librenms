@@ -199,6 +199,12 @@ class DevicesController extends Controller
                 'endpoint' => route('ajax.select.device-group'),
             ],
             [
+                'key' => 'secrets.secret_id',
+                'label' => __('Secret'),
+                'type' => 'select',
+                'endpoint' => route('ajax.select.secret'),
+            ],
+            [
                 'key' => 'poller_group',
                 'label' => __('device.edit.poller_group'),
                 'type' => 'select',

@@ -35,12 +35,12 @@ use LibreNMS\Enum\SecretType;
 
 class SecretController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         Gate::authorize('viewAny', Secret::class);
 
         return view('secrets.index', [
-            'secrets' => Secret::withCount('devices')->orderBy('description')->get(),
+            'secrets' => Secret::hasAccess($request->user())->withCount('devices')->orderBy('description')->get(),
         ]);
     }
 

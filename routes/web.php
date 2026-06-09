@@ -327,6 +327,7 @@ Route::middleware(['auth'])->group(function (): void {
             Route::get('graph-aggregate', Select\GraphAggregateController::class)->name('ajax.select.graph-aggregate');
             Route::get('graylog-streams', Select\GraylogStreamsController::class)->name('ajax.select.graylog-streams');
             Route::get('inventory', Select\InventoryController::class)->name('ajax.select.inventory');
+            Route::get('secret', Select\SecretController::class)->name('ajax.select.secret');
             Route::get('syslog', Select\SyslogController::class)->name('ajax.select.syslog');
             Route::get('location', Select\LocationController::class)->name('ajax.select.location');
             Route::get('munin', Select\MuninPluginController::class)->name('ajax.select.munin');
