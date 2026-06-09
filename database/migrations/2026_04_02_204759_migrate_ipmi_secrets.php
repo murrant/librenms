@@ -6,71 +6,92 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        $attributes = [
-            'ipmi_hostname',
-            'ipmi_username',
-            'ipmi_password',
-            'ipmi_kg_key',
-        ];
+        DB::transaction(function () {
+            $secretMap  = [];
+            $secretMeta = [];
 
-        DB::table('devices_attribs')
-            ->whereIn('attrib_type', $attributes)
-            ->orderBy('device_id')
-            ->chunk(100, function ($rows) {
-                $devices = [];
-                foreach ($rows as $row) {
-                    $devices[$row->device_id][$row->attrib_type] = $row->attrib_value;
-                }
+            DB::table('devices')
+                ->orderBy('devices.device_id')
+                ->chunk(100, function ($devices) use (&$secretMap, &$secretMeta) {
+                    $deviceIds = $devices->pluck('device_id')->all();
 
-                $pollingMethods = [];
-                foreach ($devices as $deviceId => $attribs) {
-                    if (empty($attribs['ipmi_hostname'])) {
-                        continue;
-                    }
+                    $attribsByDevice = DB::table('devices_attribs')
+                        ->whereIn('device_id', $deviceIds)
+                        ->whereIn('attrib_type', ['ipmi_hostname', 'ipmi_username', 'ipmi_password', 'ipmi_kg_key'])
+                        ->get()
+                        ->groupBy('device_id');
 
-                    $data = [
-                        'username' => $attribs['ipmi_username'] ?? '',
-                        'password' => $attribs['ipmi_password'] ?? '',
-                        'kg_key' => $attribs['ipmi_kg_key'] ?? null,
-                    ];
+                    $hostnamesByDevice = $devices->pluck('hostname', 'device_id');
 
-                    try {
-                        $hostname = DB::table('devices')->where('device_id', $deviceId)->value('hostname');
-                        $description = "IPMI for device " . $hostname;
+                    $pollingMethods = [];
 
-                        $secretId = DB::table('secrets')->insertGetId([
-                            'description' => $description,
-                            'secret_type' => 'ipmi',
-                            'default' => false,
-                            'data' => encrypt(json_encode($data)),
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
+                    foreach ($deviceIds as $deviceId) {
+                        $attribs = ($attribsByDevice[$deviceId] ?? collect())
+                            ->pluck('attrib_value', 'attrib_type');
 
-                        $pollingMethods[] = [
-                            'device_id' => $deviceId,
-                            'method_type' => 'ipmi',
-                            'enabled' => true,
-                            'affects_availability' => false,
-                            'secret_id' => $secretId,
-                            'created_at' => now(),
-                            'updated_at' => now(),
+                        if (empty($attribs['ipmi_hostname'])) {
+                            continue;
+                        }
+
+                        $data = [
+                            'username' => $attribs['ipmi_username'] ?? '',
+                            'password' => $attribs['ipmi_password'] ?? '',
+                            'kg_key'   => $attribs['ipmi_kg_key']   ?? null,
                         ];
 
-                        DB::table('devices_attribs')
-                            ->where('device_id', $deviceId)
-                            ->whereIn('attrib_type', ['ipmi_username', 'ipmi_password'])
-                            ->delete();
-                    } catch (EncryptException) {
-                        // ignore
+                        try {
+                            $hash = hash('sha256', serialize($data));
+
+                            if (! isset($secretMap[$hash])) {
+                                $secretId = DB::table('secrets')->insertGetId([
+                                    'description' => "IPMI for device {$hostnamesByDevice[$deviceId]}",
+                                    'secret_type' => 'ipmi',
+                                    'default'     => false,
+                                    'data'        => encrypt(json_encode($data)),
+                                    'created_at'  => now(),
+                                    'updated_at'  => now(),
+                                ]);
+                                $secretMap[$hash]      = $secretId;
+                                $secretMeta[$secretId] = [
+                                    'count'    => 1,
+                                    'hostname' => $hostnamesByDevice[$deviceId],
+                                ];
+                            } else {
+                                $secretId = $secretMap[$hash];
+                                $secretMeta[$secretId]['count']++;
+                            }
+
+                            $pollingMethods[] = [
+                                'device_id'            => $deviceId,
+                                'method_type'          => 'ipmi',
+                                'enabled'              => true,
+                                'affects_availability' => false,
+                                'secret_id'            => $secretId,
+                                'created_at'           => now(),
+                                'updated_at'           => now(),
+                            ];
+                        } catch (EncryptException) {
+                            // ignore
+                        }
                     }
+
+                    if (! empty($pollingMethods)) {
+                        DB::table('device_polling_methods')->insert($pollingMethods);
+                    }
+                });
+
+            $id = 0;
+            foreach ($secretMeta as $secretId => $meta) {
+                if ($meta['count'] > 1) {
+                    $id++;
+                    DB::table('secrets')->where('id', $secretId)->update([
+                        'description' => "IPMI (shared #$id)",
+                        'updated_at'  => now(),
+                    ]);
                 }
-                DB::table('device_polling_methods')->insert($pollingMethods);
-            });
+            }
+        });
     }
 };
