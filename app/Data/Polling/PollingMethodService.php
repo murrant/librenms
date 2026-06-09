@@ -14,12 +14,12 @@ class PollingMethodService
         $method = app($type->methodClass());
 
         $row = new DevicePollingMethod([
-            'device_id'            => $device->device_id,
-            'method_type'          => $type,
-            'enabled'              => true,
+            'device_id' => $device->device_id,
+            'method_type' => $type,
+            'enabled' => true,
             'affects_availability' => (bool) ($method->getDefaults()['affects_availability'] ?? false),
-            'secret_id'            => $secret?->id,
-            'settings'             => $this->buildSettings($method, $settings),
+            'secret_id' => $secret?->id,
+            'settings' => $this->buildSettings($method, $settings),
         ]);
 
         $device->pollingMethods()->save($row);

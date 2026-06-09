@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Data\DeviceCredentialRepository;
 use App\Data\DeviceSecretRepository;
 use App\Facades\LibrenmsConfig;
 use App\Models\Traits\Filterable;
