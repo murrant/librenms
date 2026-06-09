@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DeviceSecretRepository.php
  *
@@ -39,6 +40,7 @@ readonly class DeviceSecretRepository
 
     /**
      * @template T of SecretData
+     *
      * @param  class-string<T>  $secretClass
      * @return T|null
      */

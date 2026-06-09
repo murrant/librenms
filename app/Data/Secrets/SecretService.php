@@ -27,8 +27,8 @@ class SecretService
         return Secret::create([
             'description' => $meta['description'],
             'secret_type' => $type->value,
-            'default'     => $meta['default'] ?? false,
-            'data'        => $data,
+            'default' => $meta['default'] ?? false,
+            'data' => $data,
         ]);
     }
 
