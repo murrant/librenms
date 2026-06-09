@@ -314,7 +314,8 @@ class RrdProcessTest extends TestCase
         LibrenmsConfig::set('rrdtool', 'rrdtool_bin');
         session(['preferences.timezone' => 'UTC']);
 
-        $rrdProcess = new class($this->logger) extends RrdProcess {
+        $rrdProcess = new class($this->logger) extends RrdProcess
+        {
             public function getProcessFactory(): Closure
             {
                 return $this->processFactory;
