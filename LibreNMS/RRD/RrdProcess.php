@@ -5,7 +5,6 @@ namespace LibreNMS\RRD;
 use App\Facades\LibrenmsConfig;
 use Closure;
 use Illuminate\Support\Str;
-use LibreNMS\Exceptions\RrdCachedConnectionException;
 use LibreNMS\Exceptions\RrdException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Process\InputStream;
