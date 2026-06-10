@@ -15,7 +15,7 @@
                         @foreach($configuredMethods as $method)
                             <li>
                                 <button type="button" @click="activeTab = '{{ $method["type"] }}'"
-                                        :class="activeTab === '{{ $method["type"] }}' ? 'tw:bg-blue-600 tw:text-white tw:border-blue-600 tw:dark:bg-blue-800' : 'tw:text-gray-700 tw:border-gray-200 tw:hover:bg-gray-50 tw:dark:text-dark-white-200 tw:dark:border-dark-gray-400 tw:dark:hover:bg-dark-gray-400'"
+                                        :class="activeTab === '{{ $method["type"] }}' ? 'tw:bg-blue-600 tw:text-white! tw:border-blue-600 tw:dark:bg-blue-800' : 'tw:text-gray-700 tw:border-gray-200 tw:hover:bg-gray-50 tw:dark:text-dark-white-200 tw:dark:border-dark-gray-400 tw:dark:hover:bg-dark-gray-400'"
                                         class="tw:w-full tw:text-left tw:px-4 tw:py-3 tw:border tw:rounded-lg tw:flex tw:justify-between tw:items-center tw:transition-colors tw:shadow-sm">
                                     <span class="tw:font-medium">{{ $method['label'] }}</span>
                                     <div class="tw:flex tw:items-center">
@@ -32,7 +32,7 @@
                         @endforeach
                         <li class="tw:mt-4 tw:pt-2 tw:border-t tw:border-gray-200 tw:dark:border-dark-gray-400">
                             <button type="button" @click="activeTab = 'add'"
-                                    :class="activeTab === 'add' ? 'tw:bg-[#32c861] tw:text-white tw:border-[#32c861]' : 'tw:bg-[#32c861] tw:text-white tw:border-[#32c861] tw:hover:bg-[#29a34f]'"
+                                    :class="activeTab === 'add' ? 'tw:bg-[#32c861] tw:text-white! tw:border-[#32c861]' : 'tw:bg-[#32c861] tw:text-white tw:border-[#32c861] tw:hover:bg-[#29a34f]'"
                                     class="tw:w-full tw:text-left tw:px-4 tw:py-3 tw:border tw:rounded-lg tw:flex tw:justify-between tw:items-center tw:transition-colors tw:shadow-sm tw:dark:text-white!">
                                 <span class="tw:font-medium">{{ __('Add Polling Type') }}</span>
                                 <i class="fa fa-plus"></i>
@@ -62,7 +62,7 @@
                              style="display: none;"
                              x-transition>
 
-                            <h3 class="tw:text-xl tw:font-semibold tw:mb-6 tw:text-gray-800 tw:dark:text-dark-white-100 tw:border-b tw:pb-3 tw:dark:border-dark-gray-400">{{ $method['label'] }} {{ __('Settings') }}</h3>
+                            <div class="tw:text-2xl tw:font-semibold tw:mb-6 tw:text-gray-800 tw:dark:text-dark-white-100 tw:border-b tw:pb-3 tw:dark:border-dark-gray-400">{{ $method['label'] }} {{ __('Settings') }}</div>
 
                             <form method="POST" action="{{ route('device.edit.polling.update', ['device' => $device, 'methodType' => $method['type']]) }}">
                                 @csrf
@@ -74,8 +74,8 @@
                                         <div class="tw:relative tw:shrink-0">
                                             <input type="hidden" name="enabled" value="0">
                                             <input type="checkbox" name="enabled" value="1" class="tw:sr-only" x-model="enabled">
-                                            <div class="tw:block tw:w-10 tw:h-6 tw:rounded-full tw:transition-colors tw:duration-200" :class="enabled ? 'tw:bg-blue-600 tw:dark:bg-blue-500' : 'tw:bg-gray-300 tw:dark:bg-dark-gray-400'"></div>
-                                            <div class="tw:absolute tw:left-1 tw:top-1 tw:w-4 tw:h-4 tw:rounded-full tw:transition-transform tw:duration-200 tw:bg-white" :class="enabled ? 'tw:translate-x-4' : 'tw:translate-x-0'"></div>
+                                            <div class="tw:block tw:w-12 tw:h-7 tw:rounded-full tw:transition-colors tw:duration-200" :class="enabled ? 'tw:bg-blue-600' : 'tw:bg-gray-300 tw:dark:bg-dark-gray-400'"></div>
+                                            <div class="tw:absolute tw:left-0.5 tw:top-0.5 tw:w-6 tw:h-6 tw:rounded-full tw:transition-transform tw:duration-200 tw:bg-white tw:shadow-sm" :class="enabled ? 'tw:translate-x-5' : 'tw:translate-x-0'"></div>
                                         </div>
                                         <span class="tw:ml-3 tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Enabled') }}</span>
                                     </label>
@@ -84,8 +84,8 @@
                                         <div class="tw:relative tw:shrink-0">
                                             <input type="hidden" name="affects_availability" value="0">
                                             <input type="checkbox" name="affects_availability" value="1" class="tw:sr-only" x-model="affectsAvailability">
-                                            <div class="tw:block tw:w-10 tw:h-6 tw:rounded-full tw:transition-colors tw:duration-200" :class="affectsAvailability ? 'tw:bg-blue-600 tw:dark:bg-blue-500' : 'tw:bg-gray-300 tw:dark:bg-dark-gray-400'"></div>
-                                            <div class="tw:absolute tw:left-1 tw:top-1 tw:w-4 tw:h-4 tw:rounded-full tw:transition-transform tw:duration-200 tw:bg-white" :class="affectsAvailability ? 'tw:translate-x-4' : 'tw:translate-x-0'"></div>
+                                            <div class="tw:block tw:w-12 tw:h-7 tw:rounded-full tw:transition-colors tw:duration-200" :class="affectsAvailability ? 'tw:bg-blue-600' : 'tw:bg-gray-300 tw:dark:bg-dark-gray-400'"></div>
+                                            <div class="tw:absolute tw:left-0.5 tw:top-0.5 tw:w-6 tw:h-6 tw:rounded-full tw:transition-transform tw:duration-200 tw:bg-white tw:shadow-sm" :class="affectsAvailability ? 'tw:translate-x-5' : 'tw:translate-x-0'"></div>
                                         </div>
                                         <span class="tw:ml-3 tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('poller.affects_availability') }}</span>
                                     </label>
@@ -110,8 +110,8 @@
                                                                 name="settings[{{ $setting['key'] }}]"
                                                                 x-model="settingsData['{{ $setting['key'] }}']"
                                                                 class="form-control"
-                                                                @if(isset($setting['min'])) min="{{ $setting['min'] }}" @endif
-                                                                @if(isset($setting['max'])) max="{{ $setting['max'] }}" @endif
+                                                                @isset($setting['min']) min="{{ $setting['min'] }}" @endisset
+                                                                @isset($setting['max']) max="{{ $setting['max'] }}" @endisset
                                                             >
                                                         @else
                                                             <input type="text" name="settings[{{ $setting['key'] }}]" x-model="settingsData['{{ $setting['key'] }}']" class="form-control">
@@ -294,7 +294,9 @@
             </div>
         @endif
     </x-device.page>
+@endsection
 
+@push('scripts')
     <script>
         function pollingTabs(requestedTab, configuredTabs, fallbackTab) {
             var allTabs = configuredTabs.concat(['add']);
@@ -331,4 +333,4 @@
             }
         }
     </script>
-@endsection
+@endpush
