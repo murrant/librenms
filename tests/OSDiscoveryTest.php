@@ -183,16 +183,36 @@ final class OSDiscoveryTest extends TestCase
      */
     private function genDevice($community): Device
     {
-        return new Device([
+        $device = new Device([
             'hostname' => $this->getSnmpsimIp(),
-            'snmpver' => 'v2c',
+            'os' => 'generic',
+        ]);
+        
+        $device->setRelation('pollingMethods', collect([
+            new \App\Models\DevicePollingMethod([
+                'method_type' => \LibreNMS\Enum\PollingMethodType::Snmp,
+                'enabled' => true,
+                'affects_availability' => true,
+            ])
+        ]));
+        
+        $secret = new \App\Models\Secret([
+            'secret_type' => \LibreNMS\Enum\SecretType::Snmp,
+            'data' => [
+                'version' => 'v2c',
+                'community' => $community,
+            ],
+        ]);
+        $device->pollingMethods->first()->setRelation('secret', $secret);
+
+        $device->pollingMethods->first()->settings = [
             'port' => $this->getSnmpsimPort(),
             'timeout' => 3,
             'retries' => 0,
             'snmp_max_repeaters' => 10,
-            'community' => $community,
-            'os' => 'generic',
-        ]);
+        ];
+
+        return $device;
     }
 
     /**

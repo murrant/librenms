@@ -239,6 +239,10 @@ class SnmpQueryMock implements SnmpQueryInterface
         $data = file_get_contents(base_path("/tests/snmpsim/$file.snmprec"));
         $line = strtok($data, "\r\n");
         while ($line !== false) {
+            if (empty(trim($line)) || str_starts_with(trim($line), '#')) {
+                $line = strtok("\r\n");
+                continue;
+            }
             [$oid, $type, $data] = explode('|', $line, 3);
             if ($type == '4') {
                 $data = trim($data);
@@ -351,7 +355,13 @@ class SnmpQueryMock implements SnmpQueryInterface
 
     private function community(): string
     {
-        $community = $this->device->community;
+        $snmpMethod = $this->device->getPollingMethods()->snmp();
+        $community = $snmpMethod ? ($snmpMethod->community ?? '') : '';
+
+        // Fallback for older mocks that might manually set attributes
+        if (empty($community)) {
+            $community = $this->device->getAttribute('community') ?? '';
+        }
 
         if (! empty($this->context)) {
             $community .= '_' . $this->context;
