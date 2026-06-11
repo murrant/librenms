@@ -98,7 +98,7 @@ class AddDeviceController
 
             // SNMP port/transport live in settings on the form; promote them onto
             // the device row where the legacy schema expects them.
-            if ($type === PollingMethodType::SNMP) {
+            if ($type === PollingMethodType::Snmp) {
                 $device->port      = (int) ($settings['port'] ?? LibrenmsConfig::get('snmp.port', 161));
                 $device->transport = $settings['transport'] ?? LibrenmsConfig::get('snmp.transports.0', 'udp');
                 unset($settings['port'], $settings['transport']);
