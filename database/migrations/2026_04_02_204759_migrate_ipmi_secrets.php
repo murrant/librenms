@@ -4,12 +4,11 @@ use Illuminate\Contracts\Encryption\EncryptException;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-            $secretMap  = [];
+            $secretMap = [];
             $secretMeta = [];
 
             DB::table('devices')
@@ -38,7 +37,7 @@ return new class extends Migration
                         $data = [
                             'username' => $attribs['ipmi_username'] ?? '',
                             'password' => $attribs['ipmi_password'] ?? '',
-                            'kg_key'   => $attribs['ipmi_kg_key']   ?? null,
+                            'kg_key'   => $attribs['ipmi_kg_key'] ?? null,
                         ];
 
                         try {
@@ -53,7 +52,7 @@ return new class extends Migration
                                     'created_at'  => now(),
                                     'updated_at'  => now(),
                                 ]);
-                                $secretMap[$hash]      = $secretId;
+                                $secretMap[$hash] = $secretId;
                                 $secretMeta[$secretId] = [
                                     'count'    => 1,
                                     'hostname' => $hostnamesByDevice[$deviceId],
