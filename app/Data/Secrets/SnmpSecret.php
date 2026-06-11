@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SnmpSecretData.php
  *
@@ -40,52 +41,6 @@ class SnmpSecret extends SecretData
     ) {
     }
 
-    /**
-     * Create an array of arguments to send to net-snmp commands
-     *
-     * @param  string|null  $context
-     * @return string[]
-     */
-    public function toNetSnmpOptions(?string $context = null): array
-    {
-        $options = ['-' . $this->version];
-
-        if ($this->version === 'v3') {
-            if ($this->authname !== null) {
-                array_push($options, '-u', $this->authname);
-            }
-
-            array_push($options, '-l', $this->authlevel);
-
-            if (in_array($this->authlevel, ['authNoPriv', 'authPriv'])) {
-                array_push($options, '-a', $this->authalgo);
-
-                if ($this->authpass !== null) {
-                    array_push($options, '-A', $this->authpass);
-                }
-            }
-
-            if ($this->authlevel === 'authPriv') {
-                array_push($options, '-x', $this->cryptoalgo);
-
-                if ($this->cryptopass !== null) {
-                    array_push($options, '-X', $this->cryptopass);
-                }
-            }
-
-            $resolvedContext = $context ?? $this->context;
-            if ($resolvedContext !== null) {
-                array_push($options, '-n', $resolvedContext);
-            }
-        } else {
-            if ($this->community !== null) {
-                array_push($options, '-c', $this->community);
-            }
-        }
-
-        return $options;
-    }
-
     public static function fromArray(array $data): static
     {
         return new static(
@@ -119,7 +74,6 @@ class SnmpSecret extends SecretData
             cryptoalgo: $device['cryptoalgo'] ?? 'AES',
             context: $device['context'] ?? null,
         );
-
     }
 
     public static function rules(): array

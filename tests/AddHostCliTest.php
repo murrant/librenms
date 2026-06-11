@@ -51,6 +51,17 @@ final class AddHostCliTest extends DBTestCase
         $this->assertEquals(0, $device->snmp_disable, 'snmp is disabled');
         $this->assertEquals('community', $device->community, 'Wrong snmp community');
         $this->assertEquals('v1', $device->snmpver, 'Wrong snmp version');
+
+        $snmpMethod = $device->getPollingMethod('snmp');
+        $this->assertNotNull($snmpMethod);
+        $secret = $snmpMethod->secret;
+        $this->assertNotNull($secret);
+        $this->assertEquals('community', $secret->data['community']);
+        $this->assertEquals('v1', $secret->data['version']);
+
+        $icmpMethod = $device->getPollingMethod('icmp');
+        $this->assertNotNull($icmpMethod);
+        $this->assertTrue($icmpMethod->enabled);
     }
 
     #[TestDox('CLI SNMP v2')]
@@ -66,6 +77,13 @@ final class AddHostCliTest extends DBTestCase
         $this->assertEquals(0, $device->snmp_disable, 'snmp is disabled');
         $this->assertEquals('community', $device->community, 'Wrong snmp community');
         $this->assertEquals('v2c', $device->snmpver, 'Wrong snmp version');
+
+        $snmpMethod = $device->getPollingMethod('snmp');
+        $this->assertNotNull($snmpMethod);
+        $secret = $snmpMethod->secret;
+        $this->assertNotNull($secret);
+        $this->assertEquals('community', $secret->data['community']);
+        $this->assertEquals('v2c', $secret->data['version']);
     }
 
     #[TestDox('CLI SNMP v3 user and password')]
@@ -84,6 +102,15 @@ final class AddHostCliTest extends DBTestCase
         $this->assertEquals('AuthPW', $device->authpass, 'Wrong snmp v3 authentication password');
         $this->assertEquals('PrivPW', $device->cryptopass, 'Wrong snmp v3 crypto password');
         $this->assertEquals('v3', $device->snmpver, 'Wrong snmp version');
+
+        $snmpMethod = $device->getPollingMethod('snmp');
+        $this->assertNotNull($snmpMethod);
+        $secret = $snmpMethod->secret;
+        $this->assertNotNull($secret);
+        $this->assertEquals('v3', $secret->data['version']);
+        $this->assertEquals('SecName', $secret->data['authname']);
+        $this->assertEquals('AuthPW', $secret->data['authpass']);
+        $this->assertEquals('PrivPW', $secret->data['cryptopass']);
     }
 
     public function testPortAssociationMode(): void
@@ -166,6 +193,9 @@ final class AddHostCliTest extends DBTestCase
         $this->assertEquals('hardware', $device->hardware, 'Wrong hardware name');
         $this->assertEquals('nameOfOS', $device->os, 'Wrong os name');
         $this->assertEquals('system', $device->sysName, 'Wrong system name');
+
+        $this->assertNull($device->getPollingMethod('snmp'));
+        $this->assertNotNull($device->getPollingMethod('icmp'));
     }
 
     public function testExistingDevice(): void

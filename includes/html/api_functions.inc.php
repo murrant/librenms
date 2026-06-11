@@ -22,6 +22,7 @@ use App\Models\BgpPeer;
 use App\Models\Device;
 use App\Models\DeviceGroup;
 use App\Models\DeviceOutage;
+use App\Models\DevicePollingMethod;
 use App\Models\Eventlog;
 use App\Models\Ipv4Address;
 use App\Models\Ipv4Mac;
@@ -43,6 +44,7 @@ use App\Models\PortGroup;
 use App\Models\PortSecurity;
 use App\Models\PortsFdb;
 use App\Models\PortsNac;
+use App\Models\Secret;
 use App\Models\Sensor;
 use App\Models\ServiceTemplate;
 use App\Models\UserPref;
@@ -61,6 +63,8 @@ use LibreNMS\Alert\AlertData;
 use LibreNMS\Alerting\QueryBuilderParser;
 use LibreNMS\Billing;
 use LibreNMS\Enum\MaintenanceBehavior;
+use LibreNMS\Enum\PollingMethodType;
+use LibreNMS\Enum\SecretType;
 use LibreNMS\Enum\Severity;
 use LibreNMS\Exceptions\InvalidIpException;
 use LibreNMS\Exceptions\InvalidTableColumnException;
@@ -151,7 +155,7 @@ function api_get_graph(Request $request, array $additional = [])
         }
 
         return response($graph->data, 200, ['Content-Type' => $graph->contentType()]);
-    } catch (\LibreNMS\Exceptions\RrdGraphException $e) {
+    } catch (LibreNMS\Exceptions\RrdGraphException $e) {
         return api_error(500, $e->getMessage());
     }
 }
@@ -203,7 +207,7 @@ function get_graph_by_port_hostname(Request $request, $ifname = null, $type = 'p
     return check_port_permission($vars['id'], $device_id, fn () => api_get_graph($request, $vars));
 }
 
-function get_port_stats_by_port_hostname(Illuminate\Http\Request $request)
+function get_port_stats_by_port_hostname(Request $request)
 {
     $ifName = $request->route('ifname');
 
@@ -300,7 +304,7 @@ function list_locations()
     return api_success($locations, 'locations');
 }
 
-function get_device(Illuminate\Http\Request $request)
+function get_device(Request $request)
 {
     $device = DeviceCache::get($request->route('hostname'));
 
@@ -322,7 +326,7 @@ function get_device(Illuminate\Http\Request $request)
     });
 }
 
-function list_devices(Illuminate\Http\Request $request)
+function list_devices(Request $request)
 {
     // This will return a list of devices
 
@@ -416,7 +420,7 @@ function list_devices(Illuminate\Http\Request $request)
     return api_success($devices, 'devices');
 }
 
-function add_device(Illuminate\Http\Request $request)
+function add_device(Request $request)
 {
     // This will add a device using the data passed encoded with json
     $data = $request->json()->all();
@@ -428,7 +432,7 @@ function add_device(Illuminate\Http\Request $request)
         return api_error(400, 'Missing the device hostname');
     }
 
-    if (! \LibreNMS\Util\Validate::hostname($data['hostname']) && ! IP::isValid($data['hostname'])) {
+    if (! LibreNMS\Util\Validate::hostname($data['hostname']) && ! IP::isValid($data['hostname'])) {
         return api_error(400, 'Invalid hostname or IP: ' . $data['hostname']);
     }
 
@@ -442,25 +446,21 @@ function add_device(Illuminate\Http\Request $request)
             'port',
             'transport',
             'poller_group',
-            'snmpver',
             'port_association_mode',
-            'community',
-            'authlevel',
-            'authname',
-            'authpass',
-            'authalgo',
-            'cryptopass',
-            'cryptoalgo',
         ]));
 
         if (! empty($data['location'])) {
-            $device->location_id = \App\Models\Location::firstOrCreate(['location' => $data['location']])->id;
+            $device->location_id = Location::firstOrCreate(['location' => $data['location']])->id;
         }
 
-        // uses different name in legacy call
-        if (! empty($data['version'])) {
-            $device->snmpver = $data['version'];
-        }
+        $pollingMethods = collect();
+
+        // ICMP polling method is always added
+        $pollingMethods->push(new DevicePollingMethod([
+            'method_type' => PollingMethodType::Icmp,
+            'enabled' => true,
+            'affects_availability' => false,
+        ]));
 
         $force_add = ! empty($data['force_add']);
 
@@ -469,7 +469,52 @@ function add_device(Illuminate\Http\Request $request)
             $device->sysName = $data['sysName'] ?? '';
             $device->hardware = $data['hardware'] ?? '';
             $device->snmp_disable = 1;
-        } elseif ($force_add && ! $device->hasSnmpInfo()) {
+        } else {
+            $device->snmp_disable = 0;
+            // SNMP polling method is added if not snmp_disable
+            $snmpPollingMethod = new DevicePollingMethod([
+                'method_type' => PollingMethodType::Snmp,
+                'enabled' => true,
+                'affects_availability' => true,
+            ]);
+
+            // Build SnmpSecret if custom credentials were provided
+            $snmpver = $data['snmpver'] ?? $data['version'] ?? null;
+            $community = $data['community'] ?? null;
+            $authlevel = $data['authlevel'] ?? null;
+            $authname = $data['authname'] ?? null;
+            $authpass = $data['authpass'] ?? null;
+            $authalgo = $data['authalgo'] ?? null;
+            $cryptopass = $data['cryptopass'] ?? null;
+            $cryptoalgo = $data['cryptoalgo'] ?? null;
+
+            if ($snmpver || $community || $authlevel || $authname || $authpass || $authalgo || $cryptopass || $cryptoalgo) {
+                $snmpData = [
+                    'version' => $snmpver ?: 'v2c',
+                    'community' => $community,
+                    'authlevel' => $authlevel ?: 'noAuthNoPriv',
+                    'authname' => $authname,
+                    'authpass' => $authpass,
+                    'authalgo' => $authalgo ?: 'SHA',
+                    'cryptopass' => $cryptopass,
+                    'cryptoalgo' => $cryptoalgo ?: 'AES',
+                ];
+
+                $secret = new Secret([
+                    'secret_type' => SecretType::Snmp,
+                    'description' => 'SNMP ' . $device->hostname,
+                    'default' => false,
+                    'data' => $snmpData,
+                ]);
+                $snmpPollingMethod->setRelation('secret', $secret);
+            }
+
+            $pollingMethods->push($snmpPollingMethod);
+        }
+
+        $device->setRelation('pollingMethods', $pollingMethods);
+
+        if ($force_add && empty($data['snmp_disable']) && ! $device->hasSnmpInfo()) {
             return api_error(400, 'SNMP information is required when force adding a device');
         }
 
@@ -483,7 +528,7 @@ function add_device(Illuminate\Http\Request $request)
     return api_success([$device->attributesToArray()], 'devices', $message);
 }
 
-function del_device(Illuminate\Http\Request $request)
+function del_device(Request $request)
 {
     // This will add a device using the data passed encoded with json
     $hostname = $request->route('hostname');
@@ -514,7 +559,7 @@ function del_device(Illuminate\Http\Request $request)
     return api_success([$device], 'devices', $response);
 }
 
-function maintenance_device(Illuminate\Http\Request $request)
+function maintenance_device(Request $request)
 {
     $data = $request->json()->all();
 
@@ -540,21 +585,21 @@ function maintenance_device(Illuminate\Http\Request $request)
     $behavior = MaintenanceBehavior::tryFrom((int) ($data['behavior'] ?? -1))
         ?? LibrenmsConfig::get('alert.scheduled_maintenance_default_behavior');
 
-    $alert_schedule = new \App\Models\AlertSchedule([
+    $alert_schedule = new App\Models\AlertSchedule([
         'title' => $title,
         'notes' => $notes,
         'behavior' => $behavior,
         'recurring' => 0,
     ]);
 
-    $start = $data['start'] ?? \Carbon\Carbon::now()->format('Y-m-d H:i:00');
+    $start = $data['start'] ?? Carbon\Carbon::now()->format('Y-m-d H:i:00');
     $alert_schedule->start = $start;
 
     $duration = $data['duration'];
 
     if (Str::contains($duration, ':')) {
         [$duration_hour, $duration_min] = explode(':', (string) $duration);
-        $alert_schedule->end = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $start)
+        $alert_schedule->end = Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $start)
             ->addHours((float) $duration_hour)->addMinutes((float) $duration_min)
             ->format('Y-m-d H:i:00');
     }
@@ -574,7 +619,7 @@ function maintenance_device(Illuminate\Http\Request $request)
     }
 }
 
-function device_under_maintenance(Illuminate\Http\Request $request)
+function device_under_maintenance(Request $request)
 {
     // return whether or not a device is in an active maintenance window
 
@@ -597,7 +642,7 @@ function device_under_maintenance(Illuminate\Http\Request $request)
     return check_device_permission($device_id, fn () => api_success($model->isUnderMaintenance(), 'is_under_maintenance'));
 }
 
-function device_availability(Illuminate\Http\Request $request)
+function device_availability(Request $request)
 {
     // return availability per device
 
@@ -618,7 +663,7 @@ function device_availability(Illuminate\Http\Request $request)
     });
 }
 
-function device_outages(Illuminate\Http\Request $request)
+function device_outages(Request $request)
 {
     // return outages per device
 
@@ -639,7 +684,7 @@ function device_outages(Illuminate\Http\Request $request)
     });
 }
 
-function get_vlans(Illuminate\Http\Request $request)
+function get_vlans(Request $request)
 {
     $hostname = $request->route('hostname');
 
@@ -665,12 +710,12 @@ function get_vlans(Illuminate\Http\Request $request)
     });
 }
 
-function show_endpoints(Illuminate\Http\Request $request, Router $router)
+function show_endpoints(Request $request, Router $router)
 {
     $output = [];
     $base = str_replace('api/v0', '', $request->url());
     foreach ($router->getRoutes() as $route) {
-        /** @var \Illuminate\Routing\Route $route */
+        /** @var Illuminate\Routing\Route $route */
         if (Str::startsWith($route->getPrefix(), 'api/v0') && $route->getName()) {
             $output[$route->getName()] = $base . $route->uri();
         }
@@ -681,7 +726,7 @@ function show_endpoints(Illuminate\Http\Request $request, Router $router)
     return response()->json($output, 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 }
 
-function list_bgp(Illuminate\Http\Request $request)
+function list_bgp(Request $request)
 {
     $sql = '';
     $sql_params = [];
@@ -752,7 +797,7 @@ function list_bgp(Illuminate\Http\Request $request)
     return api_success($bgp_sessions, 'bgp_sessions');
 }
 
-function get_bgp(Illuminate\Http\Request $request)
+function get_bgp(Request $request)
 {
     $bgpPeerId = $request->route('id');
     if (! is_numeric($bgpPeerId)) {
@@ -771,7 +816,7 @@ function get_bgp(Illuminate\Http\Request $request)
     return api_success($bgp_session, 'bgp_session');
 }
 
-function edit_bgp_descr(Illuminate\Http\Request $request)
+function edit_bgp_descr(Request $request)
 {
     $bgp_descr = $request->json('bgp_descr');
     if (! $bgp_descr) {
@@ -800,7 +845,7 @@ function edit_bgp_descr(Illuminate\Http\Request $request)
     return api_error(500, 'Failed to update existing bgp');
 }
 
-function list_cbgp(Illuminate\Http\Request $request)
+function list_cbgp(Request $request)
 {
     $sql = '';
     $sql_params = [];
@@ -828,7 +873,7 @@ function list_cbgp(Illuminate\Http\Request $request)
     return api_success($bgp_counters, 'bgp_counters');
 }
 
-function list_ospf(Illuminate\Http\Request $request)
+function list_ospf(Request $request)
 {
     $sql = '';
     $sql_params = [];
@@ -848,7 +893,7 @@ function list_ospf(Illuminate\Http\Request $request)
     return api_success($ospf_neighbours, 'ospf_neighbours');
 }
 
-function list_ospf_ports(Illuminate\Http\Request $request)
+function list_ospf_ports(Request $request)
 {
     $ospf_ports = OspfPort::hasAccess(Auth::user())
               ->get();
@@ -859,10 +904,10 @@ function list_ospf_ports(Illuminate\Http\Request $request)
     return api_success($ospf_ports, 'ospf_ports', null, 200, $ospf_ports->count());
 }
 
-function list_ospfv3(Illuminate\Http\Request $request)
+function list_ospfv3(Request $request)
 {
     $hostname = $request->input('hostname');
-    $device_id = \App\Facades\DeviceCache::get($hostname)->device_id;
+    $device_id = DeviceCache::get($hostname)->device_id;
 
     $ospf_neighbours = Ospfv3Nbr::hasAccess(Auth::user())
         ->when($device_id, fn ($q) => $q->where('device_id', $device_id))
@@ -876,10 +921,10 @@ function list_ospfv3(Illuminate\Http\Request $request)
     return api_success($ospf_neighbours, 'ospfv3_neighbours', count: $ospf_neighbours->count());
 }
 
-function list_ospfv3_ports(Illuminate\Http\Request $request)
+function list_ospfv3_ports(Request $request)
 {
     $hostname = $request->input('hostname');
-    $device_id = \App\Facades\DeviceCache::get($hostname)->device_id;
+    $device_id = DeviceCache::get($hostname)->device_id;
 
     $ospf_ports = Ospfv3Port::hasAccess(Auth::user())
         ->when($device_id, fn ($q) => $q->where('device_id', $device_id))
@@ -909,7 +954,7 @@ function get_graph_by_portgroup(Request $request)
     ]);
 }
 
-function get_components(Illuminate\Http\Request $request)
+function get_components(Request $request)
 {
     $hostname = $request->route('hostname');
 
@@ -937,7 +982,7 @@ function get_components(Illuminate\Http\Request $request)
     });
 }
 
-function add_components(Illuminate\Http\Request $request)
+function add_components(Request $request)
 {
     $hostname = $request->route('hostname');
     $ctype = $request->route('type');
@@ -950,7 +995,7 @@ function add_components(Illuminate\Http\Request $request)
     return api_success($component, 'components');
 }
 
-function edit_components(Illuminate\Http\Request $request)
+function edit_components(Request $request)
 {
     $hostname = $request->route('hostname');
     $data = json_decode($request->getContent(), true);
@@ -966,7 +1011,7 @@ function edit_components(Illuminate\Http\Request $request)
     return api_success_noresult(200);
 }
 
-function delete_components(Illuminate\Http\Request $request)
+function delete_components(Request $request)
 {
     $cid = $request->route('component');
 
@@ -978,7 +1023,7 @@ function delete_components(Illuminate\Http\Request $request)
     }
 }
 
-function get_graphs(Illuminate\Http\Request $request)
+function get_graphs(Request $request)
 {
     $hostname = $request->route('hostname');
 
@@ -1007,7 +1052,7 @@ function get_graphs(Illuminate\Http\Request $request)
     });
 }
 
-function trigger_device_discovery(Illuminate\Http\Request $request)
+function trigger_device_discovery(Request $request)
 {
     // return details of a single device
     $hostname = $request->route('hostname');
@@ -1028,7 +1073,7 @@ function trigger_device_discovery(Illuminate\Http\Request $request)
     });
 }
 
-function list_available_health_graphs(Illuminate\Http\Request $request)
+function list_available_health_graphs(Request $request)
 {
     $hostname = $request->route('hostname');
     $device_id = ctype_digit($hostname) ? $hostname : getidbyname($hostname);
@@ -1089,7 +1134,7 @@ function list_available_health_graphs(Illuminate\Http\Request $request)
     });
 }
 
-function list_available_wireless_graphs(Illuminate\Http\Request $request)
+function list_available_wireless_graphs(Request $request)
 {
     $hostname = $request->route('hostname');
     $device_id = ctype_digit($hostname) ? $hostname : getidbyname($hostname);
@@ -1127,9 +1172,9 @@ function list_available_wireless_graphs(Illuminate\Http\Request $request)
 }
 
 /**
- * @throws \LibreNMS\Exceptions\ApiException
+ * @throws LibreNMS\Exceptions\ApiException
  */
-function get_device_ports(Illuminate\Http\Request $request): JsonResponse
+function get_device_ports(Request $request): JsonResponse
 {
     $device = DeviceCache::get($request->route('hostname'));
     $columns = validate_column_list($request->input('columns'), 'ports', ['ifName']);
@@ -1160,12 +1205,12 @@ function get_device_ports(Illuminate\Http\Request $request): JsonResponse
     return api_success($ports, 'ports');
 }
 
-function get_device_wireless_sensors(Illuminate\Http\Request $request): JsonResponse
+function get_device_wireless_sensors(Request $request): JsonResponse
 {
     $device = DeviceCache::get($request->route('hostname'));
     $class = $request->input('class');
 
-    if ($class && ! in_array($class, \LibreNMS\Enum\WirelessSensorType::values(), true)) {
+    if ($class && ! in_array($class, LibreNMS\Enum\WirelessSensorType::values(), true)) {
         return api_error(400, "Invalid wireless sensor class '$class'");
     }
 
@@ -1218,7 +1263,7 @@ function get_device_wireless_sensors(Illuminate\Http\Request $request): JsonResp
     return api_success($wireless_sensors, 'wireless_sensors', count: $wireless_sensors->count());
 }
 
-function get_device_ip_addresses(Illuminate\Http\Request $request)
+function get_device_ip_addresses(Request $request)
 {
     $hostname = $request->route('hostname');
     // use hostname as device_id if it's all digits
@@ -1236,7 +1281,7 @@ function get_device_ip_addresses(Illuminate\Http\Request $request)
     });
 }
 
-function get_port_ip_addresses(Illuminate\Http\Request $request)
+function get_port_ip_addresses(Request $request)
 {
     $port_id = $request->route('portid');
 
@@ -1252,7 +1297,7 @@ function get_port_ip_addresses(Illuminate\Http\Request $request)
     });
 }
 
-function get_port_fdb(Illuminate\Http\Request $request)
+function get_port_fdb(Request $request)
 {
     $port_id = $request->route('portid');
 
@@ -1267,7 +1312,7 @@ function get_port_fdb(Illuminate\Http\Request $request)
     });
 }
 
-function get_network_ip_addresses(Illuminate\Http\Request $request)
+function get_network_ip_addresses(Request $request)
 {
     $network_id = $request->route('id');
     $ipv4 = dbFetchRows('SELECT * FROM `ipv4_addresses` WHERE `ipv4_network_id` = ?', [$network_id]);
@@ -1280,7 +1325,7 @@ function get_network_ip_addresses(Illuminate\Http\Request $request)
     return api_success(array_merge($ipv4, $ipv6), 'addresses');
 }
 
-function get_port_transceiver(Illuminate\Http\Request $request)
+function get_port_transceiver(Request $request)
 {
     $port_id = $request->route('portid');
 
@@ -1291,7 +1336,7 @@ function get_port_transceiver(Illuminate\Http\Request $request)
     });
 }
 
-function get_port_info(Illuminate\Http\Request $request)
+function get_port_info(Request $request)
 {
     $port_id = $request->route('portid');
 
@@ -1306,7 +1351,7 @@ function get_port_info(Illuminate\Http\Request $request)
     });
 }
 
-function update_port_description(Illuminate\Http\Request $request)
+function update_port_description(Request $request)
 {
     $port_id = $request->route('portid');
     $port = Port::hasAccess(Auth::user())
@@ -1348,7 +1393,7 @@ function update_port_description(Illuminate\Http\Request $request)
     }
 }
 
-function get_port_description(Illuminate\Http\Request $request)
+function get_port_description(Request $request)
 {
     $port_id = $request->route('portid');
     $port = Port::hasAccess(Auth::user())
@@ -1363,9 +1408,9 @@ function get_port_description(Illuminate\Http\Request $request)
 }
 
 /**
- * @throws \LibreNMS\Exceptions\ApiException
+ * @throws LibreNMS\Exceptions\ApiException
  */
-function search_ports(Illuminate\Http\Request $request): JsonResponse
+function search_ports(Request $request): JsonResponse
 {
     $columns = validate_column_list($request->input('columns'), 'ports', ['device_id', 'port_id', 'ifIndex', 'ifName', 'ifAlias']);
     $field = $request->route('field');
@@ -1396,9 +1441,9 @@ function search_ports(Illuminate\Http\Request $request): JsonResponse
 }
 
 /**
- * @throws \LibreNMS\Exceptions\ApiException
+ * @throws LibreNMS\Exceptions\ApiException
  */
-function get_all_ports(Illuminate\Http\Request $request): JsonResponse
+function get_all_ports(Request $request): JsonResponse
 {
     $columns = validate_column_list($request->input('columns'), 'ports', ['port_id', 'ifName']);
 
@@ -1410,7 +1455,7 @@ function get_all_ports(Illuminate\Http\Request $request): JsonResponse
     return api_success($ports, 'ports');
 }
 
-function get_port_stack(Illuminate\Http\Request $request)
+function get_port_stack(Request $request)
 {
     $hostname = $request->route('hostname');
     $device = DeviceCache::get($hostname);
@@ -1418,7 +1463,7 @@ function get_port_stack(Illuminate\Http\Request $request)
     return check_device_permission($device->device_id, fn () => api_success($device->portsStack, 'mappings'));
 }
 
-function get_port_security(Illuminate\Http\Request $request)
+function get_port_security(Request $request)
 {
     $hostname = $request->route('hostname') ?? null;
     $port_id = $request->route('portid') ?? null;
@@ -1444,7 +1489,7 @@ function get_port_security(Illuminate\Http\Request $request)
     }
 }
 
-function update_device_port_notes(Illuminate\Http\Request $request): JsonResponse
+function update_device_port_notes(Request $request): JsonResponse
 {
     $portid = $request->route('portid');
 
@@ -1466,12 +1511,12 @@ function update_device_port_notes(Illuminate\Http\Request $request): JsonRespons
     }
 }
 
-function list_alert_rules(Illuminate\Http\Request $request)
+function list_alert_rules(Request $request)
 {
     $id = $request->route('id');
 
-    $rules = \App\Http\Resources\AlertRule::collection(
-        \App\Models\AlertRule::when($id, fn ($query) => $query->where('id', $id))
+    $rules = App\Http\Resources\AlertRule::collection(
+        App\Models\AlertRule::when($id, fn ($query) => $query->where('id', $id))
         ->with([
             'devices:device_id',
             'groups:id',
@@ -1484,7 +1529,7 @@ function list_alert_rules(Illuminate\Http\Request $request)
     return api_success($rules->toArray($request), 'rules');
 }
 
-function list_alert_templates(Illuminate\Http\Request $request)
+function list_alert_templates(Request $request)
 {
     $id = $request->route('id');
 
@@ -1494,7 +1539,7 @@ function list_alert_templates(Illuminate\Http\Request $request)
     return api_success($templates->toArray($request), 'alert_templates');
 }
 
-function add_edit_alert_template(Illuminate\Http\Request $request)
+function add_edit_alert_template(Request $request)
 {
     $vars = json_decode($request->getContent(), true);
 
@@ -1608,9 +1653,9 @@ function add_edit_alert_template(Illuminate\Http\Request $request)
 }
 
 /**
- * @throws \LibreNMS\Exceptions\ApiException
+ * @throws LibreNMS\Exceptions\ApiException
  */
-function list_alerts(Illuminate\Http\Request $request): JsonResponse
+function list_alerts(Request $request): JsonResponse
 {
     $id = $request->route('id');
 
@@ -1695,7 +1740,7 @@ function api_parse_transport_targets(array $transports): array
 
 function api_default_transport_targets(): array
 {
-    $single = \App\Models\AlertTransport::where('is_default', true)
+    $single = App\Models\AlertTransport::where('is_default', true)
         ->pluck('transport_id')
         ->map(static fn ($id) => (int) $id)
         ->all();
@@ -1704,13 +1749,13 @@ function api_default_transport_targets(): array
 }
 
 /**
- * Legacy API: build one global {@see \App\Models\AlertOperation} from the operations array and assign to the rule.
+ * Legacy API: build one global {@see App\Models\AlertOperation} from the operations array and assign to the rule.
  *
  * @param  array<int, array<string, mixed>>  $operations
  */
 function api_assign_rule_alert_operation_from_legacy_api(int $ruleId, array $operations, string $ruleName, ?int $defaultStepSeconds = null, bool $notificationsSuppressed = false): void
 {
-    $rule = \App\Models\AlertRule::find($ruleId);
+    $rule = App\Models\AlertRule::find($ruleId);
     if (! $rule) {
         return;
     }
@@ -1724,7 +1769,7 @@ function api_assign_rule_alert_operation_from_legacy_api(int $ruleId, array $ope
 
     $name = mb_substr(trim($ruleName) !== '' ? $ruleName : 'Rule #' . $ruleId, 0, 200) . ' — API';
 
-    $op = \App\Models\AlertOperation::create([
+    $op = App\Models\AlertOperation::create([
         'name' => $name,
         'default_operation_step_duration_seconds' => $defaultStepSeconds !== null ? max(0, $defaultStepSeconds) : null,
         'notifications_suppressed' => $notificationsSuppressed,
@@ -1754,19 +1799,19 @@ function api_assign_rule_alert_operation_from_legacy_api(int $ruleId, array $ope
         [$single, $group] = api_parse_transport_targets((array) ($operation['transports'] ?? []));
         if (empty($single) && empty($group)) {
             $op->delete();
-            throw new \InvalidArgumentException('Each operation must include at least one transport or transport group.');
+            throw new InvalidArgumentException('Each operation must include at least one transport or transport group.');
         }
         $anyTransports = true;
 
         foreach ($single as $transportId) {
-            \App\Models\AlertOperationTransportMap::create([
+            App\Models\AlertOperationTransportMap::create([
                 'segment_id' => $seg->id,
                 'transport_or_group_id' => $transportId,
                 'target_type' => 'single',
             ]);
         }
         foreach ($group as $groupId) {
-            \App\Models\AlertOperationTransportMap::create([
+            App\Models\AlertOperationTransportMap::create([
                 'segment_id' => $seg->id,
                 'transport_or_group_id' => $groupId,
                 'target_type' => 'group',
@@ -1776,14 +1821,14 @@ function api_assign_rule_alert_operation_from_legacy_api(int $ruleId, array $ope
 
     if (! $anyTransports) {
         $op->delete();
-        throw new \InvalidArgumentException('Each operation must include at least one transport or transport group.');
+        throw new InvalidArgumentException('Each operation must include at least one transport or transport group.');
     }
 
     $rule->alert_operation_id = $op->id;
     $rule->save();
 }
 
-function add_edit_rule(Illuminate\Http\Request $request)
+function add_edit_rule(Request $request)
 {
     $data = json_decode($request->getContent(), true);
     if (json_last_error() || ! is_array($data)) {
@@ -1861,11 +1906,11 @@ function add_edit_rule(Illuminate\Http\Request $request)
     }
 
     if (! isset($rule_id)) {
-        if (\App\Models\AlertRule::query()->where('name', $name)->exists()) {
+        if (App\Models\AlertRule::query()->where('name', $name)->exists()) {
             return api_error(500, 'Addition failed : Name has already been used');
         }
     } else {
-        if (\App\Models\AlertRule::query()->where('name', $name)->where('id', '!=', $rule_id)->exists()) {
+        if (App\Models\AlertRule::query()->where('name', $name)->where('id', '!=', $rule_id)->exists()) {
             return api_error(500, 'Update failed : Invalid rule id');
         }
     }
@@ -1937,7 +1982,7 @@ function add_edit_rule(Illuminate\Http\Request $request)
     }
 
     if (is_numeric($rule_id)) {
-        $alertRule = \App\Models\AlertRule::find($rule_id);
+        $alertRule = App\Models\AlertRule::find($rule_id);
         if (! $alertRule) {
             return api_error(500, 'Failed to update existing alert rule');
         }
@@ -1947,7 +1992,7 @@ function add_edit_rule(Illuminate\Http\Request $request)
             return api_error(500, 'Failed to update existing alert rule');
         }
     } else {
-        $alertRule = \App\Models\AlertRule::create($saveData);
+        $alertRule = App\Models\AlertRule::create($saveData);
         if (! $alertRule?->id) {
             return api_error(500, 'Failed to create new alert rule');
         }
@@ -1960,7 +2005,7 @@ function add_edit_rule(Illuminate\Http\Request $request)
 
     if (array_key_exists('default_operation_step_duration', $data) && $alertRule->alert_operation_id) {
         $opSec = $defaultOperationStepDuration !== null ? max(0, (int) $defaultOperationStepDuration) : null;
-        \App\Models\AlertOperation::query()->whereKey($alertRule->alert_operation_id)->update([
+        App\Models\AlertOperation::query()->whereKey($alertRule->alert_operation_id)->update([
             'default_operation_step_duration_seconds' => $opSec,
         ]);
     }
@@ -1968,9 +2013,9 @@ function add_edit_rule(Illuminate\Http\Request $request)
     if (! array_key_exists('alert_operation_id', $data) && is_array($operations)) {
         try {
             api_assign_rule_alert_operation_from_legacy_api((int) $rule_id, $operations, $name, $defaultOperationStepDuration, $operationNotificationsSuppressed);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             return api_error(400, $e->getMessage());
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return api_error(500, 'Failed to save alert rule operations');
         }
     }
@@ -1978,11 +2023,11 @@ function add_edit_rule(Illuminate\Http\Request $request)
     return api_success_noresult(200);
 }
 
-function delete_rule(Illuminate\Http\Request $request)
+function delete_rule(Request $request)
 {
     $rule_id = $request->route('id');
     if (is_numeric($rule_id)) {
-        $rule = \App\Models\AlertRule::find($rule_id);
+        $rule = App\Models\AlertRule::find($rule_id);
         if ($rule && $rule->delete()) {
             return api_success_noresult(200, 'Alert rule has been removed');
         } else {
@@ -1993,7 +2038,7 @@ function delete_rule(Illuminate\Http\Request $request)
     return api_error(400, 'Invalid rule id has been provided');
 }
 
-function ack_alert(Illuminate\Http\Request $request)
+function ack_alert(Request $request)
 {
     $alert_id = $request->route('id');
     $data = json_decode($request->getContent(), true);
@@ -2019,7 +2064,7 @@ function ack_alert(Illuminate\Http\Request $request)
     }
 }
 
-function unmute_alert(Illuminate\Http\Request $request)
+function unmute_alert(Request $request)
 {
     $alert_id = $request->route('id');
     $data = json_decode($request->getContent(), true);
@@ -2043,7 +2088,7 @@ function unmute_alert(Illuminate\Http\Request $request)
     }
 }
 
-function get_inventory(Illuminate\Http\Request $request)
+function get_inventory(Request $request)
 {
     $hostname = $request->route('hostname');
     // use hostname as device_id if it's all digits
@@ -2075,7 +2120,7 @@ function get_inventory(Illuminate\Http\Request $request)
     });
 }
 
-function get_inventory_for_device(Illuminate\Http\Request $request)
+function get_inventory_for_device(Request $request)
 {
     $hostname = $request->route('hostname');
     // use hostname as device_id if it's all digits
@@ -2091,7 +2136,7 @@ function get_inventory_for_device(Illuminate\Http\Request $request)
     });
 }
 
-function search_oxidized(Illuminate\Http\Request $request)
+function search_oxidized(Request $request)
 {
     $search_in_conf_textbox = $request->route('searchstring');
     $result = search_oxidized_config($search_in_conf_textbox);
@@ -2103,11 +2148,11 @@ function search_oxidized(Illuminate\Http\Request $request)
     }
 }
 
-function get_oxidized_config(Illuminate\Http\Request $request)
+function get_oxidized_config(Request $request)
 {
     $hostname = $request->route('device_name');
-    $node_info = json_decode((new \App\ApiClients\Oxidized())->getContent('/node/show/' . $hostname . '?format=json'), true);
-    $result = json_decode((new \App\ApiClients\Oxidized())->getContent('/node/fetch/' . $node_info['full_name'] . '?format=json'), true);
+    $node_info = json_decode((new App\ApiClients\Oxidized())->getContent('/node/show/' . $hostname . '?format=json'), true);
+    $result = json_decode((new App\ApiClients\Oxidized())->getContent('/node/fetch/' . $node_info['full_name'] . '?format=json'), true);
     if (! $result) {
         return api_error(404, 'Received no data from Oxidized');
     } else {
@@ -2115,7 +2160,7 @@ function get_oxidized_config(Illuminate\Http\Request $request)
     }
 }
 
-function list_oxidized(Illuminate\Http\Request $request)
+function list_oxidized(Request $request)
 {
     $return = [];
     $devices = Device::query()
@@ -2185,7 +2230,7 @@ function list_oxidized(Illuminate\Http\Request $request)
     return response()->json($return, 200, [], JSON_PRETTY_PRINT);
 }
 
-function list_bills(Illuminate\Http\Request $request)
+function list_bills(Request $request)
 {
     $bills = [];
     $bill_id = $request->route('bill_id');
@@ -2207,7 +2252,7 @@ function list_bills(Illuminate\Http\Request $request)
     } else {
         $sql = '1';
     }
-    if (Gate::denies('viewAll', \App\Models\Bill::class)) {
+    if (Gate::denies('viewAll', App\Models\Bill::class)) {
         $sql .= ' AND `bill_id` IN (SELECT `bill_id` FROM `bill_perms` WHERE `user_id` = ?)';
         $param[] = Auth::id();
     }
@@ -2271,7 +2316,7 @@ function list_bills(Illuminate\Http\Request $request)
     return api_success($bills, 'bills');
 }
 
-function get_bill_graph(Illuminate\Http\Request $request)
+function get_bill_graph(Request $request)
 {
     $bill_id = $request->route('bill_id');
     $graph_type = $request->route('graph_type');
@@ -2287,7 +2332,7 @@ function get_bill_graph(Illuminate\Http\Request $request)
     return check_bill_permission($bill_id, fn () => api_get_graph($request, $vars));
 }
 
-function get_bill_graphdata(Illuminate\Http\Request $request)
+function get_bill_graphdata(Request $request)
 {
     $bill_id = $request->route('bill_id');
 
@@ -2311,7 +2356,7 @@ function get_bill_graphdata(Illuminate\Http\Request $request)
     });
 }
 
-function get_bill_history(Illuminate\Http\Request $request)
+function get_bill_history(Request $request)
 {
     $bill_id = $request->route('bill_id');
 
@@ -2322,7 +2367,7 @@ function get_bill_history(Illuminate\Http\Request $request)
     });
 }
 
-function get_bill_history_graph(Illuminate\Http\Request $request)
+function get_bill_history_graph(Request $request)
 {
     $bill_id = $request->route('bill_id');
     $bill_hist_id = $request->route('bill_hist_id');
@@ -2353,7 +2398,7 @@ function get_bill_history_graph(Illuminate\Http\Request $request)
     return check_bill_permission($bill_id, fn () => api_get_graph($request, $vars));
 }
 
-function get_bill_history_graphdata(Illuminate\Http\Request $request)
+function get_bill_history_graphdata(Request $request)
 {
     $bill_id = $request->route('bill_id');
 
@@ -2379,7 +2424,7 @@ function get_bill_history_graphdata(Illuminate\Http\Request $request)
     });
 }
 
-function delete_bill(Illuminate\Http\Request $request)
+function delete_bill(Request $request)
 {
     $bill_id = $request->route('bill_id');
 
@@ -2387,12 +2432,12 @@ function delete_bill(Illuminate\Http\Request $request)
         return api_error(400, 'Could not remove bill with id ' . $bill_id . '. Invalid id');
     }
 
-    $res = \App\Models\Bill::where('bill_id', $bill_id)->delete();
+    $res = App\Models\Bill::where('bill_id', $bill_id)->delete();
     if ($res == 1) {
-        \App\Models\BillPort::where('bill_id', $bill_id)->delete();
-        \App\Models\BillData::where('bill_id', $bill_id)->delete();
-        \App\Models\BillHistory::where('bill_id', $bill_id)->delete();
-        \App\Models\BillPerm::where('bill_id', $bill_id)->delete();
+        App\Models\BillPort::where('bill_id', $bill_id)->delete();
+        App\Models\BillData::where('bill_id', $bill_id)->delete();
+        App\Models\BillHistory::where('bill_id', $bill_id)->delete();
+        App\Models\BillPerm::where('bill_id', $bill_id)->delete();
 
         return api_success_noresult(200, 'Bill has been removed');
     }
@@ -2431,7 +2476,7 @@ function check_bill_key_value($bill_key, $bill_value)
     return true;
 }
 
-function create_edit_bill(Illuminate\Http\Request $request)
+function create_edit_bill(Request $request)
 {
     $data = json_decode($request->getContent(), true);
     if (! $data) {
@@ -2550,7 +2595,7 @@ function create_edit_bill(Illuminate\Http\Request $request)
 
     // set previously checked ports
     if (is_array($ports_add)) {
-        \App\Models\BillPort::where('bill_id', $bill_id)->delete();
+        App\Models\BillPort::where('bill_id', $bill_id)->delete();
         if (count($ports_add) > 0) {
             foreach ($ports_add as $port_id) {
                 dbInsert(['bill_id' => $bill_id, 'port_id' => $port_id, 'bill_port_autoadded' => 0], 'bill_ports');
@@ -2561,7 +2606,7 @@ function create_edit_bill(Illuminate\Http\Request $request)
     return api_success($bill_id, 'bill_id');
 }
 
-function update_device(Illuminate\Http\Request $request)
+function update_device(Request $request)
 {
     $hostname = $request->route('hostname');
     // use hostname as device_id if it's all digits
@@ -2593,7 +2638,7 @@ function update_device(Illuminate\Http\Request $request)
 
                 if ($field == 'location') {
                     $field = 'location_id';
-                    $field_data = \App\Models\Location::firstOrCreate(['location' => $field_data])->id;
+                    $field_data = Location::firstOrCreate(['location' => $field_data])->id;
                 }
 
                 $update[$field] = $field_data;
@@ -2613,7 +2658,7 @@ function update_device(Illuminate\Http\Request $request)
     }
 }
 
-function rename_device(Illuminate\Http\Request $request)
+function rename_device(Request $request)
 {
     $hostname = $request->route('hostname');
     $device_id = ctype_digit($hostname) ? $hostname : getidbyname($hostname);
@@ -2633,7 +2678,7 @@ function rename_device(Illuminate\Http\Request $request)
     }
 }
 
-function add_port_group(Illuminate\Http\Request $request)
+function add_port_group(Request $request)
 {
     $data = json_decode($request->getContent(), true);
     if (json_last_error() || ! is_array($data)) {
@@ -2655,7 +2700,7 @@ function add_port_group(Illuminate\Http\Request $request)
     return api_success($portGroup->id, 'id', 'Port group ' . $portGroup->name . ' created', 201);
 }
 
-function get_port_groups(Illuminate\Http\Request $request)
+function get_port_groups(Request $request)
 {
     $query = PortGroup::query();
 
@@ -2668,7 +2713,7 @@ function get_port_groups(Illuminate\Http\Request $request)
     return api_success($groups->makeHidden('pivot')->toArray(), 'groups', 'Found ' . $groups->count() . ' port groups');
 }
 
-function get_ports_by_group(Illuminate\Http\Request $request)
+function get_ports_by_group(Request $request)
 {
     $name = $request->route('name');
     if (! $name) {
@@ -2690,7 +2735,7 @@ function get_ports_by_group(Illuminate\Http\Request $request)
     return api_success($ports->makeHidden('pivot')->toArray(), 'ports');
 }
 
-function assign_port_group(Illuminate\Http\Request $request)
+function assign_port_group(Request $request)
 {
     $port_group_id = $request->route('port_group_id');
     $data = json_decode($request->getContent(), true);
@@ -2714,7 +2759,7 @@ function assign_port_group(Illuminate\Http\Request $request)
     return api_success(200, 'Port Ids ' . implode(', ', $port_id_list) . ' have been added to Port Group Id ' . $port_group_id);
 }
 
-function remove_port_group(Illuminate\Http\Request $request)
+function remove_port_group(Request $request)
 {
     $port_group_id = $request->route('port_group_id');
     $data = json_decode($request->getContent(), true);
@@ -2738,7 +2783,7 @@ function remove_port_group(Illuminate\Http\Request $request)
     return api_success(200, 'Port Ids ' . implode(', ', $port_id_list) . ' have been removed from Port Group Id ' . $port_group_id);
 }
 
-function add_device_group(Illuminate\Http\Request $request)
+function add_device_group(Request $request)
 {
     $data = json_decode($request->getContent(), true);
     if (json_last_error() || ! is_array($data)) {
@@ -2779,7 +2824,7 @@ function add_device_group(Illuminate\Http\Request $request)
     return api_success($deviceGroup->id, 'id', 'Device group ' . $deviceGroup->name . ' created', 201);
 }
 
-function update_device_group(Illuminate\Http\Request $request)
+function update_device_group(Request $request)
 {
     $data = json_decode($request->getContent(), true);
     if (json_last_error() || ! is_array($data)) {
@@ -2832,14 +2877,14 @@ function update_device_group(Illuminate\Http\Request $request)
 
     try {
         $deviceGroup->save();
-    } catch (\Illuminate\Database\QueryException) {
+    } catch (Illuminate\Database\QueryException) {
         return api_error(500, 'Failed to save changes device group');
     }
 
     return api_success_noresult(200, "Device group $name updated");
 }
 
-function delete_device_group(Illuminate\Http\Request $request)
+function delete_device_group(Request $request)
 {
     $name = $request->route('name');
     if (! $name) {
@@ -2861,7 +2906,7 @@ function delete_device_group(Illuminate\Http\Request $request)
     return api_success_noresult(200, "Device group $name deleted");
 }
 
-function update_device_group_add_devices(Illuminate\Http\Request $request)
+function update_device_group_add_devices(Request $request)
 {
     $data = json_decode($request->getContent(), true);
     if (json_last_error() || ! is_array($data)) {
@@ -2898,7 +2943,7 @@ function update_device_group_add_devices(Illuminate\Http\Request $request)
     return api_success_noresult(200, 'Devices added');
 }
 
-function update_device_group_remove_devices(Illuminate\Http\Request $request)
+function update_device_group_remove_devices(Request $request)
 {
     $data = json_decode($request->getContent(), true);
     if (json_last_error() || ! is_array($data)) {
@@ -2935,7 +2980,7 @@ function update_device_group_remove_devices(Illuminate\Http\Request $request)
     return api_success_noresult(200, 'Devices removed');
 }
 
-function get_device_groups(Illuminate\Http\Request $request)
+function get_device_groups(Request $request)
 {
     $hostname = $request->route('hostname');
 
@@ -2958,7 +3003,7 @@ function get_device_groups(Illuminate\Http\Request $request)
     return api_success($groups->makeHidden('pivot')->toArray(), 'groups', 'Found ' . $groups->count() . ' device groups');
 }
 
-function maintenance_devicegroup(Illuminate\Http\Request $request)
+function maintenance_devicegroup(Request $request)
 {
     $data = $request->json()->all();
 
@@ -2986,21 +3031,21 @@ function maintenance_devicegroup(Illuminate\Http\Request $request)
     $behavior = MaintenanceBehavior::tryFrom((int) ($data['behavior'] ?? -1))
         ?? LibrenmsConfig::get('alert.scheduled_maintenance_default_behavior');
 
-    $alert_schedule = new \App\Models\AlertSchedule([
+    $alert_schedule = new App\Models\AlertSchedule([
         'title' => $title,
         'notes' => $notes,
         'behavior' => $behavior,
         'recurring' => 0,
     ]);
 
-    $start = $data['start'] ?? \Carbon\Carbon::now()->format('Y-m-d H:i:00');
+    $start = $data['start'] ?? Carbon\Carbon::now()->format('Y-m-d H:i:00');
     $alert_schedule->start = $start;
 
     $duration = $data['duration'];
 
     if (Str::contains($duration, ':')) {
         [$duration_hour, $duration_min] = explode(':', (string) $duration);
-        $alert_schedule->end = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $start)
+        $alert_schedule->end = Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $start)
             ->addHours((float) $duration_hour)->addMinutes((float) $duration_min)
             ->format('Y-m-d H:i:00');
     }
@@ -3015,7 +3060,7 @@ function maintenance_devicegroup(Illuminate\Http\Request $request)
     }
 }
 
-function get_devices_by_group(Illuminate\Http\Request $request)
+function get_devices_by_group(Request $request)
 {
     $name = $request->route('name');
     if (! $name) {
@@ -3037,7 +3082,7 @@ function get_devices_by_group(Illuminate\Http\Request $request)
     return api_success($devices->makeHidden('pivot')->toArray(), 'devices');
 }
 
-function list_vrf(Illuminate\Http\Request $request)
+function list_vrf(Request $request)
 {
     $sql = '';
     $sql_params = [];
@@ -3070,7 +3115,7 @@ function list_vrf(Illuminate\Http\Request $request)
     return api_success($vrfs, 'vrfs');
 }
 
-function get_vrf(Illuminate\Http\Request $request)
+function get_vrf(Request $request)
 {
     $vrfId = $request->route('id');
     if (! is_numeric($vrfId)) {
@@ -3086,7 +3131,7 @@ function get_vrf(Illuminate\Http\Request $request)
     return api_success($vrf, 'vrf');
 }
 
-function list_mpls_services(Illuminate\Http\Request $request)
+function list_mpls_services(Request $request)
 {
     $hostname = $request->input('hostname');
     $device_id = ctype_digit((string) $hostname) ? $hostname : getidbyname($hostname);
@@ -3100,7 +3145,7 @@ function list_mpls_services(Illuminate\Http\Request $request)
     return api_success($mpls_services, 'mpls_services', null, 200, $mpls_services->count());
 }
 
-function list_mpls_saps(Illuminate\Http\Request $request)
+function list_mpls_saps(Request $request)
 {
     $hostname = $request->input('hostname');
     $device_id = ctype_digit((string) $hostname) ? $hostname : getidbyname($hostname);
@@ -3114,7 +3159,7 @@ function list_mpls_saps(Illuminate\Http\Request $request)
     return api_success($mpls_saps, 'saps', null, 200, $mpls_saps->count());
 }
 
-function list_ipsec(Illuminate\Http\Request $request)
+function list_ipsec(Request $request)
 {
     $hostname = $request->route('hostname');
     // use hostname as device_id if it's all digits
@@ -3128,7 +3173,7 @@ function list_ipsec(Illuminate\Http\Request $request)
     return api_success($ipsec, 'ipsec');
 }
 
-function list_vlans(Illuminate\Http\Request $request)
+function list_vlans(Request $request)
 {
     $sql = '';
     $sql_params = [];
@@ -3156,7 +3201,7 @@ function list_vlans(Illuminate\Http\Request $request)
     return api_success($vlans, 'vlans');
 }
 
-function list_links(Illuminate\Http\Request $request)
+function list_links(Request $request)
 {
     $hostname = $request->route('hostname');
     $sql = '';
@@ -3184,7 +3229,7 @@ function list_links(Illuminate\Http\Request $request)
     return api_success($links, 'links');
 }
 
-function get_link(Illuminate\Http\Request $request)
+function get_link(Request $request)
 {
     $linkId = $request->route('id');
     if (! is_numeric($linkId)) {
@@ -3200,7 +3245,7 @@ function get_link(Illuminate\Http\Request $request)
     return api_success($link, 'link');
 }
 
-function get_fdb(Illuminate\Http\Request $request)
+function get_fdb(Request $request)
 {
     $hostname = $request->route('hostname');
 
@@ -3230,7 +3275,7 @@ function get_fdb(Illuminate\Http\Request $request)
     });
 }
 
-function get_nac(Illuminate\Http\Request $request)
+function get_nac(Request $request)
 {
     $hostname = $request->route('hostname');
 
@@ -3238,7 +3283,7 @@ function get_nac(Illuminate\Http\Request $request)
         return api_error(500, 'No hostname has been provided');
     }
 
-    $device = \App\Facades\DeviceCache::get($hostname);
+    $device = DeviceCache::get($hostname);
     if (! $device->exists) {
         return api_error(404, "Device $hostname not found");
     }
@@ -3250,7 +3295,7 @@ function get_nac(Illuminate\Http\Request $request)
     });
 }
 
-function get_transceivers(Illuminate\Http\Request $request)
+function get_transceivers(Request $request)
 {
     $hostname = $request->route('hostname');
 
@@ -3267,7 +3312,7 @@ function get_transceivers(Illuminate\Http\Request $request)
     return api_success($device->transceivers()->hasAccess($request->user())->get(), 'transceivers');
 }
 
-function list_fdb(Illuminate\Http\Request $request)
+function list_fdb(Request $request)
 {
     $mac = $request->route('mac');
 
@@ -3282,7 +3327,7 @@ function list_fdb(Illuminate\Http\Request $request)
     return api_success($fdb, 'ports_fdb');
 }
 
-function list_fdb_detail(Illuminate\Http\Request $request)
+function list_fdb_detail(Request $request)
 {
     $macAddress = Mac::parse($request->route('mac'));
 
@@ -3314,7 +3359,7 @@ function list_fdb_detail(Illuminate\Http\Request $request)
     return api_success($fdb, 'ports_fdb', null, 200, count($fdb), $extras);
 }
 
-function list_nac(Illuminate\Http\Request $request)
+function list_nac(Request $request)
 {
     $mac = $request->route('mac');
 
@@ -3340,7 +3385,7 @@ function list_sensors()
     return api_success($sensors, 'sensors');
 }
 
-function list_ip_addresses(Illuminate\Http\Request $request)
+function list_ip_addresses(Request $request)
 {
     $address_family = $request->route('address_family');
 
@@ -3374,7 +3419,7 @@ function list_ip_addresses(Illuminate\Http\Request $request)
     }
 }
 
-function list_ip_networks(Illuminate\Http\Request $request)
+function list_ip_networks(Request $request)
 {
     $address_family = $request->route('address_family');
 
@@ -3406,7 +3451,7 @@ function list_ip_networks(Illuminate\Http\Request $request)
     }
 }
 
-function list_arp(Illuminate\Http\Request $request)
+function list_arp(Request $request)
 {
     $query = $request->route('query');
     $cidr = $request->route('cidr');
@@ -3437,7 +3482,7 @@ function list_arp(Illuminate\Http\Request $request)
     return api_success($arp, 'arp');
 }
 
-function list_services(Illuminate\Http\Request $request)
+function list_services(Request $request)
 {
     $where = [];
     $params = [];
@@ -3483,7 +3528,7 @@ function list_services(Illuminate\Http\Request $request)
     return api_success($services, 'services');
 }
 
-function add_eventlog(Illuminate\Http\Request $request)
+function add_eventlog(Request $request)
 {
     // return details of a single device
     $hostname = $request->route('hostname');
@@ -3506,7 +3551,7 @@ function add_eventlog(Illuminate\Http\Request $request)
     return api_error(400, 'No Eventlog text provided.');
 }
 
-function list_logs(Illuminate\Http\Request $request, Router $router)
+function list_logs(Request $request, Router $router)
 {
     $type = $router->current()->getName();
     $hostname = $request->route('hostname');
@@ -3585,7 +3630,7 @@ function list_logs(Illuminate\Http\Request $request, Router $router)
 }
 
 /**
- * @throws \LibreNMS\Exceptions\ApiException
+ * @throws LibreNMS\Exceptions\ApiException
  */
 function validate_column_list(?string $columns, string $table, array $default = []): array
 {
@@ -3595,7 +3640,7 @@ function validate_column_list(?string $columns, string $table, array $default = 
 
     static $schema;
     if (is_null($schema)) {
-        $schema = new \LibreNMS\DB\Schema();
+        $schema = new LibreNMS\DB\Schema();
     }
 
     $column_names = is_array($columns) ? $columns : explode(',', $columns);
@@ -3620,7 +3665,7 @@ function missing_fields($required_fields, $data)
     return false;
 }
 
-function add_service_template_for_device_group(Illuminate\Http\Request $request)
+function add_service_template_for_device_group(Request $request)
 {
     $data = json_decode($request->getContent(), true);
     if (json_last_error() || ! is_array($data)) {
@@ -3656,7 +3701,7 @@ function add_service_template_for_device_group(Illuminate\Http\Request $request)
     return api_success($serviceTemplate->id, 'id', 'Service Template ' . $serviceTemplate->name . ' created', 201);
 }
 
-function get_service_templates(Illuminate\Http\Request $request)
+function get_service_templates(Request $request)
 {
     if ($request->user()->cannot('viewAll', ServiceTemplate::class)) {
         return api_error(403, 'Insufficient permissions to access service templates');
@@ -3671,7 +3716,7 @@ function get_service_templates(Illuminate\Http\Request $request)
     return api_success($templates->makeHidden('pivot')->toArray(), 'templates', 'Found ' . $templates->count() . ' service templates');
 }
 
-function add_service_for_host(Illuminate\Http\Request $request)
+function add_service_for_host(Request $request)
 {
     $hostname = $request->route('hostname');
     $device_id = ctype_digit($hostname) ? $hostname : getidbyname($hostname);
@@ -3689,7 +3734,7 @@ function add_service_for_host(Illuminate\Http\Request $request)
     $service_ignore = $data['ignore'] ? true : false; // Default false
     $service_disable = $data['disable'] ? true : false; // Default false
     $service_name = $data['name'];
-    $service_id = \LibreNMS\Services::addService($device_id, $service_type, $service_desc, $service_ip, $service_param, (int) $service_ignore, (int) $service_disable, 0, $service_name);
+    $service_id = LibreNMS\Services::addService($device_id, $service_type, $service_desc, $service_ip, $service_param, (int) $service_ignore, (int) $service_disable, 0, $service_name);
     if ($service_id != false) {
         return api_success_noresult(201, "Service $service_type has been added to device $hostname (#$service_id)");
     }
@@ -3697,7 +3742,7 @@ function add_service_for_host(Illuminate\Http\Request $request)
     return api_error(500, 'Failed to add the service');
 }
 
-function add_parents_to_host(Illuminate\Http\Request $request)
+function add_parents_to_host(Request $request)
 {
     $data = json_decode($request->getContent(), true);
     $device_id = $request->route('id');
@@ -3722,7 +3767,7 @@ function add_parents_to_host(Illuminate\Http\Request $request)
     return api_error(400, 'Check your parent and device IDs');
 }
 
-function del_parents_from_host(Illuminate\Http\Request $request)
+function del_parents_from_host(Request $request)
 {
     $device_id = $request->route('id');
     $device_id = ctype_digit($device_id) ? $device_id : getidbyname($device_id);
@@ -3767,14 +3812,14 @@ function validateDeviceIds($ids)
     return true;
 }
 
-function add_location(Illuminate\Http\Request $request)
+function add_location(Request $request)
 {
     $data = json_decode($request->getContent(), true);
     if (missing_fields(['location', 'lat', 'lng'], $data)) {
         return api_error(400, 'Required fields missing (location, lat and lng needed)');
     }
     // Set the location
-    $location = new \App\Models\Location($data);
+    $location = new Location($data);
     $location->fixed_coordinates = $data['fixed_coordinates'] ?? $location->coordinatesValid();
 
     if ($location->save()) {
@@ -3784,7 +3829,7 @@ function add_location(Illuminate\Http\Request $request)
     return api_error(500, 'Failed to add the location');
 }
 
-function edit_location(Illuminate\Http\Request $request)
+function edit_location(Request $request)
 {
     $location = $request->route('location_id_or_name');
     if (empty($location)) {
@@ -3803,7 +3848,7 @@ function edit_location(Illuminate\Http\Request $request)
     return api_error(500, 'Failed to update location');
 }
 
-function get_location(Illuminate\Http\Request $request)
+function get_location(Request $request)
 {
     $location = $request->route('location_id_or_name');
     if (empty($location)) {
@@ -3822,7 +3867,7 @@ function get_location_id_by_name($location)
     return dbFetchCell('SELECT id FROM locations WHERE location = ?', $location);
 }
 
-function del_location(Illuminate\Http\Request $request)
+function del_location(Request $request)
 {
     $location = $request->route('location');
     if (empty($location)) {
@@ -3836,7 +3881,7 @@ function del_location(Illuminate\Http\Request $request)
         'location_id' => 0,
     ];
     dbUpdate($data, 'devices', '`location_id` = ?', [$location_id]);
-    $result = \App\Models\Location::where('id', $location_id)->delete();
+    $result = Location::where('id', $location_id)->delete();
     if ($result == 1) {
         return api_success_noresult(201, "Location $location has been deleted successfully");
     }
@@ -3844,7 +3889,7 @@ function del_location(Illuminate\Http\Request $request)
     return api_error(500, "Failed to delete the location $location");
 }
 
-function maintenance_location(Illuminate\Http\Request $request)
+function maintenance_location(Request $request)
 {
     $data = $request->json()->all();
 
@@ -3871,21 +3916,21 @@ function maintenance_location(Illuminate\Http\Request $request)
     $behavior = MaintenanceBehavior::tryFrom((int) ($data['behavior'] ?? -1))
         ?? LibrenmsConfig::get('alert.scheduled_maintenance_default_behavior');
 
-    $alert_schedule = new \App\Models\AlertSchedule([
+    $alert_schedule = new App\Models\AlertSchedule([
         'title' => $title,
         'notes' => $notes,
         'behavior' => $behavior,
         'recurring' => 0,
     ]);
 
-    $start = $data['start'] ?? \Carbon\Carbon::now()->format('Y-m-d H:i:00');
+    $start = $data['start'] ?? Carbon\Carbon::now()->format('Y-m-d H:i:00');
     $alert_schedule->start = $start;
 
     $duration = $data['duration'];
 
     if (Str::contains($duration, ':')) {
         [$duration_hour, $duration_min] = explode(':', (string) $duration);
-        $alert_schedule->end = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $start)
+        $alert_schedule->end = Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $start)
             ->addHours((float) $duration_hour)->addMinutes((float) $duration_min)
             ->format('Y-m-d H:i:00');
     }
@@ -3900,7 +3945,7 @@ function maintenance_location(Illuminate\Http\Request $request)
     }
 }
 
-function get_poller_group(Illuminate\Http\Request $request)
+function get_poller_group(Request $request)
 {
     $poller_group = $request->route('poller_group_id_or_name');
     if (empty($poller_group)) {
@@ -3915,7 +3960,7 @@ function get_poller_group(Illuminate\Http\Request $request)
     return api_success($data, 'get_poller_group');
 }
 
-function del_service_from_host(Illuminate\Http\Request $request)
+function del_service_from_host(Request $request)
 {
     $service_id = $request->route('id');
     if (empty($service_id)) {
@@ -3929,7 +3974,7 @@ function del_service_from_host(Illuminate\Http\Request $request)
     return api_error(500, 'Failed to delete the service');
 }
 
-function search_by_mac(Illuminate\Http\Request $request)
+function search_by_mac(Request $request)
 {
     $macAddress = Mac::parse((string) $request->route('search'))->hex();
 
@@ -3959,7 +4004,7 @@ function search_by_mac(Illuminate\Http\Request $request)
 
     return api_success($ports, 'ports');
 }
-function edit_service_for_host(Illuminate\Http\Request $request)
+function edit_service_for_host(Request $request)
 {
     $service_id = $request->route('id');
     $data = json_decode($request->getContent(), true);
@@ -3973,7 +4018,7 @@ function edit_service_for_host(Illuminate\Http\Request $request)
 /**
  * recieve syslog messages via json https://github.com/librenms/librenms/pull/14424
  */
-function post_syslogsink(Illuminate\Http\Request $request)
+function post_syslogsink(Request $request)
 {
     $json = $request->json()->all();
 
@@ -3995,7 +4040,7 @@ function post_syslogsink(Illuminate\Http\Request $request)
  */
 function server_info()
 {
-    $version = \LibreNMS\Util\Version::get();
+    $version = LibreNMS\Util\Version::get();
 
     $versions = [
         'local_ver' => $version->name(),
@@ -4032,7 +4077,7 @@ function list_pollers()
 /**
  * List poller log - devices with polling information
  */
-function list_poller_log(Illuminate\Http\Request $request)
+function list_poller_log(Request $request)
 {
     $user = Auth::user();
 

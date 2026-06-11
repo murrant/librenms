@@ -11,15 +11,15 @@ class PollingMethodService
 {
     public function create(Device $device, PollingMethodType $type, array $settings, ?Secret $secret): DevicePollingMethod
     {
-        $method = app($type->methodClass());
+        $methodClass = $type->methodClass();
 
         $row = new DevicePollingMethod([
             'device_id'            => $device->device_id,
             'method_type'          => $type,
             'enabled'              => true,
-            'affects_availability' => (bool) ($method->getDefaults()['affects_availability'] ?? false),
+            'affects_availability' => (bool) ($methodClass::getDefaults()['affects_availability'] ?? false),
             'secret_id'            => $secret?->id,
-            'settings'             => $this->buildSettings($method, $settings),
+            'settings'             => $this->buildSettings($methodClass, $settings),
         ]);
 
         $device->pollingMethods()->save($row);
@@ -29,12 +29,12 @@ class PollingMethodService
 
     public function update(DevicePollingMethod $row, array $validated, PollingMethodType $type): void
     {
-        $method = app($type->methodClass());
+        $methodClass = $type->methodClass();
 
         $row->enabled = (bool) ($validated['enabled'] ?? true);
         $row->affects_availability = (bool) ($validated['affects_availability'] ?? false);
 
-        $row->settings = $this->mergeSettings($row->settings ?? [], $validated['settings'] ?? [], $method);
+        $row->settings = $this->mergeSettings($row->settings ?? [], $validated['settings'] ?? [], $methodClass);
 
         $row->save();
 
@@ -43,9 +43,9 @@ class PollingMethodService
         }
     }
 
-    private function buildSettings($method, array $validated): array
+    private function buildSettings(string $methodClass, array $validated): array
     {
-        $schemaDefaults = collect($method->getSettingsSchema())
+        $schemaDefaults = collect($methodClass::getSettingsSchema())
             ->mapWithKeys(fn ($field, $key) => [
                 $key => $field['default'] ?? (isset($field['options']) ? array_key_first($field['options']) : null),
             ])
@@ -53,14 +53,14 @@ class PollingMethodService
 
         return array_merge(
             $schemaDefaults->all(),
-            collect($method->getDefaults())->except('affects_availability')->all(),
+            collect($methodClass::getDefaults())->except('affects_availability')->all(),
             $validated
         );
     }
 
-    private function mergeSettings(array $existing, array $validated, $method): array
+    private function mergeSettings(array $existing, array $validated, string $methodClass): array
     {
-        $allowed = collect($method->getSettingsSchema())->keys();
+        $allowed = collect($methodClass::getSettingsSchema())->keys();
 
         return array_merge(
             $existing,

@@ -23,7 +23,7 @@ if (Gate::denies('device.update')) {
         $panes['routing'] = 'Routing';
     }
 
-    if (count(\App\Facades\LibrenmsConfig::get("os.{$device['os']}.icons", []))) {
+    if (count(App\Facades\LibrenmsConfig::get("os.{$device['os']}.icons", []))) {
         $panes['icon'] = 'Icon';
     }
 
@@ -35,7 +35,7 @@ if (Gate::denies('device.update')) {
         $panes['modules'] = 'Modules';
     }
 
-    if (\App\Facades\LibrenmsConfig::get('show_services')) {
+    if (App\Facades\LibrenmsConfig::get('show_services')) {
         $panes['services'] = 'Services';
     }
 

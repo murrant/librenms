@@ -26,18 +26,17 @@
 
 namespace LibreNMS\Polling;
 
-use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 
 class ConnectivityHelper
 {
     public static function snmpIsAllowed(Device $device): bool
     {
-        return $device->snmp_disable === false;
+        return (bool) $device->getPollingMethod('snmp')?->enabled;
     }
 
     public static function pingIsAllowed(Device $device): bool
     {
-        return LibrenmsConfig::get('icmp_check') && ! ($device->exists && $device->getAttrib('override_icmp_disable') === 'true');
+        return (bool) $device->getPollingMethod('icmp')?->enabled;
     }
 }

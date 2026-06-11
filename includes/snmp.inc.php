@@ -171,11 +171,10 @@ function gen_snmp_cmd($cmd, $device, $oids, $options = null, $mib = null, $mibdi
     $deviceModel = DeviceCache::get($device['device_id']);
 
     // $device is not persisted to the db, fill in the data
-    $credentials = $deviceModel->exists
-        ? $deviceModel->getSecrets()->snmp()
-        : SnmpSecret::fromDeviceArray($device);
+    $credentials = ($deviceModel->exists ? $deviceModel->snmpSecret() : null)
+        ?: SnmpSecret::fromDeviceArray($device);
 
-    $cmd = array_merge($cmd, $credentials->toNetSnmpOptions($device['context_name'] ?? null), Arr::wrap($options));
+    $cmd = array_merge($cmd, \LibreNMS\Polling\Method\SnmpPollingMethod::fromSecret($credentials)->toNetSnmpOptions($device['context_name'] ?? null), Arr::wrap($options));
 
     if ($mib) {
         array_push($cmd, '-m', $mib);

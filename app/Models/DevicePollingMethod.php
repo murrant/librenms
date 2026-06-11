@@ -49,7 +49,7 @@ class DevicePollingMethod extends Model
         $device = $this->device;
 
         if (! $this->enabled) {
-            $device->status        = false;
+            $device->status = false;
             $device->status_reason = $this->method_type->value;
         } elseif ($device->status_reason === $this->method_type->value) {
             $device->status_reason = '';

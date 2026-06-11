@@ -112,8 +112,8 @@ Route::middleware(['auth'])->group(function (): void {
         Route::get('performance', [PollerController::class, 'performanceTab'])->name('poller.performance');
         Route::resource('{id}/settings', PollerSettingsController::class, ['as' => 'poller'])->only(['update', 'destroy']);
     });
-    Route::delete('ports/purge', [\App\Http\Controllers\PortsController::class, 'purge'])->name('ports.purge');
-    Route::get('ports/{view?}/{graph?}', [\App\Http\Controllers\PortsController::class, 'index'])
+    Route::delete('ports/purge', [App\Http\Controllers\PortsController::class, 'purge'])->name('ports.purge');
+    Route::get('ports/{view?}/{graph?}', [App\Http\Controllers\PortsController::class, 'index'])
         ->middleware('saved-filter:ports')->name('ports');
     Route::prefix('services')->name('services.')->group(function (): void {
         Route::resource('templates', ServiceTemplateController::class);
@@ -154,6 +154,9 @@ Route::middleware(['auth'])->group(function (): void {
     Route::get('nac', [NacController::class, 'index']);
 
     // Device Tabs
+    Route::get('/device/add', [Device\AddDeviceController::class, 'index'])->name('device.add');
+    Route::post('/device/add', [Device\AddDeviceController::class, 'store'])->name('device.add.store');
+    Route::redirect('/addhost', '/device/add');
     Route::get('/device/{device}/edit', [Device\EditDeviceController::class, 'index'])->name('device.edit');
     Route::put('/device/{device}/edit', [Device\EditDeviceController::class, 'update'])->name('device.edit.update');
     Route::get('/device/{device}/edit/health', [Device\EditHealthController::class, 'index'])->name('device.edit.health');

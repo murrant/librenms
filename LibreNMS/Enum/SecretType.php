@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SecretType.php
  *
@@ -51,9 +52,10 @@ enum SecretType: string
     /** @return class-string<SecretData> */
     public function secretClass(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Snmp => SnmpSecret::class,
             self::Ipmi => IpmiSecret::class,
         };
     }
+
 }

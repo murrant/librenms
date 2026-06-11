@@ -759,6 +759,26 @@ device_outages:
     device_outages_device_id_index: { Name: device_outages_device_id_index, Columns: [device_id], Unique: false, Type: BTREE }
     device_outages_going_down_index: { Name: device_outages_going_down_index, Columns: [going_down], Unique: false, Type: BTREE }
     device_outages_up_again_index: { Name: device_outages_up_again_index, Columns: [up_again], Unique: false, Type: BTREE }
+device_polling_methods:
+  Columns:
+    - { Field: id, Type: 'bigint unsigned', 'Null': false, Extra: auto_increment }
+    - { Field: device_id, Type: 'int unsigned', 'Null': true, Extra: '' }
+    - { Field: method_type, Type: varchar(255), 'Null': false, Extra: '' }
+    - { Field: enabled, Type: tinyint, 'Null': false, Extra: '', Default: '1' }
+    - { Field: affects_availability, Type: tinyint, 'Null': false, Extra: '', Default: '0' }
+    - { Field: secret_id, Type: 'bigint unsigned', 'Null': true, Extra: '' }
+    - { Field: settings, Type: longtext, 'Null': true, Extra: '' }
+    - { Field: last_checked_at, Type: timestamp, 'Null': true, Extra: '' }
+    - { Field: last_check_successful, Type: tinyint, 'Null': true, Extra: '' }
+    - { Field: created_at, Type: timestamp, 'Null': true, Extra: '' }
+    - { Field: updated_at, Type: timestamp, 'Null': true, Extra: '' }
+  Indexes:
+    PRIMARY: { Name: PRIMARY, Columns: [id], Unique: true, Type: BTREE }
+    device_polling_methods_device_id_method_type_unique: { Name: device_polling_methods_device_id_method_type_unique, Columns: [device_id, method_type], Unique: true, Type: BTREE }
+    device_polling_methods_secret_id_foreign: { Name: device_polling_methods_secret_id_foreign, Columns: [secret_id], Unique: false, Type: BTREE }
+  Constraints:
+    device_polling_methods_device_id_foreign: { name: device_polling_methods_device_id_foreign, foreign_key: device_id, table: devices, key: device_id, extra: 'ON DELETE CASCADE' }
+    device_polling_methods_secret_id_foreign: { name: device_polling_methods_secret_id_foreign, foreign_key: secret_id, table: secrets, key: id, extra: 'ON DELETE SET NULL' }
 device_relationships:
   Columns:
     - { Field: parent_device_id, Type: 'int unsigned', 'Null': false, Extra: '', Default: '0' }
@@ -2045,26 +2065,6 @@ processors:
   Indexes:
     PRIMARY: { Name: PRIMARY, Columns: [processor_id], Unique: true, Type: BTREE }
     processors_device_id_index: { Name: processors_device_id_index, Columns: [device_id], Unique: false, Type: BTREE }
-proxmox:
-  Columns:
-    - { Field: id, Type: 'int unsigned', 'Null': false, Extra: auto_increment }
-    - { Field: device_id, Type: 'int unsigned', 'Null': false, Extra: '', Default: '0' }
-    - { Field: vmid, Type: int, 'Null': false, Extra: '' }
-    - { Field: cluster, Type: varchar(255), 'Null': false, Extra: '' }
-    - { Field: description, Type: varchar(255), 'Null': true, Extra: '' }
-    - { Field: last_seen, Type: timestamp, 'Null': false, Extra: '', Default: CURRENT_TIMESTAMP }
-  Indexes:
-    PRIMARY: { Name: PRIMARY, Columns: [id], Unique: true, Type: BTREE }
-    proxmox_cluster_vmid_unique: { Name: proxmox_cluster_vmid_unique, Columns: [cluster, vmid], Unique: true, Type: BTREE }
-proxmox_ports:
-  Columns:
-    - { Field: id, Type: 'int unsigned', 'Null': false, Extra: auto_increment }
-    - { Field: vm_id, Type: int, 'Null': false, Extra: '' }
-    - { Field: port, Type: varchar(10), 'Null': false, Extra: '' }
-    - { Field: last_seen, Type: timestamp, 'Null': false, Extra: '', Default: CURRENT_TIMESTAMP }
-  Indexes:
-    PRIMARY: { Name: PRIMARY, Columns: [id], Unique: true, Type: BTREE }
-    proxmox_ports_vm_id_port_unique: { Name: proxmox_ports_vm_id_port_unique, Columns: [vm_id, port], Unique: true, Type: BTREE }
 pseudowires:
   Columns:
     - { Field: pseudowire_id, Type: 'int unsigned', 'Null': false, Extra: auto_increment }
@@ -2188,6 +2188,18 @@ route:
     - { Field: inetCidrRoutePfxLen, Type: 'int unsigned', 'Null': false, Extra: '' }
   Indexes:
     PRIMARY: { Name: PRIMARY, Columns: [route_id], Unique: true, Type: BTREE }
+secrets:
+  Columns:
+    - { Field: id, Type: 'bigint unsigned', 'Null': false, Extra: auto_increment }
+    - { Field: created_at, Type: timestamp, 'Null': true, Extra: '' }
+    - { Field: updated_at, Type: timestamp, 'Null': true, Extra: '' }
+    - { Field: description, Type: varchar(255), 'Null': false, Extra: '' }
+    - { Field: secret_type, Type: varchar(255), 'Null': false, Extra: '' }
+    - { Field: default, Type: tinyint, 'Null': false, Extra: '', Default: '0' }
+    - { Field: data, Type: text, 'Null': false, Extra: '' }
+  Indexes:
+    PRIMARY: { Name: PRIMARY, Columns: [id], Unique: true, Type: BTREE }
+    secrets_secret_type_index: { Name: secrets_secret_type_index, Columns: [secret_type], Unique: false, Type: BTREE }
 sensors:
   Columns:
     - { Field: sensor_id, Type: 'int unsigned', 'Null': false, Extra: auto_increment }
@@ -2244,12 +2256,13 @@ services:
     - { Field: service_param, Type: text, 'Null': true, Extra: '' }
     - { Field: service_ignore, Type: tinyint, 'Null': false, Extra: '', Default: '0' }
     - { Field: service_status, Type: tinyint, 'Null': false, Extra: '', Default: '0' }
-    - { Field: service_changed, Type: 'int unsigned', 'Null': false, Extra: '', Default: '0' }
     - { Field: service_message, Type: text, 'Null': true, Extra: '' }
     - { Field: service_disabled, Type: tinyint, 'Null': false, Extra: '', Default: '0' }
     - { Field: service_ds, Type: text, 'Null': true, Extra: '' }
     - { Field: service_template_id, Type: 'int unsigned', 'Null': false, Extra: '', Default: '0' }
     - { Field: service_name, Type: varchar(255), 'Null': true, Extra: '' }
+    - { Field: created_at, Type: timestamp, 'Null': true, Extra: '' }
+    - { Field: updated_at, Type: timestamp, 'Null': true, Extra: '' }
   Indexes:
     PRIMARY: { Name: PRIMARY, Columns: [service_id], Unique: true, Type: BTREE }
     services_device_id_index: { Name: services_device_id_index, Columns: [device_id], Unique: false, Type: BTREE }
@@ -2582,6 +2595,15 @@ vminfo:
     PRIMARY: { Name: PRIMARY, Columns: [id], Unique: true, Type: BTREE }
     vminfo_device_id_index: { Name: vminfo_device_id_index, Columns: [device_id], Unique: false, Type: BTREE }
     vminfo_vmwvmvmid_index: { Name: vminfo_vmwvmvmid_index, Columns: [vmwVmVMID], Unique: false, Type: BTREE }
+vm_ports:
+  Columns:
+    - { Field: id, Type: 'int unsigned', 'Null': false, Extra: auto_increment }
+    - { Field: vm_id, Type: int, 'Null': false, Extra: '' }
+    - { Field: port, Type: varchar(10), 'Null': false, Extra: '' }
+    - { Field: last_seen, Type: timestamp, 'Null': false, Extra: '', Default: CURRENT_TIMESTAMP }
+  Indexes:
+    PRIMARY: { Name: PRIMARY, Columns: [id], Unique: true, Type: BTREE }
+    proxmox_ports_vm_id_port_unique: { Name: proxmox_ports_vm_id_port_unique, Columns: [vm_id, port], Unique: true, Type: BTREE }
 vrfs:
   Columns:
     - { Field: vrf_id, Type: 'int unsigned', 'Null': false, Extra: auto_increment }

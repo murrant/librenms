@@ -23,8 +23,9 @@ class EditPollingController
 
     public function __construct(
         private readonly PollingMethodService $pollingService,
-        private readonly SecretService        $secretService,
-    ) {}
+        private readonly SecretService $secretService,
+    ) {
+    }
 
     /**
      * @throws AuthorizationException
@@ -88,8 +89,8 @@ class EditPollingController
     {
         $this->authorize('update', $device);
 
-        $type          = PollingMethodType::tryFrom($methodType) ?? abort(404);
-        $row           = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
+        $type = PollingMethodType::tryFrom($methodType) ?? abort(404);
+        $row = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
         $validated = $request->validated();
 
         if ($type->hasSecret() && array_key_exists('secret_id', $validated)) {
@@ -122,7 +123,7 @@ class EditPollingController
         $this->authorize('update', $device);
 
         $type = PollingMethodType::tryFrom($methodType) ?? abort(404);
-        $row  = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
+        $row = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
 
         if ($type->hasSecret()) {
             $this->authorize('delete', Secret::class);
@@ -139,13 +140,13 @@ class EditPollingController
 
     private function buildMethodData(Device $device, PollingMethodType $type): array
     {
-        $pollingMethod = app($type->methodClass());
+        $methodClass   = $type->methodClass();
         $row           = $device->pollingMethods->firstWhere('method_type', $type);
         $secret        = $row?->secret;
         $canUnmaskSecrets = Gate::allows('unmask', Secret::class);
         $schema        = $type->hasSecret() ? $type->secretClass()::getUiSchema() : [];
         $schemaFields  = $this->buildSchemaFields($schema);
-        $settingsSchema = $pollingMethod->getSettingsSchema();
+        $settingsSchema = $methodClass::getSettingsSchema();
         $secretsForType = Secret::query()
             ->where('secret_type', $type->value)
             ->orderBy('description')
@@ -170,7 +171,7 @@ class EditPollingController
             )->all(),
             'settings_fields'  => $this->buildSchemaFields($settingsSchema, 'settingsData'),
             'settings'         => $row?->settings ?? [],
-            'affects_availability' => $row?->affects_availability ?? (bool) ($pollingMethod->getDefaults()['affects_availability'] ?? false),
+            'affects_availability' => $row?->affects_availability ?? (bool) ($methodClass::getDefaults()['affects_availability'] ?? false),
             'secret'           => $secret,
             'secret_form_data' => collect($schema)->mapWithKeys(
                 fn (array $field, string $key): array => [
@@ -197,6 +198,7 @@ class EditPollingController
                         if (is_array($condVal) && isset($condVal['$in'])) {
                             return json_encode(array_values($condVal['$in'])) . '.includes(__DATA_VAR__[' . json_encode($condKey) . '])';
                         }
+
                         return '__DATA_VAR__[' . json_encode($condKey) . '] === ' . json_encode($condVal);
                     })->implode(' && ');
 
