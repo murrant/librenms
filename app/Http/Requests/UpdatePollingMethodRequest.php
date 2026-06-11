@@ -36,16 +36,16 @@ class UpdatePollingMethodRequest extends FormRequest
             return $rules;
         }
 
-        $pollingMethod = app($type->methodClass());
+        $methodClass = $type->methodClass();
         $rules = [
             ...$rules,
-            ...collect($pollingMethod->getRules())
+            ...collect($methodClass::getRules())
                 ->mapWithKeys(fn (array|string $rule, string $key): array => ["settings.$key" => $rule])
                 ->all(),
         ];
 
         if ($type->hasSecret() && $this->has('secret_data')) {
-            /** @var class-string<\App\Data\Secrets\SecretData> $secretClass */
+            /** @var class-string<\App\App\Data\Secrets\SecretData> $secretClass */
             $secretClass = $type->secretClass();
             $rules = [
                 ...$rules,

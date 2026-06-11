@@ -3,7 +3,7 @@
 namespace LibreNMS\Tests\Unit;
 
 use App\Actions\Device\CheckDeviceAvailability;
-use App\Actions\Device\DeviceIsSnmpable;
+use App\Actions\Device\DeviceSnmpIsAvailable;
 use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use LibreNMS\Data\Source\Icmp\Fping;
@@ -166,9 +166,9 @@ final class ConnectivityHelperTest extends TestCase
 
         $device = new Device;
 
-        $this->assertTrue((new DeviceIsSnmpable)->execute($device));
-        $this->assertTrue((new DeviceIsSnmpable)->execute($device));
-        $this->assertTrue((new DeviceIsSnmpable)->execute($device));
-        $this->assertFalse((new DeviceIsSnmpable)->execute($device));
+        $this->assertTrue((new DeviceSnmpIsAvailable)->execute($device));
+        $this->assertTrue((new DeviceSnmpIsAvailable)->execute($device));
+        $this->assertTrue((new DeviceSnmpIsAvailable)->execute($device));
+        $this->assertFalse((new DeviceSnmpIsAvailable)->execute($device));
     }
 }

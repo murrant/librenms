@@ -35,10 +35,10 @@ class StorePollingMethodRequest extends FormRequest
         $type = $this->pollingType();
 
         if ($type) {
-            $pollingMethod = app($type->methodClass());
+            $methodClass = $type->methodClass();
             $rules = [
                 ...$rules,
-                ...collect($pollingMethod->getRules())
+                ...collect($methodClass::getRules())
                     ->mapWithKeys(fn (array|string $rule, string $key): array => ["settings.$key" => $rule])
                     ->all(),
             ];

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SecretController.php
  *
@@ -70,7 +71,7 @@ class SecretController extends Controller
         ]);
 
         $secretType = SecretType::tryFrom($validated['secret_type']);
-        if (!$secretType) {
+        if (! $secretType) {
             abort(400, 'Invalid secret type.');
         }
 

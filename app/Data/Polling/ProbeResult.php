@@ -8,7 +8,8 @@ readonly class ProbeResult
         public bool $success,
         public ?string $error = null,
         public ?float $latencyMs = null,
-    ) {}
+    ) {
+    }
 
     public static function success(float $latencyMs): self
     {

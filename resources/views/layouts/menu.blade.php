@@ -197,7 +197,7 @@
                         <li role="presentation" class="divider"></li>
                         @endcanany
                         @can('device.create')
-                        <li><a href="{{ url('addhost') }}"><i class="fa fa-plus fa-fw fa-lg"
+                        <li><a href="{{ route('device.add') }}"><i class="fa fa-plus fa-fw fa-lg"
                                                               aria-hidden="true"></i> {{ __('Add Device') }}</a></li>
                         @endcan
                         @can('device.delete')

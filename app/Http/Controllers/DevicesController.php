@@ -227,7 +227,7 @@ class DevicesController extends Controller
                 'endpoint' => route('ajax.select.poller-group'),
             ];
         }
-        
+
         $fields[] = [
             'key' => 'disabled',
             'label' => __('Disabled'),

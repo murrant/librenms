@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Data\DeviceCredentialRepository;
-use App\Data\DeviceSecretRepository;
 use App\Facades\LibrenmsConfig;
 use App\Models\Traits\Filterable;
 use App\View\SimpleTemplate;
@@ -24,6 +23,7 @@ use Illuminate\Support\Str;
 use LibreNMS\Enum\AddressFamily;
 use LibreNMS\Enum\DeviceStatus;
 use LibreNMS\Enum\MaintenanceStatus;
+use LibreNMS\Enum\PollingMethodType;
 use LibreNMS\Exceptions\InvalidIpException;
 use LibreNMS\Util\IP;
 use LibreNMS\Util\IPv4;
@@ -143,6 +143,24 @@ class Device extends BaseModel
         return static::where('hostname', $hostname)->first();
     }
 
+    public function getPollingMethod(string $method): ?DevicePollingMethod
+    {
+        $type = PollingMethodType::tryFrom($method);
+        if (! $type) {
+            return null;
+        }
+
+        if ($this->relationLoaded('pollingMethods')) {
+            return $this->pollingMethods->firstWhere('method_type', $type);
+        }
+
+        if ($this->exists) {
+            return $this->pollingMethods()->where('method_type', $type->value)->first();
+        }
+
+        return null;
+    }
+
     public function pollerTarget(): string
     {
         return ($this->overwrite_ip ?: $this->hostname) ?: '';
@@ -216,12 +234,9 @@ class Device extends BaseModel
         return false; // no known snmpver
     }
 
-    /**
-     * Conveinence method.  It is better to use dependency injection
-     */
-    public function getSecrets(): DeviceSecretRepository
+    public function getPollingMethods(): \LibreNMS\Polling\Method\PollingMethodRepository
     {
-        return new DeviceSecretRepository($this);
+        return new \LibreNMS\Polling\Method\PollingMethodRepository($this);
     }
 
     /**
@@ -348,7 +363,7 @@ class Device extends BaseModel
             return $name;
         }
 
-        $length = \App\Facades\LibrenmsConfig::get('shorthost_target_length', $length);
+        $length = LibrenmsConfig::get('shorthost_target_length', $length);
         if ($length < strlen($name)) {
             $take = max(substr_count($name, '.', 0, $length), 1);
 
@@ -542,6 +557,46 @@ class Device extends BaseModel
     }
 
     // ---- Accessors/Mutators ----
+
+    public function getSnmpverAttribute($value)
+    {
+        return $this->getPollingMethods()->snmp()->version;
+    }
+
+    public function getCommunityAttribute($value)
+    {
+        return $this->getPollingMethods()->snmp()->community;
+    }
+
+    public function getAuthlevelAttribute($value)
+    {
+        return $this->getPollingMethods()->snmp()->authlevel;
+    }
+
+    public function getAuthnameAttribute($value)
+    {
+        return $this->getPollingMethods()->snmp()->authname;
+    }
+
+    public function getAuthpassAttribute($value)
+    {
+        return $this->getPollingMethods()->snmp()->authpass;
+    }
+
+    public function getAuthalgoAttribute($value)
+    {
+        return $this->getPollingMethods()->snmp()->authalgo;
+    }
+
+    public function getCryptopassAttribute($value)
+    {
+        return $this->getPollingMethods()->snmp()->cryptopass;
+    }
+
+    public function getCryptoalgoAttribute($value)
+    {
+        return $this->getPollingMethods()->snmp()->cryptoalgo;
+    }
 
     public function getIconAttribute($icon): string
     {
@@ -965,7 +1020,7 @@ class Device extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, \App\Models\Link>
+     * @return \Illuminate\Support\Collection<int, Link>
      */
     public function allLinks(): \Illuminate\Support\Collection
     {
@@ -982,7 +1037,7 @@ class Device extends BaseModel
 
     /**
      * @return HasMany<Ipv4Mac, $this>
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\MacAccounting, $this>
+     * @return HasMany<MacAccounting, $this>
      */
     public function macAccounting(): HasMany
     {
@@ -990,7 +1045,7 @@ class Device extends BaseModel
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Ipv4Mac, $this>
+     * @return HasMany<Ipv4Mac, $this>
      */
     public function macs(): HasMany
     {

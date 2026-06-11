@@ -26,7 +26,6 @@
 
 namespace LibreNMS\Polling;
 
-use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 
 readonly class ConnectivityHelper
@@ -48,12 +47,12 @@ readonly class ConnectivityHelper
 
     public function snmpIsEnabled(): bool
     {
-        return $this->device->snmp_disable === false;
+        return (bool) $this->device->getPollingMethod('snmp')?->enabled;
     }
 
     public function icmpIsEnabled(): bool
     {
-        return LibrenmsConfig::get('icmp_check') && ! ($this->device->exists && $this->device->getAttrib('override_icmp_disable') === 'true');
+        return (bool) $this->device->getPollingMethod('icmp')?->enabled;
     }
 
     public function snmpIsAvailable(): bool
@@ -68,7 +67,7 @@ readonly class ConnectivityHelper
 
     public function ipmiIsEnabled(): bool
     {
-        return $this->device->exists && $this->device->getAttrib('ipmi_hostname');
+        return (bool) $this->device->getPollingMethod('ipmi')?->enabled;
     }
 
     public function ipmiIsAvailable(): bool
@@ -78,7 +77,7 @@ readonly class ConnectivityHelper
 
     public function unixAgentIsEnabled(): bool
     {
-        return false;
+        return (bool) $this->device->getPollingMethod('unixagent')?->enabled;
     }
 
     public function unixAgentIsAvailable(): bool
