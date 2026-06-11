@@ -2,14 +2,14 @@
 
 namespace LibreNMS\Enum;
 
-use App\Data\Secrets\IpmiSecret;
-use App\Data\Secrets\SecretData;
-use App\Data\Secrets\SnmpSecret;
 use LibreNMS\Interfaces\PollingMethod;
 use LibreNMS\Polling\Method\IcmpPollingMethod;
 use LibreNMS\Polling\Method\IpmiPollingMethod;
 use LibreNMS\Polling\Method\SnmpPollingMethod;
 use LibreNMS\Polling\Method\UnixAgentPollingMethod;
+use LibreNMS\Polling\Secrets\IpmiSecret;
+use LibreNMS\Polling\Secrets\SecretData;
+use LibreNMS\Polling\Secrets\SnmpSecret;
 
 enum PollingMethodType: string
 {
@@ -43,4 +43,36 @@ enum PollingMethodType: string
     {
         return $this->secretClass() !== null;
     }
+
+    /**
+     * @param array<string, array> $schema
+     * @return array
+     */
+    public static function buildSchemaFields(array $schema, string $dataVar = 'formData'): array
+    {
+        return collect($schema)->map(function (array $field, string $key) use ($dataVar): array {
+            $visibleIfExpression = null;
+
+            if (isset($field['visible_if']) && is_array($field['visible_if'])) {
+                $visibleIfExpression = collect($field['visible_if'])
+                    ->map(function (mixed $condVal, string $condKey): string {
+                        if (is_array($condVal) && isset($condVal['$in'])) {
+                            return json_encode(array_values($condVal['$in'])) . '.includes(__DATA_VAR__[' . json_encode($condKey) . '])';
+                        }
+
+                        return '__DATA_VAR__[' . json_encode($condKey) . '] === ' . json_encode($condVal);
+                    })->implode(' && ');
+
+                $visibleIfExpression = str_replace('__DATA_VAR__', $dataVar, $visibleIfExpression);
+            }
+
+            return [
+                ...$field,
+                'key'                   => $key,
+                'field_type'            => $field['type'] ?? 'text',
+                'visible_if_expression' => $visibleIfExpression,
+            ];
+        })->values()->all();
+    }
 }
+

@@ -3,7 +3,7 @@
 /*
  * ConnectivityHelper.php
  *
- * Helper to check the connectivity to a device and optionally save metrics about that connectivity
+ * Helper to check polling method availability and module gating for a device.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,16 +27,46 @@
 namespace LibreNMS\Polling;
 
 use App\Models\Device;
+use LibreNMS\Enum\PollingMethodType;
 
 class ConnectivityHelper
 {
-    public static function snmpIsAllowed(Device $device): bool
+    public function __construct(
+        private readonly Device $device,
+    ) {}
+
+    /**
+     * Check if a specific polling method is configured and enabled for this device.
+     */
+    public function enabled(PollingMethodType $type): bool
     {
-        return (bool) $device->getPollingMethod('snmp')?->enabled;
+        return (bool) $this->device->getPollingMethod($type)?->enabled;
     }
 
-    public static function pingIsAllowed(Device $device): bool
+    public function can(PollingMethodType $type): bool
     {
-        return (bool) $device->getPollingMethod('icmp')?->enabled;
+        $method = $this->device->getPollingMethod($type);
+
+        return $method?->enabled && $method?->last_check_successful;
+    }
+
+    public function canSnmp(): bool
+    {
+        return $this->can(PollingMethodType::Snmp);
+    }
+
+    public function canIpmi(): bool
+    {
+        return $this->can(PollingMethodType::Ipmi);
+    }
+
+    public function canIcmp(): bool
+    {
+        return $this->can(PollingMethodType::Icmp);
+    }
+
+    public function canUnixAgent(): bool
+    {
+        return $this->can(PollingMethodType::UnixAgent);
     }
 }

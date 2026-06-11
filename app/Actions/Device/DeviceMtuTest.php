@@ -4,7 +4,6 @@ namespace App\Actions\Device;
 
 use App\Facades\LibrenmsConfig;
 use App\Models\Device;
-use LibreNMS\Polling\ConnectivityHelper;
 use Log;
 use Symfony\Component\Process\Process;
 
@@ -19,7 +18,7 @@ class DeviceMtuTest
 
     public function execute(Device $device): bool
     {
-        if (! ConnectivityHelper::pingIsAllowed($device)) {
+        if (! $device->getPollingMethod(PollingMethodType::Icmp)?->enabled) {
             return true;
         }
 

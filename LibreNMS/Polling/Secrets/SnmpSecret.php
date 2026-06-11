@@ -24,7 +24,7 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace App\Data\Secrets;
+namespace LibreNMS\Polling\Secrets;
 
 class SnmpSecret extends SecretData
 {

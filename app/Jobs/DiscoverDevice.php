@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Log;
 use LibreNMS\Enum\ProcessType;
 use LibreNMS\Enum\Severity;
 use LibreNMS\OS;
+use LibreNMS\Polling\ConnectivityHelper;
 use LibreNMS\Util\Dns;
 use LibreNMS\Util\Module;
 use LibreNMS\Util\ModuleList;
@@ -106,6 +107,7 @@ EOH, $this->device->hostname, $os_group ? " ($os_group)" : '', $this->device->de
         $this->deviceArray['status'] = $this->device->status;
         $this->deviceArray['status_reason'] = $this->device->status_reason;
         $os = OS::make($this->deviceArray);
+        $connectivity = new ConnectivityHelper($this->device);
         Event::listen(OsChangedEvent::class, function () use (&$os): void {
             $os = $this->handleOsChange($os);
         });
@@ -117,7 +119,7 @@ EOH, $this->device->hostname, $os_group ? " ($os_group)" : '', $this->device->de
 
             try {
                 $instance = Module::fromName($module);
-                $should_discover = $instance->shouldDiscover($os, $module_status);
+                $should_discover = $instance->shouldDiscover($os, $module_status, $connectivity);
 
                 if ($should_discover) {
                     Log::info("#### Load discovery module $module ####\n");

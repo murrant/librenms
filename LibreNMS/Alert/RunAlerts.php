@@ -34,7 +34,6 @@ namespace LibreNMS\Alert;
 use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;
 use App\Facades\Rrd;
-use App\Models\Alert;
 use App\Models\AlertLog;
 use App\Models\AlertTransport;
 use App\Models\ApplicationMetric;
@@ -45,9 +44,9 @@ use LibreNMS\Alerting\QueryBuilderParser;
 use LibreNMS\Enum\AlertRuleOperationPhase;
 use LibreNMS\Enum\AlertState;
 use LibreNMS\Enum\MaintenanceStatus;
+use LibreNMS\Enum\PollingMethodType;
 use LibreNMS\Enum\Severity;
 use LibreNMS\Exceptions\AlertTransportDeliveryException;
-use LibreNMS\Polling\ConnectivityHelper;
 use LibreNMS\Util\Number;
 use LibreNMS\Util\Time;
 
@@ -127,7 +126,7 @@ class RunAlerts
         $obj['proc'] = $alert['proc'];
         $obj['status'] = $device->status;
         $obj['status_reason'] = $device->status_reason;
-        if (ConnectivityHelper::pingIsAllowed($device)) {
+        if ($device->getPollingMethod(PollingMethodType::Icmp)?->enabled) {
             $last_ping = Rrd::lastUpdate(Rrd::name($device->hostname, 'icmp-perf'));
             if ($last_ping) {
                 $obj['ping_timestamp'] = $last_ping->timestamp;

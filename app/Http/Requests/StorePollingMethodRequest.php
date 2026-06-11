@@ -44,7 +44,7 @@ class StorePollingMethodRequest extends FormRequest
             ];
 
             if ($type->hasSecret() && $this->input('credential_mode', 'existing') === 'new') {
-                /** @var class-string<\App\Data\Secrets\SecretData> $secretClass */
+                /** @var class-string<\LibreNMS\Polling\Secrets\SecretData> $secretClass */
                 $secretClass = $type->secretClass();
                 $rules = [
                     ...$rules,

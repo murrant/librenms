@@ -74,7 +74,7 @@ class PollDevice implements ShouldQueue
                 $this->recordPerformance($measurement);
             }
 
-            if (ConnectivityHelper::pingIsAllowed($this->device)) {
+            if ($this->device->getPollingMethod(PollingMethodType::Icmp)?->enabled) {
                 $this->os->enableGraph('ping_perf');
             }
 
@@ -129,7 +129,8 @@ class PollDevice implements ShouldQueue
 
             try {
                 $instance = Module::fromName($module);
-                $should_poll = $instance->shouldPoll($this->os, $module_status);
+                $connectivity = new ConnectivityHelper($this->device, $module_status);
+                $should_poll = $instance->shouldPoll($this->os, $connectivity);
 
                 if ($should_poll) {
                     Log::info("#### Load poller module $module ####\n");
