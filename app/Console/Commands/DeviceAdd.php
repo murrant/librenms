@@ -93,8 +93,6 @@ class DeviceAdd extends LnmsCommand
         $device = new Device([
             'hostname' => $this->argument('device spec'),
             'display_template' => $this->option('display-name'),
-            'port' => $this->option('port'),
-            'transport' => $this->option('transport'),
             'poller_group' => $this->option('poller-group'),
             'port_association_mode' => PortAssociationMode::getId($this->option('port-association-mode')),
         ]);
@@ -109,17 +107,19 @@ class DeviceAdd extends LnmsCommand
         ]));
 
         if ($this->option('ping-only')) {
-            $device->snmp_disable = true;
             $device->os = $this->option('os');
             $device->hardware = $this->option('hardware');
             $device->sysName = $this->option('sysName');
         } else {
-            $device->snmp_disable = false;
             // SNMP polling method is added if not ping-only
             $snmpPollingMethod = new DevicePollingMethod([
                 'method_type' => PollingMethodType::Snmp,
                 'enabled' => true,
                 'affects_availability' => true,
+                'settings' => array_filter([
+                    'port' => $this->option('port'),
+                    'transport' => $this->option('transport'),
+                ]),
             ]);
 
             // Build SnmpSecret if custom credentials were provided
