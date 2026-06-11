@@ -26,11 +26,11 @@
 
 namespace LibreNMS\Enum;
 
-use App\Data\Secrets\IcmpSecret;
-use App\Data\Secrets\IpmiSecret;
-use App\Data\Secrets\SecretData;
-use App\Data\Secrets\SnmpSecret;
-use App\Data\Secrets\UnixAgentSecret;
+use LibreNMS\Polling\Secrets\IcmpSecret;
+use LibreNMS\Polling\Secrets\IpmiSecret;
+use LibreNMS\Polling\Secrets\SecretData;
+use LibreNMS\Polling\Secrets\SnmpSecret;
+use LibreNMS\Polling\Secrets\UnixAgentSecret;
 
 enum SecretType: string
 {

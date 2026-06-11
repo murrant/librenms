@@ -4,7 +4,7 @@ namespace App\Actions\Device;
 
 use App\Models\Device;
 use LibreNMS\Enum\AvailabilitySource;
-use LibreNMS\Polling\ConnectivityHelper;
+use LibreNMS\Enum\PollingMethodType;
 
 class CheckDeviceAvailability
 {
@@ -18,7 +18,7 @@ class CheckDeviceAvailability
 
     public function execute(Device $device, bool $commit = false): bool
     {
-        $icmpMethod = $device->getPollingMethod('icmp');
+        $icmpMethod = $device->getPollingMethod(PollingMethodType::Icmp);
         if ($icmpMethod?->enabled) {
             $ping_response = $this->deviceIcmpIsAvailable->execute($device);
             $icmpMethod->last_check_successful = $ping_response->isAlive();
@@ -33,7 +33,7 @@ class CheckDeviceAvailability
             }
         }
 
-        $snmpMethod = $device->getPollingMethod('snmp');
+        $snmpMethod = $device->getPollingMethod(PollingMethodType::Snmp);
         if ($snmpMethod?->enabled) {
             $icmp_success = ! $icmpMethod?->enabled || $icmpMethod->last_check_successful || ! $icmpMethod->affects_availability;
             if ($icmp_success) {

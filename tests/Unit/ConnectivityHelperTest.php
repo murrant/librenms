@@ -4,7 +4,6 @@ namespace LibreNMS\Tests\Unit;
 
 use App\Actions\Device\CheckDeviceAvailability;
 use App\Actions\Device\DeviceSnmpIsAvailable;
-use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use LibreNMS\Data\Source\Icmp\Fping;
 use LibreNMS\Data\Source\Icmp\FpingResponse;
@@ -55,10 +54,21 @@ final class ConnectivityHelperTest extends TestCase
             );
 
         $device = new Device();
+        $icmpMethod = new \App\Models\DevicePollingMethod([
+            'method_type' => \LibreNMS\Enum\PollingMethodType::Icmp,
+            'enabled' => true,
+            'affects_availability' => true,
+        ]);
+        $snmpMethod = new \App\Models\DevicePollingMethod([
+            'method_type' => \LibreNMS\Enum\PollingMethodType::Snmp,
+            'enabled' => true,
+            'affects_availability' => true,
+        ]);
+        $device->setRelation('pollingMethods', collect([$icmpMethod, $snmpMethod]));
 
         /** ping and snmp enabled */
-        LibrenmsConfig::set('icmp_check', true);
-        $device->snmp_disable = false;
+        $icmpMethod->enabled = true;
+        $snmpMethod->enabled = true;
 
         // ping up, snmp up
         $this->assertTrue(app(CheckDeviceAvailability::class)->execute($device));
@@ -81,8 +91,10 @@ final class ConnectivityHelperTest extends TestCase
         $this->assertEquals('icmp,snmp', $device->status_reason);
 
         /** ping disabled and snmp enabled */
-        LibrenmsConfig::set('icmp_check', false);
-        $device->snmp_disable = false;
+        $device->status = true;
+        $device->status_reason = '';
+        $icmpMethod->enabled = false;
+        $snmpMethod->enabled = true;
 
         // ping up, snmp up
         $this->assertTrue(app(CheckDeviceAvailability::class)->execute($device));
@@ -105,8 +117,10 @@ final class ConnectivityHelperTest extends TestCase
         $this->assertEquals('snmp', $device->status_reason);
 
         /** ping enabled and snmp disabled */
-        LibrenmsConfig::set('icmp_check', true);
-        $device->snmp_disable = true;
+        $device->status = true;
+        $device->status_reason = '';
+        $icmpMethod->enabled = true;
+        $snmpMethod->enabled = false;
 
         // ping up, snmp up
         $this->assertTrue(app(CheckDeviceAvailability::class)->execute($device));
@@ -129,8 +143,10 @@ final class ConnectivityHelperTest extends TestCase
         $this->assertEquals('icmp', $device->status_reason);
 
         /** ping and snmp disabled */
-        LibrenmsConfig::set('icmp_check', false);
-        $device->snmp_disable = true;
+        $device->status = true;
+        $device->status_reason = '';
+        $icmpMethod->enabled = false;
+        $snmpMethod->enabled = false;
 
         // ping up, snmp up
         $this->assertTrue(app(CheckDeviceAvailability::class)->execute($device));

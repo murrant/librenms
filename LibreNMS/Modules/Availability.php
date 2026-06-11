@@ -63,7 +63,7 @@ class Availability implements Module
      */
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->hasAvailability();
+        return $connectivity->isEnabled();
     }
 
     /**

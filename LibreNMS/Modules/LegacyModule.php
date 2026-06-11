@@ -88,11 +88,15 @@ class LegacyModule implements Module
 
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        // all legacy modules require snmp except ipmi and unix-agent
-        return $status->isEnabled() && match ($this->name) {
-            'ipmi' => $connectivity->ipmiIsAvailable(),
-            'unix-agent' => $connectivity->unixAgentIsAvailable(),
-            default => $connectivity->snmpIsAvailable(),
+        if (! $connectivity->isEnabledAndDeviceUp()) {
+            return false;
+        }
+
+        // Legacy modules for ipmi and unix-agent don't require SNMP
+        return match ($this->name) {
+            'ipmi' => $connectivity->canIpmi(),
+            'unix-agent' => $connectivity->canUnixAgent(),
+            default => $connectivity->canSnmp(),
         };
     }
 

@@ -64,7 +64,7 @@ class IpSystemStats implements Module
      */
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->snmpIsAvailable();
+        return $status->isEnabled() && $connectivity->canSnmp();
     }
 
     /**

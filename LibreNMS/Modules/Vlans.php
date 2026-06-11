@@ -56,7 +56,7 @@ class Vlans implements Module
      */
     public function shouldDiscover(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->snmpIsAvailable();
+        return $status->isEnabled() && $connectivity->canSnmp();
     }
 
     /**
@@ -68,7 +68,7 @@ class Vlans implements Module
             return false; // FIXME improve test suite to skip polling when polling data is null
         }
 
-        return $status->isEnabled() && $connectivity->snmpIsAvailable();
+        return $status->isEnabled() && $connectivity->canSnmp();
     }
 
     /**

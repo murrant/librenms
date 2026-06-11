@@ -48,7 +48,7 @@ class Slas implements Module
 
     public function shouldDiscover(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->snmpIsAvailable() && $os instanceof SlaDiscovery;
+        return $status->isEnabled() && $connectivity->canSnmp() && $os instanceof SlaDiscovery;
     }
 
     /**
@@ -68,7 +68,7 @@ class Slas implements Module
 
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->snmpIsAvailable() && $os instanceof SlaPolling;
+        return $status->isEnabled() && $connectivity->canSnmp() && $os instanceof SlaPolling;
     }
 
     /**

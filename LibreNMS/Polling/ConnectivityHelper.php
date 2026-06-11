@@ -3,7 +3,7 @@
 /*
  * ConnectivityHelper.php
  *
- * Helper to check the connectivity to a device and optionally save metrics about that connectivity
+ * Helper to check polling method availability and module gating for a device.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 namespace LibreNMS\Polling;
 
 use App\Models\Device;
+use LibreNMS\Enum\PollingMethodType;
 
 readonly class ConnectivityHelper
 {
@@ -47,12 +48,12 @@ readonly class ConnectivityHelper
 
     public function snmpIsEnabled(): bool
     {
-        return (bool) $this->device->getPollingMethod('snmp')?->enabled;
+        return $this->enabled(PollingMethodType::Snmp);
     }
 
     public function icmpIsEnabled(): bool
     {
-        return (bool) $this->device->getPollingMethod('icmp')?->enabled;
+        return $this->enabled(PollingMethodType::Icmp);
     }
 
     public function snmpIsAvailable(): bool
@@ -67,7 +68,7 @@ readonly class ConnectivityHelper
 
     public function ipmiIsEnabled(): bool
     {
-        return (bool) $this->device->getPollingMethod('ipmi')?->enabled;
+        return $this->enabled(PollingMethodType::Ipmi);
     }
 
     public function ipmiIsAvailable(): bool
@@ -77,11 +78,46 @@ readonly class ConnectivityHelper
 
     public function unixAgentIsEnabled(): bool
     {
-        return (bool) $this->device->getPollingMethod('unixagent')?->enabled;
+        return $this->enabled(PollingMethodType::UnixAgent);
     }
 
     public function unixAgentIsAvailable(): bool
     {
         return $this->unixAgentIsEnabled();
+    }
+
+    /**
+     * Check if a specific polling method is configured and enabled for this device.
+     */
+    public function enabled(PollingMethodType $type): bool
+    {
+        return (bool) $this->device->getPollingMethod($type)?->enabled;
+    }
+
+    public function can(PollingMethodType $type): bool
+    {
+        $method = $this->device->getPollingMethod($type);
+
+        return $method?->enabled && $method?->last_check_successful;
+    }
+
+    public function canSnmp(): bool
+    {
+        return $this->can(PollingMethodType::Snmp);
+    }
+
+    public function canIpmi(): bool
+    {
+        return $this->can(PollingMethodType::Ipmi);
+    }
+
+    public function canIcmp(): bool
+    {
+        return $this->can(PollingMethodType::Icmp);
+    }
+
+    public function canUnixAgent(): bool
+    {
+        return $this->can(PollingMethodType::UnixAgent);
     }
 }

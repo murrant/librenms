@@ -64,7 +64,7 @@ class Isis implements Module
 
     public function shouldDiscover(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->snmpIsAvailable();
+        return $status->isEnabled() && $connectivity->canSnmp();
     }
 
     /**
@@ -85,7 +85,7 @@ class Isis implements Module
 
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->snmpIsAvailable();
+        return $status->isEnabled() && $connectivity->canSnmp();
     }
 
     /**
