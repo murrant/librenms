@@ -21,31 +21,33 @@
 
             <form method="POST" action="{{ route('device.add.store') }}"
                   x-data="{
+                      activeTab: 'snmp',
                       activeMethods: ['snmp', 'icmp'],
                       methods: {
                           @foreach($availableMethods as $method)
                           '{{ $method['type'] }}': {
+                              validate: true,
                               credential_mode: 'default',
                               formData: @js($method['schema_defaults'] ?? []),
                               settingsData: {}
                           },
                           @endforeach
                       },
-                      addableTypes: @js(
-                          collect($availableMethods)
-                              ->filter(fn($m) => !in_array($m['type'], ['snmp', 'icmp']))
-                              ->values()
-                      ),
+                      allTypes: @js(collect($availableMethods)->map(fn($m) => ['type' => $m['type'], 'label' => $m['label']])->values()),
                       get addableRemaining() {
-                          return this.addableTypes.filter(m => !this.activeMethods.includes(m.type));
+                          return this.allTypes.filter(m => !this.activeMethods.includes(m.type));
                       },
                       addMethod(type) {
                           if (!this.activeMethods.includes(type)) {
                               this.activeMethods.push(type);
+                              this.activeTab = type;
                           }
                       },
                       removeMethod(type) {
                           this.activeMethods = this.activeMethods.filter(t => t !== type);
+                          if (this.activeTab === type) {
+                              this.activeTab = this.activeMethods[0] ?? '';
+                          }
                       },
                   }">
                 @csrf
@@ -90,44 +92,48 @@
 
                 <div class="tw:flex tw:flex-col tw:md:flex-row tw:gap-6">
 
-                    {{-- Left: method tabs --}}
+                    {{-- Left: tab list --}}
                     <div class="tw:w-full tw:md:w-1/4 tw:shrink-0">
                         <ul class="tw:flex tw:flex-col tw:space-y-2">
                             @foreach($availableMethods as $method)
-                                <li x-show="activeMethods.includes('{{ $method['type'] }}')">
-                                    <div :class="'tw:w-full tw:text-left tw:px-4 tw:py-3 tw:border tw:rounded-lg tw:flex tw:justify-between tw:items-center tw:shadow-sm tw:border-gray-200 tw:dark:border-dark-gray-400 tw:text-gray-700 tw:dark:text-dark-white-200'">
-                                        <span class="tw:font-medium">{{ $method['label'] }}</span>
-                                        @if(!in_array($method['type'], ['snmp', 'icmp']))
-                                            <button type="button"
-                                                    @click="removeMethod('{{ $method['type'] }}')"
-                                                    class="tw:text-gray-400 tw:hover:text-red-500 tw:transition-colors"
-                                                    title="{{ __('Remove') }}">
-                                                <i class="fa fa-times"></i>
-                                            </button>
-                                        @endif
-                                    </div>
+                                <li x-show="activeMethods.includes('{{ $method['type'] }}')"
+                                    :class="activeTab === '{{ $method['type'] }}'
+                                        ? 'tw:bg-blue-600 tw:border-blue-600 tw:dark:bg-blue-800'
+                                        : 'tw:border-gray-200 tw:hover:bg-gray-50 tw:dark:border-dark-gray-400 tw:dark:hover:bg-dark-gray-400'"
+                                    class="tw:flex tw:items-center tw:border tw:rounded-lg tw:shadow-sm tw:transition-colors tw:overflow-hidden">
+                                    <button type="button"
+                                            @click="activeTab = '{{ $method['type'] }}'"
+                                            :class="activeTab === '{{ $method['type'] }}' ? 'tw:text-white!' : 'tw:text-gray-700 tw:dark:text-dark-white-200'"
+                                            class="tw:flex-1 tw:text-left tw:px-4 tw:py-3 tw:font-medium tw:transition-colors">
+                                        {{ $method['label'] }}
+                                    </button>
+                                    <button type="button"
+                                            @click="removeMethod('{{ $method['type'] }}')"
+                                            :class="activeTab === '{{ $method['type'] }}' ? 'tw:text-blue-200 tw:hover:text-white' : 'tw:text-gray-400 tw:hover:text-red-500'"
+                                            class="tw:px-3 tw:py-3 tw:shrink-0 tw:transition-colors"
+                                            title="{{ __('Remove') }}">
+                                        <i class="fa fa-times"></i>
+                                    </button>
                                 </li>
                             @endforeach
 
-                            {{-- Add polling type dropdown --}}
+                            {{-- Add polling type --}}
                             <li class="tw:mt-4 tw:pt-2 tw:border-t tw:border-gray-200 tw:dark:border-dark-gray-400"
                                 x-show="addableRemaining.length > 0">
                                 <div class="input-group">
                                     <select id="add-method-select" class="form-control">
                                         <option value="">{{ __('Add polling type...') }}</option>
                                         @foreach($availableMethods as $method)
-                                            @if(!in_array($method['type'], ['snmp', 'icmp']))
-                                                <option value="{{ $method['type'] }}"
-                                                        x-show="!activeMethods.includes('{{ $method['type'] }}')">
-                                                    {{ $method['label'] }}
-                                                </option>
-                                            @endif
+                                            <option value="{{ $method['type'] }}"
+                                                    x-show="!activeMethods.includes('{{ $method['type'] }}')">
+                                                {{ $method['label'] }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     <span class="input-group-btn">
                                         <button type="button" class="btn btn-success"
                                                 @click="
-                                                    const sel = document.getElementById('add-method-select');
+                                                    const sel = $el.closest('.input-group').querySelector('select');
                                                     if (sel.value) { addMethod(sel.value); sel.value = ''; }
                                                 ">
                                             <i class="fa fa-plus"></i>
@@ -138,40 +144,43 @@
                         </ul>
                     </div>
 
-                    {{-- Right: method panels --}}
-                    <div class="tw:w-full tw:md:w-3/4 tw:flex tw:flex-col tw:gap-4">
+                    {{-- Right: tab panels --}}
+                    <div class="tw:w-full tw:md:w-3/4 tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:rounded-lg tw:shadow-sm tw:p-6 tw:grow">
                         @foreach($availableMethods as $method)
-                            <div x-show="activeMethods.includes('{{ $method['type'] }}')"
-                                 class="tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:rounded-lg tw:shadow-sm tw:p-5"
+                            <div x-show="activeTab === '{{ $method['type'] }}' && activeMethods.includes('{{ $method['type'] }}')"
+                                 style="display: none;"
                                  x-transition>
 
-                                <div class="tw:text-lg tw:font-semibold tw:mb-4 tw:pb-3 tw:border-b tw:border-gray-200 tw:dark:border-dark-gray-400 tw:text-gray-800 tw:dark:text-dark-white-100">
-                                    {{ $method['label'] }}
+                                <div class="tw:text-2xl tw:font-semibold tw:mb-6 tw:pb-3 tw:border-b tw:border-gray-200 tw:dark:border-dark-gray-400 tw:text-gray-800 tw:dark:text-dark-white-100">
+                                    {{ $method['label'] }} {{ __('Settings') }}
                                 </div>
 
-                                {{-- Hidden active flag --}}
-                                <input type="hidden" name="polling_methods[{{ $method['type'] }}][active]" value="0">
-                                <input type="hidden" name="polling_methods[{{ $method['type'] }}][active]"
-                                       x-bind:value="activeMethods.includes('{{ $method['type'] }}') ? '1' : '0'">
+                                {{-- Active flag (submitted for all methods, controller ignores inactive ones) --}}
+                                <template x-if="activeMethods.includes('{{ $method['type'] }}')">
+                                    <input type="hidden" name="polling_methods[{{ $method['type'] }}][active]" value="1">
+                                </template>
 
-                                {{-- Validate checkbox --}}
-                                <label class="tw:flex tw:items-center tw:cursor-pointer tw:px-4 tw:py-3 tw:rounded-lg tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:w-full tw:max-w-md tw:mb-4">
-                                    <div class="tw:relative tw:shrink-0" x-data="{ checked: true }">
-                                        <input type="hidden" name="polling_methods[{{ $method['type'] }}][validate]" value="0">
-                                        <input type="checkbox" name="polling_methods[{{ $method['type'] }}][validate]"
-                                               value="1" class="tw:sr-only" x-model="checked">
-                                        <div class="tw:block tw:w-12 tw:h-7 tw:rounded-full tw:transition-colors tw:duration-200"
-                                             :class="checked ? 'tw:bg-blue-600' : 'tw:bg-gray-300 tw:dark:bg-dark-gray-400'"></div>
-                                        <div class="tw:absolute tw:left-0.5 tw:top-0.5 tw:w-6 tw:h-6 tw:rounded-full tw:transition-transform tw:duration-200 tw:bg-white tw:shadow-sm"
-                                             :class="checked ? 'tw:translate-x-5' : 'tw:translate-x-0'"></div>
-                                    </div>
-                                    <span class="tw:ml-3 tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Validate on add') }}</span>
-                                </label>
+                                {{-- Validate on add toggle --}}
+                                <div class="tw:mb-6">
+                                    <label class="tw:flex tw:items-center tw:cursor-pointer tw:group tw:px-4 tw:py-3 tw:rounded-lg tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:w-full tw:max-w-md">
+                                        <div class="tw:relative tw:shrink-0">
+                                            <input type="hidden" name="polling_methods[{{ $method['type'] }}][validate]" value="0">
+                                            <input type="checkbox" name="polling_methods[{{ $method['type'] }}][validate]"
+                                                   value="1" class="tw:sr-only"
+                                                   x-model="methods['{{ $method['type'] }}'].validate">
+                                            <div class="tw:block tw:w-16 tw:h-9 tw:rounded-full tw:transition-colors tw:duration-200"
+                                                 :class="methods['{{ $method['type'] }}'].validate ? 'tw:bg-blue-600' : 'tw:bg-gray-300 tw:dark:bg-dark-gray-400'"></div>
+                                            <div class="tw:absolute tw:left-1 tw:top-1 tw:w-7 tw:h-7 tw:rounded-full tw:transition-transform tw:duration-200 tw:bg-white tw:shadow-sm"
+                                                 :class="methods['{{ $method['type'] }}'].validate ? 'tw:translate-x-7' : 'tw:translate-x-0'"></div>
+                                        </div>
+                                        <span class="tw:ml-4 tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Validate on add') }}</span>
+                                    </label>
+                                </div>
 
-                                {{-- Settings fields (e.g. SNMP port/transport) --}}
+                                {{-- Settings fields --}}
                                 @if(!empty($method['settings_fields']))
-                                    <div class="tw:mb-4">
-                                        <h4 class="tw:text-sm tw:font-semibold tw:mb-3 tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Settings') }}</h4>
+                                    <div class="tw:mb-6">
+                                        <h4 class="tw:font-semibold tw:text-base tw:mb-3 tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Settings') }}</h4>
                                         <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-4 tw:max-w-2xl">
                                             @foreach($method['settings_fields'] as $setting)
                                                 <div class="form-group"
@@ -204,12 +213,12 @@
                                     </div>
                                 @endif
 
-                                {{-- Credential section --}}
+                                {{-- Credentials --}}
                                 @if(!empty($method['schema_fields']))
-                                    <div class="tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:rounded-lg tw:p-4">
-                                        <h4 class="tw:text-sm tw:font-semibold tw:mb-3 tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Credentials') }}</h4>
+                                    <div class="tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:rounded-lg tw:p-5">
+                                        <h4 class="tw:font-semibold tw:text-base tw:mb-4 tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Credentials') }}</h4>
 
-                                        <div class="tw:flex tw:gap-4 tw:mb-4">
+                                        <div class="tw:flex tw:flex-wrap tw:gap-4 tw:mb-4">
                                             <label class="radio-inline">
                                                 <input type="radio"
                                                        name="polling_methods[{{ $method['type'] }}][credential_mode]"
@@ -234,7 +243,9 @@
                                         </div>
 
                                         {{-- Existing secret picker --}}
-                                        <div x-show="methods['{{ $method['type'] }}'].credential_mode === 'existing'" class="form-group" style="display: none;">
+                                        <div x-show="methods['{{ $method['type'] }}'].credential_mode === 'existing'"
+                                             style="display: none;"
+                                             class="form-group tw:max-w-md">
                                             <label class="control-label">{{ __('Select Secret') }}</label>
                                             <select name="polling_methods[{{ $method['type'] }}][secret_id]" class="form-control">
                                                 <option value="">{{ __('Select an existing secret...') }}</option>
@@ -248,8 +259,9 @@
                                         </div>
 
                                         {{-- New secret form --}}
-                                        <div x-show="methods['{{ $method['type'] }}'].credential_mode === 'new'" style="display: none;">
-                                            <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-4 tw:max-w-2xl tw:mb-3">
+                                        <div x-show="methods['{{ $method['type'] }}'].credential_mode === 'new'"
+                                             style="display: none;">
+                                            <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-4 tw:max-w-2xl tw:mb-4">
                                                 <div class="form-group">
                                                     <label class="control-label">{{ __('Secret Description') }}</label>
                                                     <input type="text"
@@ -305,11 +317,10 @@
 
                                 {{-- SNMP-off manual overrides --}}
                                 @if($method['type'] === 'snmp')
-                                    <div x-data="{ snmpValidate: true }"
-                                         x-show="activeMethods.includes('snmp') && !snmpValidate"
-                                         class="tw:mt-4 tw:pt-4 tw:border-t tw:border-gray-200 tw:dark:border-dark-gray-400"
+                                    <div x-show="!methods['snmp'].validate"
+                                         class="tw:mt-6 tw:pt-6 tw:border-t tw:border-gray-200 tw:dark:border-dark-gray-400"
                                          style="display: none;">
-                                        <h4 class="tw:text-sm tw:font-semibold tw:mb-3 tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Manual Overrides') }}</h4>
+                                        <h4 class="tw:font-semibold tw:text-base tw:mb-3 tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Manual Overrides') }}</h4>
                                         <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-3 tw:gap-4 tw:max-w-2xl">
                                             <div class="form-group">
                                                 <label for="sysName" class="control-label">{{ __('sysName') }} <span class="text-muted">({{ __('optional') }})</span></label>
@@ -327,9 +338,9 @@
                                     </div>
                                 @endif
 
-                            </div>
+                            </div>{{-- end panel --}}
                         @endforeach
-                    </div>
+                    </div>{{-- end right --}}
 
                 </div>{{-- end flex row --}}
 
