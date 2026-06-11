@@ -239,7 +239,8 @@ class SnmpQueryMock implements SnmpQueryInterface
         $data = file_get_contents(base_path("/tests/snmpsim/$file.snmprec"));
         $line = strtok($data, "\r\n");
         while ($line !== false) {
-            if (empty(trim($line)) || str_starts_with(trim($line), '#')) {
+            $line = trim($line);
+            if (empty($line) || str_starts_with($line, '#')) {
                 $line = strtok("\r\n");
                 continue;
             }
