@@ -127,22 +127,20 @@ class ValidateDeviceAndCreate
         $host_unreachable_exception = new HostUnreachableSnmpException($this->device->hostname);
 
         // Retrieve existing SNMP secret from relations if set
-        $existingSnmpSecret = $this->device->snmpSecret();
+        $existingSnmpSecret = $this->device->relationLoaded('pollingMethods') 
+            ? $this->device->pollingMethods->firstWhere('method_type', PollingMethodType::Snmp)?->secret 
+            : null;
 
         // which snmp version should we try (and in what order)
         $snmp_versions = [];
         if ($existingSnmpSecret?->version) {
             $snmp_versions[] = $existingSnmpSecret->version;
-        } elseif ($this->device->snmpver) {
-            $snmp_versions[] = $this->device->snmpver;
         }
         $snmp_versions = array_unique(array_merge($snmp_versions, LibrenmsConfig::get('snmp.version')));
 
         $communities = Arr::where(Arr::wrap(LibrenmsConfig::get('snmp.community')), fn ($community) => $community && is_string($community));
         if ($existingSnmpSecret?->community) {
             array_unshift($communities, $existingSnmpSecret->community);
-        } elseif ($this->device->community) {
-            array_unshift($communities, $this->device->community);
         }
         $communities = array_unique($communities);
 
@@ -156,8 +154,6 @@ class ValidateDeviceAndCreate
                 'cryptopass' => $existingSnmpSecret->cryptopass,
                 'cryptoalgo' => $existingSnmpSecret->cryptoalgo,
             ]);
-        } else {
-            array_unshift($v3_credentials, $this->device->only(['authlevel', 'authname', 'authpass', 'authalgo', 'cryptopass', 'cryptoalgo']));
         }
         $v3_credentials = array_unique($v3_credentials, SORT_REGULAR);
 
@@ -266,26 +262,6 @@ class ValidateDeviceAndCreate
                     'enabled' => true,
                     'affects_availability' => true,
                 ]);
-
-                // Fallback: If device has SNMP attributes, build a Secret
-                if ($this->device->snmpver || $this->device->community || $this->device->authlevel) {
-                    $secret = new Secret([
-                        'secret_type' => SecretType::Snmp,
-                        'description' => 'SNMP ' . $this->device->hostname,
-                        'default' => false,
-                        'data' => [
-                            'version' => $this->device->snmpver ?: 'v2c',
-                            'community' => $this->device->community,
-                            'authlevel' => $this->device->authlevel ?: 'noAuthNoPriv',
-                            'authname' => $this->device->authname,
-                            'authpass' => $this->device->authpass,
-                            'authalgo' => $this->device->authalgo ?: 'SHA',
-                            'cryptopass' => $this->device->cryptopass,
-                            'cryptoalgo' => $this->device->cryptoalgo ?: 'AES',
-                        ],
-                    ]);
-                    $snmpMethod->setRelation('secret', $secret);
-                }
 
                 $pollingMethods->push($snmpMethod);
             }

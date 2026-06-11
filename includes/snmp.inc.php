@@ -16,7 +16,6 @@
  * the source code distribution for details.
  */
 
-use App\Data\Secrets\SnmpSecret;
 use App\Facades\LibrenmsConfig;
 use App\Polling\Measure\Measurement;
 use Illuminate\Support\Arr;
@@ -171,10 +170,9 @@ function gen_snmp_cmd($cmd, $device, $oids, $options = null, $mib = null, $mibdi
     $deviceModel = DeviceCache::get($device['device_id']);
 
     // $device is not persisted to the db, fill in the data
-    $credentials = ($deviceModel->exists ? $deviceModel->snmpSecret() : null)
-        ?: SnmpSecret::fromDeviceArray($device);
+    $snmpMethod = $deviceModel->getPollingMethods()->snmp();
 
-    $cmd = array_merge($cmd, \LibreNMS\Polling\Method\SnmpPollingMethod::fromSecret($credentials)->toNetSnmpOptions($device['context_name'] ?? null), Arr::wrap($options));
+    $cmd = array_merge($cmd, $snmpMethod->toNetSnmpOptions($device['context_name'] ?? null), Arr::wrap($options));
 
     if ($mib) {
         array_push($cmd, '-m', $mib);

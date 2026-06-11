@@ -48,13 +48,6 @@ class Device extends BaseModel
     public $timestamps = false;
     protected $primaryKey = 'device_id';
     protected $fillable = [
-        'authalgo',
-        'authlevel',
-        'authname',
-        'authpass',
-        'community',
-        'cryptoalgo',
-        'cryptopass',
         'disable_notify',
         'disabled',
         'features',
@@ -71,22 +64,15 @@ class Device extends BaseModel
         'override_sysLocation',
         'overwrite_ip',
         'poller_group',
-        'port',
         'port_association_mode',
         'purpose',
-        'retries',
         'serial',
-        'snmp_disable',
-        'snmp_max_repeaters',
-        'snmpver',
         'status',
         'status_reason',
         'sysDescr',
         'sysName',
         'sysObjectID',
         'snmpEngineID',
-        'timeout',
-        'transport',
         'type',
         'version',
         'uptime',
@@ -130,7 +116,6 @@ class Device extends BaseModel
             'ignore' => 'boolean',
             'ignore_status' => 'boolean',
             'disabled' => 'boolean',
-            'snmp_disable' => 'boolean',
             'disable_notify' => 'boolean',
             'override_sysLocation' => 'boolean',
         ];
@@ -212,23 +197,25 @@ class Device extends BaseModel
 
     public function hasSnmpInfo(): bool
     {
-        if ($this->snmpver == 'v3') {
-            if ($this->authlevel == 'authNoPriv') {
-                return ! empty($this->authname) && ! empty($this->authpass);
+        $snmp = $this->getPollingMethods()->snmp();
+        
+        if ($snmp->version == 'v3') {
+            if ($snmp->authlevel == 'authNoPriv') {
+                return ! empty($snmp->authname) && ! empty($snmp->authpass);
             }
 
-            if ($this->authlevel == 'authPriv') {
-                return ! empty($this->authname)
-                    && ! empty($this->authpass)
-                    && ! empty($this->cryptoalgo)
-                    && ! empty($this->cryptopass);
+            if ($snmp->authlevel == 'authPriv') {
+                return ! empty($snmp->authname)
+                    && ! empty($snmp->authpass)
+                    && ! empty($snmp->cryptoalgo)
+                    && ! empty($snmp->cryptopass);
             }
 
-            return $this->authlevel !== 'noAuthNoPriv'; // reject if not noAuthNoPriv
+            return $snmp->authlevel !== 'noAuthNoPriv'; // reject if not noAuthNoPriv
         }
 
-        if ($this->snmpver == 'v2c' || $this->snmpver == 'v1') {
-            return ! empty($this->community);
+        if ($snmp->version == 'v2c' || $snmp->version == 'v1') {
+            return ! empty($snmp->community);
         }
 
         return false; // no known snmpver
@@ -557,46 +544,6 @@ class Device extends BaseModel
     }
 
     // ---- Accessors/Mutators ----
-
-    public function getSnmpverAttribute($value)
-    {
-        return $this->getPollingMethods()->snmp()->version;
-    }
-
-    public function getCommunityAttribute($value)
-    {
-        return $this->getPollingMethods()->snmp()->community;
-    }
-
-    public function getAuthlevelAttribute($value)
-    {
-        return $this->getPollingMethods()->snmp()->authlevel;
-    }
-
-    public function getAuthnameAttribute($value)
-    {
-        return $this->getPollingMethods()->snmp()->authname;
-    }
-
-    public function getAuthpassAttribute($value)
-    {
-        return $this->getPollingMethods()->snmp()->authpass;
-    }
-
-    public function getAuthalgoAttribute($value)
-    {
-        return $this->getPollingMethods()->snmp()->authalgo;
-    }
-
-    public function getCryptopassAttribute($value)
-    {
-        return $this->getPollingMethods()->snmp()->cryptopass;
-    }
-
-    public function getCryptoalgoAttribute($value)
-    {
-        return $this->getPollingMethods()->snmp()->cryptoalgo;
-    }
 
     public function getIconAttribute($icon): string
     {
