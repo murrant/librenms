@@ -23,7 +23,8 @@ class EditPollingController
 
     public function __construct(
         private readonly SecretService $secretService,
-    ) {}
+    ) {
+    }
 
     /**
      * @throws AuthorizationException
@@ -62,11 +63,11 @@ class EditPollingController
             ->orderBy('description')
             ->get();
         $secretDescriptions = $secretsForType->mapWithKeys(fn (Secret $availableSecret): array => [
-            (string)$availableSecret->id => $availableSecret->description,
+            (string) $availableSecret->id => $availableSecret->description,
         ])->all();
         $secretFormDataById = $secretsForType->mapWithKeys(fn (Secret $availableSecret): array => [
-            (string)$availableSecret->id => collect($schemaFields)->mapWithKeys(fn (array $field): array => [
-                $field['key'] => $canUnmaskSecrets ? (string)data_get($availableSecret->data, $field['key'], '') : '',
+            (string) $availableSecret->id => collect($schemaFields)->mapWithKeys(fn (array $field): array => [
+                $field['key'] => $canUnmaskSecrets ? (string) data_get($availableSecret->data, $field['key'], '') : '',
             ])->all(),
         ])->all();
 
@@ -79,10 +80,10 @@ class EditPollingController
             ])->all(),
             'settings_fields' => PollingMethodType::buildSchemaFields($settingsSchema, 'settingsData'),
             'settings' => $row?->settings ?? [],
-            'affects_availability' => $row?->affects_availability ?? (bool)($methodClass::getDefaults()['affects_availability'] ?? false),
+            'affects_availability' => $row?->affects_availability ?? (bool) ($methodClass::getDefaults()['affects_availability'] ?? false),
             'secret' => $secret,
             'secret_form_data' => collect($schema)->mapWithKeys(fn (array $field, string $key): array => [
-                $key => $canUnmaskSecrets ? (string)data_get($secret?->data, $key, '') : '',
+                $key => $canUnmaskSecrets ? (string) data_get($secret?->data, $key, '') : '',
             ])->all(),
             'secret_descriptions' => $secretDescriptions,
             'secret_form_data_by_id' => $secretFormDataById,
@@ -124,7 +125,7 @@ class EditPollingController
             'device_id' => $device->device_id,
             'method_type' => $type,
             'enabled' => true,
-            'affects_availability' => (bool)($methodClass::getDefaults()['affects_availability'] ?? false),
+            'affects_availability' => (bool) ($methodClass::getDefaults()['affects_availability'] ?? false),
             'secret_id' => $secret?->id,
             'settings' => $this->buildSettings($methodClass, $request->validatedSettings()),
         ]);
@@ -183,7 +184,7 @@ class EditPollingController
 
         if ($type->hasSecret() && array_key_exists('secret_id', $validated)) {
             $this->authorize('update', Secret::class);
-            $row->secret_id = $this->resolveExistingSecret((int)$validated['secret_id'], $type)->id;
+            $row->secret_id = $this->resolveExistingSecret((int) $validated['secret_id'], $type)->id;
         } elseif ($type->hasSecret() && $request->has('secret_data')) {
             $this->authorize('update', Secret::class);
             $mode = $validated['secret_update_mode'] ?? 'update';
@@ -199,8 +200,8 @@ class EditPollingController
 
         $methodClass = $type->methodClass();
 
-        $row->enabled = (bool)($validated['enabled'] ?? true);
-        $row->affects_availability = (bool)($validated['affects_availability'] ?? false);
+        $row->enabled = (bool) ($validated['enabled'] ?? true);
+        $row->affects_availability = (bool) ($validated['affects_availability'] ?? false);
         $row->settings = $this->mergeSettings($row->settings ?? [], $validated['settings'] ?? [], $methodClass);
 
         $row->save();

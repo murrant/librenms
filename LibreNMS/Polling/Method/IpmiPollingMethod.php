@@ -19,7 +19,8 @@ readonly class IpmiPollingMethod implements PollingMethod
         public int $cipherSuite,
         public int $timeout,
         public string $type,
-    ) {}
+    ) {
+    }
 
     public static function fromModel(DevicePollingMethod $method): self
     {

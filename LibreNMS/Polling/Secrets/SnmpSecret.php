@@ -58,6 +58,7 @@ class SnmpSecret extends SecretData
 
     /**
      * @deprecated
+     *
      * @param  array  $device
      * @return static
      */

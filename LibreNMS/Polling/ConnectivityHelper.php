@@ -33,7 +33,8 @@ class ConnectivityHelper
 {
     public function __construct(
         private readonly Device $device,
-    ) {}
+    ) {
+    }
 
     /**
      * Check if a specific polling method is configured and enabled for this device.
@@ -46,7 +47,7 @@ class ConnectivityHelper
     public function isAvailable(): bool
     {
         foreach ($this->device->pollingMethods as $method) {
-            if ($method->enabled && $method->affects_availability && !$method->last_check_successful) {
+            if ($method->enabled && $method->affects_availability && ! $method->last_check_successful) {
                 return true;
             }
         }

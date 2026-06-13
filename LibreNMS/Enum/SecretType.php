@@ -26,11 +26,9 @@
 
 namespace LibreNMS\Enum;
 
-use LibreNMS\Polling\Secrets\IcmpSecret;
 use LibreNMS\Polling\Secrets\IpmiSecret;
 use LibreNMS\Polling\Secrets\SecretData;
 use LibreNMS\Polling\Secrets\SnmpSecret;
-use LibreNMS\Polling\Secrets\UnixAgentSecret;
 
 enum SecretType: string
 {
@@ -57,5 +55,4 @@ enum SecretType: string
             self::Ipmi => IpmiSecret::class,
         };
     }
-
 }

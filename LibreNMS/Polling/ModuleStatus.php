@@ -26,7 +26,6 @@
 
 namespace LibreNMS\Polling;
 
-
 class ModuleStatus implements \Stringable
 {
     public function __construct(
@@ -75,7 +74,6 @@ class ModuleStatus implements \Stringable
 
         return 'globally';
     }
-
 
     public function hasSubModules(): bool
     {
