@@ -48,7 +48,7 @@ class Transceivers implements Module
 
     public function shouldDiscover(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp() && $os instanceof TransceiverDiscovery;
+        return $status->isEnabled() && $connectivity->snmpIsAvailable() && $os instanceof TransceiverDiscovery;
     }
 
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool

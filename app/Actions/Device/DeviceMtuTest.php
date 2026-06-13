@@ -4,6 +4,7 @@ namespace App\Actions\Device;
 
 use App\Facades\LibrenmsConfig;
 use App\Models\Device;
+use LibreNMS\Enum\PollingMethodType;
 use Log;
 use Symfony\Component\Process\Process;
 

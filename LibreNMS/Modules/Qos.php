@@ -50,7 +50,7 @@ class Qos implements Module
 
     public function shouldDiscover(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp() && $os instanceof QosDiscovery;
+        return $status->isEnabled() && $connectivity->snmpIsAvailable() && $os instanceof QosDiscovery;
     }
 
     /**
@@ -71,7 +71,7 @@ class Qos implements Module
 
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp() && $os instanceof QosPolling;
+        return $status->isEnabled() && $connectivity->snmpIsAvailable() && $os instanceof QosPolling;
     }
 
     /**

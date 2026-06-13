@@ -6,7 +6,7 @@
 
         @if($configuredMethods->isNotEmpty())
             <div
-                x-data="pollingTabs('{{ request('tab') }}', @js($configuredMethods->pluck('type')->values()), '{{ $configuredMethods->first()["type"] }}')"
+                x-data="pollingTabs('{{ request('tab') }}', @js($configuredMethods->pluck('type')->values()), '{{ $configuredMethods->first()["type"] }}', @js($configuredMethods->mapWithKeys(fn($m) => [$m['type'] => ['enabled' => (bool)$m['enabled'], 'affectsAvailability' => (bool)$m['affects_availability']]])))"
                 class="tw:flex tw:flex-col tw:md:flex-row tw:gap-6 tw:mt-6"
             >
                 <!-- Left Tabs -->
@@ -43,6 +43,17 @@
 
                 <!-- Right Content -->
                 <div class="tw:w-full tw:md:w-3/4 tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:rounded-lg tw:shadow-sm tw:p-6 tw:grow">
+                    <div x-show="noAvailabilitySources" style="display: none;" class="tw:mb-6 tw:bg-yellow-50 tw:dark:bg-transparent tw:border tw:border-yellow-200 tw:dark:border-yellow-800 tw:p-4 tw:rounded-lg" x-transition>
+                        <div class="tw:flex tw:items-start">
+                            <i class="tw:text-yellow-600 tw:dark:text-yellow-500 tw:mt-1 tw:mr-3 fa fa-exclamation-triangle fa-2x"></i>
+                            <div>
+                                <p class="tw:font-semibold tw:text-yellow-800 tw:dark:text-yellow-400">
+                                    {{ __('device.no_availability') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     @foreach($configuredMethods as $method)
                         <div x-data="{
                                 enabled: {{ $method['enabled'] ? 'true' : 'false' }},
@@ -56,7 +67,15 @@
                                 secretDescriptions: @js($method['secret_descriptions']),
                                 secretFormDataById: @js($method['secret_form_data_by_id']),
                                 formData: {{ json_encode($method['secret_form_data']) }},
-                                settingsData: {{ json_encode($method['settings']) }}
+                                settingsData: {{ json_encode($method['settings']) }},
+                                init() {
+                                    this.$watch('enabled', (val) => {
+                                        this.methods['{{ $method["type"] }}'].enabled = val;
+                                    });
+                                    this.$watch('affectsAvailability', (val) => {
+                                        this.methods['{{ $method["type"] }}'].affectsAvailability = val;
+                                    });
+                                }
                              }"
                              x-show="activeTab === '{{ $method["type"] }}'"
                              style="display: none;"
@@ -298,7 +317,7 @@
 
 @push('scripts')
     <script>
-        function pollingTabs(requestedTab, configuredTabs, fallbackTab) {
+        function pollingTabs(requestedTab, configuredTabs, fallbackTab, initialMethods) {
             var allTabs = configuredTabs.concat(['add']);
             var urlTab = new URLSearchParams(window.location.search).get('tab');
             var initialTab = requestedTab || urlTab || fallbackTab;
@@ -309,6 +328,10 @@
 
             return {
                 activeTab: initialTab,
+                methods: initialMethods || {},
+                get noAvailabilitySources() {
+                    return !Object.values(this.methods).some(m => m.enabled && m.affectsAvailability);
+                },
                 init() {
                     this.$watch('activeTab', function (tab) {
                         var url = new URL(window.location.href);

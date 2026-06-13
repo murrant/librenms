@@ -50,7 +50,7 @@ class Stp implements Module
 
     public function shouldDiscover(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp();
+        return $status->isEnabled() && $connectivity->snmpIsAvailable();
     }
 
     public function discover(OS $os): void
@@ -70,7 +70,7 @@ class Stp implements Module
 
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp();
+        return $status->isEnabled() && $connectivity->snmpIsAvailable();
     }
 
     public function poll(OS $os, DataStorageInterface $datastore): void

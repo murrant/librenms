@@ -39,22 +39,4 @@ class DevicePollingMethod extends Model
     {
         return $this->belongsTo(Secret::class);
     }
-
-    public function syncDeviceStatus(): void
-    {
-        if (! $this->affects_availability) {
-            return;
-        }
-
-        $device = $this->device;
-
-        if (! $this->enabled) {
-            $device->status = false;
-            $device->status_reason = $this->method_type->value;
-        } elseif ($device->status_reason === $this->method_type->value) {
-            $device->status_reason = '';
-        }
-
-        $device->save();
-    }
 }

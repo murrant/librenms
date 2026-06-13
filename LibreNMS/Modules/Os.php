@@ -51,7 +51,7 @@ class Os implements Module
 
     public function shouldDiscover(\LibreNMS\OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp();
+        return $status->isEnabled() && $connectivity->snmpIsAvailable();
     }
 
     public function discover(\LibreNMS\OS $os): void
@@ -81,7 +81,7 @@ class Os implements Module
 
     public function shouldPoll(\LibreNMS\OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp();
+        return $status->isEnabled() && $connectivity->snmpIsAvailable();
     }
 
     public function poll(\LibreNMS\OS $os, DataStorageInterface $datastore): void

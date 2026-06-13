@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Device;
 
+use App\Actions\Device\SetDeviceAvailability;
 use App\Http\Interfaces\ToastInterface;
 use App\Http\Requests\StorePollingMethodRequest;
 use App\Http\Requests\UpdatePollingMethodRequest;
@@ -173,41 +174,40 @@ class EditPollingController
     /**
      * @throws AuthorizationException|ValidationException
      */
-    public function update(UpdatePollingMethodRequest $request, Device $device, string $methodType, ToastInterface $toast): RedirectResponse
+    public function update(UpdatePollingMethodRequest $request, Device $device, string $methodType, ToastInterface $toast, SetDeviceAvailability $setDeviceAvailability): RedirectResponse
     {
         $this->authorize('update', $device);
 
         $type = PollingMethodType::tryFrom($methodType) ?? abort(404);
-        $row = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
+        $pollingMethod = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
         $validated = $request->validated();
 
         if ($type->hasSecret() && array_key_exists('secret_id', $validated)) {
             $this->authorize('update', Secret::class);
-            $row->secret_id = $this->resolveExistingSecret((int)$validated['secret_id'], $type)->id;
+            $pollingMethod->secret_id = $this->resolveExistingSecret((int)$validated['secret_id'], $type)->id;
         } elseif ($type->hasSecret() && $request->has('secret_data')) {
             $this->authorize('update', Secret::class);
             $mode = $validated['secret_update_mode'] ?? 'update';
-            $row->secret_id = $this->secretService->updateOrCreate(
-                $row,
+            $pollingMethod->secret_id = $this->secretService->updateOrCreate(
+                $pollingMethod,
                 $type,
                 $request->validatedSecretData(),
                 $mode
             )->id;
         }
 
-        $row->setRelation('device', $device);
+        $pollingMethod->setRelation('device', $device);
 
         $methodClass = $type->methodClass();
 
-        $row->enabled = (bool)($validated['enabled'] ?? true);
-        $row->affects_availability = (bool)($validated['affects_availability'] ?? false);
-        $row->settings = $this->mergeSettings($row->settings ?? [], $validated['settings'] ?? [], $methodClass);
+        $pollingMethod->enabled = (bool)($validated['enabled'] ?? true);
+        $pollingMethod->affects_availability = (bool)($validated['affects_availability'] ?? false);
+        $pollingMethod->settings = $this->mergeSettings($pollingMethod->settings ?? [], $validated['settings'] ?? [], $methodClass);
 
-        $row->save();
+        $pollingMethod->save();
 
-        if ($row->wasChanged('enabled')) {
-            $row->syncDeviceStatus();
-        }
+        $setDeviceAvailability->execute($device, false);
+        $device->saveQuietly();
 
         $toast->success(__('poller.method_updated'));
 
@@ -230,18 +230,21 @@ class EditPollingController
     /**
      * @throws AuthorizationException
      */
-    public function destroy(Device $device, string $methodType, ToastInterface $toast): RedirectResponse
+    public function destroy(Device $device, string $methodType, ToastInterface $toast, SetDeviceAvailability $setDeviceAvailability): RedirectResponse
     {
         $this->authorize('update', $device);
 
         $type = PollingMethodType::tryFrom($methodType) ?? abort(404);
-        $row = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
+        $pollingMethod = $device->pollingMethods()->where('method_type', $type->value)->firstOrFail();
 
         if ($type->hasSecret()) {
             $this->authorize('delete', Secret::class);
         }
 
-        $row->delete();
+        $pollingMethod->delete();
+
+        $setDeviceAvailability->execute($device, false);
+        $device->saveQuietly();
 
         $toast->success(__('poller.method_removed'));
 

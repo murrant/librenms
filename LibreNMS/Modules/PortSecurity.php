@@ -51,7 +51,7 @@ class PortSecurity implements Module
 
     public function shouldDiscover(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp() && $os instanceof PortSecurityDiscovery;
+        return $status->isEnabled() && $connectivity->snmpIsAvailable() && $os instanceof PortSecurityDiscovery;
     }
 
     /**
@@ -64,7 +64,7 @@ class PortSecurity implements Module
 
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp() && $os instanceof PortSecurityPolling;
+        return $status->isEnabled() && $connectivity->snmpIsAvailable() && $os instanceof PortSecurityPolling;
     }
 
     /**

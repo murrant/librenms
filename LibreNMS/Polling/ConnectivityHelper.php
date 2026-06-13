@@ -29,24 +29,20 @@ namespace LibreNMS\Polling;
 use App\Models\Device;
 use LibreNMS\Enum\PollingMethodType;
 
-class ConnectivityHelper
+readonly class ConnectivityHelper
 {
     public function __construct(
-        private readonly Device $device,
+        private Device $device,
     ) {}
-
-    /**
-     * Check if a specific polling method is configured and enabled for this device.
-     */
-    public function enabled(PollingMethodType $type): bool
-    {
-        return (bool) $this->device->getPollingMethod($type)?->enabled;
-    }
 
     public function isAvailable(): bool
     {
+        if (! $this->device->exists || $this->device->pollingMethods->isEmpty()) {
+            return true;
+        }
+
         foreach ($this->device->pollingMethods as $method) {
-            if ($method->enabled && $method->affects_availability && !$method->last_check_successful) {
+            if ($method->enabled && $method->affects_availability && ! $method->last_check_successful) {
                 return true;
             }
         }
@@ -65,30 +61,40 @@ class ConnectivityHelper
         return false;
     }
 
-    public function can(PollingMethodType $type): bool
+    public function methodIsEnabled(PollingMethodType $type): bool
+    {
+        return (bool) $this->device->getPollingMethod($type)?->enabled;
+    }
+
+    public function methodIsAvailable(PollingMethodType $type): bool
     {
         $method = $this->device->getPollingMethod($type);
 
         return $method?->enabled && $method?->last_check_successful;
     }
 
-    public function canSnmp(): bool
+    public function snmpIsAvailable(): bool
     {
-        return $this->can(PollingMethodType::Snmp);
+        return $this->methodIsAvailable(PollingMethodType::Snmp);
     }
 
-    public function canIpmi(): bool
+    public function ipmiIsAvailable(): bool
     {
-        return $this->can(PollingMethodType::Ipmi);
+        return $this->methodIsAvailable(PollingMethodType::Ipmi);
     }
 
-    public function canIcmp(): bool
+    public function icmpIsAvailable(): bool
     {
-        return $this->can(PollingMethodType::Icmp);
+        return $this->methodIsAvailable(PollingMethodType::Icmp);
     }
 
-    public function canUnixAgent(): bool
+    public function icmpIsEnabled(): bool
     {
-        return $this->can(PollingMethodType::UnixAgent);
+        return $this->methodIsEnabled(PollingMethodType::Icmp);
+    }
+
+    public function unixAgentIsAvailable(): bool
+    {
+        return $this->methodIsAvailable(PollingMethodType::UnixAgent);
     }
 }
