@@ -34,7 +34,6 @@ namespace LibreNMS\Alert;
 use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;
 use App\Facades\Rrd;
-use App\Models\Alert;
 use App\Models\AlertLog;
 use App\Models\AlertTransport;
 use App\Models\ApplicationMetric;
@@ -127,7 +126,7 @@ class RunAlerts
         $obj['proc'] = $alert['proc'];
         $obj['status'] = $device->status;
         $obj['status_reason'] = $device->status_reason;
-        if (ConnectivityHelper::pingIsAllowed($device)) {
+        if ((new ConnectivityHelper($device))->icmpIsEnabled()) {
             $last_ping = Rrd::lastUpdate(Rrd::name($device->hostname, 'icmp-perf'));
             if ($last_ping) {
                 $obj['ping_timestamp'] = $last_ping->timestamp;
