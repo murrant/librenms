@@ -43,6 +43,28 @@ class ConnectivityHelper
         return (bool) $this->device->getPollingMethod($type)?->enabled;
     }
 
+    public function isAvailable(): bool
+    {
+        foreach ($this->device->pollingMethods as $method) {
+            if ($method->enabled && $method->affects_availability && !$method->last_check_successful) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasAvailability(): bool
+    {
+        foreach ($this->device->pollingMethods as $method) {
+            if ($method->enabled && $method->affects_availability) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function can(PollingMethodType $type): bool
     {
         $method = $this->device->getPollingMethod($type);
