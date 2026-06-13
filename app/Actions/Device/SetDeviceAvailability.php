@@ -18,7 +18,8 @@ class SetDeviceAvailability
      * @param  bool  $commit  Save changes to the database
      * @return bool true if the status changed
      */
-    public function execute(Device $device, bool $commit = true): bool {
+    public function execute(Device $device, bool $commit = true): bool
+    {
         if ($device->exists || $device->relationLoaded('pollingMethods')) {
             $failedAvailabilityMethods = $device->pollingMethods
                 ->filter(fn ($method) => $method->enabled && $method->affects_availability && ! $method->last_check_successful);

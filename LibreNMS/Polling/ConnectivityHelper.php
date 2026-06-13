@@ -33,7 +33,8 @@ readonly class ConnectivityHelper
 {
     public function __construct(
         private Device $device,
-    ) {}
+    ) {
+    }
 
     public function isAvailable(): bool
     {
