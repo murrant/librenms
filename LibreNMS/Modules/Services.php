@@ -51,7 +51,7 @@ class Services implements Module
     {
         $device = $os->getDevice();
 
-        if (! $connectivity->isEnabledAndDeviceUp()) {
+        if (! $status->isEnabled() || ! $connectivity->snmpIsAvailable()) {
             return false;
         }
 

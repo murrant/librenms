@@ -131,7 +131,7 @@ class Device extends BaseModel
     public function getPollingMethod(PollingMethodType $method): ?DevicePollingMethod
     {
         if ($this->exists || $this->relationLoaded('pollingMethods')) {
-            return $this->pollingMethods->firstWhere('method_type', $method->name);
+            return $this->pollingMethods->firstWhere('method_type', $method);
         }
 
         return null;

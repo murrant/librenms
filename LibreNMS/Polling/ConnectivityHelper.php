@@ -33,71 +33,16 @@ readonly class ConnectivityHelper
 {
     public function __construct(
         private Device $device,
-    ) {
-    }
+    ) {}
 
     public function isAvailable(): bool
     {
-        return $this->device->status;
-    }
+        if (! $this->device->exists || $this->device->pollingMethods->isEmpty()) {
+            return true;
+        }
 
-    public function hasAvailability(): bool
-    {
-        return $this->icmpIsEnabled() || $this->snmpIsAvailable();
-    }
-
-    public function snmpIsEnabled(): bool
-    {
-        return $this->enabled(PollingMethodType::Snmp);
-    }
-
-    public function icmpIsEnabled(): bool
-    {
-        return $this->enabled(PollingMethodType::Icmp);
-    }
-
-    public function snmpIsAvailable(): bool
-    {
-        return $this->snmpIsEnabled() && $this->isAvailable() && ! str_contains($this->device->status_reason, 'snmp');
-    }
-
-    public function icmpIsAvailable(): bool
-    {
-        return $this->icmpIsEnabled() && $this->isAvailable() && ! str_contains($this->device->status_reason, 'icmp');
-    }
-
-    public function ipmiIsEnabled(): bool
-    {
-        return $this->enabled(PollingMethodType::Ipmi);
-    }
-
-    public function ipmiIsAvailable(): bool
-    {
-        return $this->ipmiIsEnabled();
-    }
-
-    public function unixAgentIsEnabled(): bool
-    {
-        return $this->enabled(PollingMethodType::UnixAgent);
-    }
-
-    public function unixAgentIsAvailable(): bool
-    {
-        return $this->unixAgentIsEnabled();
-    }
-
-    /**
-     * Check if a specific polling method is configured and enabled for this device.
-     */
-    public function enabled(PollingMethodType $type): bool
-    {
-        return (bool) $this->device->getPollingMethod($type)?->enabled;
-    }
-
-    public function isAvailable(): bool
-    {
         foreach ($this->device->pollingMethods as $method) {
-            if ($method->enabled && $method->affects_availability && !$method->last_check_successful) {
+            if ($method->enabled && $method->affects_availability && ! $method->last_check_successful) {
                 return true;
             }
         }
@@ -116,30 +61,55 @@ readonly class ConnectivityHelper
         return false;
     }
 
-    public function can(PollingMethodType $type): bool
+    public function methodIsEnabled(PollingMethodType $type): bool
+    {
+        return (bool) $this->device->getPollingMethod($type)?->enabled;
+    }
+
+    public function methodIsAvailable(PollingMethodType $type): bool
     {
         $method = $this->device->getPollingMethod($type);
 
         return $method?->enabled && $method?->last_check_successful;
     }
 
-    public function canSnmp(): bool
+    public function snmpIsEnabled(): bool
     {
-        return $this->can(PollingMethodType::Snmp);
+        return $this->methodIsEnabled(PollingMethodType::Snmp);
     }
 
-    public function canIpmi(): bool
+    public function snmpIsAvailable(): bool
     {
-        return $this->can(PollingMethodType::Ipmi);
+        return $this->methodIsAvailable(PollingMethodType::Snmp);
     }
 
-    public function canIcmp(): bool
+    public function ipmiIsEnabled(): bool
     {
-        return $this->can(PollingMethodType::Icmp);
+        return $this->methodIsEnabled(PollingMethodType::Ipmi);
     }
 
-    public function canUnixAgent(): bool
+    public function ipmiIsAvailable(): bool
     {
-        return $this->can(PollingMethodType::UnixAgent);
+        return $this->methodIsAvailable(PollingMethodType::Ipmi);
+    }
+
+    public function icmpIsEnabled(): bool
+    {
+        return $this->methodIsEnabled(PollingMethodType::Icmp);
+    }
+
+    public function icmpIsAvailable(): bool
+    {
+        return $this->methodIsAvailable(PollingMethodType::Icmp);
+    }
+
+    public function unixAgentIsEnabled(): bool
+    {
+        return $this->methodIsEnabled(PollingMethodType::UnixAgent);
+    }
+
+    public function unixAgentIsAvailable(): bool
+    {
+        return $this->methodIsAvailable(PollingMethodType::UnixAgent);
     }
 }

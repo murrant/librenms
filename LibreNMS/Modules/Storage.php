@@ -51,7 +51,7 @@ class Storage implements Module
 
     public function shouldDiscover(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp();
+        return $status->isEnabled() && $connectivity->snmpIsAvailable();
     }
 
     /**
@@ -70,7 +70,7 @@ class Storage implements Module
 
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp();
+        return $status->isEnabled() && $connectivity->snmpIsAvailable();
     }
 
     /**

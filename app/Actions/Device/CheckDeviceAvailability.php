@@ -3,7 +3,6 @@
 namespace App\Actions\Device;
 
 use App\Models\Device;
-use LibreNMS\Enum\AvailabilitySource;
 use LibreNMS\Enum\PollingMethodType;
 
 class CheckDeviceAvailability
@@ -44,15 +43,7 @@ class CheckDeviceAvailability
             }
         }
 
-        if ($icmpMethod?->enabled && $icmpMethod?->affects_availability && ! $icmpMethod->last_check_successful) {
-            $this->setDeviceAvailability->execute($device, false, AvailabilitySource::Icmp, $commit);
-        } elseif ($snmpMethod?->enabled && $snmpMethod?->affects_availability) {
-            $this->setDeviceAvailability->execute($device, $snmpMethod->last_check_successful, AvailabilitySource::Snmp, $commit);
-        } elseif ($icmpMethod?->enabled && $icmpMethod?->affects_availability) {
-            $this->setDeviceAvailability->execute($device, true, AvailabilitySource::Icmp, $commit);
-        } else {
-            $this->setDeviceAvailability->execute($device, true, AvailabilitySource::None, $commit);
-        }
+        $this->setDeviceAvailability->execute($device, $commit);
 
         if ($commit) {
             $icmpMethod?->save();

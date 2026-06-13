@@ -53,7 +53,7 @@ class Mpls implements Module
 
     public function shouldDiscover(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp() && $os instanceof MplsDiscovery;
+        return $status->isEnabled() && $connectivity->snmpIsAvailable() && $os instanceof MplsDiscovery;
     }
 
     /**
@@ -101,7 +101,7 @@ class Mpls implements Module
 
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp() && $os instanceof MplsPolling;
+        return $status->isEnabled() && $connectivity->snmpIsAvailable() && $os instanceof MplsPolling;
     }
 
     /**

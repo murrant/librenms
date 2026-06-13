@@ -65,7 +65,7 @@ class Nac implements Module
 
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->canSnmp() && $os instanceof NacPolling;
+        return $status->isEnabled() && $connectivity->snmpIsAvailable() && $os instanceof NacPolling;
     }
 
     /**
