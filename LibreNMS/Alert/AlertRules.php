@@ -65,7 +65,7 @@ readonly class AlertRules
     public function run(): bool
     {
         if ($this->device->getMaintenanceStatus() === MaintenanceStatus::SkipAlerts) {
-            Log::info("Under Maintenance, skipping alert rules check.");
+            Log::info('Under Maintenance, skipping alert rules check.');
 
             return false;
         }
@@ -168,9 +168,9 @@ readonly class AlertRules
     /**
      * Handle triggering or updating an active alert.
      *
-     * @param int $rule_id
-     * @param array $rows
-     * @param Alert|null $alert
+     * @param  int  $rule_id
+     * @param  array  $rows
+     * @param  Alert|null  $alert
      */
     private function handleAlertTrigger(int $rule_id, array $rows, ?Alert $alert): void
     {
@@ -230,8 +230,8 @@ readonly class AlertRules
     /**
      * Handle recovery of an alert.
      *
-     * @param int $rule_id
-     * @param Alert|null $alert
+     * @param  int  $rule_id
+     * @param  Alert|null  $alert
      */
     private function handleAlertRecovery(int $rule_id, ?Alert $alert): void
     {
