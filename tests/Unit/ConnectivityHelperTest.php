@@ -37,15 +37,13 @@ final class ConnectivityHelperTest extends TestCase
             return $mock;
         });
 
-        // not called when snmp is disabled
+        // not called when snmp is disabled or ping up
         $up = new SnmpResponse('SNMPv2-MIB::sysObjectID.0 = .1');
         $down = new SnmpResponse('', '', 1);
         SnmpQuery::partialMock()->shouldReceive('get')
-            ->times(8)
+            ->times(6)
             ->andReturn(
                 $up,
-                $up,
-                $down,
                 $down,
                 $up,
                 $up,
@@ -81,9 +79,9 @@ final class ConnectivityHelperTest extends TestCase
         $this->assertEquals('icmp,snmp', $device->status_reason);
 
         // ping up, snmp down
-        $this->assertTrue(app(CheckDeviceAvailability::class)->execute($device));
-        $this->assertTrue($device->status);
-        $this->assertEquals('', $device->status_reason);
+        $this->assertFalse(app(CheckDeviceAvailability::class)->execute($device));
+        $this->assertFalse($device->status);
+        $this->assertEquals('snmp', $device->status_reason);
 
         // ping down, snmp down
         $this->assertFalse(app(CheckDeviceAvailability::class)->execute($device));
