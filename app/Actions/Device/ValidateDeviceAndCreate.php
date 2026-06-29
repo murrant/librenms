@@ -127,8 +127,8 @@ class ValidateDeviceAndCreate
         $host_unreachable_exception = new HostUnreachableSnmpException($this->device->hostname);
 
         // Retrieve existing SNMP secret from relations if set
-        $existingSnmpSecret = $this->device->relationLoaded('pollingMethods') 
-            ? $this->device->pollingMethods->firstWhere('method_type', PollingMethodType::Snmp)?->secret 
+        $existingSnmpSecret = $this->device->relationLoaded('pollingMethods')
+            ? $this->device->pollingMethods->firstWhere('method_type', PollingMethodType::Snmp)?->secret
             : null;
 
         // which snmp version should we try (and in what order)

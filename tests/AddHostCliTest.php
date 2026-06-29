@@ -48,8 +48,6 @@ final class AddHostCliTest extends DBTestCase
         $device = Device::findByHostname($this->hostName);
         $this->assertNotNull($device);
 
-
-
         $snmpMethod = $device->getPollingMethod(PollingMethodType::Snmp);
         $this->assertNotNull($snmpMethod);
         $secret = $snmpMethod->secret;
@@ -72,8 +70,6 @@ final class AddHostCliTest extends DBTestCase
         $device = Device::findByHostname($this->hostName);
         $this->assertNotNull($device);
 
-
-
         $snmpMethod = $device->getPollingMethod(PollingMethodType::Snmp);
         $this->assertNotNull($snmpMethod);
         $secret = $snmpMethod->secret;
@@ -91,8 +87,6 @@ final class AddHostCliTest extends DBTestCase
 
         $device = Device::findByHostname($this->hostName);
         $this->assertNotNull($device);
-
-
 
         $snmpMethod = $device->getPollingMethod(PollingMethodType::Snmp);
         $this->assertNotNull($snmpMethod);
@@ -176,7 +170,6 @@ final class AddHostCliTest extends DBTestCase
 
         $device = Device::findByHostname($this->hostName);
         $this->assertNotNull($device);
-
 
         $this->assertEquals('hardware', $device->hardware, 'Wrong hardware name');
         $this->assertEquals('nameOfOS', $device->os, 'Wrong os name');
