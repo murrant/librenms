@@ -81,14 +81,19 @@ class ProcessorGraph extends AbstractGraph
 
         $vars = array_merge($this->vars, $vars);
 
-        // Count how many files actually exist on disk for the layout
-        $rrd_count = 0;
+        // Filter valid datasets and run checkRrdExists exactly once per processor
+        $valid_datasets = [];
         foreach ($this->processors as $proc) {
             $rrd_filename = Rrd::name($this->device->hostname, ['processor', $proc->processor_type, $proc->processor_index]);
             if (Rrd::checkRrdExists($rrd_filename)) {
-                $rrd_count++;
+                $valid_datasets[] = [
+                    'filename' => $rrd_filename,
+                    'descr' => $proc->getFormattedDescription(),
+                ];
             }
         }
+
+        $rrd_count = count($valid_datasets);
 
         if (LibrenmsConfig::getOsSetting($this->device->os, 'processor_stacked')) {
             $builder = (new MultiSimplexSeparatedGraphBuilder())
@@ -101,26 +106,25 @@ class ProcessorGraph extends AbstractGraph
                 ->divider(max(1, $rrd_count))
                 ->textOrig()
                 ->noTotal();
-        } else {
-            $builder = (new MultiLineGraphBuilder())
-                ->unitText('Load %')
-                ->units('')
-                ->totalUnits('%')
-                ->colours('mixed')
-                ->scaleMin(0)
-                ->scaleMax(100)
-                ->noTotal();
+
+            foreach ($valid_datasets as $dataset) {
+                $builder->addDataset($dataset['filename'], 'usage', $dataset['descr']);
+            }
+
+            return $builder->build($vars);
         }
 
-        foreach ($this->processors as $proc) {
-            $rrd_filename = Rrd::name($this->device->hostname, ['processor', $proc->processor_type, $proc->processor_index]);
-            if (Rrd::checkRrdExists($rrd_filename)) {
-                if ($builder instanceof MultiLineGraphBuilder) {
-                    $builder->addDataset($rrd_filename, 'usage', $proc->getFormattedDescription(), area: true);
-                } else {
-                    $builder->addDataset($rrd_filename, 'usage', $proc->getFormattedDescription());
-                }
-            }
+        $builder = (new MultiLineGraphBuilder())
+            ->unitText('Load %')
+            ->units('')
+            ->totalUnits('%')
+            ->colours('mixed')
+            ->scaleMin(0)
+            ->scaleMax(100)
+            ->noTotal();
+
+        foreach ($valid_datasets as $dataset) {
+            $builder->addDataset($dataset['filename'], 'usage', $dataset['descr'], area: true);
         }
 
         return $builder->build($vars);
