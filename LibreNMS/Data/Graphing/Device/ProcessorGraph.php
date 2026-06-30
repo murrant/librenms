@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Gate;
 use LibreNMS\Data\Graphing\AbstractGraph;
 use LibreNMS\Data\Graphing\Builders\MultiLineGraphBuilder;
 use LibreNMS\Data\Graphing\Builders\MultiSimplexSeparatedGraphBuilder;
+use LibreNMS\Data\Graphing\GraphParameters;
 
 class ProcessorGraph extends AbstractGraph
 {
@@ -73,13 +74,11 @@ class ProcessorGraph extends AbstractGraph
         return $files;
     }
 
-    public function definition(array $vars = []): array
+    public function definition(GraphParameters $graph_params): array
     {
         if ($this->processors->isEmpty()) {
             throw new \LibreNMS\Exceptions\RrdGraphException('No Processors');
         }
-
-        $vars = array_merge($this->vars, $vars);
 
         // Filter valid datasets and run checkRrdExists exactly once per processor
         $valid_datasets = [];
@@ -111,7 +110,7 @@ class ProcessorGraph extends AbstractGraph
                 $builder->addDataset($dataset['filename'], 'usage', $dataset['descr']);
             }
 
-            return $builder->build($vars);
+            return $builder->build($graph_params);
         }
 
         $builder = (new MultiLineGraphBuilder())
@@ -127,6 +126,6 @@ class ProcessorGraph extends AbstractGraph
             $builder->addDataset($dataset['filename'], 'usage', $dataset['descr'], area: true);
         }
 
-        return $builder->build($vars);
+        return $builder->build($graph_params);
     }
 }
