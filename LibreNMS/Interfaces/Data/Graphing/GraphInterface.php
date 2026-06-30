@@ -25,11 +25,13 @@
 
 namespace LibreNMS\Interfaces\Data\Graphing;
 
+use LibreNMS\Data\Graphing\GraphParameters;
+
 interface GraphInterface
 {
     public function authorize(): bool;
     public function validation(): array;
-    public function definition(array $vars = []): array;
+    public function definition(GraphParameters $graph_params): array;
     public function getPageTitle(): string;
     public function getGraphTitle(): string;
     public function getRrdFiles(): array;

@@ -67,7 +67,7 @@ class LegacyGraph extends AbstractGraph
 
     private function load(array $vars = []): void
     {
-        if ($this->loaded && empty($vars)) {
+        if ($this->loaded) {
             return;
         }
 
@@ -107,7 +107,7 @@ class LegacyGraph extends AbstractGraph
             return;
         }
 
-        $graph_params = new GraphParameters($vars);
+        $graph_params = app()->bound(GraphParameters::class) ? app(GraphParameters::class) : new GraphParameters($this->vars);
         $type = $graph_params->type;
         $subtype = $graph_params->subtype;
         $height = $graph_params->height;
@@ -149,9 +149,9 @@ class LegacyGraph extends AbstractGraph
     }
 
 
-    public function definition(array $vars = []): array
+    public function definition(GraphParameters $graph_params): array
     {
-        $this->load($vars);
+        $this->load($graph_params->all());
         return $this->rrdOptions;
     }
 
