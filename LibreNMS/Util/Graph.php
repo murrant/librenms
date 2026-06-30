@@ -110,6 +110,7 @@ class Graph
         }
 
         $graph_params = new GraphParameters($vars);
+        app()->instance(GraphParameters::class, $graph_params);
         $name = $graph_params->type . '_' . $graph_params->subtype;
 
         /** @var GraphFactory $factory */
@@ -133,7 +134,7 @@ class Graph
             throw new RrdGraphException('No Authorization', 'No Auth', $graph_params->width, $graph_params->height);
         }
 
-        $rrd_options = $graph->definition($vars);
+        $rrd_options = $graph->definition($graph_params);
 
         if (empty($rrd_options)) {
             throw new RrdGraphException('Graph Definition Error', 'Def Error', $graph_params->width, $graph_params->height);
