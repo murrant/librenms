@@ -15,13 +15,11 @@ class GraphDetail extends Command
     public function handle(GraphFactory $graphs): int
     {
         $device = DeviceCache::get($this->option('device') ?: Device::limit(1)->value('device_id'));
-        DeviceCache::setPrimary($device->device_id);
 
-        $graph = $graphs->graphFor($this->argument('name'));
-        $def = $graph->definition([
+        $graph = $graphs->graphFor($this->argument('name'), [
             'type' => $this->argument('name'),
+            'device' => $device->device_id,
         ]);
-
 
         $this->line("Type: $graph->type");
         $this->line("Subtype: $graph->subtype");
@@ -29,7 +27,7 @@ class GraphDetail extends Command
         $this->line("Graph Title: " . $graph->getGraphTitle());
         $this->line("Page Title: " . substr($graph->getPageTitle(), 0, 80));
         $this->line("Rrd Files: " . implode(', ', array_map(fn($f) => basename($f), $graph->getRrdFiles())));
-        $this->line("Definition: " . substr(implode(' ', $def), 80));
+        $this->line("Definition: " . substr(implode(' ', $graph->definition()), 80));
 
 
         return 0;

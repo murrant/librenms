@@ -28,9 +28,9 @@ namespace LibreNMS\Data\Graphing;
 use App\Facades\DeviceCache;
 use App\Models\Device;
 use App\Models\Port;
-use App\Models\User;
 use LibreNMS\Exceptions\InvalidGraph;
 use LibreNMS\Interfaces\Data\Graphing\GraphInterface;
+use function base_path;
 
 class LegacyGraph implements GraphInterface
 {
@@ -41,15 +41,19 @@ class LegacyGraph implements GraphInterface
     private ?string $graphTitle = null;
     private ?bool $authorized = null;
     private array $rrdFiles = [];
+    private bool $loaded = false;
+    private array $rrdOptions = [];
+    private ?Device $device = null;
+    private ?Port $port = null;
 
+    /**
+     * @throws InvalidGraph
+     */
     public function __construct(
         public readonly string $type,
         public readonly string $subtype,
-        private ?Device $device = null,
-        private ?Port $port = null,
+        private array $vars = [],
     ) {
-        $this->device ??= DeviceCache::getPrimary();
-
         $this->auth_file = base_path("includes/html/graphs/$this->type/auth.inc.php");
         $graph_file = base_path("includes/html/graphs/$this->type/$this->subtype.inc.php");
         if (! file_exists($graph_file)) {
@@ -62,41 +66,48 @@ class LegacyGraph implements GraphInterface
         }
     }
 
-    public function authorize(): bool
+    private function load(array $vars = []): void
     {
-        if ($this->authorized === null) {
-            $this->legacyIncludes();
-            auth()->setUser(User::firstWhere('username', 'murrant')); // FIXME
-            $device = $this->device;
-
-            $auth = false;
-            include $this->auth_file;
-
-            $this->authorized = $auth;
-            $this->graphTitle = $graph_title ?? $this->graphTitle;
-            $this->pageTitle = $title ?? $this->graphTitle;
-
-            $unhandled = array_diff(array_keys(get_defined_vars()), ['auth', 'device', 'title', 'graph_title']);
-            if ($unhandled) {
-                dd($unhandled);
-            }
+        if ($this->loaded && empty($vars)) {
+            return;
         }
 
-        return $this->authorized;
-    }
+        $this->vars = array_merge($this->vars, $vars);
 
-    public function validation(): array
-    {
-        return [];
-    }
+        include_once base_path('includes/common.php');
+        include_once base_path('includes/html/functions.inc.php');
+        include_once base_path('includes/dbFacile.php');
+        include_once base_path('includes/rewrites.php');
 
-    public function definition(array $vars = []): array
-    {
-        $this->legacyIncludes();
+        if (! $this->device && isset($this->vars['device'])) {
+            $this->device = DeviceCache::get(is_numeric($this->vars['device']) ? $this->vars['device'] : getidbyname($this->vars['device']));
+        }
 
-        // set up "global" variables
+        if ($this->device) {
+            DeviceCache::setPrimary($this->device->device_id);
+        }
+
+        if (! $this->port && isset($this->vars['id']) && $this->type === 'port') {
+            $this->port = \App\Facades\PortCache::get($this->vars['id']);
+        }
+
+        // Local scope variables for the included files
         $device = $this->device;
-        $graph_title = $this->graphTitle;
+        $port = $this->port;
+        $vars = $this->vars;
+
+        $auth = auth()->guest();
+        include $this->auth_file;
+
+        $this->authorized = $auth;
+        $this->graphTitle = $graph_title ?? $this->graphTitle;
+        $this->pageTitle = $title ?? $this->graphTitle;
+
+        if (! $auth) {
+            $this->loaded = true;
+            return;
+        }
+
         $graph_params = new GraphParameters($vars);
         $type = $graph_params->type;
         $subtype = $graph_params->subtype;
@@ -119,6 +130,8 @@ class LegacyGraph implements GraphInterface
 
         include $this->graph_file;
 
+        $this->rrdOptions = $rrd_options;
+
         if (isset($rrd_list) && is_array($rrd_list)) {
             $this->rrdFiles = array_column($rrd_list, 'filename');
         } elseif (isset($rrd_filenames) && is_array($rrd_filenames)) {
@@ -127,44 +140,36 @@ class LegacyGraph implements GraphInterface
             $this->rrdFiles = isset($rrd_filename) ? [$rrd_filename] : [];
         }
 
-//        $unhandled = array_diff(array_keys(get_defined_vars()), [
-//            'vars',
-//            'device',
-//            'graph_title',
-//            'graph_params',
-//            'type',
-//            'subtype',
-//            'height',
-//            'width',
-//            'from',
-//            'to',
-//            'period',
-//            'prev_from',
-//            'inverse',
-//            'in',
-//            'out',
-//            'float_precision',
-//            'title',
-//            'nototal',
-//            'nodetails',
-//            'noagg',
-//            'rrd_options',
-//            'rrd_filename',
-//        ]);
-//        if ($unhandled) {
-//            dd($unhandled);
-//        }
+        $this->loaded = true;
+    }
 
-        return $rrd_options;
+    public function authorize(): bool
+    {
+        $this->load();
+        return $this->authorized;
+    }
+
+    public function validation(): array
+    {
+        return [];
+    }
+
+    public function definition(array $vars = []): array
+    {
+        $this->load($vars);
+        return $this->rrdOptions;
     }
 
     public function getPageTitle(): string
     {
+        $this->load();
         return $this->pageTitle ?? $this->getGraphTitle();
     }
 
     public function getGraphTitle(): string
     {
+        $this->load();
+
         if ($this->graphTitle !== null) {
             return $this->graphTitle;
         }
@@ -178,14 +183,7 @@ class LegacyGraph implements GraphInterface
 
     public function getRrdFiles(): array
     {
+        $this->load();
         return $this->rrdFiles;
-    }
-
-    private function legacyIncludes(): void
-    {
-        include_once base_path('includes/common.php');
-        include_once base_path('includes/html/functions.inc.php');
-        include_once base_path('includes/dbFacile.php');
-        include_once base_path('includes/rewrites.php');
     }
 }
