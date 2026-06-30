@@ -1,4 +1,5 @@
 <?php
+
 /**
  * GraphFactory.php
  *
@@ -45,7 +46,7 @@ class GraphFactory
         $vars['type'] ??= $name;
 
         // Look for a modern class, e.g. LibreNMS\Data\Graphing\Device\ProcessorSeparateGraph
-        $className = "LibreNMS\\Data\\Graphing\\" . ucfirst($type) . "\\" . \Illuminate\Support\Str::studly($subtype) . "Graph";
+        $className = 'LibreNMS\\Data\\Graphing\\' . ucfirst($type) . '\\' . \Illuminate\Support\Str::studly($subtype) . 'Graph';
         if (class_exists($className)) {
             return app($className, ['vars' => $vars]);
         }
