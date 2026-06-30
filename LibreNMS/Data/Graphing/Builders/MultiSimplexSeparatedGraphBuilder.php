@@ -126,9 +126,8 @@ class MultiSimplexSeparatedGraphBuilder
         return $this;
     }
 
-    public function build(array $vars): array
+    public function build(GraphParameters $graph_params): array
     {
-        $graph_params = new GraphParameters($vars);
         $float_precision = $graph_params->float_precision;
 
         if ($this->scaleMin !== null) {
