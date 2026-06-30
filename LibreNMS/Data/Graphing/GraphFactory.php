@@ -33,12 +33,14 @@ class GraphFactory
     /**
      * @throws InvalidGraph
      */
-    public function graphFor(string $name): GraphInterface
+    public function graphFor(string $name, array $vars = []): GraphInterface
     {
         if (! preg_match('/([a-z]+)_([a-zA-Z0-9_]+)/', $name, $matches)) {
             throw new InvalidGraph;
         }
 
-        return new LegacyGraph($matches[1], $matches[2]); // Only legacy for now
+        $vars['type'] ??= $name;
+
+        return new LegacyGraph($matches[1], $matches[2], $vars); // Only legacy for now
     }
 }
