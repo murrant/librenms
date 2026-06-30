@@ -1,6 +1,6 @@
 <?php
 /**
- * GraphFactory.php
+ * AbstractGraph.php
  *
  * -Description-
  *
@@ -25,31 +25,34 @@
 
 namespace LibreNMS\Data\Graphing;
 
-use LibreNMS\Exceptions\InvalidGraph;
 use LibreNMS\Interfaces\Data\Graphing\GraphInterface;
 
-class GraphFactory
+abstract class AbstractGraph implements GraphInterface
 {
-    /**
-     * @throws InvalidGraph
-     */
-    public function graphFor(string $name, array $vars = []): GraphInterface
+    public function validation(): array
     {
-        if (! preg_match('/([a-z]+)_([a-zA-Z0-9_]+)/', $name, $matches)) {
-            throw new InvalidGraph;
+        return [];
+    }
+
+    public function getPageTitle(): string
+    {
+        return $this->getGraphTitle();
+    }
+
+    /**
+     * Bind validated parameters directly to class properties
+     */
+    public function fill(array $vars): self
+    {
+        $reflector = new \ReflectionClass($this);
+        foreach ($vars as $key => $value) {
+            if ($reflector->hasProperty($key)) {
+                $property = $reflector->getProperty($key);
+                if ($property->isPublic() && ! $property->isReadOnly()) {
+                    $this->$key = $value;
+                }
+            }
         }
-
-        $type = $matches[1];
-        $subtype = $matches[2];
-
-        $vars['type'] ??= $name;
-
-        // Look for a modern class, e.g. LibreNMS\Data\Graphing\Device\ProcessorSeparateGraph
-        $className = "LibreNMS\\Data\\Graphing\\" . ucfirst($type) . "\\" . \Illuminate\Support\Str::studly($subtype) . "Graph";
-        if (class_exists($className)) {
-            return app($className, ['vars' => $vars]);
-        }
-
-        return new LegacyGraph($type, $subtype, $vars);
+        return $this;
     }
 }
