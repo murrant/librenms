@@ -26,14 +26,15 @@
 
 namespace LibreNMS\Util;
 
-use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use LibreNMS\Data\Graphing\GraphFactory;
 use LibreNMS\Data\Graphing\GraphImage;
 use LibreNMS\Data\Graphing\GraphParameters;
 use LibreNMS\Enum\ImageFormat;
+use LibreNMS\Exceptions\InvalidGraph;
 use LibreNMS\Exceptions\RrdGraphException;
 use Rrd;
 
@@ -99,90 +100,61 @@ class Graph
      * @return GraphImage
      *
      * @throws RrdGraphException
+     * @throws InvalidGraph
      */
-    public static function get($vars): GraphImage
+    public static function get(array|string $vars): GraphImage
     {
-        if (! defined('IGNORE_ERRORS')) {
-            define('IGNORE_ERRORS', true);
-        }
-
-        chdir(base_path());
-
-        include_once base_path('includes/dbFacile.php');
-        include_once base_path('includes/common.php');
-        include_once base_path('includes/html/functions.inc.php');
-        include_once base_path('includes/rewrites.php');
-
         // handle possible graph url input
         if (is_string($vars)) {
             $vars = Url::parseLegacyPathVars($vars);
         }
 
-        if (isset($vars['device'])) {
-            $device = device_by_id_cache(is_numeric($vars['device']) ? $vars['device'] : getidbyname($vars['device']));
-            DeviceCache::setPrimary($device['device_id']);
-        }
-
-        // variables for included graphs
         $graph_params = new GraphParameters($vars);
-        // set php variables for legacy graphs
-        $type = $graph_params->type;
-        $subtype = $graph_params->subtype;
-        $height = $graph_params->height;
-        $width = $graph_params->width;
-        $from = $graph_params->from;
-        $to = $graph_params->to;
-        $period = $graph_params->period;
-        $prev_from = $graph_params->prev_from;
-        $inverse = $graph_params->inverse;
-        $in = $graph_params->in;
-        $out = $graph_params->out;
-        $float_precision = $graph_params->float_precision;
-        $title = $graph_params->visible('title');
-        $nototal = ! $graph_params->visible('total');
-        $nodetails = ! $graph_params->visible('details');
-        $noagg = ! $graph_params->visible('aggregate');
+        $name = $graph_params->type . '_' . $graph_params->subtype;
 
-        $rrd_options = [];
-        $rrd_filename = null;
+        /** @var GraphFactory $factory */
+        $factory = app(GraphFactory::class);
+        $graph = $factory->graphFor($name, $vars);
 
-        $auth = Auth::guest(); // if user not logged in, assume we authenticated via signed url, allow_unauth_graphs or allow_unauth_graphs_cidr
-        require base_path("/includes/html/graphs/$type/auth.inc.php");
-        if (! $auth) {
-            // We are unauthenticated :(
-            throw new RrdGraphException('No Authorization', 'No Auth', $width, $height);
+        // Run validation if rules are defined
+        if ($rules = $graph->validation()) {
+            $validator = \Validator::make($vars, $rules);
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
         }
 
-        if (is_file(base_path("/includes/html/graphs/$type/$subtype.inc.php"))) {
-            require base_path("/includes/html/graphs/$type/$subtype.inc.php");
-        } elseif (is_file(base_path("/includes/html/graphs/$type/generic.inc.php"))) {
-            require base_path("/includes/html/graphs/$type/generic.inc.php");
-        } else {
-            throw new RrdGraphException("{$type}_$subtype template missing", "{$type}_$subtype missing", $width, $height);
+        if (! $graph->authorize()) {
+            throw new RrdGraphException('No Authorization', 'No Auth', $graph_params->width, $graph_params->height);
         }
 
-        if (empty($rrd_options)) { // @phpstan-ignore empty.variable ($rrd_options is populated by included graph templates)
-            throw new RrdGraphException('Graph Definition Error', 'Def Error', $width, $height);
+        $rrd_options = $graph->definition($vars);
+
+        if (empty($rrd_options)) {
+            throw new RrdGraphException('Graph Definition Error', 'Def Error', $graph_params->width, $graph_params->height);
         }
 
-        $rrd_options = [...$graph_params->toRrdOptions(), ...$rrd_options]; // @phpstan-ignore deadCode.unreachable
+        $rrd_options = [...$graph_params->toRrdOptions(), ...$rrd_options];
 
         // Generating the graph!
         try {
             $image_data = Rrd::graph($rrd_options);
 
-            return new GraphImage($graph_params->imageFormat, $graph_params->getTitle(), $image_data);
+            return new GraphImage($graph_params->imageFormat, $graph->getGraphTitle(), $image_data);
         } catch (RrdGraphException $e) {
             // preserve original error if debug is enabled, otherwise make it a little more user friendly
             if (Debug::isEnabled()) {
                 throw $e;
             }
 
-            if (isset($rrd_filename) && ! Rrd::checkRrdExists($rrd_filename)) {
-                throw new RrdGraphException('No Data file' . basename($rrd_filename), 'No Data', $width, $height, $e->getCode(), $e->getImage());
+            $rrdFiles = $graph->getRrdFiles();
+            $rrd_filename = reset($rrdFiles) ?: null;
+
+            if ($rrd_filename && ! Rrd::checkRrdExists($rrd_filename)) {
+                throw new RrdGraphException('No Data file' . basename($rrd_filename), 'No Data', $graph_params->width, $graph_params->height, $e->getCode(), $e->getImage());
             }
 
-            throw new RrdGraphException('Error: ' . $e->getMessage(), 'Draw Error', $width, $height, $e->getCode(), $e->getImage());
+            throw new RrdGraphException('Error: ' . $e->getMessage(), 'Draw Error', $graph_params->width, $graph_params->height, $e->getCode(), $e->getImage());
         }
     }
 
