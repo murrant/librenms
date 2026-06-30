@@ -1,4 +1,5 @@
 <?php
+
 /**
  * GraphInterface.php
  *
@@ -28,9 +29,14 @@ namespace LibreNMS\Interfaces\Data\Graphing;
 interface GraphInterface
 {
     public function authorize(): bool;
+
     public function validation(): array;
+
     public function definition(array $vars = []): array;
+
     public function getPageTitle(): string;
+
     public function getGraphTitle(): string;
+
     public function getRrdFiles(): array;
 }
