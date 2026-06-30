@@ -405,4 +405,21 @@ class Rewrite
     {
         return round($celsius * 1.8 + 32, 2);
     }
+
+    public static function shortHrDevice(string $descr): string
+    {
+        $rewrite_hrDevice = [
+            'GenuineIntel:' => '',
+            'AuthenticAMD:' => '',
+            'Intel(R)' => '',
+            'CPU' => '',
+            '(R)' => '',
+            '  ' => ' ',
+        ];
+
+        $descr = str_replace(array_keys($rewrite_hrDevice), array_values($rewrite_hrDevice), $descr);
+        $descr = preg_replace('/\ +/', ' ', $descr);
+
+        return trim($descr);
+    }
 }

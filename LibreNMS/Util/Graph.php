@@ -122,6 +122,11 @@ class Graph
             if ($validator->fails()) {
                 throw new ValidationException($validator);
             }
+            $vars = $validator->validated();
+        }
+
+        if ($graph instanceof \LibreNMS\Data\Graphing\AbstractGraph) {
+            $graph->fill($vars);
         }
 
         if (! $graph->authorize()) {
