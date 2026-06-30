@@ -18,7 +18,7 @@ class Processor extends DeviceRelatedModel
      *
      * @return string
      */
-    public function getFormattedDescription()
+    public function getFormattedDescription(): string
     {
         $bad_descr = [
             'GenuineIntel:',
@@ -32,8 +32,6 @@ class Processor extends DeviceRelatedModel
         $descr = str_replace($bad_descr, '', $this->processor_descr);
 
         // reduce extra spaces
-        $descr = str_replace('  ', ' ', $descr);
-
-        return $descr;
+        return str_replace('  ', ' ', $descr);
     }
 }

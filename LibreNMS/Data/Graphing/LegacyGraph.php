@@ -79,7 +79,7 @@ class LegacyGraph extends AbstractGraph
         include_once base_path('includes/rewrites.php');
 
         if (! $this->device && isset($this->vars['device'])) {
-            $this->device = DeviceCache::get(is_numeric($this->vars['device']) ? $this->vars['device'] : getidbyname($this->vars['device']));
+            $this->device = DeviceCache::get($this->vars['device']);
         }
 
         if ($this->device) {
