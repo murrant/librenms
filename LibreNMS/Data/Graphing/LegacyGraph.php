@@ -29,10 +29,9 @@ use App\Facades\DeviceCache;
 use App\Models\Device;
 use App\Models\Port;
 use LibreNMS\Exceptions\InvalidGraph;
-use LibreNMS\Interfaces\Data\Graphing\GraphInterface;
 use function base_path;
 
-class LegacyGraph implements GraphInterface
+class LegacyGraph extends AbstractGraph
 {
     private readonly string $auth_file;
     private readonly string $graph_file;
@@ -149,10 +148,6 @@ class LegacyGraph implements GraphInterface
         return $this->authorized;
     }
 
-    public function validation(): array
-    {
-        return [];
-    }
 
     public function definition(array $vars = []): array
     {
