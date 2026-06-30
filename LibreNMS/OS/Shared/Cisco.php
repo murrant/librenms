@@ -1044,11 +1044,11 @@ class Cisco extends OS implements
                 ['4k', 3071],
             ] as [$suffix, $offset]) {
                 $vlans = $data['CISCO-VTP-MIB::vlanTrunkPortVlansXmitJoined' . $suffix] ?? '';
-            
+
                 if ($vlans === '') {
                     $vlans = $data['CISCO-VTP-MIB::vlanTrunkPortVlansEnabled' . $suffix] ?? '';
                 }
-            
+
                 foreach (StringHelpers::bitsToIndices($vlans) as $vlanId) {
                     $isNative[$vlanId + $offset][$ifindex] ??= 0;
                 }
