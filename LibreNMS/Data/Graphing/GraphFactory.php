@@ -25,6 +25,7 @@
 
 namespace LibreNMS\Data\Graphing;
 
+use Illuminate\Support\Str;
 use LibreNMS\Exceptions\InvalidGraph;
 use LibreNMS\Interfaces\Data\Graphing\GraphInterface;
 
@@ -45,7 +46,7 @@ class GraphFactory
         $vars['type'] ??= $name;
 
         // Look for a modern class, e.g. LibreNMS\Data\Graphing\Device\ProcessorSeparateGraph
-        $className = "LibreNMS\\Data\\Graphing\\" . ucfirst($type) . "\\" . \Illuminate\Support\Str::studly($subtype) . "Graph";
+        $className = "LibreNMS\\Graphs\\" . ucfirst($type) . "\\" . Str::studly($subtype) . "Graph";
         if (class_exists($className)) {
             return app($className, ['vars' => $vars]);
         }
