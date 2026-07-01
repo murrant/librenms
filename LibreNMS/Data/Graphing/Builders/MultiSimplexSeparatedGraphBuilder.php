@@ -32,7 +32,6 @@ use LibreNMS\Data\Store\Rrd;
 class MultiSimplexSeparatedGraphBuilder
 {
     private string $unitText = '';
-    private string $units = '';
     private string $totalUnits = '';
     private string $colours = 'mixed';
     private ?float $scaleMin = null;
@@ -48,12 +47,6 @@ class MultiSimplexSeparatedGraphBuilder
     public function unitText(string $unitText): self
     {
         $this->unitText = $unitText;
-        return $this;
-    }
-
-    public function units(string $units): self
-    {
-        $this->units = $units;
         return $this;
     }
 
