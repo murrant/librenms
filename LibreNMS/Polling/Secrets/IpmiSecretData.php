@@ -26,7 +26,7 @@
 
 namespace LibreNMS\Polling\Secrets;
 
-class IpmiSecret extends SecretData
+class IpmiSecretData extends SecretData
 {
     public function __construct(
         public ?string $username = null,

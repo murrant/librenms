@@ -26,7 +26,7 @@
 
 namespace LibreNMS\Polling\Secrets;
 
-class SnmpSecret extends SecretData
+class SnmpSecretData extends SecretData
 {
     public function __construct(
         public string $version = 'v2c',

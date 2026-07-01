@@ -7,9 +7,9 @@ use LibreNMS\Polling\Method\IcmpPollingMethod;
 use LibreNMS\Polling\Method\IpmiPollingMethod;
 use LibreNMS\Polling\Method\SnmpPollingMethod;
 use LibreNMS\Polling\Method\UnixAgentPollingMethod;
-use LibreNMS\Polling\Secrets\IpmiSecret;
+use LibreNMS\Polling\Secrets\IpmiSecretData;
 use LibreNMS\Polling\Secrets\SecretData;
-use LibreNMS\Polling\Secrets\SnmpSecret;
+use LibreNMS\Polling\Secrets\SnmpSecretData;
 
 enum PollingMethodType: string
 {
@@ -33,8 +33,8 @@ enum PollingMethodType: string
     public function secretClass(): ?string
     {
         return match ($this) {
-            self::Snmp => SnmpSecret::class,
-            self::Ipmi => IpmiSecret::class,
+            self::Snmp => SnmpSecretData::class,
+            self::Ipmi => IpmiSecretData::class,
             default => null,
         };
     }

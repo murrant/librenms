@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Gate;
 use LibreNMS\Enum\SecretType;
+use LibreNMS\Polling\Secrets\SecretData;
 
 class Secret extends BaseModel
 {
@@ -24,6 +25,20 @@ class Secret extends BaseModel
         'secret_type' => SecretType::class,
         'data' => EncryptedArray::class,
     ];
+
+    /**
+     * Cast the secret data array into the specified SecretData class.
+     * If no class is specified, it is inferred from the secret type.
+     *
+     * @template T of SecretData
+     * @param class-string<T>|null $secretClass
+     * @return ($secretClass is null ? SecretData : T)
+     */
+    public function asSecretData(?string $secretClass = null): SecretData
+    {
+        $class = $secretClass ?? $this->secret_type->secretClass();
+        return $class::fromArray($this->data);
+    }
 
     // ---- Query Scopes ----
 

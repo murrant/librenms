@@ -42,6 +42,8 @@ use LibreNMS\Exceptions\HostUnreachablePingException;
 use LibreNMS\Exceptions\HostUnreachableSnmpException;
 use LibreNMS\Exceptions\SnmpVersionUnsupportedException;
 use LibreNMS\Modules\Core;
+use LibreNMS\Polling\Secrets\SnmpSecret;
+use LibreNMS\Polling\Secrets\SnmpSecretData;
 use SnmpQuery;
 
 class ValidateDeviceAndCreate
@@ -127,35 +129,32 @@ class ValidateDeviceAndCreate
         $host_unreachable_exception = new HostUnreachableSnmpException($this->device->hostname);
 
         // Retrieve existing SNMP secret from relations if set
-        $existingSnmpSecret = $this->device->relationLoaded('pollingMethods') 
-            ? $this->device->pollingMethods->firstWhere('method_type', PollingMethodType::Snmp)?->secret 
+        $existingSnmpSecret = $this->device->relationLoaded('pollingMethods')
+            ? $this->device->pollingMethods->firstWhere('method_type', PollingMethodType::Snmp)?->secret
             : null;
 
-        // which snmp version should we try (and in what order)
-        $snmp_versions = [];
-        if ($existingSnmpSecret?->version) {
-            $snmp_versions[] = $existingSnmpSecret->version;
+        if ($existingSnmpSecret !== null) {
+            $secretData = $existingSnmpSecret->asSecretData(SnmpSecretData::class);
+            $snmp_versions = [$secretData->version];
+            if ($secretData->version === 'v3') {
+                $v3_credentials = [[
+                    'authlevel' => $secretData->authlevel,
+                    'authname' => $secretData->authname,
+                    'authpass' => $secretData->authpass,
+                    'authalgo' => $secretData->authalgo,
+                    'cryptopass' => $secretData->cryptopass,
+                    'cryptoalgo' => $secretData->cryptoalgo,
+                ]];
+                $communities = [];
+            } else {
+                $communities = [$secretData->community];
+                $v3_credentials = [];
+            }
+        } else {
+            $snmp_versions = array_unique(LibrenmsConfig::get('snmp.version', []));
+            $communities = array_unique(Arr::where(Arr::wrap(LibrenmsConfig::get('snmp.community')), fn ($community) => $community && is_string($community)));
+            $v3_credentials = array_unique(LibrenmsConfig::get('snmp.v3', []), SORT_REGULAR);
         }
-        $snmp_versions = array_unique(array_merge($snmp_versions, LibrenmsConfig::get('snmp.version')));
-
-        $communities = Arr::where(Arr::wrap(LibrenmsConfig::get('snmp.community')), fn ($community) => $community && is_string($community));
-        if ($existingSnmpSecret?->community) {
-            array_unshift($communities, $existingSnmpSecret->community);
-        }
-        $communities = array_unique($communities);
-
-        $v3_credentials = LibrenmsConfig::get('snmp.v3');
-        if ($existingSnmpSecret && $existingSnmpSecret->version === 'v3') {
-            array_unshift($v3_credentials, [
-                'authlevel' => $existingSnmpSecret->authlevel,
-                'authname' => $existingSnmpSecret->authname,
-                'authpass' => $existingSnmpSecret->authpass,
-                'authalgo' => $existingSnmpSecret->authalgo,
-                'cryptopass' => $existingSnmpSecret->cryptopass,
-                'cryptoalgo' => $existingSnmpSecret->cryptoalgo,
-            ]);
-        }
-        $v3_credentials = array_unique($v3_credentials, SORT_REGULAR);
 
         // Keep track of other polling methods so we do not overwrite them when setting the relation
         $otherPollingMethods = collect();

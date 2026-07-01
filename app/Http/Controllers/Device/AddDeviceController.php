@@ -144,10 +144,10 @@ class AddDeviceController
                 return back()->withInput()->withErrors(['hostname' => __('Failed to save device.')]);
             }
         } catch (HostUnreachableException $e) {
-            $reasons = implode(', ', $e->getReasons());
+            $errors = array_merge([$e->getMessage()], $e->getReasons());
 
             return back()->withInput()->withErrors([
-                'hostname' => $e->getMessage() . ($reasons ? " ($reasons)" : ''),
+                'hostname' => $errors,
             ]);
         } catch (\Exception $e) {
             return back()->withInput()->withErrors(['hostname' => $e->getMessage()]);

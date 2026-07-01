@@ -143,7 +143,7 @@ readonly class SnmpPollingMethod implements PollingMethod
         );
     }
 
-    public static function fromSecret(\LibreNMS\Polling\Secrets\SnmpSecret $secret): self
+    public static function fromSecret(\LibreNMS\Polling\Secrets\SnmpSecretData $secret): self
     {
         return new self(
             enabled: true,

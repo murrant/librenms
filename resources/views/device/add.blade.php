@@ -1,5 +1,9 @@
 @extends('layouts.librenmsv1')
 
+@php
+    $oldActiveMethods = old('active_methods', ['snmp', 'icmp']);
+@endphp
+
 @section('title', __('Add Device'))
 
 @section('content')
@@ -21,15 +25,16 @@
 
             <form method="POST" action="{{ route('device.add.store') }}"
                   x-data="{
-                      activeTab: 'snmp',
-                      activeMethods: ['snmp', 'icmp'],
+                      activeTab: '{{ old('active_tab', 'snmp') }}',
+                      activeMethods: @js($oldActiveMethods),
                       methods: {
                           @foreach($availableMethods as $method)
                           '{{ $method['type'] }}': {
-                              validate: true,
-                              credential_mode: 'default',
-                              formData: @js($method['schema_defaults'] ?? []),
-                              settingsData: {}
+                               validate: {{ old("polling_methods.{$method['type']}.validate") !== null ? (old("polling_methods.{$method['type']}.validate") ? 'true' : 'false') : 'true' }},
+                               affects_availability: {{ old("polling_methods.{$method['type']}.affects_availability") !== null ? (old("polling_methods.{$method['type']}.affects_availability") ? 'true' : 'false') : ($method['type'] === 'snmp' ? 'true' : 'false') }},
+                               credential_mode: '{{ old("polling_methods.{$method['type']}.credential_mode", 'default') }}',
+                               formData: @js(old("polling_methods.{$method['type']}.secret_data", $method['schema_defaults'] ?? [])),
+                               settingsData: @js(old("polling_methods.{$method['type']}.settings", []))
                           },
                           @endforeach
                       },
@@ -51,6 +56,10 @@
                       },
                   }">
                 @csrf
+                <input type="hidden" name="active_tab" :value="activeTab">
+                <template x-for="method in activeMethods">
+                    <input type="hidden" name="active_methods[]" :value="method">
+                </template>
 
                 {{-- General Properties --}}
                 <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-4 tw:mb-4">
@@ -59,7 +68,9 @@
                         <input type="text" id="hostname" name="hostname" class="form-control"
                                value="{{ old('hostname') }}" placeholder="device.example.com" required autofocus>
                         @if($errors->has('hostname'))
-                            <span class="help-block">{{ $errors->first('hostname') }}</span>
+                            @foreach($errors->get('hostname') as $error)
+                                <span class="help-block">{{ $error }}</span>
+                            @endforeach
                         @endif
                     </div>
 
@@ -160,8 +171,9 @@
                                     <input type="hidden" name="polling_methods[{{ $method['type'] }}][active]" value="1">
                                 </template>
 
-                                {{-- Validate on add toggle --}}
-                                <div class="tw:mb-6">
+                                {{-- Toggles container --}}
+                                <div class="tw:flex tw:flex-col tw:gap-3 tw:mb-6">
+                                    {{-- Validate on add toggle --}}
                                     <label class="tw:flex tw:items-center tw:cursor-pointer tw:group tw:px-4 tw:py-3 tw:rounded-lg tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:w-full tw:max-w-md">
                                         <div class="tw:relative tw:shrink-0">
                                             <input type="hidden" name="polling_methods[{{ $method['type'] }}][validate]" value="0">
@@ -175,47 +187,26 @@
                                         </div>
                                         <span class="tw:ml-4 tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Validate on add') }}</span>
                                     </label>
-                                </div>
 
-                                {{-- Settings fields --}}
-                                @if(!empty($method['settings_fields']))
-                                    <div class="tw:mb-6">
-                                        <h4 class="tw:font-semibold tw:text-base tw:mb-3 tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Settings') }}</h4>
-                                        <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-4 tw:max-w-2xl">
-                                            @foreach($method['settings_fields'] as $setting)
-                                                <div class="form-group"
-                                                     @if($setting['visible_if_expression']) x-show="{{ $setting['visible_if_expression'] }}" @endif>
-                                                    <label class="control-label">{{ __('poller.method_settings.' . $method['type'] . '.' . $setting['key']) }}</label>
-                                                    @if(($setting['field_type'] ?? 'text') === 'select')
-                                                        <select name="polling_methods[{{ $method['type'] }}][settings][{{ $setting['key'] }}]"
-                                                                x-model="methods['{{ $method['type'] }}'].settingsData['{{ $setting['key'] }}']"
-                                                                class="form-control">
-                                                            @foreach($setting['options'] ?? [] as $optVal => $optLabel)
-                                                                <option value="{{ $optVal }}">{{ __($optLabel) }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    @elseif(($setting['field_type'] ?? 'text') === 'number')
-                                                        <input type="number"
-                                                               name="polling_methods[{{ $method['type'] }}][settings][{{ $setting['key'] }}]"
-                                                               x-model="methods['{{ $method['type'] }}'].settingsData['{{ $setting['key'] }}']"
-                                                               class="form-control"
-                                                               @isset($setting['min']) min="{{ $setting['min'] }}" @endisset
-                                                               @isset($setting['max']) max="{{ $setting['max'] }}" @endisset>
-                                                    @else
-                                                        <input type="text"
-                                                               name="polling_methods[{{ $method['type'] }}][settings][{{ $setting['key'] }}]"
-                                                               x-model="methods['{{ $method['type'] }}'].settingsData['{{ $setting['key'] }}']"
-                                                               class="form-control">
-                                                    @endif
-                                                </div>
-                                            @endforeach
+                                    {{-- Affects Availability toggle --}}
+                                    <label class="tw:flex tw:items-center tw:cursor-pointer tw:group tw:px-4 tw:py-3 tw:rounded-lg tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:w-full tw:max-w-md">
+                                        <div class="tw:relative tw:shrink-0">
+                                            <input type="hidden" name="polling_methods[{{ $method['type'] }}][affects_availability]" value="0">
+                                            <input type="checkbox" name="polling_methods[{{ $method['type'] }}][affects_availability]"
+                                                   value="1" class="tw:sr-only"
+                                                   x-model="methods['{{ $method['type'] }}'].affects_availability">
+                                            <div class="tw:block tw:w-16 tw:h-9 tw:rounded-full tw:transition-colors tw:duration-200"
+                                                 :class="methods['{{ $method['type'] }}'].affects_availability ? 'tw:bg-blue-600' : 'tw:bg-gray-300 tw:dark:bg-dark-gray-400'"></div>
+                                            <div class="tw:absolute tw:left-1 tw:top-1 tw:w-7 tw:h-7 tw:rounded-full tw:transition-transform tw:duration-200 tw:bg-white tw:shadow-sm"
+                                                 :class="methods['{{ $method['type'] }}'].affects_availability ? 'tw:translate-x-7' : 'tw:translate-x-0'"></div>
                                         </div>
-                                    </div>
-                                @endif
+                                        <span class="tw:ml-4 tw:font-medium tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('poller.affects_availability') }}</span>
+                                    </label>
+                                </div>
 
                                 {{-- Credentials --}}
                                 @if(!empty($method['schema_fields']))
-                                    <div class="tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:rounded-lg tw:p-5">
+                                    <div class="tw:border tw:border-gray-200 tw:dark:border-dark-gray-400 tw:rounded-lg tw:p-5 tw:mb-6">
                                         <h4 class="tw:font-semibold tw:text-base tw:mb-4 tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Credentials') }}</h4>
 
                                         <div class="tw:flex tw:flex-wrap tw:gap-4 tw:mb-4">
@@ -311,6 +302,42 @@
                                                     </div>
                                                 @endforeach
                                             </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- Settings fields --}}
+                                @if(!empty($method['settings_fields']))
+                                    <div class="tw:mb-6">
+                                        <h4 class="tw:font-semibold tw:text-base tw:mb-3 tw:text-gray-700 tw:dark:text-dark-white-200">{{ __('Settings') }}</h4>
+                                        <div class="tw:grid tw:grid-cols-1 tw:md:grid-cols-2 tw:gap-4 tw:max-w-2xl">
+                                            @foreach($method['settings_fields'] as $setting)
+                                                <div class="form-group"
+                                                     @if($setting['visible_if_expression']) x-show="{{ $setting['visible_if_expression'] }}" @endif>
+                                                    <label class="control-label">{{ __('poller.method_settings.' . $method['type'] . '.' . $setting['key']) }}</label>
+                                                    @if(($setting['field_type'] ?? 'text') === 'select')
+                                                        <select name="polling_methods[{{ $method['type'] }}][settings][{{ $setting['key'] }}]"
+                                                                x-model="methods['{{ $method['type'] }}'].settingsData['{{ $setting['key'] }}']"
+                                                                class="form-control">
+                                                            @foreach($setting['options'] ?? [] as $optVal => $optLabel)
+                                                                <option value="{{ $optVal }}">{{ __($optLabel) }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    @elseif(($setting['field_type'] ?? 'text') === 'number')
+                                                        <input type="number"
+                                                               name="polling_methods[{{ $method['type'] }}][settings][{{ $setting['key'] }}]"
+                                                               x-model="methods['{{ $method['type'] }}'].settingsData['{{ $setting['key'] }}']"
+                                                               class="form-control"
+                                                               @isset($setting['min']) min="{{ $setting['min'] }}" @endisset
+                                                               @isset($setting['max']) max="{{ $setting['max'] }}" @endisset>
+                                                    @else
+                                                        <input type="text"
+                                                               name="polling_methods[{{ $method['type'] }}][settings][{{ $setting['key'] }}]"
+                                                               x-model="methods['{{ $method['type'] }}'].settingsData['{{ $setting['key'] }}']"
+                                                               class="form-control">
+                                                    @endif
+                                                </div>
+                                            @endforeach
                                         </div>
                                     </div>
                                 @endif

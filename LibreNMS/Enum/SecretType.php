@@ -27,9 +27,9 @@
 namespace LibreNMS\Enum;
 
 use LibreNMS\Polling\Secrets\IcmpSecret;
-use LibreNMS\Polling\Secrets\IpmiSecret;
+use LibreNMS\Polling\Secrets\IpmiSecretData;
 use LibreNMS\Polling\Secrets\SecretData;
-use LibreNMS\Polling\Secrets\SnmpSecret;
+use LibreNMS\Polling\Secrets\SnmpSecretData;
 use LibreNMS\Polling\Secrets\UnixAgentSecret;
 
 enum SecretType: string
@@ -53,8 +53,8 @@ enum SecretType: string
     public function secretClass(): string
     {
         return match ($this) {
-            self::Snmp => SnmpSecret::class,
-            self::Ipmi => IpmiSecret::class,
+            self::Snmp => SnmpSecretData::class,
+            self::Ipmi => IpmiSecretData::class,
         };
     }
 
