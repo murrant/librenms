@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MultiLineGraphBuilder.php
  *
@@ -44,42 +45,49 @@ class MultiLineGraphBuilder
     public function unitText(string $unitText): self
     {
         $this->unitText = $unitText;
+
         return $this;
     }
 
     public function units(string $units): self
     {
         $this->units = $units;
+
         return $this;
     }
 
     public function colours(string $colours): self
     {
         $this->colours = $colours;
+
         return $this;
     }
 
     public function scaleMin(float $scaleMin): self
     {
         $this->scaleMin = $scaleMin;
+
         return $this;
     }
 
     public function scaleMax(float $scaleMax): self
     {
         $this->scaleMax = $scaleMax;
+
         return $this;
     }
 
     public function noTotal(bool $noTotal = true): self
     {
         $this->nototal = $noTotal;
+
         return $this;
     }
 
     public function descrLen(int $descrLen): self
     {
         $this->descrLen = $descrLen;
+
         return $this;
     }
 
@@ -101,6 +109,7 @@ class MultiLineGraphBuilder
             'areacolour' => $areaColour,
             'invert' => $invert,
         ];
+
         return $this;
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * InvalidGraph.php
  *
@@ -29,8 +30,8 @@ use Throwable;
 
 class InvalidGraph extends RrdException
 {
-public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null)
-{
-    parent::__construct($message ?: "Invalid Graph", $code, $previous);
-}
+    public function __construct(string $message = '', int $code = 0, ?Throwable $previous = null)
+    {
+        parent::__construct($message ?: 'Invalid Graph', $code, $previous);
+    }
 }

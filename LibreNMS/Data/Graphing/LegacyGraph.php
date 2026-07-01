@@ -1,4 +1,5 @@
 <?php
+
 /**
  * LegacyGraph.php
  *
@@ -47,6 +48,7 @@ class LegacyGraph extends AbstractGraph
 
     /**
      * @param  array<string, scalar>  $vars
+     *
      * @throws InvalidGraph
      */
     public function __construct(
@@ -103,6 +105,7 @@ class LegacyGraph extends AbstractGraph
 
         if (! $auth) {
             $this->loaded = true;
+
             return;
         }
 
@@ -144,19 +147,21 @@ class LegacyGraph extends AbstractGraph
     public function authorize(): bool
     {
         $this->load();
+
         return $this->authorized;
     }
-
 
     public function definition(GraphParameters $graph_params): array
     {
         $this->load();
+
         return $this->rrdOptions;
     }
 
     public function getPageTitle(): string
     {
         $this->load();
+
         return $this->pageTitle ?? $this->getGraphTitle();
     }
 
@@ -178,6 +183,7 @@ class LegacyGraph extends AbstractGraph
     public function getRrdFiles(): array
     {
         $this->load();
+
         return $this->rrdFiles;
     }
 }

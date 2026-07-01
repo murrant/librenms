@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ProcessorGraph.php
  *
@@ -71,6 +72,7 @@ class ProcessorGraph extends AbstractGraph
         foreach ($this->processors as $proc) {
             $files[] = Rrd::name($this->device->hostname, ['processor', $proc->processor_type, $proc->processor_index]);
         }
+
         return $files;
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * AbstractGraph.php
  *
@@ -53,6 +54,7 @@ abstract class AbstractGraph implements GraphInterface
                 }
             }
         }
+
         return $this;
     }
 }
