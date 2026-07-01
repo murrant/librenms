@@ -30,7 +30,6 @@ use App\Facades\DeviceCache;
 use App\Models\Device;
 use App\Models\Port;
 use LibreNMS\Exceptions\InvalidGraph;
-use function base_path;
 
 class LegacyGraph extends AbstractGraph
 {
