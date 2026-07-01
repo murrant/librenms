@@ -24,11 +24,10 @@ class GraphDetail extends Command
         $this->line("Type: $graph->type");
         $this->line("Subtype: $graph->subtype");
         $this->line('Authorized: ' . ($graph->authorize() ? 'true' : 'false'));
-        $this->line("Graph Title: " . $graph->getGraphTitle());
-        $this->line("Page Title: " . substr($graph->getPageTitle(), 0, 80));
-        $this->line("Rrd Files: " . implode(', ', array_map(fn($f) => basename($f), $graph->getRrdFiles())));
-        $this->line("Definition: " . substr(implode(' ', $graph->definition()), 80));
-
+        $this->line('Graph Title: ' . $graph->getGraphTitle());
+        $this->line('Page Title: ' . substr($graph->getPageTitle(), 0, 80));
+        $this->line('Rrd Files: ' . implode(', ', array_map(fn ($f) => basename($f), $graph->getRrdFiles())));
+        $this->line('Definition: ' . substr(implode(' ', $graph->definition()), 80));
 
         return 0;
     }
