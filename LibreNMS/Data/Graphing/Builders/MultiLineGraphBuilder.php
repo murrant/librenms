@@ -33,7 +33,6 @@ class MultiLineGraphBuilder
 {
     private string $unitText = '';
     private string $units = '';
-    private string $totalUnits = '%';
     private string $colours = 'mixed';
     private ?float $scaleMin = null;
     private ?float $scaleMax = null;
@@ -51,12 +50,6 @@ class MultiLineGraphBuilder
     public function units(string $units): self
     {
         $this->units = $units;
-        return $this;
-    }
-
-    public function totalUnits(string $totalUnits): self
-    {
-        $this->totalUnits = $totalUnits;
         return $this;
     }
 

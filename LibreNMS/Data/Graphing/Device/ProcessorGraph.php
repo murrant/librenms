@@ -97,7 +97,6 @@ class ProcessorGraph extends AbstractGraph
         if (LibrenmsConfig::getOsSetting($this->device->os, 'processor_stacked')) {
             $builder = (new MultiSimplexSeparatedGraphBuilder())
                 ->unitText('Load %')
-                ->units('%')
                 ->totalUnits('%')
                 ->colours('oranges')
                 ->scaleMin(0)
@@ -116,7 +115,6 @@ class ProcessorGraph extends AbstractGraph
         $builder = (new MultiLineGraphBuilder())
             ->unitText('Load %')
             ->units('')
-            ->totalUnits('%')
             ->colours('mixed')
             ->scaleMin(0)
             ->scaleMax(100)

@@ -46,12 +46,13 @@ class LegacyGraph extends AbstractGraph
     private ?Port $port = null;
 
     /**
+     * @param  array<string, scalar>  $vars
      * @throws InvalidGraph
      */
     public function __construct(
         public readonly string $type,
         public readonly string $subtype,
-        private array $vars = [],
+        private readonly array $vars = [],
     ) {
         $this->auth_file = base_path("includes/html/graphs/$this->type/auth.inc.php");
         $graph_file = base_path("includes/html/graphs/$this->type/$this->subtype.inc.php");
@@ -65,13 +66,11 @@ class LegacyGraph extends AbstractGraph
         }
     }
 
-    private function load(array $vars = []): void
+    private function load(): void
     {
         if ($this->loaded) {
             return;
         }
-
-        $this->vars = array_merge($this->vars, $vars);
 
         include_once base_path('includes/common.php');
         include_once base_path('includes/html/functions.inc.php');
@@ -151,7 +150,7 @@ class LegacyGraph extends AbstractGraph
 
     public function definition(GraphParameters $graph_params): array
     {
-        $this->load($graph_params->all());
+        $this->load();
         return $this->rrdOptions;
     }
 
