@@ -17,7 +17,6 @@ class DeviceIcmpIsAvailable
 
     public function execute(Device $device): FpingResponse
     {
-
         $status = $this->fping->ping($device->pollerTarget(), $device->ipFamily());
 
         if ($status->duplicates > 0) {

@@ -13,7 +13,8 @@ readonly class UnixAgentPollingMethod implements PollingMethod
         public bool $enabled,
         public bool $affectsAvailability,
         public int $port,
-    ) {}
+    ) {
+    }
 
     public static function fromModel(DevicePollingMethod $method): self
     {
