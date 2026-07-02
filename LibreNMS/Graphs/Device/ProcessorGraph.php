@@ -76,7 +76,7 @@ class ProcessorGraph extends AbstractGraph
         return $files;
     }
 
-    public function definition(GraphParameters $graph_params): array
+    public function rrdDefinition(GraphParameters $graph_params): array
     {
         if ($this->processors->isEmpty()) {
             throw new \LibreNMS\Exceptions\RrdGraphException('No Processors');

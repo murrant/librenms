@@ -27,7 +27,7 @@ class GraphDetail extends Command
         $this->line('Graph Title: ' . $graph->getGraphTitle());
         $this->line('Page Title: ' . substr($graph->getPageTitle(), 0, 80));
         $this->line('Rrd Files: ' . implode(', ', array_map(fn ($f) => basename($f), $graph->getRrdFiles())));
-        $this->line('Definition: ' . substr(implode(' ', $graph->definition()), 80));
+        $this->line('Definition: ' . substr(implode(' ', $graph->rrdDefinition()), 80));
 
         return 0;
     }
