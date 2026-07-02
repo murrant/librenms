@@ -29,10 +29,9 @@ namespace LibreNMS\Util;
 use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 use LibreNMS\Data\Graphing\GraphFactory;
 use LibreNMS\Data\Graphing\GraphImage;
-use LibreNMS\Data\Graphing\GraphParameters;
 use LibreNMS\Enum\ImageFormat;
 use LibreNMS\Exceptions\InvalidGraph;
 use LibreNMS\Exceptions\RrdGraphException;
@@ -104,63 +103,42 @@ class Graph
      */
     public static function get(array|string $vars): GraphImage
     {
-        // handle possible graph url input
-        if (is_string($vars)) {
-            $vars = Url::parseLegacyPathVars($vars);
-        }
+        $vars = is_string($vars) ? Url::parseLegacyPathVars($vars) : $vars;
 
-        $graph_params = new GraphParameters($vars);
-        app()->instance(GraphParameters::class, $graph_params);
-        $name = $graph_params->type . '_' . $graph_params->subtype;
+        $graph = app(GraphFactory::class)->graphFor($vars['type'] ?? '', $vars);
+        $params = $graph->getParams();
 
-        /** @var GraphFactory $factory */
-        $factory = app(GraphFactory::class);
-        $graph = $factory->graphFor($name, $vars);
-
-        // Run validation if rules are defined
         if ($rules = $graph->validation()) {
-            $validator = \Validator::make($vars, $rules);
-            if ($validator->fails()) {
-                throw new ValidationException($validator);
-            }
-            $vars = $validator->validated();
-        }
-
-        if ($graph instanceof \LibreNMS\Data\Graphing\AbstractGraph) {
-            $graph->fill($vars);
+            Validator::validate($vars, $rules);
         }
 
         if (! $graph->authorize()) {
-            throw new RrdGraphException('No Authorization', 'No Auth', $graph_params->width, $graph_params->height);
+            throw new RrdGraphException('No Authorization', 'No Auth', $params->width, $params->height);
         }
 
-        $rrd_options = $graph->rrdDefinition($graph_params);
+        $rrd_options = $graph->rrdDefinition();
 
         if (empty($rrd_options)) {
-            throw new RrdGraphException('Graph Definition Error', 'Def Error', $graph_params->width, $graph_params->height);
+            throw new RrdGraphException('Graph Definition Error', 'Def Error', $params->width, $params->height);
         }
 
-        $rrd_options = [...$graph_params->toRrdOptions(), ...$rrd_options];
+        $rrd_options = [...$params->toRrdOptions(), ...$rrd_options];
 
         // Generating the graph!
         try {
-            $image_data = Rrd::graph($rrd_options);
-
-            return new GraphImage($graph_params->imageFormat, $graph->getGraphTitle(), $image_data);
+            return new GraphImage($params->imageFormat, $graph->getGraphTitle(), Rrd::graph($rrd_options));
         } catch (RrdGraphException $e) {
-            // preserve original error if debug is enabled, otherwise make it a little more user friendly
             if (Debug::isEnabled()) {
                 throw $e;
             }
 
-            $rrdFiles = $graph->getRrdFiles();
-            $rrd_filename = reset($rrdFiles) ?: null;
-
-            if ($rrd_filename && ! Rrd::checkRrdExists($rrd_filename)) {
-                throw new RrdGraphException('No Data file' . basename($rrd_filename), 'No Data', $graph_params->width, $graph_params->height, $e->getCode(), $e->getImage());
+            foreach($graph->getRrdFiles() as $rrd_filename) {
+                if (! Rrd::checkRrdExists($rrd_filename)) {
+                    throw new RrdGraphException('No Data file' . basename($rrd_filename), 'No Data', $params->width, $params->height, $e->getCode(), $e->getImage());
+                }
             }
 
-            throw new RrdGraphException('Error: ' . $e->getMessage(), 'Draw Error', $graph_params->width, $graph_params->height, $e->getCode(), $e->getImage());
+            throw new RrdGraphException('Error: ' . $e->getMessage(), 'Draw Error', $params->width, $params->height, $e->getCode(), $e->getImage());
         }
     }
 
