@@ -42,7 +42,6 @@ use LibreNMS\Exceptions\HostUnreachablePingException;
 use LibreNMS\Exceptions\HostUnreachableSnmpException;
 use LibreNMS\Exceptions\SnmpVersionUnsupportedException;
 use LibreNMS\Modules\Core;
-use LibreNMS\Polling\Secrets\SnmpSecret;
 use LibreNMS\Polling\Secrets\SnmpSecretData;
 use SnmpQuery;
 

@@ -15,7 +15,8 @@ readonly class UnixAgentPollingMethod implements PollingMethod
         public bool $enabled,
         public bool $affectsAvailability,
         public int $port,
-    ) {}
+    ) {
+    }
 
     public function isAvailable(Device $device, bool $commit = false): bool
     {
@@ -31,6 +32,7 @@ readonly class UnixAgentPollingMethod implements PollingMethod
             $agent = @fsockopen($poller_target, (int) $agent_port, $errno, $errstr, $timeout);
             if ($agent) {
                 fclose($agent);
+
                 return true;
             }
         } catch (\Throwable) {
