@@ -150,7 +150,7 @@ class LegacyGraph extends AbstractGraph
         return $this->authorized;
     }
 
-    public function definition(GraphParameters $graph_params): array
+    public function rrdDefinition(GraphParameters $graph_params): array
     {
         $this->load();
 
