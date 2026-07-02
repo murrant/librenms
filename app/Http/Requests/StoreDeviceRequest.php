@@ -24,20 +24,20 @@ class StoreDeviceRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'hostname'              => ['required', 'ip_or_hostname'],
-            'port'                  => ['nullable', 'integer', 'between:1,65535'],
-            'transport'             => ['nullable', 'string', 'in:udp,udp6,tcp,tcp6'],
-            'poller_group'          => ['nullable', 'integer', Rule::in(PollerGroup::pluck('id')->prepend(0))],
-            'port_assoc_mode'       => ['nullable', 'string', Rule::in(PortAssociationMode::getModes())],
-            'force_add'             => ['nullable', 'boolean'],
-            'ping_fallback'         => ['nullable', 'boolean'],
-            'polling_methods'       => ['required', 'array'],
-            'sysName'               => ['nullable', 'string', 'max:255'],
-            'hardware'              => ['nullable', 'string', 'max:255'],
-            'os'                    => ['nullable', 'string', 'max:255'],
-            'active_tab'            => ['nullable', 'string'],
-            'active_methods'        => ['nullable', 'array'],
-            'active_methods.*'      => ['string'],
+            'hostname' => ['required', 'ip_or_hostname'],
+            'port' => ['nullable', 'integer', 'between:1,65535'],
+            'transport' => ['nullable', 'string', 'in:udp,udp6,tcp,tcp6'],
+            'poller_group' => ['nullable', 'integer', Rule::in(PollerGroup::pluck('id')->prepend(0))],
+            'port_assoc_mode' => ['nullable', 'string', Rule::in(PortAssociationMode::getModes())],
+            'force_add' => ['nullable', 'boolean'],
+            'ping_fallback' => ['nullable', 'boolean'],
+            'polling_methods' => ['required', 'array'],
+            'sysName' => ['nullable', 'string', 'max:255'],
+            'hardware' => ['nullable', 'string', 'max:255'],
+            'os' => ['nullable', 'string', 'max:255'],
+            'active_tab' => ['nullable', 'string'],
+            'active_methods' => ['nullable', 'array'],
+            'active_methods.*' => ['string'],
         ];
 
         // Loop over the methods provided in the request
@@ -48,18 +48,18 @@ class StoreDeviceRequest extends FormRequest
             }
 
             // Only validate if explicitly checked/enabled in form
-            $isActive = !empty($data['active']) && $this->boolean("polling_methods.{$method}.active");
-            $isEnabled = !empty($data['enabled']) && $this->boolean("polling_methods.{$method}.enabled");
+            $isActive = ! empty($data['active']) && $this->boolean("polling_methods.{$method}.active");
+            $isEnabled = ! empty($data['enabled']) && $this->boolean("polling_methods.{$method}.enabled");
 
             if (! $isActive && ! $isEnabled) {
                 continue;
             }
 
-            $rules["polling_methods.{$method}.active"]               = ['nullable', 'boolean'];
-            $rules["polling_methods.{$method}.validate"]             = ['nullable', 'boolean'];
+            $rules["polling_methods.{$method}.active"] = ['nullable', 'boolean'];
+            $rules["polling_methods.{$method}.validate"] = ['nullable', 'boolean'];
             $rules["polling_methods.{$method}.affects_availability"] = ['nullable', 'boolean'];
-            $rules["polling_methods.{$method}.credential_mode"]      = ['nullable', 'in:default,existing,new'];
-            
+            $rules["polling_methods.{$method}.credential_mode"] = ['nullable', 'in:default,existing,new'];
+
             if ($type->hasSecret()) {
                 $rules["polling_methods.{$method}.secret_id"] = [
                     'required_if:polling_methods.' . $method . '.credential_mode,existing',
@@ -69,7 +69,7 @@ class StoreDeviceRequest extends FormRequest
                 ];
 
                 $rules["polling_methods.{$method}.description"] = ['nullable', 'string', 'max:255'];
-                $rules["polling_methods.{$method}.default"]     = ['nullable', 'boolean'];
+                $rules["polling_methods.{$method}.default"] = ['nullable', 'boolean'];
 
                 $credentialMode = $data['credential_mode'] ?? 'default';
                 if ($credentialMode === 'new') {
@@ -97,7 +97,7 @@ class StoreDeviceRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'force_add'     => $this->boolean('force_add'),
+            'force_add' => $this->boolean('force_add'),
             'ping_fallback' => $this->boolean('ping_fallback'),
         ]);
 
