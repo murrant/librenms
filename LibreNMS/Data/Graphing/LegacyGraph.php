@@ -27,8 +27,6 @@
 namespace LibreNMS\Data\Graphing;
 
 use App\Facades\DeviceCache;
-use App\Models\Device;
-use App\Models\Port;
 use LibreNMS\Exceptions\InvalidGraph;
 
 class LegacyGraph extends AbstractGraph
@@ -42,8 +40,6 @@ class LegacyGraph extends AbstractGraph
     private array $rrdFiles = [];
     private bool $loaded = false;
     private array $rrdOptions = [];
-    private ?Device $device = null;
-    private ?Port $port = null;
 
     /**
      * @param  array<string, scalar>  $vars
@@ -51,18 +47,22 @@ class LegacyGraph extends AbstractGraph
      * @throws InvalidGraph
      */
     public function __construct(
-        public readonly string $type,
-        public readonly string $subtype,
-        private readonly array $vars = [],
+        GraphParameters $params,
+        array $vars = [],
     ) {
-        $this->auth_file = base_path("includes/html/graphs/$this->type/auth.inc.php");
-        $graph_file = base_path("includes/html/graphs/$this->type/$this->subtype.inc.php");
+        parent::__construct($params, $vars);
+
+        $this->auth_file = base_path("includes/html/graphs/$params->type/auth.inc.php");
+        if (! file_exists($this->auth_file)) {
+            throw new InvalidGraph;
+        }
+
+        $graph_file = base_path("includes/html/graphs/$params->type/$params->subtype.inc.php");
         if (! file_exists($graph_file)) {
-            $graph_file = base_path("includes/html/graphs/$this->type/generic.inc.php");
+            $graph_file = base_path("includes/html/graphs/$params->type/generic.inc.php");
         }
         $this->graph_file = $graph_file;
-
-        if (! file_exists($this->auth_file) || ! file_exists($this->graph_file)) {
+        if (! file_exists($this->graph_file)) {
             throw new InvalidGraph;
         }
     }
@@ -78,16 +78,8 @@ class LegacyGraph extends AbstractGraph
         include_once base_path('includes/dbFacile.php');
         include_once base_path('includes/rewrites.php');
 
-        if (! $this->device && isset($this->vars['device'])) {
-            $this->device = DeviceCache::get($this->vars['device']);
-        }
-
-        if ($this->device) {
+        if ($this->device->exists) {
             DeviceCache::setPrimary($this->device->device_id);
-        }
-
-        if (! $this->port && isset($this->vars['id']) && $this->type === 'port') {
-            $this->port = \App\Facades\PortCache::get($this->vars['id']);
         }
 
         // Local scope variables for the included files
@@ -108,7 +100,7 @@ class LegacyGraph extends AbstractGraph
             return;
         }
 
-        $graph_params = app()->bound(GraphParameters::class) ? app(GraphParameters::class) : new GraphParameters($this->vars);
+        $graph_params = $this->params;
         $type = $graph_params->type;
         $subtype = $graph_params->subtype;
         $height = $graph_params->height;
@@ -150,7 +142,7 @@ class LegacyGraph extends AbstractGraph
         return $this->authorized;
     }
 
-    public function rrdDefinition(GraphParameters $graph_params): array
+    public function rrdDefinition(): array
     {
         $this->load();
 
