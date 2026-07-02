@@ -37,21 +37,19 @@ class GraphFactory
      */
     public function graphFor(string $name, array $vars = []): GraphInterface
     {
-        if (! preg_match('/([a-z]+)_([a-zA-Z0-9_]+)/', $name, $matches)) {
+        $vars['type'] ??= $name;
+        $params = new GraphParameters($vars);
+
+        if (empty($params->type) || empty($params->subtype)) {
             throw new InvalidGraph;
         }
 
-        $type = $matches[1];
-        $subtype = $matches[2];
-
-        $vars['type'] ??= $name;
-
-        // Look for a modern class, e.g. LibreNMS\Data\Graphing\Device\ProcessorSeparateGraph
-        $className = 'LibreNMS\\Graphs\\' . ucfirst($type) . '\\' . Str::studly($subtype) . 'Graph';
+        // Look for a modern class, e.g. LibreNMS\Graphs\Device\ProcessorGraph
+        $className = 'LibreNMS\\Graphs\\' . ucfirst($params->type) . '\\' . Str::studly($params->subtype) . 'Graph';
         if (class_exists($className)) {
-            return app($className, ['vars' => $vars]);
+            return app($className, ['vars' => $vars, 'params' => $params]);
         }
 
-        return new LegacyGraph($type, $subtype, $vars);
+        return new LegacyGraph($params, $vars);
     }
 }

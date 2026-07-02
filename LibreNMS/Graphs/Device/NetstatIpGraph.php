@@ -2,30 +2,19 @@
 
 namespace LibreNMS\Graphs\Device;
 
-use App\Facades\DeviceCache;
 use App\Facades\Rrd;
-use App\Models\Device;
 use Illuminate\Support\Facades\Gate;
 use LibreNMS\Data\Graphing\AbstractGraph;
 use LibreNMS\Data\Graphing\Builders\MultiLineGraphBuilder;
-use LibreNMS\Data\Graphing\GraphParameters;
 
 class NetstatIpGraph extends AbstractGraph
 {
-    private Device $device;
-
-    public function __construct(
-        private readonly array $vars = [],
-    ) {
-        $this->device = DeviceCache::get($this->vars['device'] ?? null);
-    }
-
     public function authorize(): bool
     {
         return Gate::allows('view', $this->device);
     }
 
-    public function rrdDefinition(GraphParameters $graph_params): array
+    public function rrdDefinition(): array
     {
         $rrd_file = Rrd::name($this->device->hostname, 'netstats-ip');
 
@@ -40,7 +29,7 @@ class NetstatIpGraph extends AbstractGraph
             ->addDataset($rrd_file, 'ipInDiscards', 'In Discards')
             ->addDataset($rrd_file, 'ipOutDiscards', 'Out Discards', invert: true)
             ->addDataset($rrd_file, 'ipOutNoRoutes', 'Out No Routes', invert: true)
-            ->build($graph_params);
+            ->build($this->params);
     }
 
     public function getGraphTitle(): string

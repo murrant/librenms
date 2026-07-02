@@ -26,13 +26,48 @@
 
 namespace LibreNMS\Data\Graphing;
 
+use App\Facades\DeviceCache;
+use App\Facades\PortCache;
+use App\Models\Device;
+use App\Models\Port;
 use LibreNMS\Interfaces\Data\Graphing\GraphInterface;
 
 abstract class AbstractGraph implements GraphInterface
 {
+    protected Device $device;
+    protected ?Port $port;
+
+    public function __construct(
+        protected readonly GraphParameters $params,
+        protected readonly array $vars = [],
+    )
+    {
+        $device_id = $this->vars['device'] ?? ($this->params->type == 'device' ? ($this->vars['id'] ?? null) : null);
+        $this->device = DeviceCache::get($device_id);
+
+        $port_id = $this->vars['port'] ?? ($this->params->type == 'port' ? ($this->vars['id'] ?? null) : null);
+        $this->port = PortCache::get($port_id);
+    }
+
+    public function getParams(): GraphParameters
+    {
+        return $this->params;
+    }
+
     public function validation(): array
     {
-        return [];
+        return [
+            'type' => ['required', 'string', 'regex:/^[a-z][a-z0-9]*_[a-zA-Z0-9_]+$/'],
+            'id' => ['nullable', 'integer'],
+            'from' => ['nullable', 'regex:/^(-?\d+|-?\d+[smhdwMy]|now|end)$/'],
+            'to' => ['nullable', 'regex:/^(-?\d+|-?\d+[smhdwMy]|now|end)$/'],
+            'width' => ['nullable', 'integer', 'min:10', 'max:10000'],
+            'height' => ['nullable', 'integer', 'min:10', 'max:8000'],
+            'legend' => ['nullable', 'in:yes,no,0,1'],
+            'bg' => ['nullable', 'regex:/^[0-9A-Fa-f]{6}$/'],
+            'title' => ['nullable', 'string', 'max:255'],
+            'output' => ['nullable', 'in:png,svg,json'],
+        ];
     }
 
     public function getPageTitle(): string
@@ -40,21 +75,8 @@ abstract class AbstractGraph implements GraphInterface
         return $this->getGraphTitle();
     }
 
-    /**
-     * Bind validated parameters directly to class properties
-     */
-    public function fill(array $vars): self
+    protected function init(): void
     {
-        $reflector = new \ReflectionClass($this);
-        foreach ($vars as $key => $value) {
-            if ($reflector->hasProperty($key)) {
-                $property = $reflector->getProperty($key);
-                if ($property->isPublic() && ! $property->isReadOnly()) {
-                    $this->$key = $value;
-                }
-            }
-        }
-
-        return $this;
+        // for child init
     }
 }

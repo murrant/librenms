@@ -26,29 +26,25 @@
 
 namespace LibreNMS\Graphs\Device;
 
-use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;
 use App\Facades\Rrd;
-use App\Models\Device;
+use App\Models\Processor;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use LibreNMS\Data\Graphing\AbstractGraph;
 use LibreNMS\Data\Graphing\Builders\MultiLineGraphBuilder;
 use LibreNMS\Data\Graphing\Builders\MultiSimplexSeparatedGraphBuilder;
-use LibreNMS\Data\Graphing\GraphParameters;
 
 class ProcessorGraph extends AbstractGraph
 {
     public string $type = 'device';
     public string $subtype = 'processor';
 
-    private Device $device;
+    /** @var Collection<Processor> */
     private Collection $processors;
 
-    public function __construct(
-        private readonly array $vars = [],
-    ) {
-        $this->device = DeviceCache::get($this->vars['device'] ?? null);
+    protected function init(): void
+    {
         $this->processors = $this->device->exists ? $this->device->processors : new Collection;
     }
 
@@ -76,7 +72,7 @@ class ProcessorGraph extends AbstractGraph
         return $files;
     }
 
-    public function rrdDefinition(GraphParameters $graph_params): array
+    public function rrdDefinition(): array
     {
         if ($this->processors->isEmpty()) {
             throw new \LibreNMS\Exceptions\RrdGraphException('No Processors');
@@ -111,7 +107,7 @@ class ProcessorGraph extends AbstractGraph
                 $builder->addDataset($dataset['filename'], 'usage', $dataset['descr']);
             }
 
-            return $builder->build($graph_params);
+            return $builder->build($this->params);
         }
 
         $builder = (new MultiLineGraphBuilder())
@@ -126,6 +122,6 @@ class ProcessorGraph extends AbstractGraph
             $builder->addDataset($dataset['filename'], 'usage', $dataset['descr'], area: true);
         }
 
-        return $builder->build($graph_params);
+        return $builder->build($this->params);
     }
 }
