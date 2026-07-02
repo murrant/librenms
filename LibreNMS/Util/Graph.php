@@ -132,7 +132,7 @@ class Graph
                 throw $e;
             }
 
-            foreach($graph->getRrdFiles() as $rrd_filename) {
+            foreach ($graph->getRrdFiles() as $rrd_filename) {
                 if (! Rrd::checkRrdExists($rrd_filename)) {
                     throw new RrdGraphException('No Data file' . basename($rrd_filename), 'No Data', $params->width, $params->height, $e->getCode(), $e->getImage());
                 }

@@ -40,8 +40,7 @@ abstract class AbstractGraph implements GraphInterface
     public function __construct(
         protected readonly GraphParameters $params,
         protected readonly array $vars = [],
-    )
-    {
+    ) {
         $device_id = $this->vars['device'] ?? ($this->params->type == 'device' ? ($this->vars['id'] ?? null) : null);
         $this->device = DeviceCache::get($device_id);
 
