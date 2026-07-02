@@ -34,7 +34,9 @@ interface GraphInterface
 
     public function validation(): array;
 
-    public function rrdDefinition(GraphParameters $graph_params): array;
+    public function rrdDefinition(): array;
+
+    public function getParams(): GraphParameters;
 
     public function getPageTitle(): string;
 
