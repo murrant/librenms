@@ -55,7 +55,7 @@ enum PollingMethodType: string
     }
 
     /**
-     * @param array<string, array> $schema
+     * @param  array<string, array>  $schema
      * @return array
      */
     public static function buildSchemaFields(array $schema, string $dataVar = 'formData'): array
@@ -78,11 +78,10 @@ enum PollingMethodType: string
 
             return [
                 ...$field,
-                'key'                   => $key,
-                'field_type'            => $field['type'] ?? 'text',
+                'key' => $key,
+                'field_type' => $field['type'] ?? 'text',
                 'visible_if_expression' => $visibleIfExpression,
             ];
         })->values()->all();
     }
 }
-

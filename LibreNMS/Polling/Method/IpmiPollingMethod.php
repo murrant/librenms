@@ -21,7 +21,8 @@ readonly class IpmiPollingMethod implements PollingMethod
         public int $cipherSuite,
         public int $timeout,
         public string $type,
-    ) {}
+    ) {
+    }
 
     public function isEnabled(): bool
     {
@@ -38,6 +39,7 @@ readonly class IpmiPollingMethod implements PollingMethod
 
         try {
             $ipmi->command(['power', 'status']);
+
             return true;
         } catch (\Throwable) {
             return false;
