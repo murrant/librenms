@@ -253,35 +253,36 @@ $('input[name="service_status"]').on('switchChange.bootstrapSwitch',  function(e
     var orig_state = $(this).data("orig_state");
     var orig_colour = $(this).data("orig_colour");
     $.ajax({
-        type: 'POST',
-            url: 'ajax_form.php',
-            data: { type: "create-service", service_id: service_id, disabled: (1 - state) },
-            dataType: "html",
-            success: function(msg) {
-                if(msg.indexOf("ERROR:") <= -1) {
-                    if(state) {
-                        $('#service_status-'+service_id).removeClass('fa-pause');
-                        $('#service_status-'+service_id).addClass('fa-'+orig_state);
-                        $('#service_status-'+service_id).removeClass('text-default');
-                        $('#service_status-'+service_id).removeClass('text-danger');
-                        $('#service_status-'+service_id).removeClass('text-success');
-                        $('#service_status-'+service_id).addClass('text-'+orig_colour);
-                    } else {
-                        $('#service_status-'+service_id).removeClass('fa-check');
-                        $('#service_status-'+service_id).addClass('fa-pause');
-                        $('#service_status-'+service_id).removeClass('text-success');
-                        $('#service_status-'+service_id).removeClass('text-danger');
-                        $('#service_status-'+service_id).addClass('text-default');
-                    }
+        type: 'PUT',
+        url: '<?php echo route("service.update", ["service" => ":service"]) ?>'.replace(':service', service_id),
+        data: { disabled: (1 - state) },
+        dataType: "json",
+        success: function(data) {
+            if (data.status == 0) {
+                if (state) {
+                    $('#service_status-'+service_id).removeClass('fa-pause');
+                    $('#service_status-'+service_id).addClass('fa-'+orig_state);
+                    $('#service_status-'+service_id).removeClass('text-default');
+                    $('#service_status-'+service_id).removeClass('text-danger');
+                    $('#service_status-'+service_id).removeClass('text-success');
+                    $('#service_status-'+service_id).addClass('text-'+orig_colour);
                 } else {
-                    $("#message").html('<div class="alert alert-info">'+msg+'</div>');
-                    $('#'+service_id).bootstrapSwitch('toggleState',true );
+                    $('#service_status-'+service_id).removeClass('fa-check');
+                    $('#service_status-'+service_id).addClass('fa-pause');
+                    $('#service_status-'+service_id).removeClass('text-success');
+                    $('#service_status-'+service_id).removeClass('text-danger');
+                    $('#service_status-'+service_id).addClass('text-default');
                 }
-            },
-                error: function() {
-                    $("#message").html('<div class="alert alert-info">This service could not be updated.</div>');
-                    $('#'+service_id).bootstrapSwitch('toggleState',true );
-                }
+            } else {
+                $("#message").html('<div class="alert alert-info">'+data.message+'</div>');
+                $('#'+service_id).bootstrapSwitch('toggleState',true );
+            }
+        },
+        error: function(xhr) {
+            var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'This service could not be updated.';
+            $("#message").html('<div class="alert alert-info">' + msg + '</div>');
+            $('#'+service_id).bootstrapSwitch('toggleState',true );
+        }
     });
 });
 

@@ -129,6 +129,7 @@ Route::middleware(['auth'])->group(function (): void {
     });
     Route::resource('service', ServiceController::class)->only(['show', 'destroy']);
     Route::get('locations', [LocationController::class, 'index']);
+    Route::resource('service', ServiceController::class)->only(['show', 'store', 'update', 'destroy']);
     Route::resource('ssl-certificates', SslCertificateController::class)->except(['edit']);
     Route::resource('preferences', UserPreferencesController::class)->only('index', 'store', 'update');
     Route::middleware('can:api.access')->group(function (): void {
