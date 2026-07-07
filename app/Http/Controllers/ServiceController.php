@@ -63,6 +63,7 @@ class ServiceController extends Controller
                     'message' => 'Added Service: <i>' . $service->service_id . ': ' . e($type) . '</i>',
                 ]);
             }
+
             return response()->json([
                 'status' => 1,
                 'message' => 'ERROR: Failed to add Service: <i>' . e($type) . '</i>',
