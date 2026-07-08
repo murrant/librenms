@@ -28,6 +28,7 @@ namespace LibreNMS\Data\Graphing;
 
 use App\Facades\DeviceCache;
 use LibreNMS\Exceptions\InvalidGraph;
+use LibreNMS\Exceptions\RrdNotFoundException;
 
 class LegacyGraph extends AbstractGraph
 {
@@ -73,66 +74,77 @@ class LegacyGraph extends AbstractGraph
             return;
         }
 
-        include_once base_path('includes/common.php');
-        include_once base_path('includes/html/functions.inc.php');
-        include_once base_path('includes/dbFacile.php');
-        include_once base_path('includes/rewrites.php');
+        $previousCwd = getcwd();
+        chdir(base_path());
 
-        if ($this->device->exists) {
-            DeviceCache::setPrimary($this->device->device_id);
-        }
+        try {
+            include_once base_path('includes/common.php');
+            include_once base_path('includes/html/functions.inc.php');
+            include_once base_path('includes/dbFacile.php');
+            include_once base_path('includes/rewrites.php');
 
-        // Local scope variables for the included files
-        $device = $this->device;
-        $port = $this->port;
-        $vars = $this->vars;
+            if ($this->device->exists) {
+                DeviceCache::setPrimary($this->device->device_id);
+            }
 
-        $auth = auth()->guest();
-        include $this->auth_file;
+            // Local scope variables for the included files
+            $device = $this->device;
+            $port = $this->port;
+            $vars = $this->vars;
 
-        $this->authorized = $auth;
-        $this->graphTitle = $graph_title ?? $this->graphTitle;
-        $this->pageTitle = $title ?? $this->graphTitle;
+            $auth = auth()->guest();
+            @include $this->auth_file;
 
-        if (! $auth) {
+            $this->authorized = $auth;
+            $this->graphTitle = $graph_title ?? $this->graphTitle;
+            $this->pageTitle = $title ?? $this->graphTitle;
+
+            if (! $auth) {
+                $this->loaded = true;
+
+                return;
+            }
+
+            $graph_params = $this->params;
+            $type = $graph_params->type;
+            $subtype = $graph_params->subtype;
+            $height = $graph_params->height;
+            $width = $graph_params->width;
+            $from = $graph_params->from;
+            $to = $graph_params->to;
+            $period = $graph_params->period;
+            $prev_from = $graph_params->prev_from;
+            $inverse = $graph_params->inverse;
+            $in = $graph_params->in;
+            $out = $graph_params->out;
+            $float_precision = $graph_params->float_precision;
+            $title = $graph_params->visible('title');
+            $nototal = ! $graph_params->visible('total');
+            $nodetails = ! $graph_params->visible('details');
+            $noagg = ! $graph_params->visible('aggregate');
+
+            $rrd_options = [];
+
+            @include $this->graph_file;
+
+            $this->rrdOptions = $rrd_options;
+
+            if (isset($rrd_list) && is_array($rrd_list)) {
+                $this->rrdFiles = array_column($rrd_list, 'filename');
+            } elseif (isset($rrd_filenames) && is_array($rrd_filenames)) {
+                $this->rrdFiles = $rrd_filenames;
+            } else {
+                $this->rrdFiles = isset($rrd_filename) ? [$rrd_filename] : [];
+            }
+
             $this->loaded = true;
-
-            return;
+        } catch (RrdNotFoundException) {
+            //
+        } finally {
+            if ($previousCwd !== false) {
+                chdir($previousCwd);
+            }
         }
-
-        $graph_params = $this->params;
-        $type = $graph_params->type;
-        $subtype = $graph_params->subtype;
-        $height = $graph_params->height;
-        $width = $graph_params->width;
-        $from = $graph_params->from;
-        $to = $graph_params->to;
-        $period = $graph_params->period;
-        $prev_from = $graph_params->prev_from;
-        $inverse = $graph_params->inverse;
-        $in = $graph_params->in;
-        $out = $graph_params->out;
-        $float_precision = $graph_params->float_precision;
-        $title = $graph_params->visible('title');
-        $nototal = ! $graph_params->visible('total');
-        $nodetails = ! $graph_params->visible('details');
-        $noagg = ! $graph_params->visible('aggregate');
-
-        $rrd_options = [];
-
-        include $this->graph_file;
-
-        $this->rrdOptions = $rrd_options;
-
-        if (isset($rrd_list) && is_array($rrd_list)) {
-            $this->rrdFiles = array_column($rrd_list, 'filename');
-        } elseif (isset($rrd_filenames) && is_array($rrd_filenames)) {
-            $this->rrdFiles = $rrd_filenames;
-        } else {
-            $this->rrdFiles = isset($rrd_filename) ? [$rrd_filename] : [];
-        }
-
-        $this->loaded = true;
     }
 
     public function authorize(): bool
