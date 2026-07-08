@@ -47,6 +47,8 @@ abstract class AbstractGraph implements GraphInterface
 
         $port_id = $this->vars['port'] ?? ($this->params->type == 'port' ? ($this->vars['id'] ?? null) : null);
         $this->port = PortCache::get($port_id);
+
+        $this->init();
     }
 
     public function getParams(): GraphParameters
@@ -58,7 +60,7 @@ abstract class AbstractGraph implements GraphInterface
     {
         return [
             'type' => ['required', 'string', 'regex:/^[a-z][a-z0-9]*_[a-zA-Z0-9_]+$/'],
-            'id' => ['nullable', 'integer'],
+            'id' => ['nullable', 'regex:/^[A-Za-z0-9,._-]+$/'],
             'from' => ['nullable', 'regex:/^(-?\d+|-?\d+[smhdwMy]|now|end)$/'],
             'to' => ['nullable', 'regex:/^(-?\d+|-?\d+[smhdwMy]|now|end)$/'],
             'width' => ['nullable', 'integer', 'min:10', 'max:10000'],
