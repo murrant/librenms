@@ -28,9 +28,13 @@ namespace LibreNMS\Data\Graphing;
 
 use App\Facades\DeviceCache;
 use App\Facades\PortCache;
+use App\Facades\Rrd;
 use App\Models\Device;
 use App\Models\Port;
+use Illuminate\Support\Facades\Validator;
+use LibreNMS\Exceptions\RrdGraphException;
 use LibreNMS\Interfaces\Data\Graphing\GraphInterface;
+use LibreNMS\Util\Debug;
 
 abstract class AbstractGraph implements GraphInterface
 {
@@ -75,6 +79,49 @@ abstract class AbstractGraph implements GraphInterface
     public function getPageTitle(): string
     {
         return $this->getGraphTitle();
+    }
+
+    public function getRrdCommandOptions(): array
+    {
+        $params = $this->getParams();
+
+        if ($rules = $this->validation()) {
+            Validator::validate($this->vars, $rules);
+        }
+
+        if (! $this->authorize()) {
+            throw new RrdGraphException('No Authorization', 'No Auth', $params->width, $params->height);
+        }
+
+        $rrd_options = $this->rrdDefinition();
+
+        if (empty($rrd_options)) {
+            throw new RrdGraphException('Graph Definition Error', 'Def Error', $params->width, $params->height);
+        }
+
+        return [...$params->toRrdOptions(), ...$rrd_options];
+    }
+
+    public function render(): GraphImage
+    {
+        $params = $this->getParams();
+        $rrd_options = $this->getRrdCommandOptions();
+
+        try {
+            return new GraphImage($params->imageFormat, $this->getGraphTitle(), Rrd::graph($rrd_options));
+        } catch (RrdGraphException $e) {
+            if (Debug::isEnabled()) {
+                throw $e;
+            }
+
+            foreach ($this->getRrdFiles() as $filename) {
+                if (! Rrd::checkRrdExists($filename)) {
+                    throw new RrdGraphException('No Data file' . basename($filename), 'No Data', $params->width, $params->height, $e->getCode(), $e->getImage());
+                }
+            }
+
+            throw new RrdGraphException('Error: ' . $e->getMessage(), 'Draw Error', $params->width, $params->height, $e->getCode(), $e->getImage());
+        }
     }
 
     protected function init(): void

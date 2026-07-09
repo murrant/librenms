@@ -26,6 +26,7 @@
 
 namespace LibreNMS\Interfaces\Data\Graphing;
 
+use LibreNMS\Data\Graphing\GraphImage;
 use LibreNMS\Data\Graphing\GraphParameters;
 
 interface GraphInterface
@@ -43,4 +44,8 @@ interface GraphInterface
     public function getGraphTitle(): string;
 
     public function getRrdFiles(): array;
+
+    public function getRrdCommandOptions(): array;
+
+    public function render(): GraphImage;
 }
