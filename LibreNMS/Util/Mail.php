@@ -147,7 +147,7 @@ class Mail
                 $cid = 'graph' . ++$count;
 
                 // fetch image data
-                $image = Graph::getImage($url);
+                $image = Graph::getImageData($url);
 
                 // attach image
                 $fileName = substr(Clean::fileName($image->title ?: $cid), 0, 250);

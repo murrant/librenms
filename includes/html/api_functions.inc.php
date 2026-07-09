@@ -60,11 +60,11 @@ use Illuminate\Support\Str;
 use LibreNMS\Alert\AlertData;
 use LibreNMS\Alerting\QueryBuilderParser;
 use LibreNMS\Billing;
+use LibreNMS\Data\Graphing\GraphFactory;
 use LibreNMS\Enum\MaintenanceBehavior;
 use LibreNMS\Enum\Severity;
 use LibreNMS\Exceptions\InvalidIpException;
 use LibreNMS\Exceptions\InvalidTableColumnException;
-use LibreNMS\Util\Graph;
 use LibreNMS\Util\IP;
 use LibreNMS\Util\IPv4;
 use LibreNMS\Util\Mac;
@@ -139,18 +139,19 @@ function api_get_graph(Request $request, array $additional = [])
             'duration',
         ]);
 
-        $graph = Graph::get([
+        $graphVars = array_merge([
             'width' => $request->input('width', 1075),
             'height' => $request->input('height', 300),
-            ...$additional,
-            ...$vars,
-        ]);
+        ], $additional, $vars);
+
+        $graph = app(GraphFactory::class)->graphFor($graphVars['type'] ?? '', $graphVars);
+        $image = $graph->render();
 
         if ($request->input('output') === 'base64') {
-            return api_success(['image' => $graph->base64(), 'content-type' => $graph->contentType()], 'image');
+            return api_success(['image' => $image->base64(), 'content-type' => $image->contentType()], 'image');
         }
 
-        return response($graph->data, 200, ['Content-Type' => $graph->contentType()]);
+        return response($image->data, 200, ['Content-Type' => $image->contentType()]);
     } catch (\LibreNMS\Exceptions\RrdGraphException $e) {
         return api_error(500, $e->getMessage());
     }

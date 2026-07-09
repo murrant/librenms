@@ -94,7 +94,7 @@ class AppServiceProvider extends ServiceProvider
 
         Blade::directive('signedGraphTag', fn ($vars) => "<?php echo '<img class=\"librenms-graph\" src=\"' . \LibreNMS\Util\Url::forExternalGraph($vars) . '\" />'; ?>");
 
-        Blade::directive('graphImage', fn ($vars, $flags = 0) => "<?php echo \LibreNMS\Util\Graph::getImageData($vars, $flags); ?>");
+        Blade::directive('graphImage', fn ($expression) => "<?php echo \LibreNMS\Util\Graph::getImageData($expression); ?>");
 
         Blade::directive('vuei18n', fn () => "<?php
              \$manifest_file = public_path('js/lang/manifest.json');
