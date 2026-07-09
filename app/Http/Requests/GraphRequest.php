@@ -115,6 +115,7 @@ class GraphRequest extends FormRequest
 
         try {
             $graphRules = $this->getGraph()->validation();
+
             return array_merge($baseRules, $graphRules);
         } catch (\Throwable) {
             return $baseRules;
@@ -176,6 +177,7 @@ class GraphRequest extends FormRequest
         if ($this->graph === null) {
             $this->graph = app(GraphFactory::class)->graphFor($this->type ?: $this->string('type', '')->toString(), $this->toVars());
         }
+
         return $this->graph;
     }
 }
