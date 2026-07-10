@@ -11,7 +11,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use LibreNMS\Util\Graph;
 use LibreNMS\Util\StringHelpers;
-use LibreNMS\Util\Time;
 
 class GraphsPageController extends Controller
 {
@@ -39,7 +38,7 @@ class GraphsPageController extends Controller
             'pageTitle' => $this->entityTitle($request->device, $request->port) . $subtitle,
             'subtypeOptions' => $subtypeOptions,
             'subtypeSelected' => $subtypeSelected,
-            'periodThumbs' => $this->periodThumbnails($request, $request->from, $request->to, $thumbWidth),
+            'periodThumbs' => $this->periodThumbnails($request, $thumbWidth),
             'toggles' => $this->controlToggles($request, $fullType, $showCommand),
             'trendHint' => $fullType === 'port_bits' || str_contains($fullType, 'sensor_'),
             'graphFrom' => $request->input('from') ?? '-1d',
@@ -94,30 +93,53 @@ class GraphsPageController extends Controller
      *
      * @return array<int, array<string, mixed>>
      */
-    private function periodThumbnails(GraphsPageRequest $request, int $from, int $to, int $thumbWidth): array
+    private function periodThumbnails(GraphsPageRequest $request, int $thumbWidth): array
     {
-        $now = (int) LibrenmsConfig::get('time.now');
-        $currentDuration = ($to ?: $now) - $from;
-        $periodThumbs = [];
+        $fromInput = $request->input('from');
+        $activeFrom = $request->to ? null : ($fromInput ?: '-1d');
 
-        foreach (LibrenmsConfig::get('graphs.row.normal') as $period => $text) {
-            $periodFrom = (int) LibrenmsConfig::get("time.$period");
-            $periodDuration = $now - $periodFrom;
-            $periodThumbs[] = [
+        return array_map(function (string $period) use ($request, $thumbWidth, $activeFrom) {
+            $relativeFrom = $this->periodToRelativeOffset($period);
+
+            return [
                 'text' => __("settings.settings.graphs.row.normal.options.$period"),
-                'active' => ! $to && $periodDuration > 0 && abs($currentDuration - $periodDuration) <= 0.05 * $periodDuration,
-                'link' => $this->graphUrl($request, ['from' => Time::toRelativeOffset($periodDuration), 'to' => null]),
+                'active' => $relativeFrom === $activeFrom,
+                'link' => $this->graphUrl($request, ['from' => $relativeFrom, 'to' => null]),
                 'vars' => $request->toVars([
                     'height' => '90',
                     'width' => (int) round($thumbWidth * 1.5),
                     'legend' => 'no',
                     'absolute' => 1,
-                    'from' => $periodFrom,
+                    'from' => $relativeFrom,
                 ]),
             ];
-        }
+        }, array_keys(LibrenmsConfig::get('graphs.row.normal')));
+    }
 
-        return $periodThumbs;
+    /**
+     * Translate legacy period key to relative offset format.
+     */
+    private function periodToRelativeOffset(string $period): string
+    {
+        return match ($period) {
+            'now' => '-0h',
+            'onehour' => '-1h',
+            'fourhour' => '-4h',
+            'sixhour' => '-6h',
+            'twelvehour' => '-12h',
+            'twoday' => '-2d',
+            'threeday' => '-3d',
+            'week' => '-1w',
+            'tenday' => '-10d',
+            'twoweek' => '-2w',
+            'month' => '-1mo',
+            'twomonth' => '-2mo',
+            'threemonth' => '-3mo',
+            'sixmonth' => '-6mo',
+            'year' => '-1y',
+            'twoyear' => '-2y',
+            default => '-1d',
+        };
     }
 
     /**

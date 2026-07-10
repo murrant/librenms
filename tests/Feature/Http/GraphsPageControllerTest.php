@@ -54,6 +54,32 @@ class GraphsPageControllerTest extends TestCase
         $this->assertNoPhpWarningOutput($response->getContent());
     }
 
+    public function testRelativePeriodThumbnailsActiveState(): void
+    {
+        $device = Device::factory()->create();
+
+        $response = $this->actingAs($this->adminUser())
+            ->get("/graphs?device={$device->device_id}&type=device_poller_perf&from=-1d");
+
+        $response->assertOk();
+        $response->assertSee(' aria-current="true"', false);
+    }
+
+    public function testCustomPeriodThumbnailsActiveState(): void
+    {
+        $device = Device::factory()->create();
+
+        $now = time();
+        $now -= $now % 300;
+        $oneDayAgo = $now - 86400; // exactly 24 hours ago (fixed timestamp)
+
+        $response = $this->actingAs($this->adminUser())
+            ->get("/graphs?device={$device->device_id}&type=device_poller_perf&from={$oneDayAgo}");
+
+        $response->assertOk();
+        $response->assertDontSee(' aria-current="true"', false);
+    }
+
     public function testShowCommandUsesGraphVars(): void
     {
         $device = Device::factory()->create(['hostname' => 'port-device.example.com']);
