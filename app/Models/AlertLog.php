@@ -24,7 +24,6 @@ class AlertLog extends DeviceRelatedModel
     ];
     protected array $filterable = [
         'device_id',
-        'alert_log.device_id',
         'rule_id',
         'state',
         'rule.severity',

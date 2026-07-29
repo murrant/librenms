@@ -245,11 +245,12 @@ if (defined('SHOW_SETTINGS')) {
         $initialFilter['device_id'] = ['eq' => (int) $device['device_id']];
     }
 
+    $filterName = empty($device['device_id']) ? 'alerts' : 'device.alerts';
     $filterHtml = \Illuminate\Support\Facades\Blade::render(
-        '<x-filter name="$filterName" :fields="$filterFields" :initial="$initial" class="tw:px-2"/>',
+        '<x-filter :name="$filterName" :fields="$filterFields" :initial="$initial" class="tw:px-2"/>',
         [
             'filterFields' => $filterFields,
-            'fitlerName' => $device['device_id'] > 0 ? 'device.alerts' : 'alerts',
+            'filterName' => $filterName,
             'initial' => $initialFilter,
         ]
     );
@@ -363,7 +364,7 @@ if ($template.length) {
 }
 
 $(window).on("filter:apply", function (event) {
-    if (event.originalEvent.detail.name === "alerts") {
+    if (event.originalEvent.detail.name === "' . $filterName . '") {
         filter = event.originalEvent.detail.filters;
         alerts_grid.bootgrid("reload");
     }

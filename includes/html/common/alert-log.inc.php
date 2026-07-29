@@ -74,10 +74,12 @@ if ($device->exists) {
     $initialFilter['device_id'] = ['eq' => (int) $device->device_id];
 }
 
+$filterName = $device->exists ? 'device.alertlog' : 'alertlog';
 $filterHtml = \Illuminate\Support\Facades\Blade::render(
-    '<x-filter name="alertlog" :fields="$filterFields" :initial="$initial" class="tw:pb-2"/>',
+    '<x-filter :name="$filterName" :fields="$filterFields" :initial="$initial" class="tw:pb-2"/>',
     [
         'filterFields' => $filterFields,
+        'filterName' => $filterName,
         'initial' => $initialFilter,
     ]
 );
@@ -168,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     $(window).on("filter:apply", function (event) {
-        if (event.originalEvent.detail.name === "alertlog") {
+        if (event.originalEvent.detail.name === "' . $filterName . '") {
             filter = event.originalEvent.detail.filters;
             grid.bootgrid("reload");
         }
