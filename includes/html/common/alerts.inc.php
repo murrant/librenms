@@ -226,7 +226,36 @@ if (defined('SHOW_SETTINGS')) {
 
     $group = $widget_settings['group'] ?? '';
 
+    $filterFields = \App\Models\Alert::filterFieldDefinitions($device['device_id'] > 0 ? (int) $device['device_id'] : null);
+    $initialFilter = request()->array('filter');
+
+    // handle legacy url filters
+    if (empty($initialFilter)) {
+        if (isset($state) && $state !== '') {
+            $initialFilter['state'] = ['eq' => (int) $state];
+        }
+        if (request()->filled('severity')) {
+            $initialFilter['rule.severity'] = ['in' => (array) request()->input('severity')];
+        }
+        if (request()->filled('group')) {
+            $initialFilter['device.groups.id'] = ['eq' => (int) request()->input('group')];
+        }
+    }
+    if ($device['device_id'] > 0) {
+        $initialFilter['device_id'] = ['eq' => (int) $device['device_id']];
+    }
+
+    $filterHtml = \Illuminate\Support\Facades\Blade::render(
+        '<x-filter name="$filterName" :fields="$filterFields" :initial="$initial" class="tw:px-2"/>',
+        [
+            'filterFields' => $filterFields,
+            'fitlerName' => $device['device_id'] > 0 ? 'device.alerts' : 'alerts',
+            'initial' => $initialFilter,
+        ]
+    );
+
     $common_output[] = '
+<template id="alerts-filter-template">' . $filterHtml . '</template>
 <div class="row">
     <div class="col-sm-12">
         <span id="message"></span>
@@ -256,8 +285,13 @@ if (defined('SHOW_SETTINGS')) {
     </table>
 </div>
 <script>
+var filter = ' . json_encode($initialFilter) . ';
 var alerts_grid = $("#alerts_' . $unique_id . '").bootgrid({
     ajax: true,
+    templates: {
+        header: "<div class=\"alerts-headers-table-menu actionBar\"><p class=\"@{{css.actions}}\"></p></div><div class=\"row\"></div>",
+        search: ""
+    },
     post: function ()
     {
         return {
@@ -269,29 +303,13 @@ var alerts_grid = $("#alerts_' . $unique_id . '").bootgrid({
     if (is_numeric($alert_id)) {
         $common_output[] = "alert_id: '$alert_id',\n";
     }
-
-    if (is_numeric($acknowledged)) {
-        $common_output[] = "acknowledged: '$acknowledged',\n";
-    }
-    if (is_numeric($fired)) {
-        $common_output[] = "fired: '$fired',\n";
-    }
-    if (isset($state) && $state != '') {
-        $common_output[] = "state: '$state',\n";
-    }
-    if (isset($min_severity) && $min_severity != '') {
-        $common_output[] = "min_severity: '$min_severity',\n";
-    }
-
-    if (is_numeric($group)) {
-        $common_output[] = "group: '$group',\n";
-    }
     if (is_numeric($proc)) {
         $common_output[] = "proc: '$proc',\n";
     }
 
     $common_output[] = '
-            device_id: \'' . $device['device_id'] . '\'
+            device_id: \'' . $device['device_id'] . '\',
+            filter: filter
         }
     },
     url: "' . route('table.alerts') . '",
@@ -336,6 +354,19 @@ var alerts_grid = $("#alerts_' . $unique_id . '").bootgrid({
       $(\'#alert_log_id\').val(alert_log_id);
       $("#alert_details_modal").modal(\'show\');
     });
+});
+
+const $template = $("#alerts-filter-template");
+if ($template.length) {
+    const $content = $($template[0].content.cloneNode(true));
+    $(".alerts-headers-table-menu").append($content);
+}
+
+$(window).on("filter:apply", function (event) {
+    if (event.originalEvent.detail.name === "alerts") {
+        filter = event.originalEvent.detail.filters;
+        alerts_grid.bootgrid("reload");
+    }
 });
 </script>';
 }

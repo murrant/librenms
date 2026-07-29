@@ -52,9 +52,38 @@ $common_output[] = '<div class="panel panel-default panel-condensed">
             ';
 
 $device = DeviceCache::get(request()->input('device_id') ?: ($vars['device'] ?? 0));
-$device_selected = json_encode($device->exists ? ['id' => $device->device_id, 'text' => $device->displayName()] : '');
+
+$filterFields = \App\Models\AlertLog::filterFieldDefinitions($device->exists ? (int) $device->device_id : null);
+$initialFilter = request()->array('filter');
+
+// handle legacy url filters
+if (empty($initialFilter)) {
+    if (request()->filled('state')) {
+        $initialFilter['state'] = ['eq' => (int) request()->input('state')];
+    }
+    if (request()->filled('severity')) {
+        $initialFilter['rule.severity'] = ['in' => (array) request()->input('severity')];
+    }
+    if (request()->filled('device_group')) {
+        $initialFilter['device.groups.id'] = ['eq' => (int) request()->input('device_group')];
+    } elseif (request()->filled('group')) {
+        $initialFilter['device.groups.id'] = ['eq' => (int) request()->input('group')];
+    }
+}
+if ($device->exists) {
+    $initialFilter['device_id'] = ['eq' => (int) $device->device_id];
+}
+
+$filterHtml = \Illuminate\Support\Facades\Blade::render(
+    '<x-filter name="alertlog" :fields="$filterFields" :initial="$initial" class="tw:pb-2"/>',
+    [
+        'filterFields' => $filterFields,
+        'initial' => $initialFilter,
+    ]
+);
 
 $common_output[] = '
+<template id="alertlog-filter-template">' . $filterHtml . '</template>
 <div class="table-responsive">
     <table id="alertlog" class="table table-hover table-condensed table-striped" data-url="' . route('table.alertlog') . '">
         <thead>
@@ -74,51 +103,18 @@ $common_output[] = '
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    var filter = ' . json_encode($initialFilter) . ';
+
     var grid = $("#alertlog").bootgrid({
         ajax: true,
         rowCount: [50, 100, 250, -1],
         templates: {
-            header: \'<div id="{{ctx.id}}" class="{{css.header}}"><div class="row"> \
-                <div class="col-sm-8 actionBar"><span class="pull-left"> \
-                <form method="get" action="" class="form-inline" role="form" id="alertlog-filter-form"> \
-            <input type=hidden name="hostname" id="hostname"> \
-';
-
-if (isset($vars['fromdevice']) && ! $vars['fromdevice']) {
-    $common_output[] = '<div class="form-group"> \
-                <select name="device_id" id="device_id" class="form-control input-sm" style="min-width: 175px;"></select> \
-               </div> \
-               ';
-}
-
-$common_output[] = '<div class="form-group"> \
-               <select name="state" id="state" class="form-control input-sm"> \\';
-
-$selected_state = request()->input('state', '');
-foreach ($alert_states as $text => $value) {
-    $selected = $value == $selected_state ? ' selected' : '';
-    $common_output[] = '<option value="' . htmlspecialchars((string) $value) . "\"$selected>$text</option> \\";
-}
-$common_output[] = '</select> \
-               </div> \
-               <div class="form-group"> \
-               <select name="severity[]" id="severity" class="form-control input-sm" multiple> \\';
-$selected_severity = request()->input('severity', []);
-foreach ($alert_severities as $text => $value) {
-    $selected = in_array($value, (array) $selected_severity) ? ' selected' : '';
-    $common_output[] = "<option value=\"$value\"$selected>$text</option> \\";
-}
-$common_output[] = '</select> \
-               </div> \
-               <button id="filter" type="submit" class="btn btn-default input-sm">Filter</button> \
-               </form></span></div> \
-               <div class="col-sm-4 actionBar"><p class="{{css.search}}"></p><p class="{{css.actions}}"></p></div></div></div>\'
+            header: \'<div class="alertlog-headers-table-menu actionBar tw:block tw:sm:flex tw:justify-between tw:px-2 tw:pt-2"><p class="{{css.actions}}"></p></div><div class="row"></div>\',
+            search: ""
         },
         post: function () {
             return {
-                device_id: $(\'#device_id\').val() || \'' . $device->device_id . '\',
-                state: $(\'#state\').val(),
-                severity: $(\'#severity\').val() || []
+                filter: filter
             };
         },
         converters: {
@@ -127,13 +123,6 @@ $common_output[] = '</select> \
             }
         }
     }).on("loaded.rs.jquery.bootgrid", function () {
-
-        var results = $("div.infos").text().split(" ");
-        var low = results[1] - 1;
-        var high = results[3];
-        var max = high - low;
-        var search = $(\'.search-field\').val();
-
         grid.find(".incident-toggle").each(function () {
             $(this).parent().addClass(\'incident-toggle-td\');
         }).on("click", function (e) {
@@ -172,32 +161,18 @@ $common_output[] = '</select> \
         });
     });
 
-    $("#severity").select2({
-        placeholder: "Any Severity",
-        width: "13.1em",
-        maximumSelectionLength: 2,
-        containerCssClass: "severity-select-box"
-     });
-    init_select2("#device_id", "device", {}, ' . $device_selected . ' , "All Devices");
+    const $template = $("#alertlog-filter-template");
+    if ($template.length) {
+        const $content = $($template[0].content.cloneNode(true));
+        $(".alertlog-headers-table-menu").prepend($content);
+    }
 
-    $("#alertlog-filter-form").on("submit", function (e) {
-        e.preventDefault();
-        var formData = $(this).serializeArray().filter(function(item) {
-            return item.value !== "";
-        });
-        var queryString = $.param(formData);
-        var newUrl = window.location.origin + window.location.pathname + (queryString ? "?" + queryString : "");
-        window.history.pushState({path: newUrl}, "", newUrl);
-        grid.bootgrid("reload");
+    $(window).on("filter:apply", function (event) {
+        if (event.originalEvent.detail.name === "alertlog") {
+            filter = event.originalEvent.detail.filters;
+            grid.bootgrid("reload");
+        }
     });
 });
 </script>
-<style>
-.severity-select-box .select2-search--inline {
-    display: none;
-}
-.severity-select-box .select2-search--inline:first-child {
-    display: inline-block;
-}
-</style>
 ';

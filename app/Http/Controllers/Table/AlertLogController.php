@@ -30,6 +30,7 @@ class AlertLogController extends TableController
             'device_id' => 'integer|nullable',
             'device_group' => 'integer|nullable',
             'state' => 'integer|nullable',
+            ...AlertLog::filterValidationRules(),
         ];
     }
 
@@ -81,7 +82,8 @@ class AlertLogController extends TableController
         $query = AlertLog::query()
             ->select('alert_log.*')
             ->with(['device', 'rule'])
-            ->hasAccess($request->user());
+            ->hasAccess($request->user())
+            ->when($request->array('filter'), fn ($q, $filters) => $q->applyFilters($filters));
 
         $sort = $request->input('sort');
         if (isset($sort['severity']) || isset($sort['alert_rule'])) {

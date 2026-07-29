@@ -1,49 +1,39 @@
 @extends('widgets.settings.base')
 
+@php
+    $sev_val = (array) ($filter['rule.severity']['in'] ?? $filter['severity']['in'] ?? $severity ?? []);
+    $state_val = (string) ($filter['state']['eq'] ?? $state ?? '');
+    $rule_id_val = $filter['rule_id']['eq'] ?? ($rule_id ?? '');
+@endphp
+
 @section('form')
     <div class="form-group">
         <label for="title-{{ $id }}" class="control-label">{{ __('Widget title') }}</label>
         <input type="text" class="form-control" name="title" id="title-{{ $id }}" placeholder="{{ __('Custom title') }}" value="{{ $title }}">
     </div>
     <div class="form-group">
-        <label for="acknowledged-{{ $id }}" class="control-label">{{ __('Show acknowledged') }}:</label>
-        <select class="form-control" name="acknowledged" id="acknowledged-{{ $id }}">
-            <option value="">{{ __('not filtered') }}</option>
-            <option value="1" @if($acknowledged === '1') selected @endif>{{ __('show only acknowledged') }}</option>
-            <option value="0" @if($acknowledged === '0') selected @endif>{{ __('hide acknowledged') }}</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="unreachable-{{ $id }}" class="control-label">{{ __('Show unreachable') }}:</label>
-        <select class="form-control" name="unreachable" id="unreachable-{{ $id }}">
-            <option value="">{{ __('not filtered') }}</option>
-            <option value="1" @if($unreachable === '1') selected @endif>{{ __('show only alerts where all parent devices are down') }}</option>
-            <option value="0" @if($unreachable === '0') selected @endif>{{ __('hide alerts where all parent devices are down') }}</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="fired-{{ $id }}" class="control-label">{{ __('Show only fired') }}:</label>
-        <select class="form-control" name="fired" id="fired-{{ $id }}">
-            <option value="">{{ __('not filtered') }}</option>
-            <option value="1" @if($fired === '1') selected @endif>{{ __('show only fired alerts') }}</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="min_severity-{{ $id }}" class="control-label">{{ __('Displayed severity') }}:</label>
-        <select class="form-control" name="min_severity" id="min_severity-{{ $id }}">
-            <option value="">{{ __('any severity') }}</option>
-            @foreach($severities as $name => $val)
-                <option value="{{ $val }}" @if($min_severity == $val) selected @endif>{{ $name }}{{$val > 3 ? '' : ' ' . __('or higher')}}</option>
-            @endforeach
-        </select>
-    </div>
-    <div class="form-group">
         <label for="state-{{ $id }}" class="control-label">{{ __('State') }}:</label>
         <select class="form-control" name="state" id="state-{{ $id }}">
             <option value="">{{ __('any state') }}</option>
             @foreach($states as $name => $val)
-                <option value="{{ $val }}" @if($state === $val) selected @endif>{{ $name }}</option>
+                <option value="{{ $val }}" @if($state_val === (string)$val) selected @endif>{{ $name }}</option>
             @endforeach
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="severity-{{ $id }}" class="control-label">{{ __('Displayed severity') }}:</label>
+        <select class="form-control" name="severity[]" id="severity-{{ $id }}" multiple>
+            @foreach($severities as $name => $val)
+                <option value="{{ $val }}" @if(in_array($val, $sev_val) || $sev_val == $val) selected @endif>{{ $name }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="rule_id-{{ $id }}" class="control-label">{{ __('Alert Rule') }}</label>
+        <select class="form-control" name="rule_id" id="rule_id-{{ $id }}" data-placeholder="{{ __('All Rules') }}">
+            @if(isset($rule) && $rule)
+                <option value="{{ $rule->id }}" selected>{{ $rule->name }}</option>
+            @endif
         </select>
     </div>
     <div class="form-group">
@@ -89,6 +79,7 @@
 @section('javascript')
     <script type="text/javascript">
         init_select2('#device_group-{{ $id }}', 'device-group', {});
+        init_select2('#rule_id-{{ $id }}', 'alert-rule', {});
 
         $('#hidenavigation-{{ $id }}')
             .bootstrapSwitch('offColor','danger')

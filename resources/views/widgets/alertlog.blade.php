@@ -15,15 +15,14 @@
 </div>
 <script>
     (function () {
+        var filter = @json($filter ?? []);
         var grid = $("#alertlog_{{ $id }}").bootgrid({
             ajax: true,
             rowCount: [50, 100, 250, -1],
             navigation: ! {{ $hidenavigation }},
             post: function () {
                 return {
-                    device_group: "{{ $device_group }}",
-                    state: '{{ $state }}',
-                    severity: @json($severity),
+                    filter: filter
                 };
             },
             converters: {

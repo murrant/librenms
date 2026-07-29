@@ -19,7 +19,6 @@
 </div>
 <script>
     (function () {
-        var widgetDefaultMinSeverity = @json($min_severity);
         var severityQuickFilter = null;
         var alerts_grid;
 
@@ -29,8 +28,8 @@
             $alertsContainer.find('.alerts-widget-sev-btn').each(function () {
                 var $btn = $(this);
                 var sev = $btn.data('targetSev');
-                var active = (sev === 'warning' && severityQuickFilter === 5)
-                    || (sev === 'critical' && severityQuickFilter === 6);
+                var active = (sev === 'warning' && severityQuickFilter === 'warning')
+                    || (sev === 'critical' && severityQuickFilter === 'critical');
                 $btn.toggleClass('btn-default', !active)
                     .toggleClass('btn-warning', active && sev === 'warning')
                     .toggleClass('btn-danger', active && sev === 'critical')
@@ -41,28 +40,30 @@
         $alertsContainer.on('click', '.alerts-widget-sev-btn', function () {
             var target = $(this).data('targetSev');
             if (target === 'warning') {
-                severityQuickFilter = severityQuickFilter === 5 ? null : 5;
+                severityQuickFilter = severityQuickFilter === 'warning' ? null : 'warning';
             } else if (target === 'critical') {
-                severityQuickFilter = severityQuickFilter === 6 ? null : 6;
+                severityQuickFilter = severityQuickFilter === 'critical' ? null : 'critical';
             }
             updateSeverityQuickFilterButtons();
             alerts_grid.bootgrid('reload');
         });
 
+        var initialFilter = @json($filter ?? []);
+
         alerts_grid = $("#alerts-{{ $id }}").bootgrid({
             ajax: true,
-            requestHandler: request => ({
-                ...request,
-                acknowledged: '{{ $acknowledged }}',
-                unreachable: '{{ $unreachable }}',
-                fired: '{{ $fired }}',
-                state: '{{ $state }}',
-                min_severity: severityQuickFilter !== null ? severityQuickFilter : (widgetDefaultMinSeverity ?? ''),
-                group: '{{ $device_group }}',
-                proc: '{{ $proc }}',
-                uncollapse_key_count: '{{ $uncollapse_key_count }}',
-                device_id: '{{ $device }}'
-            }),
+            requestHandler: request => {
+                var currentFilter = JSON.parse(JSON.stringify(initialFilter));
+                if (severityQuickFilter !== null) {
+                    currentFilter['rule.severity'] = { eq: severityQuickFilter };
+                }
+                return {
+                    ...request,
+                    filter: currentFilter,
+                    proc: '{{ $proc }}',
+                    uncollapse_key_count: '{{ $uncollapse_key_count }}'
+                };
+            },
             responseHandler: response => {
                 $("#widget_title_counter_{{ $id }}").text(response.total ? ` (${response.total})` : '')
 

@@ -3,7 +3,9 @@
 $vars = \LibreNMS\Util\Url::parseLegacyPathVars($_SERVER['REQUEST_URI'] ?? null);
 
 foreach ($_GET as $name => $value) {
-    if (is_scalar($value)) {
+    if (is_array($value)) {
+        $vars[$name] = $value;
+    } elseif (is_scalar($value)) {
         $vars[$name] = strip_tags((string) $value);
     }
 }

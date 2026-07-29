@@ -318,7 +318,9 @@ class Url
     {
         $url = empty($vars) ? '' : $prefix;
         foreach ($vars as $var => $value) {
-            if ($value == '0' || $value != '' && ! Str::contains($var, 'opt') && ! is_numeric($var)) {
+            if (is_array($value)) {
+                $url .= http_build_query([$var => $value]) . '/';
+            } elseif ($value === '0' || ($value !== '' && $value !== null && ! Str::contains((string) $var, 'opt') && ! is_numeric($var))) {
                 $url .= urlencode((string) $var) . '=' . urlencode((string) $value) . '/';
             }
         }

@@ -26,6 +26,8 @@
 
 namespace App\Http\Controllers\Widgets;
 
+use App\Models\AlertRule;
+use App\Models\DeviceGroup;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -35,39 +37,88 @@ class AlertsController extends WidgetController
     protected $defaults = [
         'title' => null,
         'device' => null,
-        'acknowledged' => null,
-        'fired' => null,
-        'min_severity' => null,
+        'severity' => [],
         'state' => null,
         'device_group' => null,
+        'rule_id' => null,
         'proc' => 0,
         'location' => 1,
         'sort' => 1,
         'hidenavigation' => 0,
         'uncollapse_key_count' => 1,
-        'unreachable' => null,
+        'filter' => [],
     ];
+
+    public function getSettings($settingsView = false): array
+    {
+        $settings = parent::getSettings($settingsView);
+
+        $filter = $settings['filter'] ?? [];
+
+        $legacySeverityMap = [
+            '1' => 'ok',
+            '2' => 'warning',
+            '3' => 'critical',
+            '4' => 'ok',
+            '5' => 'warning',
+            '6' => 'critical',
+        ];
+
+        if (! isset($filter['state']) && isset($settings['state']) && $settings['state'] !== '' && $settings['state'] !== null) {
+            $filter['state'] = ['eq' => (int) $settings['state']];
+        }
+        if (! isset($filter['rule.severity']) && ! empty($settings['severity'])) {
+            $severities = array_map(fn ($s) => $legacySeverityMap[$s] ?? (string) $s, (array) $settings['severity']);
+            $filter['rule.severity'] = ['in' => array_values(array_unique($severities))];
+        } elseif (isset($filter['rule.severity']['in'])) {
+            $severities = array_map(fn ($s) => $legacySeverityMap[$s] ?? (string) $s, (array) $filter['rule.severity']['in']);
+            $filter['rule.severity']['in'] = array_values(array_unique($severities));
+        }
+        if (! isset($filter['device.groups.id']) && isset($settings['device_group'])) {
+            $groupId = $settings['device_group'] instanceof DeviceGroup ? $settings['device_group']->id : $settings['device_group'];
+            if ($groupId) {
+                $filter['device.groups.id'] = ['eq' => (int) $groupId];
+            }
+        }
+        if (! isset($filter['rule_id']) && isset($settings['rule_id']) && $settings['rule_id'] !== '' && $settings['rule_id'] !== null) {
+            $filter['rule_id'] = ['eq' => (int) $settings['rule_id']];
+        }
+        if (! isset($filter['device_id']) && isset($settings['device']) && $settings['device'] !== '' && $settings['device'] !== null) {
+            $filter['device_id'] = ['eq' => (int) $settings['device']];
+        }
+
+        $settings['filter'] = $filter;
+        $this->settings = $settings;
+
+        return $settings;
+    }
 
     public function getSettingsView(Request $request): View
     {
         $data = $this->getSettings(true);
+
+        $ruleId = $data['filter']['rule_id']['eq'] ?? null;
+        if ($ruleId) {
+            $data['rule'] = AlertRule::find($ruleId);
+        }
+
+        $devGroupId = $data['filter']['device.groups.id']['eq'] ?? null;
+        if ($devGroupId && ! ($data['device_group'] instanceof DeviceGroup)) {
+            $data['device_group'] = DeviceGroup::find($devGroupId);
+        }
+
         $data['severities'] = [
-            // alert_rules.status is enum('ok','warning','critical')
-            'ok' => 1,
-            'warning' => 2,
-            'critical' => 3,
-            'ok only' => 4,
-            'warning only' => 5,
-            'critical only' => 6,
+            'critical' => 'critical',
+            'warning' => 'warning',
+            'ok' => 'ok',
         ];
         $data['states'] = [
-            // divined from librenms/alerts.php
-            'recovered' => '0',
-            'alerted' => '1',
-            'acknowledged' => '2',
-            'worse' => '3',
-            'better' => '4',
-            'changed' => '5',
+            'recovered' => 0,
+            'alerted' => 1,
+            'acknowledged' => 2,
+            'worse' => 3,
+            'better' => 4,
+            'changed' => 5,
         ];
 
         return view('widgets.settings.alerts', $data);

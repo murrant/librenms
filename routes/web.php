@@ -321,6 +321,7 @@ Route::middleware(['auth'])->group(function (): void {
 
         // js select2 data controllers
         Route::prefix('select')->group(function (): void {
+            Route::get('alert-rule', Select\AlertRuleController::class)->name('ajax.select.alert-rule');
             Route::get('alert-transport', Select\AlertTransportController::class)->name('ajax.select.alert-transport');
             Route::get('alert-transport-group', Select\AlertTransportGroupController::class)->name('ajax.select.alert-transport-group');
             Route::get('alert-transports-groups', Select\AlertTransportsAndGroupsController::class)->name('ajax.select.alert-transports-groups');

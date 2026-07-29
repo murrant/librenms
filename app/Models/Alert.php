@@ -26,6 +26,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\Filterable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,7 +36,9 @@ use LibreNMS\Enum\AlertState;
 
 class Alert extends DeviceRelatedModel
 {
+    use Filterable;
     use HasFactory;
+
     public $timestamps = false;
     protected $fillable = [
         'device_id',
@@ -46,6 +49,17 @@ class Alert extends DeviceRelatedModel
         'info',
         'timestamp',
         'note',
+    ];
+
+    protected array $filterable = [
+        'device_id',
+        'rule_id',
+        'id',
+        'alert_id',
+        'state',
+        'rule.severity',
+        'device.location_id',
+        'device.groups.id',
     ];
 
     /**
@@ -122,5 +136,60 @@ class Alert extends DeviceRelatedModel
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'devices_perms', 'device_id', 'user_id');
+    }
+
+    /**
+     * @return array<array{key: string, label: string, type: string, endpoint?: string, options?: array<string, string>}>
+     */
+    public static function filterFieldDefinitions(?int $deviceId = null): array
+    {
+        $fields = [];
+
+        if ($deviceId === null) {
+            $fields[] = [
+                'key' => 'device_id',
+                'label' => __('Device'),
+                'type' => 'select',
+                'endpoint' => route('ajax.select.device'),
+            ];
+            $fields[] = [
+                'key' => 'device.groups.id',
+                'label' => __('Device group'),
+                'type' => 'select',
+                'endpoint' => route('ajax.select.device-group'),
+            ];
+        }
+
+        return array_merge($fields, [
+            [
+                'key' => 'rule_id',
+                'label' => __('Alert Rule'),
+                'type' => 'select',
+                'endpoint' => route('ajax.select.alert-rule'),
+            ],
+            [
+                'key' => 'state',
+                'label' => __('State'),
+                'type' => 'select',
+                'options' => [
+                    '0' => __('Ok'),
+                    '1' => __('Alert'),
+                    '2' => __('Acknowledged'),
+                    '3' => __('Worse'),
+                    '4' => __('Better'),
+                    '5' => __('Changed'),
+                ],
+            ],
+            [
+                'key' => 'rule.severity',
+                'label' => __('Severity'),
+                'type' => 'select',
+                'options' => [
+                    'critical' => __('Critical'),
+                    'warning' => __('Warning'),
+                    'ok' => __('OK'),
+                ],
+            ],
+        ]);
     }
 }
