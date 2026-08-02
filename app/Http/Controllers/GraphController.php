@@ -6,6 +6,7 @@ use App\Http\Requests\GraphRequest;
 use Illuminate\Http\Response;
 use LibreNMS\Enum\ImageFormat;
 use LibreNMS\Exceptions\RrdGraphException;
+use LibreNMS\Interfaces\Data\Graphing\RrdGraphInterface;
 use LibreNMS\Util\Debug;
 
 class GraphController extends Controller
@@ -22,6 +23,11 @@ class GraphController extends Controller
 
         try {
             $graph = $request->getGraph();
+
+            if (! $graph instanceof RrdGraphInterface) {
+                throw new RrdGraphException('Graph does not support RRD rendering');
+            }
+
             $image = $graph->render();
 
             if (Debug::isEnabled()) {

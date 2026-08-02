@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Observers\MempoolObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use App\TimeSeries\Contracts\MetricIdentifiable;
+use App\TimeSeries\MetricIdentity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -13,7 +15,7 @@ use LibreNMS\Interfaces\Models\Keyable;
 use LibreNMS\Util\Number;
 
 #[ObservedBy([MempoolObserver::class])]
-class Mempool extends DeviceRelatedModel implements Keyable
+class Mempool extends DeviceRelatedModel implements Keyable, MetricIdentifiable
 {
     use HasFactory;
 
@@ -136,5 +138,15 @@ class Mempool extends DeviceRelatedModel implements Keyable
     public function getCompositeKey(): string
     {
         return "$this->mempool_type-$this->mempool_index";
+    }
+
+    public function toMetricIdentity(string $metricName): MetricIdentity
+    {
+        return new MetricIdentity($metricName, [
+            'device_id' => $this->device_id,
+            'mempool_type' => $this->mempool_type,
+            'mempool_class' => $this->mempool_class,
+            'mempool_index' => $this->mempool_index,
+        ]);
     }
 }

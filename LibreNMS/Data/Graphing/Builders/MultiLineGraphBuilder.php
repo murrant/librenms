@@ -27,8 +27,11 @@
 namespace LibreNMS\Data\Graphing\Builders;
 
 use App\Facades\LibrenmsConfig;
+use App\TimeSeries\Contracts\RrdPathResolver;
+use Illuminate\Support\Arr;
 use LibreNMS\Data\Graphing\GraphParameters;
 use LibreNMS\Data\Store\Rrd;
+use LibreNMS\Interfaces\Data\Graphing\GraphDataInterface;
 
 class MultiLineGraphBuilder
 {
@@ -40,7 +43,11 @@ class MultiLineGraphBuilder
     private bool $nototal = false;
     private int $descrLen = 12;
 
-    private array $datasets = [];
+    private array $seriesOptions = [];
+
+    public function __construct(
+        private readonly GraphDataInterface $data,
+    ) {}
 
     public function unitText(string $unitText): self
     {
@@ -91,26 +98,31 @@ class MultiLineGraphBuilder
         return $this;
     }
 
-    public function addDataset(
-        string $filename,
-        string $ds,
-        string $description,
-        ?string $colour = null,
-        bool $area = false,
-        ?string $areaColour = null,
-        bool $invert = false
-    ): self {
-        $this->datasets[] = [
-            'filename' => $filename,
-            'ds' => $ds,
-            'descr' => $description,
-            'colour' => $colour,
-            'area' => $area,
-            'areacolour' => $areaColour,
-            'invert' => $invert,
-        ];
+    public function setSeriesOptions(string|array $series, ?string $color = null, bool $area = false, ?string $areaColor = null, bool $invert = false): self
+    {
+        foreach (Arr::wrap($series) as $index) {
+            $this->seriesOptions[$index] = [
+                'color' => $color,
+                'area' => $area,
+                'areaColor' => $areaColor,
+                'invert' => $invert,
+            ];
+        }
 
         return $this;
+    }
+
+    /**
+     * @return array{color: ?string, area: bool, areaColor: ?string, invert: bool}
+     */
+    private function getOptions(string $series): array
+    {
+        return $this->seriesOptions[$series] ?? [
+            'color' => null,
+            'area' => false,
+            'areaColor' => null,
+            'invert' => false,
+        ];
     }
 
     public function build(GraphParameters $graph_params): array
@@ -134,42 +146,40 @@ class MultiLineGraphBuilder
 
         $stackedVal = LibrenmsConfig::get('webui.graph_stacked') ? '1' : '-1';
         $rrd_optionsb = [];
-        $colour_iter = 0;
 
-        foreach ($this->datasets as $i => $rrd) {
-            $colour = $rrd['colour'];
-            if ($colour === null) {
-                if (! LibrenmsConfig::get("graph_colours.{$this->colours}.{$colour_iter}")) {
-                    $colour_iter = 0;
+        $color_iter = 0;
+        $i = 0;
+        foreach ($this->data->getSeries() as $index => $series) {
+            $options = $this->getOptions($index);
+
+            $color = $options['color'];
+            if ($color === null) {
+                if (! LibrenmsConfig::get("graph_colours.$this->colours.$color_iter")) {
+                    $color_iter = 0;
                 }
-                $colour = LibrenmsConfig::get("graph_colours.{$this->colours}.{$colour_iter}");
-                $colour_iter++;
+                $color = LibrenmsConfig::get("graph_colours.$this->colours.$color_iter");
+                $color_iter++;
             }
 
-            $areacolour = $rrd['areacolour'];
-            if ($rrd['area'] && empty($areacolour)) {
-                $areacolour = $colour . '20';
-            }
-
-            $ds = $rrd['ds'];
-            $filename = $rrd['filename'];
-            $descr = Rrd::fixedSafeDescr($rrd['descr'], $descr_len);
-            $id = 'ds' . $i;
+            $ds = $series->field;
+            $filename = app(RrdPathResolver::class)->resolve($series->metric);
+            $descr = Rrd::fixedSafeDescr($series->description, $descr_len);
+            $id = 'ds' . $i++;
 
             $rrd_options[] = 'DEF:' . $id . "=$filename:$ds:AVERAGE";
             $rrd_options[] = 'DEF:' . $id . "min=$filename:$ds:MIN";
             $rrd_options[] = 'DEF:' . $id . "max=$filename:$ds:MAX";
 
-            if ($rrd['invert']) {
+            if ($options['invert']) {
                 $rrd_options[] = 'CDEF:' . $id . 'i=' . $id . ',' . $stackedVal . ',*';
-                $rrd_optionsb[] = 'LINE1.25:' . $id . 'i#' . $colour . ":$descr";
-                if (! empty($areacolour)) {
-                    $rrd_optionsb[] = 'AREA:' . $id . 'i#' . $areacolour;
+                $rrd_optionsb[] = 'LINE1.25:' . $id . 'i#' . $color . ":$descr";
+                if ($options['area']) {
+                    $rrd_optionsb[] = 'AREA:' . $id . 'i#' . ($options['areaColor'] ?? $color . '20');
                 }
             } else {
-                $rrd_optionsb[] = 'LINE1.25:' . $id . '#' . $colour . ":$descr";
-                if (! empty($areacolour)) {
-                    $rrd_optionsb[] = 'AREA:' . $id . '#' . $areacolour;
+                $rrd_optionsb[] = 'LINE1.25:' . $id . '#' . $color . ":$descr";
+                if ($options['area']) {
+                    $rrd_optionsb[] = 'AREA:' . $id . '#' . ($options['areaColor'] ?? $color . '20');
                 }
             }
 
