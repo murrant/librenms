@@ -50,4 +50,20 @@ class RrdFileValidator implements MetricValidator
 
         return $result;
     }
+
+    public function hasValidFiles(): bool
+    {
+        foreach ($this->validatedRrdFiles as $path) {
+            if ($path !== null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasAttempted(): bool
+    {
+        return ! empty($this->validatedRrdFiles);
+    }
 }

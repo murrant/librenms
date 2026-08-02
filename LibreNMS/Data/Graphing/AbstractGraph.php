@@ -116,12 +116,23 @@ abstract class AbstractGraph implements GraphInterface
                 throw $e;
             }
 
-            if (false) { // TODO check if valid data series is empty
+            $validator = $this->getValidator();
+
+            if ($validator->hasAttempted() && ! $validator->hasValidFiles()) {
                 throw new RrdGraphException('No Data files', 'No Data', $params->width, $params->height, $e->getCode(), $e->getImage());
             }
 
             throw new RrdGraphException('Error: ' . $e->getMessage(), 'Draw Error', $params->width, $params->height, $e->getCode(), $e->getImage());
         }
+    }
+
+    public function getValidator(): RrdFileValidator
+    {
+        if ($this->validator === null) {
+            $this->validator = app(RrdFileValidator::class);
+        }
+
+        return $this->validator;
     }
 
     protected function init(): void

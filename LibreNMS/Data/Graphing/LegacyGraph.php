@@ -38,7 +38,6 @@ class LegacyGraph extends AbstractGraph
     private ?string $pageTitle = null;
     private ?string $graphTitle = null;
     private ?bool $authorized = null;
-    private array $rrdFiles = [];
     private bool $loaded = false;
     private array $rrdOptions = [];
 
@@ -129,12 +128,17 @@ class LegacyGraph extends AbstractGraph
 
             $this->rrdOptions = $rrd_options;
 
+            $validator = $this->getValidator();
             if (isset($rrd_list) && is_array($rrd_list)) {
-                $this->rrdFiles = array_column($rrd_list, 'filename');
+                foreach ($rrd_list as $item) {
+                    $validator->validate(null, ['filename' => $item['filename']]);
+                }
             } elseif (isset($rrd_filenames) && is_array($rrd_filenames)) {
-                $this->rrdFiles = $rrd_filenames;
-            } else {
-                $this->rrdFiles = isset($rrd_filename) ? [$rrd_filename] : [];
+                foreach ($rrd_filenames as $filename) {
+                    $validator->validate(null, ['filename' => $filename]);
+                }
+            } elseif (isset($rrd_filename)) {
+                $validator->validate(null, ['filename' => $rrd_filename]);
             }
 
             $this->loaded = true;
@@ -181,12 +185,5 @@ class LegacyGraph extends AbstractGraph
         }
 
         return $this->device->display ?? '';
-    }
-
-    public function getRrdFiles(): array
-    {
-        $this->load();
-
-        return $this->rrdFiles;
     }
 }
