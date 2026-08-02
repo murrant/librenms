@@ -26,8 +26,10 @@
 
 namespace App\Providers;
 
+use App\TimeSeries\Contracts\MetricValidator;
 use App\TimeSeries\Contracts\RrdPathResolver;
 use App\TimeSeries\Rrd\LegacyRrdPathResolver;
+use App\TimeSeries\Rrd\RrdFileValidator;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use LibreNMS\Data\Store\Datastore;
@@ -49,6 +51,7 @@ class DatastoreServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(RrdPathResolver::class, LegacyRrdPathResolver::class);
+        $this->app->singleton(MetricValidator::class, RrdFileValidator::class);
 
         // set up bindings
         foreach ($this->stores as $store) {

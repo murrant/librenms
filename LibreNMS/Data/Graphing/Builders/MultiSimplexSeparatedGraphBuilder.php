@@ -27,8 +27,11 @@
 namespace LibreNMS\Data\Graphing\Builders;
 
 use App\Facades\LibrenmsConfig;
+use App\TimeSeries\Contracts\MetricValidator;
+use Illuminate\Support\Arr;
 use LibreNMS\Data\Graphing\GraphParameters;
 use LibreNMS\Data\Store\Rrd;
+use LibreNMS\Interfaces\Data\Graphing\GraphDataInterface;
 
 class MultiSimplexSeparatedGraphBuilder
 {
@@ -42,8 +45,16 @@ class MultiSimplexSeparatedGraphBuilder
     private bool $textOrig = false;
     private bool $nototal = false;
     private int $descrLen = 12;
+    private array $seriesOptions = [];
 
-    private array $datasets = [];
+    private readonly MetricValidator $validator;
+
+    public function __construct(
+        private readonly GraphDataInterface $data,
+        ?MetricValidator $validator = null,
+    ) {
+        $this->validator = $validator ?? resolve(MetricValidator::class);
+    }
 
     public function unitText(string $unitText): self
     {
@@ -115,20 +126,25 @@ class MultiSimplexSeparatedGraphBuilder
         return $this;
     }
 
-    public function addDataset(
-        string $filename,
-        string $ds,
-        string $description,
-        ?string $colour = null
-    ): self {
-        $this->datasets[] = [
-            'filename' => $filename,
-            'ds' => $ds,
-            'descr' => $description,
-            'colour' => $colour,
-        ];
+    public function setSeriesOptions(string|array $series, ?string $color = null): self
+    {
+        foreach (Arr::wrap($series) as $index) {
+            $this->seriesOptions[$index] = [
+                'color' => $color,
+            ];
+        }
 
         return $this;
+    }
+
+    /**
+     * @return array{color: ?string}
+     */
+    private function getOptions(string $series): array
+    {
+        return $this->seriesOptions[$series] ?? [
+            'color' => null,
+        ];
     }
 
     public function build(GraphParameters $graph_params): array
@@ -152,13 +168,6 @@ class MultiSimplexSeparatedGraphBuilder
             $descr_len += 2;
         }
 
-        $unitlen = 10;
-        if ($this->nototal) {
-            $unitlen += 2;
-        }
-
-        $unit_text = Rrd::fixedSafeDescr($this->unitText, $unitlen);
-
         $rrd_options = [];
         $rrd_options[] = 'COMMENT:' . Rrd::fixedSafeDescr($this->unitText, $descr_len) . "        Now      Min     Max     Avg\l";
 
@@ -169,8 +178,11 @@ class MultiSimplexSeparatedGraphBuilder
         $stack = '';
 
         $colour_iter = 0;
-        foreach ($this->datasets as $i => $rrd) {
-            $colour = $rrd['colour'];
+        $i = 0;
+        foreach ($this->data->getSeries() as $index => $series) {
+            $options = $this->getOptions($index);
+
+            $colour = $options['color'];
             if ($colour === null) {
                 if (! LibrenmsConfig::get("graph_colours.{$this->colours}.{$colour_iter}")) {
                     $colour_iter = 0;
@@ -179,9 +191,13 @@ class MultiSimplexSeparatedGraphBuilder
                 $colour_iter++;
             }
 
-            $descr = Rrd::fixedSafeDescr($rrd['descr'], $descr_len);
-            $ds = $rrd['ds'];
-            $filename = $rrd['filename'];
+            $descr = Rrd::fixedSafeDescr($series->description, $descr_len);
+            $ds = $series->field;
+            $filename = $this->validator->validate($series->metric);
+
+            if ($filename === null) {
+                continue;
+            }
 
             $rrd_options[] = 'DEF:' . $ds . $i . '=' . $filename . ':' . $ds . ':AVERAGE';
             $rrd_options[] = 'DEF:' . $ds . $i . 'min=' . $filename . ':' . $ds . ':MIN';
@@ -235,6 +251,8 @@ class MultiSimplexSeparatedGraphBuilder
             }
 
             $rrd_options[] = 'COMMENT:\\n';
+
+            $i++;
         }
 
         if ($previous) {

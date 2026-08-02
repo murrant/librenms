@@ -24,10 +24,6 @@ class GraphController extends Controller
         try {
             $graph = $request->getGraph();
 
-            if (! $graph instanceof RrdGraphInterface) {
-                throw new RrdGraphException('Graph does not support RRD rendering');
-            }
-
             $image = $graph->render();
 
             if (Debug::isEnabled()) {

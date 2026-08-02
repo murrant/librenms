@@ -2,7 +2,6 @@
 
 namespace LibreNMS\Graphs\Device;
 
-use App\Facades\Rrd;
 use Illuminate\Support\Facades\Gate;
 use LibreNMS\Data\Graphing\AbstractGraph;
 use LibreNMS\Data\Graphing\Builders\MultiLineGraphBuilder;
@@ -40,12 +39,9 @@ class NetstatIpGraph extends AbstractGraph implements GraphDataInterface
 
     public function rrdDefinition(): array
     {
-        $rrd_file = Rrd::name($this->device->hostname, 'netstats-ip');
-
         return (new MultiLineGraphBuilder($this))
             ->scaleMin(0)
             ->noTotal()
-            ->setSeriesOptions(['ipOutRequests', 'ipOutDiscards', 'ipOutNoRoutes'], invert: true)
             ->colours('mixed')
             ->build($this->params);
     }
@@ -53,10 +49,5 @@ class NetstatIpGraph extends AbstractGraph implements GraphDataInterface
     public function getGraphTitle(): string
     {
         return $this->device->display . ' :: IP NetStats';
-    }
-
-    public function getRrdFiles(): array
-    {
-        return [Rrd::name($this->device->hostname, 'netstats-ip')];
     }
 }

@@ -27,7 +27,7 @@
 namespace LibreNMS\Data\Graphing\Builders;
 
 use App\Facades\LibrenmsConfig;
-use App\TimeSeries\Contracts\RrdPathResolver;
+use App\TimeSeries\Contracts\MetricValidator;
 use Illuminate\Support\Arr;
 use LibreNMS\Data\Graphing\GraphParameters;
 use LibreNMS\Data\Store\Rrd;
@@ -42,12 +42,16 @@ class MultiLineGraphBuilder
     private ?float $scaleMax = null;
     private bool $nototal = false;
     private int $descrLen = 12;
-
     private array $seriesOptions = [];
+
+    private readonly MetricValidator $validator;
 
     public function __construct(
         private readonly GraphDataInterface $data,
-    ) {}
+        ?MetricValidator $validator = null,
+    ) {
+        $this->validator = $validator ?? resolve(MetricValidator::class);
+    }
 
     public function unitText(string $unitText): self
     {
@@ -162,7 +166,12 @@ class MultiLineGraphBuilder
             }
 
             $ds = $series->field;
-            $filename = app(RrdPathResolver::class)->resolve($series->metric);
+            $filename = $this->validator->validate($series->metric);
+
+            if ($filename === null) {
+                continue;
+            }
+
             $descr = Rrd::fixedSafeDescr($series->description, $descr_len);
             $id = 'ds' . $i++;
 

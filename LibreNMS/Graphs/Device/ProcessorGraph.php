@@ -27,15 +27,16 @@
 namespace LibreNMS\Graphs\Device;
 
 use App\Facades\LibrenmsConfig;
-use App\Facades\Rrd;
 use App\Models\Processor;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use LibreNMS\Data\Graphing\AbstractGraph;
 use LibreNMS\Data\Graphing\Builders\MultiLineGraphBuilder;
 use LibreNMS\Data\Graphing\Builders\MultiSimplexSeparatedGraphBuilder;
+use LibreNMS\Data\Graphing\DataSeries;
+use LibreNMS\Interfaces\Data\Graphing\GraphDataInterface;
 
-class ProcessorGraph extends AbstractGraph
+class ProcessorGraph extends AbstractGraph implements GraphDataInterface
 {
     public string $type = 'device';
     public string $subtype = 'processor';
@@ -62,66 +63,43 @@ class ProcessorGraph extends AbstractGraph
         return $this->device->display ?? '';
     }
 
-    public function getRrdFiles(): array
+    public function getSeries(): array
     {
-        $files = [];
+        $series = [];
         foreach ($this->processors as $proc) {
-            $files[] = Rrd::name($this->device->hostname, ['processor', $proc->processor_type, $proc->processor_index]);
+            $metric = $proc->toMetricIdentity('processor');
+            $series["proc_{$proc->id}"] = new DataSeries($metric, 'usage', $proc->getFormattedDescription());
         }
 
-        return $files;
+        return $series;
     }
 
     public function rrdDefinition(): array
     {
-        if ($this->processors->isEmpty()) {
-            throw new \LibreNMS\Exceptions\RrdGraphException('No Processors');
-        }
-
-        // Filter valid datasets and run checkRrdExists exactly once per processor
-        $valid_datasets = [];
-        foreach ($this->processors as $proc) {
-            $rrd_filename = Rrd::name($this->device->hostname, ['processor', $proc->processor_type, $proc->processor_index]);
-            if (Rrd::checkRrdExists($rrd_filename)) {
-                $valid_datasets[] = [
-                    'filename' => $rrd_filename,
-                    'descr' => $proc->getFormattedDescription(),
-                ];
-            }
-        }
-
-        $rrd_count = count($valid_datasets);
+        $series = $this->getSeries();
+        $series_count = count($series);
 
         if (LibrenmsConfig::getOsSetting($this->device->os, 'processor_stacked')) {
-            $builder = (new MultiSimplexSeparatedGraphBuilder())
+            return (new MultiSimplexSeparatedGraphBuilder($this))
                 ->unitText('Load %')
                 ->totalUnits('%')
                 ->colours('oranges')
                 ->scaleMin(0)
                 ->scaleMax(100)
-                ->divider(max(1, $rrd_count))
+                ->divider((float) max(1, $series_count))
                 ->textOrig()
-                ->noTotal();
-
-            foreach ($valid_datasets as $dataset) {
-                $builder->addDataset($dataset['filename'], 'usage', $dataset['descr']);
-            }
-
-            return $builder->build($this->params);
+                ->noTotal()
+                ->build($this->params);
         }
 
-        $builder = (new MultiLineGraphBuilder())
+        return (new MultiLineGraphBuilder($this))
             ->unitText('Load %')
             ->units('')
             ->colours('mixed')
             ->scaleMin(0)
             ->scaleMax(100)
-            ->noTotal();
-
-        foreach ($valid_datasets as $dataset) {
-            $builder->addDataset($dataset['filename'], 'usage', $dataset['descr'], area: true);
-        }
-
-        return $builder->build($this->params);
+            ->noTotal()
+            ->setSeriesOptions(array_keys($series), area: true)
+            ->build($this->params);
     }
 }

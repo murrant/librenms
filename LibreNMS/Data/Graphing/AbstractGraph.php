@@ -31,6 +31,7 @@ use App\Facades\PortCache;
 use App\Facades\Rrd;
 use App\Models\Device;
 use App\Models\Port;
+use App\TimeSeries\Rrd\RrdFileValidator;
 use Illuminate\Support\Facades\Validator;
 use LibreNMS\Exceptions\RrdGraphException;
 use LibreNMS\Interfaces\Data\Graphing\GraphInterface;
@@ -40,6 +41,7 @@ abstract class AbstractGraph implements GraphInterface
 {
     protected Device $device;
     protected ?Port $port;
+    private ?RrdFileValidator $validator = null;
 
     public function __construct(
         protected readonly GraphParameters $params,
@@ -114,10 +116,8 @@ abstract class AbstractGraph implements GraphInterface
                 throw $e;
             }
 
-            foreach ($this->getRrdFiles() as $filename) {
-                if (! Rrd::checkRrdExists($filename)) {
-                    throw new RrdGraphException('No Data file' . basename($filename), 'No Data', $params->width, $params->height, $e->getCode(), $e->getImage());
-                }
+            if (false) { // TODO check if valid data series is empty
+                throw new RrdGraphException('No Data files', 'No Data', $params->width, $params->height, $e->getCode(), $e->getImage());
             }
 
             throw new RrdGraphException('Error: ' . $e->getMessage(), 'Draw Error', $params->width, $params->height, $e->getCode(), $e->getImage());
