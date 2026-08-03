@@ -33,7 +33,6 @@ use Illuminate\Support\Facades\Http;
 use LibreNMS\Alert\AlertData;
 use LibreNMS\Alert\Transport;
 use LibreNMS\Tests\TestCase;
-
 use function PHPUnit\Framework\assertEquals;
 
 final class DiscordTest extends TestCase
@@ -53,7 +52,7 @@ final class DiscordTest extends TestCase
         /** @var Device $mock_device */
         $mock_device = Device::factory()->make(['hostname' => 'my-hostname.com']);
 
-        $transport->deliverAlert(AlertData::testData($mock_device));
+        $transport->deliverAlert(AlertData::testData($mock_device)->toArray());
 
         Http::assertSent(function (Request $request) {
             assertEquals('https://discord.com/api/webhooks/number/id', $request->url());
@@ -95,7 +94,7 @@ final class DiscordTest extends TestCase
         /** @var Device $mock_device */
         $mock_device = Device::factory()->make(['hostname' => 'my-hostname.com']);
 
-        $transport->deliverAlert(AlertData::testData($mock_device));
+        $transport->deliverAlert(AlertData::testData($mock_device)->toArray());
 
         Http::assertSent(function (Request $request) {
             assertEquals('https://discord.com/api/webhooks/number/id', $request->url());
@@ -137,7 +136,7 @@ final class DiscordTest extends TestCase
         /** @var Device $mock_device */
         $mock_device = Device::factory()->make(['hostname' => 'my-hostname.com']);
 
-        $transport->deliverAlert(AlertData::testData($mock_device));
+        $transport->deliverAlert(AlertData::testData($mock_device)->toArray());
 
         Http::assertSent(function (Request $request) {
             assertEquals('https://discord.com/api/webhooks/number/id', $request->url());
@@ -186,9 +185,9 @@ final class DiscordTest extends TestCase
 
         $alert_data = AlertData::testData($mock_device);
 
-        $alert_data['msg'] = 'This test alert should not have image <img class="librenms-graph" src="google.jpeg" /> or <h2>html tags</h2></br>';
+        $alert_data->msg = 'This test alert should not have image <img class="librenms-graph" src="google.jpeg" /> or <h2>html tags</h2></br>';
 
-        $transport->deliverAlert($alert_data);
+        $transport->deliverAlert($alert_data->toArray());
 
         Http::assertSent(function (Request $request) {
             assertEquals($request->url(), 'https://discord.com/api/webhooks/number/id');

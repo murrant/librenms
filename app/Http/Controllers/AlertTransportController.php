@@ -22,7 +22,7 @@ class AlertTransportController extends Controller
         $alert_data = AlertData::testData($device);
 
         try {
-            $result = $transport->instance()->deliverAlert($alert_data);
+            $result = $transport->instance()->deliverAlert($alert_data->toArray());
 
             if ($result === true) {
                 return response()->json(['status' => 'ok']);

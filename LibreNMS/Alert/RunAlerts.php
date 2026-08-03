@@ -33,24 +33,17 @@ namespace LibreNMS\Alert;
 
 use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;
-use App\Facades\Rrd;
 use App\Models\AlertLog;
 use App\Models\AlertRule;
 use App\Models\AlertTransport;
-use App\Models\ApplicationMetric;
 use App\Models\Eventlog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use LibreNMS\Alerting\QueryBuilderParser;
-use LibreNMS\Enum\AlertRuleOperationPhase;
 use LibreNMS\Enum\AlertState;
 use LibreNMS\Enum\MaintenanceStatus;
 use LibreNMS\Enum\Severity;
 use LibreNMS\Exceptions\AlertTransportDeliveryException;
-use LibreNMS\Exceptions\RrdException;
-use LibreNMS\Polling\ConnectivityHelper;
-use LibreNMS\Util\Number;
-use LibreNMS\Util\Time;
 
 class RunAlerts
 {
@@ -88,162 +81,6 @@ class RunAlerts
         }
 
         return $txt;
-    }
-
-    /**
-     * Describe Alert
-     *
-     * @param  array  $alert  Alert-Result from DB
-     * @return array|bool|string
-     */
-    public function describeAlert($alert)
-    {
-        $obj = [];
-        $i = 0;
-        $device = DeviceCache::get($alert['device_id']);
-
-        $obj['hostname'] = $device->hostname;
-        $obj['sysName'] = $device->sysName;
-        $obj['display'] = $device->displayName();
-        $obj['sysDescr'] = $device->sysDescr;
-        $obj['sysContact'] = $device->sysContact;
-        $obj['os'] = $device->os;
-        $obj['type'] = $device->type;
-        $obj['ip'] = $device->ip;
-        $obj['device_groups'] = $device->groups->pluck('name', 'id')->all();
-        $obj['hardware'] = $device->hardware;
-        $obj['version'] = $device->version;
-        $obj['serial'] = $device->serial;
-        $obj['features'] = $device->features;
-        $obj['location'] = (string) $device->location;
-        $obj['uptime'] = $device->uptime;
-        $obj['uptime_short'] = Time::formatInterval($device->uptime, true);
-        $obj['uptime_long'] = Time::formatInterval($device->uptime);
-        $obj['description'] = $device->purpose;
-        $obj['notes'] = $device->notes;
-        $obj['alert_notes'] = $alert['note'];
-        $obj['device_id'] = $device->device_id;
-        $obj['rule_id'] = $alert['rule_id'];
-        $obj['id'] = $alert['id'];
-        $obj['proc'] = $alert['proc'];
-        $obj['status'] = $device->status;
-        $obj['status_reason'] = $device->status_reason;
-
-        if ((new ConnectivityHelper($device))->icmpIsEnabled()) {
-            try {
-                $last_ping = Rrd::lastUpdate(Rrd::name($device->hostname, 'icmp-perf'));
-                if ($last_ping) {
-                    $obj['ping_timestamp'] = $last_ping->timestamp;
-                    $obj['ping_loss'] = Number::calculatePercent($last_ping->get('xmt') - $last_ping->get('rcv'), $last_ping->get('xmt'));
-                    $obj['ping_min'] = $last_ping->get('min');
-                    $obj['ping_max'] = $last_ping->get('max');
-                    $obj['ping_avg'] = $last_ping->get('avg');
-                    $obj['debug'] = 'unsupported';
-                }
-            } catch (RrdException $e) {
-                Log::error("Error getting last ping for device {$device->hostname}: {$e->getMessage()}");
-            }
-        }
-        $extra = $alert['details'];
-
-        $obj['applications'] = $device->applications->groupBy('app_type');
-        $obj['applications_metrics'] = [];
-        foreach ($obj['applications'] as $app_name => $app_instances) {
-            $obj['applications_metrics'][$app_name] = [];
-            foreach ($app_instances as $app) {
-                $app_metrics = ApplicationMetric::where(['app_id' => $app->app_id])->get();
-                $rendered_app_metrics = [];
-                foreach ($app_metrics as $metric) {
-                    $rendered_app_metrics[$metric['metric']] = [
-                        'value' => $metric['value'],
-                        'value_prev' => $metric['value_prev'],
-                    ];
-                }
-                $obj['applications_metrics'][$app_name][] = $rendered_app_metrics;
-            }
-        }
-
-        $tpl = new Template;
-        $template = $tpl->getTemplate($obj);
-
-        if ($alert['state'] >= AlertState::ACTIVE) {
-            $obj['title'] = $template->title ?: 'Alert for device ' . $obj['display'] . ' - ' . $alert['name'];
-            if ($alert['state'] == AlertState::ACKNOWLEDGED) {
-                $obj['title'] .= ' Has been acknowledged';
-            } elseif ($alert['state'] == AlertState::WORSE) {
-                $obj['title'] .= ' Has worsened';
-            } elseif ($alert['state'] == AlertState::BETTER) {
-                $obj['title'] .= ' Has improved';
-            } elseif ($alert['state'] == AlertState::CHANGED) {
-                $obj['title'] .= ' changed';
-            }
-
-            foreach ($extra['rule'] as $incident) {
-                $i++;
-                $obj['faults'][$i] = $incident;
-                $obj['faults'][$i]['string'] = null;
-                foreach ($incident as $k => $v) {
-                    if (! empty($v) && $k != 'device_id' && (stristr((string) $k, 'id') || stristr((string) $k, 'desc') || stristr((string) $k, 'msg')) && substr_count((string) $k, '_') <= 1) {
-                        $obj['faults'][$i]['string'] .= $k . ' = ' . $v . '; ';
-                    }
-                }
-            }
-            $obj['elapsed'] = Time::formatInterval(time() - strtotime((string) $alert['time_logged']), true) ?: 'none';
-            if (! empty($extra['diff'])) {
-                $obj['diff'] = $extra['diff'];
-            }
-        } elseif ($alert['state'] == AlertState::RECOVERED) {
-            // Alert is now cleared
-            $id = dbFetchRow('SELECT alert_log.id,alert_log.time_logged,alert_log.details FROM alert_log WHERE alert_log.state != ? && alert_log.state != ? && alert_log.rule_id = ? && alert_log.device_id = ? && alert_log.id < ? ORDER BY id DESC LIMIT 1', [AlertState::ACKNOWLEDGED, AlertState::RECOVERED, $alert['rule_id'], $alert['device_id'], $alert['id']]);
-            if (empty($id['id'])) {
-                return false;
-            }
-
-            $extra = [];
-            if (! empty($id['details'])) {
-                $extra = json_decode(gzuncompress($id['details']), true);
-            }
-
-            // Reset count to 0 so alerts will continue
-            $extra['count'] = 0;
-            dbUpdate(['details' => gzcompress(json_encode($id['details']), 9)], 'alert_log', 'id = ?', [$alert['id']]);
-
-            $obj['title'] = $template->title_rec ?: 'Device ' . $obj['display'] . ' recovered from ' . ($alert['name'] ?: $alert['rule']);
-            $obj['elapsed'] = Time::formatInterval(strtotime((string) $alert['time_logged']) - strtotime((string) $id['time_logged']), true) ?: 'none';
-            $obj['id'] = $id['id'];
-            foreach ($extra['rule'] as $incident) {
-                $i++;
-                $obj['faults'][$i] = $incident;
-                $obj['faults'][$i]['string'] = '';
-                foreach ($incident as $k => $v) {
-                    if (! empty($v) && $k != 'device_id' && (stristr((string) $k, 'id') || stristr((string) $k, 'desc') || stristr((string) $k, 'msg')) && substr_count((string) $k, '_') <= 1) {
-                        $obj['faults'][$i]['string'] .= $k . ' => ' . $v . '; ';
-                    }
-                }
-            }
-        } else {
-            return 'Unknown State';
-        }//end if
-        $obj['builder'] = $alert['builder'];
-        $obj['uid'] = $alert['id'];
-        $obj['alert_id'] = $alert['alert_id'];
-        $obj['severity'] = $alert['severity'];
-        $obj['rule'] = $alert['builder']; //Backwards compatibility for old rule
-        $obj['name'] = $alert['name'];
-        $obj['timestamp'] = $alert['time_logged'];
-        $obj['contacts'] = $extra['contacts'];
-        $obj['state'] = $alert['state'];
-        $obj['alerted'] = $alert['alerted'];
-        $obj['template'] = $template;
-
-        $obj['operation_phase'] = AlertUtil::mapAlertStateToOperationPhase((int) $alert['state']);
-        $detailCount = (int) ($extra['count'] ?? 0);
-        $obj['escalation_step'] = max(1, $detailCount);
-        if ($obj['operation_phase'] !== AlertRuleOperationPhase::PROBLEM) {
-            $obj['escalation_step'] = 1;
-        }
-
-        return $obj;
     }
 
     public function clearStaleAlerts()
@@ -296,8 +133,8 @@ class RunAlerts
             $alert['details']['contacts'] = AlertUtil::getContacts($qry);
         }
 
-        $obj = $this->describeAlert($alert);
-        if (is_array($obj)) {
+        $obj = AlertData::describe($alert);
+        if ($obj !== null) {
             echo 'Issuing Alert-UID #' . $alert['id'] . '/' . $alert['state'] . ':' . PHP_EOL;
             if ($alert['state'] != AlertState::ACKNOWLEDGED || LibrenmsConfig::get('alert.acknowledged') === true) {
                 $this->extTransports($obj, $transportOverride);
@@ -660,10 +497,10 @@ class RunAlerts
     /**
      * Run external transports
      *
-     * @param  array  $obj  Alert-Array
+     * @param  AlertData  $obj  Alert data
      * @return void
      */
-    public function extTransports($obj, ?array $transportOverride = null)
+    public function extTransports(AlertData $obj, ?array $transportOverride = null): void
     {
         $type = new Template;
 
@@ -703,14 +540,13 @@ class RunAlerts
                 $transport_title = "Transport {$item['transport_type']}";
                 $obj['transport'] = $item['transport_type'];
                 $obj['transport_name'] = $item['transport_name'];
-                $obj['alert'] = new AlertData($obj);
+                $obj['alert'] = $obj;
                 $obj['title'] = $type->getTitle($obj);
-                $obj['alert']['title'] = $obj['title'];
                 $obj['msg'] = $type->getBody($obj);
                 c_echo(" :: $transport_title => ");
                 try {
                     $instance = new $class(AlertTransport::find($item['transport_id']));
-                    $tmp = $instance->deliverAlert($obj);
+                    $tmp = $instance->deliverAlert($obj->toArray());
                     $this->alertLog($tmp, $obj, $obj['transport']);
                 } catch (AlertTransportDeliveryException $e) {
                     Eventlog::log($e->getTraceAsString() . PHP_EOL . $e->getMessage(), $obj['device_id'], 'alert', Severity::Error);

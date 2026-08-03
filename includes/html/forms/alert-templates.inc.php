@@ -54,7 +54,7 @@ try {
     ];
     $test_device = new Device(['hostname' => 'test']);
     $test_device->device_id = 0;
-    $test_data['alert'] = new AlertData(AlertData::testData($test_device));
+    $test_data['alert'] = AlertData::testData($test_device);
 
     Blade::render($vars['template'], $test_data);
     Blade::render($vars['title'], $test_data);

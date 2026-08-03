@@ -30,12 +30,12 @@ if (isset($options['t']) && isset($options['h']) && isset($options['r'])) {
         exit(2);
     }
 
-    $obj = $runAlerts->describeAlert($alerts[0]);
+    $obj = AlertData::describe($alerts[0]);
     if (isset($options['p'])) {
         $obj['transport'] = $options['p'];
     }
     $type = new Template;
-    $obj['alert'] = new AlertData($obj);
+    $obj['alert'] = $obj;
     $obj['title'] = $type->getTitle($obj);
     $obj['msg'] = $type->getBody($obj);
     unset($obj['template']);

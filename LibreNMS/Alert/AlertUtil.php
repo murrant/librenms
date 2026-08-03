@@ -340,7 +340,7 @@ class AlertUtil
      * @param  array  $results  Rule-Result
      * @return array
      */
-    public static function getContacts($results)
+    public static function getContacts($results): array
     {
         if (empty($results)) {
             return [];

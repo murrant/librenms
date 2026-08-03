@@ -32,15 +32,12 @@ use LibreNMS\Enum\AlertState;
 
 class Template
 {
-    public $template;
+    public ?AlertTemplate $template = null;
 
     /**
      * Get the template details
-     *
-     * @param  array|null  $obj
-     * @return mixed
      */
-    public function getTemplate($obj = null)
+    public function getTemplate(AlertData $obj): ?AlertTemplate
     {
         if ($this->template) {
             // Return the cached template information.
@@ -56,25 +53,19 @@ class Template
         return $this->template;
     }
 
-    public function getTitle($data)
+    public function getTitle(AlertData $data): string
     {
         return $this->bladeTitle($data);
     }
 
-    public function getBody($data)
+    public function getBody(AlertData $data): string
     {
         return $this->bladeBody($data);
     }
 
-    /**
-     * Parse Blade body
-     *
-     * @param  array  $data
-     * @return string
-     */
-    public function bladeBody($data)
+    private function bladeBody(AlertData $data): string
     {
-        $alert['alert'] = new AlertData($data['alert']);
+        $alert = ['alert' => $data['alert']];
         try {
             return Blade::render($data['template']->template, $alert);
         } catch (\Exception $e) {
@@ -82,15 +73,9 @@ class Template
         }
     }
 
-    /**
-     * Parse Blade title
-     *
-     * @param  array  $data
-     * @return string
-     */
-    public function bladeTitle($data)
+    private function bladeTitle(AlertData $data): string
     {
-        $alert['alert'] = new AlertData($data['alert']);
+        $alert = ['alert' => $data['alert']];
         try {
             return Blade::render($data['title'], $alert);
         } catch (\Exception) {
