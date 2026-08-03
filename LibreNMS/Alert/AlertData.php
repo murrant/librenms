@@ -306,13 +306,7 @@ class AlertData implements ArrayAccess
      */
     public function toArray(): array
     {
-        $result = [];
-        foreach ((new \ReflectionClass($this))->getProperties(\ReflectionProperty::IS_PUBLIC) as $property) {
-            $name = $property->getName();
-            $result[$name] = $this->$name;
-        }
-
-        return $result;
+        return get_object_vars($this);
     }
 
     /**
