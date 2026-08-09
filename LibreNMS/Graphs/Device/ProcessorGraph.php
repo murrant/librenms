@@ -88,7 +88,7 @@ class ProcessorGraph extends AbstractGraph implements GraphDataInterface
                 ->scaleMax(100)
                 ->divider((float) max(1, $series_count))
                 ->textOrig()
-                ->noTotal()
+                ->hideTotal()
                 ->build($this->params);
         }
 
@@ -98,7 +98,6 @@ class ProcessorGraph extends AbstractGraph implements GraphDataInterface
             ->colors('mixed')
             ->scaleMin(0)
             ->scaleMax(100)
-            ->noTotal()
             ->setSeriesOptions(array_keys($series), area: true)
             ->build($this->params);
     }

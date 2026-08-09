@@ -45,7 +45,7 @@ class MultiSimplexSeparatedGraphBuilder
     private ?float $divider = null;
     private ?float $multiplier = null;
     private bool $textOrig = false;
-    private bool $nototal = false;
+    private bool $totalVisible = true;
     private array $seriesOptions = [];
 
     public function __construct(
@@ -109,9 +109,9 @@ class MultiSimplexSeparatedGraphBuilder
         return $this;
     }
 
-    public function noTotal(bool $noTotal = true): self
+    public function hideTotal(bool $hide = true): self
     {
-        $this->nototal = $noTotal;
+        $this->totalVisible = ! $hide;
 
         return $this;
     }
@@ -194,7 +194,7 @@ class MultiSimplexSeparatedGraphBuilder
                 $plusX = ',+';
             }
 
-            if (! $this->nototal) {
+            if ($this->totalVisible) {
                 $rrd_options[] = 'VDEF:tot' . $ds . $i . '=' . $ds . $i . ',TOTAL';
             }
 
@@ -228,7 +228,7 @@ class MultiSimplexSeparatedGraphBuilder
             $rrd_options[] = 'GPRINT:' . $t_defname . $i . 'max:MAX:%5.' . $float_precision . 'lf%s';
             $rrd_options[] = 'GPRINT:' . $t_defname . $i . ':AVERAGE:%5.' . $float_precision . 'lf%s\\n';
 
-            if (! $this->nototal) {
+            if ($this->totalVisible) {
                 $rrd_options[] = 'GPRINT:tot' . $ds . $i . ':%6.' . $float_precision . 'lf%s' . Rrd::safeDescr($this->totalUnits);
             }
 

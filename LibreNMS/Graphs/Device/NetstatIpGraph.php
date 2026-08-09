@@ -41,7 +41,6 @@ class NetstatIpGraph extends AbstractGraph implements GraphDataInterface
     {
         return MultiLineGraphBuilder::data($this)
             ->scaleMin(0)
-            ->noTotal()
             ->colors('mixed')
             ->build($this->params);
     }

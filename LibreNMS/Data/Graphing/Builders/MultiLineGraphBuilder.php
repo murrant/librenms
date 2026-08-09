@@ -42,7 +42,6 @@ class MultiLineGraphBuilder
     private string $units = '';
     private ?float $scaleMin = null;
     private ?float $scaleMax = null;
-    private bool $nototal = false;
     private array $seriesOptions = [];
 
     public function __construct(
@@ -81,13 +80,6 @@ class MultiLineGraphBuilder
     public function scaleMax(float $scaleMax): self
     {
         $this->scaleMax = $scaleMax;
-
-        return $this;
-    }
-
-    public function noTotal(bool $noTotal = true): self
-    {
-        $this->nototal = $noTotal;
 
         return $this;
     }
@@ -131,10 +123,6 @@ class MultiLineGraphBuilder
         }
 
         $descr_len = 12;
-        if ($this->nototal) {
-            $descr_len += 2;
-        }
-
         $rrd_options = [];
         $rrd_options[] = 'COMMENT:' . Rrd::fixedSafeDescr($this->unitText, $descr_len) . "      Now      Min      Max     Avg\l";
 
