@@ -24,16 +24,16 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace LibreNMS\Graphs\Device;
+namespace App\Graphs\Device;
 
+use App\Data\Graphing\AbstractGraph;
+use App\Data\Graphing\Builders\MultiLineGraphBuilder;
+use App\Data\Graphing\Builders\MultiSimplexSeparatedGraphBuilder;
+use App\Data\Graphing\DataSeries;
 use App\Facades\LibrenmsConfig;
 use App\Models\Processor;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
-use LibreNMS\Data\Graphing\AbstractGraph;
-use LibreNMS\Data\Graphing\Builders\MultiLineGraphBuilder;
-use LibreNMS\Data\Graphing\Builders\MultiSimplexSeparatedGraphBuilder;
-use LibreNMS\Data\Graphing\DataSeries;
 use LibreNMS\Interfaces\Data\Graphing\GraphDataInterface;
 
 class ProcessorGraph extends AbstractGraph implements GraphDataInterface
@@ -82,20 +82,16 @@ class ProcessorGraph extends AbstractGraph implements GraphDataInterface
         if (LibrenmsConfig::getOsSetting($this->device->os, 'processor_stacked')) {
             return MultiSimplexSeparatedGraphBuilder::data($this)
                 ->unitText('Load %')
-                ->totalUnits('%')
                 ->colors('oranges')
                 ->scaleMin(0)
                 ->scaleMax(100)
                 ->divider((float) max(1, $series_count))
                 ->textOrig()
-                ->hideTotal()
                 ->build($this->params);
         }
 
         return MultiLineGraphBuilder::data($this)
-            ->unitText('Load %')
-            ->units('')
-            ->colors('mixed')
+            ->units('', 'Load %')
             ->scaleMin(0)
             ->scaleMax(100)
             ->setSeriesOptions(array_keys($series), area: true)

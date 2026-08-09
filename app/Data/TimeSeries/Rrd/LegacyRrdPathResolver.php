@@ -1,11 +1,11 @@
 <?php
 
-namespace App\TimeSeries\Rrd;
+namespace App\Data\TimeSeries\Rrd;
 
+use App\Data\TimeSeries\Contracts\RrdPathResolver;
+use App\Data\TimeSeries\MetricIdentity;
 use App\Facades\DeviceCache;
 use App\Facades\Rrd;
-use App\TimeSeries\Contracts\RrdPathResolver;
-use App\TimeSeries\MetricIdentity;
 use InvalidArgumentException;
 
 class LegacyRrdPathResolver implements RrdPathResolver
@@ -15,7 +15,7 @@ class LegacyRrdPathResolver implements RrdPathResolver
         $labels = $identity->labels;
         $deviceId = $labels['device_id'] ?? null;
         if ($deviceId === null) {
-            throw new InvalidArgumentException("Metric identity must have a device_id label.");
+            throw new InvalidArgumentException('Metric identity must have a device_id label.');
         }
         unset($labels['device_id']);
 

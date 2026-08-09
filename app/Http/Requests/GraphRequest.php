@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Data\Graphing\GraphFactory;
 use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;
 use App\Facades\PortCache;
@@ -9,7 +10,6 @@ use App\Models\Device;
 use App\Models\Port;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
-use LibreNMS\Data\Graphing\GraphFactory;
 use LibreNMS\Interfaces\Data\Graphing\GraphInterface;
 use LibreNMS\Util\Time;
 use LibreNMS\Util\Url;
@@ -115,6 +115,7 @@ class GraphRequest extends FormRequest
 
         try {
             $graphRules = $this->getGraph()->validation();
+
             return array_merge($baseRules, $graphRules);
         } catch (\Throwable) {
             return $baseRules;
@@ -176,6 +177,7 @@ class GraphRequest extends FormRequest
         if ($this->graph === null) {
             $this->graph = app(GraphFactory::class)->graphFor($this->type ?: $this->string('type', '')->toString(), $this->toVars());
         }
+
         return $this->graph;
     }
 }

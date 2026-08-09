@@ -24,13 +24,12 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace LibreNMS\Data\Graphing\Builders;
+namespace App\Data\Graphing\Builders;
 
-use App\TimeSeries\Contracts\MetricValidator;
+use App\Data\Graphing\GraphParameters;
+use App\Data\Graphing\Traits\ColorIterator;
+use App\Data\TimeSeries\Contracts\MetricValidator;
 use Illuminate\Support\Arr;
-use LibreNMS\Data\Graphing\GraphHelper;
-use LibreNMS\Data\Graphing\GraphParameters;
-use LibreNMS\Data\Graphing\Traits\ColorIterator;
 use LibreNMS\Data\Store\Rrd;
 use LibreNMS\Interfaces\Data\Graphing\GraphDataInterface;
 
@@ -39,13 +38,13 @@ class MultiSimplexSeparatedGraphBuilder
     use ColorIterator;
 
     private string $unitText = '';
-    private string $totalUnits = '';
     private ?float $scaleMin = null;
     private ?float $scaleMax = null;
     private ?float $divider = null;
     private ?float $multiplier = null;
     private bool $textOrig = false;
-    private bool $totalVisible = true;
+    private bool $totalVisible = false;
+    private string $totalUnits = '';
     private array $seriesOptions = [];
 
     public function __construct(
@@ -63,13 +62,6 @@ class MultiSimplexSeparatedGraphBuilder
     public function unitText(string $unitText): self
     {
         $this->unitText = $unitText;
-
-        return $this;
-    }
-
-    public function totalUnits(string $totalUnits): self
-    {
-        $this->totalUnits = $totalUnits;
 
         return $this;
     }
@@ -109,9 +101,10 @@ class MultiSimplexSeparatedGraphBuilder
         return $this;
     }
 
-    public function hideTotal(bool $hide = true): self
+    public function showTotal(bool $show = true, string $units = ''): self
     {
-        $this->totalVisible = ! $hide;
+        $this->totalVisible = $show;
+        $this->totalUnits = $units;
 
         return $this;
     }
@@ -154,7 +147,7 @@ class MultiSimplexSeparatedGraphBuilder
         $period = $graph_params->period;
 
         $descr_len = 12;
-        if ($this->nototal) {
+        if (! $this->totalVisible) {
             $descr_len += 2;
         }
 
@@ -215,14 +208,9 @@ class MultiSimplexSeparatedGraphBuilder
                 $rrd_options[] = 'CDEF:' . $g_defname . $i . 'max=' . $ds . $i . 'max,' . $this->divider . ',/';
             }
 
-            if ($this->textOrig) {
-                $t_defname = $ds;
-            } else {
-                $t_defname = $g_defname;
-            }
-
             $rrd_options[] = 'AREA:' . $g_defname . $i . '#' . $color . ':' . $descr . "$stack";
 
+            $t_defname = $this->textOrig ? $ds : $g_defname;
             $rrd_options[] = 'GPRINT:' . $t_defname . $i . ':LAST:%5.' . $float_precision . 'lf%s';
             $rrd_options[] = 'GPRINT:' . $t_defname . $i . 'min:MIN:%5.' . $float_precision . 'lf%s';
             $rrd_options[] = 'GPRINT:' . $t_defname . $i . 'max:MAX:%5.' . $float_precision . 'lf%s';

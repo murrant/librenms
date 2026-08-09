@@ -26,10 +26,10 @@
 
 namespace App\Providers;
 
-use App\TimeSeries\Contracts\MetricValidator;
-use App\TimeSeries\Contracts\RrdPathResolver;
-use App\TimeSeries\Rrd\LegacyRrdPathResolver;
-use App\TimeSeries\Rrd\RrdFileValidator;
+use App\Data\TimeSeries\Contracts\MetricValidator;
+use App\Data\TimeSeries\Contracts\RrdPathResolver;
+use App\Data\TimeSeries\Rrd\LegacyRrdPathResolver;
+use App\Data\TimeSeries\Rrd\RrdFileValidator;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use LibreNMS\Data\Store\Datastore;

@@ -1,8 +1,8 @@
 <?php
 
-namespace LibreNMS\Data\Graphing;
+namespace App\Data\Graphing;
 
-use App\TimeSeries\MetricIdentity;
+use App\Data\TimeSeries\MetricIdentity;
 
 readonly class DataSeries
 {

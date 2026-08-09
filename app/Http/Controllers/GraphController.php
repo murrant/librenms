@@ -6,7 +6,6 @@ use App\Http\Requests\GraphRequest;
 use Illuminate\Http\Response;
 use LibreNMS\Enum\ImageFormat;
 use LibreNMS\Exceptions\RrdGraphException;
-use LibreNMS\Interfaces\Data\Graphing\RrdGraphInterface;
 use LibreNMS\Util\Debug;
 
 class GraphController extends Controller

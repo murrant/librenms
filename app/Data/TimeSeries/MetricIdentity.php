@@ -1,17 +1,17 @@
 <?php
 
-namespace App\TimeSeries;
+namespace App\Data\TimeSeries;
 
 use InvalidArgumentException;
 
 final readonly class MetricIdentity
 {
     /**
-     * @param array<string, scalar|null> $labels
+     * @param  array<string, scalar|null>  $labels
      */
     public function __construct(
         public string $name,
-        public array  $labels = [],
+        public array $labels = [],
     )
     {
         if ($name === '') {

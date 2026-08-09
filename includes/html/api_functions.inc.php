@@ -13,6 +13,7 @@
  */
 
 use App\Actions\Device\ValidateDeviceAndCreate;
+use App\Data\Graphing\GraphFactory;
 use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;
 use App\Models\AlertTemplate;
@@ -60,7 +61,6 @@ use Illuminate\Support\Str;
 use LibreNMS\Alert\AlertData;
 use LibreNMS\Alerting\QueryBuilderParser;
 use LibreNMS\Billing;
-use LibreNMS\Data\Graphing\GraphFactory;
 use LibreNMS\Enum\MaintenanceBehavior;
 use LibreNMS\Enum\Severity;
 use LibreNMS\Exceptions\InvalidIpException;

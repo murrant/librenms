@@ -24,14 +24,14 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace LibreNMS\Data\Graphing;
+namespace App\Data\Graphing;
 
+use App\Data\TimeSeries\Rrd\RrdFileValidator;
 use App\Facades\DeviceCache;
 use App\Facades\PortCache;
 use App\Facades\Rrd;
 use App\Models\Device;
 use App\Models\Port;
-use App\TimeSeries\Rrd\RrdFileValidator;
 use Illuminate\Support\Facades\Validator;
 use LibreNMS\Exceptions\RrdGraphException;
 use LibreNMS\Interfaces\Data\Graphing\GraphInterface;

@@ -1,9 +1,8 @@
 <?php
 
+namespace App\Data\TimeSeries\Contracts;
 
-namespace App\TimeSeries\Contracts;
-
-use App\TimeSeries\MetricIdentity;
+use App\Data\TimeSeries\MetricIdentity;
 
 interface MetricValidator
 {

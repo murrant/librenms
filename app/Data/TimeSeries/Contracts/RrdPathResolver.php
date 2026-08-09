@@ -1,8 +1,8 @@
 <?php
 
-namespace App\TimeSeries\Contracts;
+namespace App\Data\TimeSeries\Contracts;
 
-use App\TimeSeries\MetricIdentity;
+use App\Data\TimeSeries\MetricIdentity;
 
 interface RrdPathResolver
 {

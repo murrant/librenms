@@ -24,7 +24,7 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace LibreNMS\Data\Graphing;
+namespace App\Data\Graphing;
 
 use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;

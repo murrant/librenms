@@ -26,8 +26,8 @@
 
 namespace LibreNMS\Interfaces\Data\Graphing;
 
-use LibreNMS\Data\Graphing\GraphImage;
-use LibreNMS\Data\Graphing\GraphParameters;
+use App\Data\Graphing\GraphImage;
+use App\Data\Graphing\GraphParameters;
 
 interface GraphInterface
 {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\Graphing\GraphFactory;
 use App\Facades\LibrenmsConfig;
 use App\Facades\Rrd;
 use App\Http\Requests\GraphRequest;
@@ -9,7 +10,6 @@ use App\Models\Device;
 use App\Models\Port;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
-use LibreNMS\Data\Graphing\GraphFactory;
 use LibreNMS\Util\Graph;
 use LibreNMS\Util\StringHelpers;
 use LibreNMS\Util\Time;

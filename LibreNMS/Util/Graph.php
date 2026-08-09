@@ -2,10 +2,10 @@
 
 namespace LibreNMS\Util;
 
+use App\Data\Graphing\GraphFactory;
 use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use Illuminate\Support\Arr;
-use LibreNMS\Data\Graphing\GraphFactory;
 use LibreNMS\Enum\GraphOutput;
 use LibreNMS\Enum\ImageFormat;
 
@@ -63,7 +63,7 @@ class Graph
         if ($device?->graphs) {
             $graphs = $device->graphs->pluck('graph');
 
-            foreach (LibrenmsConfig::get('graph_types') as $gType => $type_data) {
+            foreach (LibrenmsConfig::get('graph_types') as $type_data) {
                 foreach (array_keys($type_data) as $subtype) {
                     if ($graphs->contains($subtype)) {
                         $types[] = $subtype;

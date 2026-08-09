@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\TimeSeries\Contracts\MetricIdentifiable;
-use App\TimeSeries\MetricIdentity;
+use App\Data\TimeSeries\Contracts\MetricIdentifiable;
+use App\Data\TimeSeries\MetricIdentity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Processor extends DeviceRelatedModel implements MetricIdentifiable

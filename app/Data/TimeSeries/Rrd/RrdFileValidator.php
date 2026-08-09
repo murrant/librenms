@@ -1,12 +1,12 @@
 <?php
 
-namespace App\TimeSeries\Rrd;
+namespace App\Data\TimeSeries\Rrd;
 
+use App\Data\TimeSeries\Contracts\MetricValidator;
+use App\Data\TimeSeries\Contracts\RrdPathResolver;
+use App\Data\TimeSeries\MetricIdentity;
 use App\Facades\LibrenmsConfig;
 use App\Facades\Rrd;
-use App\TimeSeries\Contracts\MetricValidator;
-use App\TimeSeries\Contracts\RrdPathResolver;
-use App\TimeSeries\MetricIdentity;
 
 class RrdFileValidator implements MetricValidator
 {
@@ -20,8 +20,8 @@ class RrdFileValidator implements MetricValidator
      * Resolve a metric identity or filename and check if the RRD file exists.
      * Caches the result to avoid multiple filesystem checks for the same file.
      *
-     * @param MetricIdentity|null $metric
-     * @param array{filename?: string} $extra
+     * @param  MetricIdentity|null  $metric
+     * @param  array{filename?: string}  $extra
      * @return string|null The absolute path to the RRD file if it exists, null otherwise.
      */
     public function validate(?MetricIdentity $metric = null, array $extra = []): ?string

@@ -24,13 +24,13 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace LibreNMS\Data\Graphing\Builders;
+namespace App\Data\Graphing\Builders;
 
+use App\Data\Graphing\GraphParameters;
+use App\Data\Graphing\Traits\ColorIterator;
+use App\Data\TimeSeries\Contracts\MetricValidator;
 use App\Facades\LibrenmsConfig;
-use App\TimeSeries\Contracts\MetricValidator;
 use Illuminate\Support\Arr;
-use LibreNMS\Data\Graphing\GraphParameters;
-use LibreNMS\Data\Graphing\Traits\ColorIterator;
 use LibreNMS\Data\Store\Rrd;
 use LibreNMS\Interfaces\Data\Graphing\GraphDataInterface;
 
@@ -38,7 +38,7 @@ class MultiLineGraphBuilder
 {
     use ColorIterator;
 
-    private string $unitText = '';
+    private string $unitDescription = '';
     private string $units = '';
     private ?float $scaleMin = null;
     private ?float $scaleMax = null;
@@ -56,16 +56,10 @@ class MultiLineGraphBuilder
         return resolve(self::class, [$data]);
     }
 
-    public function unitText(string $unitText): self
-    {
-        $this->unitText = $unitText;
-
-        return $this;
-    }
-
-    public function units(string $units): self
+    public function units(string $units, ?string $description = null): self
     {
         $this->units = $units;
+        $this->unitDescription = $description ?? $this->units;
 
         return $this;
     }
@@ -124,7 +118,7 @@ class MultiLineGraphBuilder
 
         $descr_len = 12;
         $rrd_options = [];
-        $rrd_options[] = 'COMMENT:' . Rrd::fixedSafeDescr($this->unitText, $descr_len) . "      Now      Min      Max     Avg\l";
+        $rrd_options[] = 'COMMENT:' . Rrd::fixedSafeDescr($this->unitDescription, $descr_len) . "      Now      Min      Max     Avg\l";
 
         $stackedVal = LibrenmsConfig::get('webui.graph_stacked') ? '1' : '-1';
         $rrd_optionsb = [];

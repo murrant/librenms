@@ -2,7 +2,7 @@
 
 namespace LibreNMS\Interfaces\Data\Graphing;
 
-use LibreNMS\Data\Graphing\DataSeries;
+use App\Data\Graphing\DataSeries;
 
 interface GraphDataInterface
 {

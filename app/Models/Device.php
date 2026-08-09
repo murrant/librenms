@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Data\TimeSeries\Contracts\MetricIdentifiable;
+use App\Data\TimeSeries\MetricIdentity;
 use App\Facades\LibrenmsConfig;
 use App\Models\Traits\Filterable;
 use App\Observers\DeviceObserver;
-use App\TimeSeries\Contracts\MetricIdentifiable;
-use App\TimeSeries\MetricIdentity;
 use App\View\SimpleTemplate;
 use Carbon\Carbon;
 use Fico7489\Laravel\Pivot\Traits\PivotEventTrait;

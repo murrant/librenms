@@ -1,6 +1,6 @@
 <?php
 
-namespace LibreNMS\Data\Graphing\Traits;
+namespace App\Data\Graphing\Traits;
 
 use App\Facades\LibrenmsConfig;
 

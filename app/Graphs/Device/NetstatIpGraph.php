@@ -1,11 +1,11 @@
 <?php
 
-namespace LibreNMS\Graphs\Device;
+namespace App\Graphs\Device;
 
+use App\Data\Graphing\AbstractGraph;
+use App\Data\Graphing\Builders\MultiLineGraphBuilder;
+use App\Data\Graphing\DataSeries;
 use Illuminate\Support\Facades\Gate;
-use LibreNMS\Data\Graphing\AbstractGraph;
-use LibreNMS\Data\Graphing\Builders\MultiLineGraphBuilder;
-use LibreNMS\Data\Graphing\DataSeries;
 use LibreNMS\Interfaces\Data\Graphing\GraphDataInterface;
 
 class NetstatIpGraph extends AbstractGraph implements GraphDataInterface
@@ -41,7 +41,6 @@ class NetstatIpGraph extends AbstractGraph implements GraphDataInterface
     {
         return MultiLineGraphBuilder::data($this)
             ->scaleMin(0)
-            ->colors('mixed')
             ->build($this->params);
     }
 
