@@ -26,34 +26,38 @@
 
 namespace LibreNMS\Data\Graphing\Builders;
 
-use App\Facades\LibrenmsConfig;
 use App\TimeSeries\Contracts\MetricValidator;
 use Illuminate\Support\Arr;
+use LibreNMS\Data\Graphing\GraphHelper;
 use LibreNMS\Data\Graphing\GraphParameters;
+use LibreNMS\Data\Graphing\Traits\ColorIterator;
 use LibreNMS\Data\Store\Rrd;
 use LibreNMS\Interfaces\Data\Graphing\GraphDataInterface;
 
 class MultiSimplexSeparatedGraphBuilder
 {
+    use ColorIterator;
+
     private string $unitText = '';
     private string $totalUnits = '';
-    private string $colours = 'mixed';
     private ?float $scaleMin = null;
     private ?float $scaleMax = null;
     private ?float $divider = null;
     private ?float $multiplier = null;
     private bool $textOrig = false;
     private bool $nototal = false;
-    private int $descrLen = 12;
     private array $seriesOptions = [];
-
-    private readonly MetricValidator $validator;
 
     public function __construct(
         private readonly GraphDataInterface $data,
-        ?MetricValidator $validator = null,
+        private readonly MetricValidator $validator
     ) {
-        $this->validator = $validator ?? resolve(MetricValidator::class);
+        $this->colors('mixed');
+    }
+
+    public static function data(GraphDataInterface $data): self
+    {
+        return resolve(self::class, [$data]);
     }
 
     public function unitText(string $unitText): self
@@ -66,13 +70,6 @@ class MultiSimplexSeparatedGraphBuilder
     public function totalUnits(string $totalUnits): self
     {
         $this->totalUnits = $totalUnits;
-
-        return $this;
-    }
-
-    public function colours(string $colours): self
-    {
-        $this->colours = $colours;
 
         return $this;
     }
@@ -119,13 +116,6 @@ class MultiSimplexSeparatedGraphBuilder
         return $this;
     }
 
-    public function descrLen(int $descrLen): self
-    {
-        $this->descrLen = $descrLen;
-
-        return $this;
-    }
-
     public function setSeriesOptions(string|array $series, ?string $color = null): self
     {
         foreach (Arr::wrap($series) as $index) {
@@ -163,7 +153,7 @@ class MultiSimplexSeparatedGraphBuilder
         $from = $graph_params->from;
         $period = $graph_params->period;
 
-        $descr_len = $this->descrLen;
+        $descr_len = 12;
         if ($this->nototal) {
             $descr_len += 2;
         }
@@ -177,19 +167,11 @@ class MultiSimplexSeparatedGraphBuilder
         $plusesX = '';
         $stack = '';
 
-        $colour_iter = 0;
         $i = 0;
         foreach ($this->data->getSeries() as $index => $series) {
             $options = $this->getOptions($index);
 
-            $colour = $options['color'];
-            if ($colour === null) {
-                if (! LibrenmsConfig::get("graph_colours.{$this->colours}.{$colour_iter}")) {
-                    $colour_iter = 0;
-                }
-                $colour = LibrenmsConfig::get("graph_colours.{$this->colours}.{$colour_iter}");
-                $colour_iter++;
-            }
+            $color = $this->nextColor($options['color']);
 
             $descr = Rrd::fixedSafeDescr($series->description, $descr_len);
             $ds = $series->field;
@@ -239,7 +221,7 @@ class MultiSimplexSeparatedGraphBuilder
                 $t_defname = $g_defname;
             }
 
-            $rrd_options[] = 'AREA:' . $g_defname . $i . '#' . $colour . ':' . $descr . "$stack";
+            $rrd_options[] = 'AREA:' . $g_defname . $i . '#' . $color . ':' . $descr . "$stack";
 
             $rrd_options[] = 'GPRINT:' . $t_defname . $i . ':LAST:%5.' . $float_precision . 'lf%s';
             $rrd_options[] = 'GPRINT:' . $t_defname . $i . 'min:MIN:%5.' . $float_precision . 'lf%s';

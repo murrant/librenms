@@ -30,27 +30,31 @@ use App\Facades\LibrenmsConfig;
 use App\TimeSeries\Contracts\MetricValidator;
 use Illuminate\Support\Arr;
 use LibreNMS\Data\Graphing\GraphParameters;
+use LibreNMS\Data\Graphing\Traits\ColorIterator;
 use LibreNMS\Data\Store\Rrd;
 use LibreNMS\Interfaces\Data\Graphing\GraphDataInterface;
 
 class MultiLineGraphBuilder
 {
+    use ColorIterator;
+
     private string $unitText = '';
     private string $units = '';
-    private string $colours = 'mixed';
     private ?float $scaleMin = null;
     private ?float $scaleMax = null;
     private bool $nototal = false;
-    private int $descrLen = 12;
     private array $seriesOptions = [];
-
-    private readonly MetricValidator $validator;
 
     public function __construct(
         private readonly GraphDataInterface $data,
-        ?MetricValidator $validator = null,
+        private readonly MetricValidator $validator,
     ) {
-        $this->validator = $validator ?? resolve(MetricValidator::class);
+        $this->colors('mixed');
+    }
+
+    public static function data(GraphDataInterface $data): self
+    {
+        return resolve(self::class, [$data]);
     }
 
     public function unitText(string $unitText): self
@@ -63,13 +67,6 @@ class MultiLineGraphBuilder
     public function units(string $units): self
     {
         $this->units = $units;
-
-        return $this;
-    }
-
-    public function colours(string $colours): self
-    {
-        $this->colours = $colours;
 
         return $this;
     }
@@ -91,13 +88,6 @@ class MultiLineGraphBuilder
     public function noTotal(bool $noTotal = true): self
     {
         $this->nototal = $noTotal;
-
-        return $this;
-    }
-
-    public function descrLen(int $descrLen): self
-    {
-        $this->descrLen = $descrLen;
 
         return $this;
     }
@@ -140,7 +130,7 @@ class MultiLineGraphBuilder
             $graph_params->scale_max = (int) $this->scaleMax;
         }
 
-        $descr_len = $this->descrLen;
+        $descr_len = 12;
         if ($this->nototal) {
             $descr_len += 2;
         }
@@ -151,19 +141,11 @@ class MultiLineGraphBuilder
         $stackedVal = LibrenmsConfig::get('webui.graph_stacked') ? '1' : '-1';
         $rrd_optionsb = [];
 
-        $color_iter = 0;
         $i = 0;
         foreach ($this->data->getSeries() as $index => $series) {
             $options = $this->getOptions($index);
 
-            $color = $options['color'];
-            if ($color === null) {
-                if (! LibrenmsConfig::get("graph_colours.$this->colours.$color_iter")) {
-                    $color_iter = 0;
-                }
-                $color = LibrenmsConfig::get("graph_colours.$this->colours.$color_iter");
-                $color_iter++;
-            }
+            $color = $this->nextColor($options['color']);
 
             $ds = $series->field;
             $filename = $this->validator->validate($series->metric);

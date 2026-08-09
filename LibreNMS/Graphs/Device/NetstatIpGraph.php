@@ -39,10 +39,10 @@ class NetstatIpGraph extends AbstractGraph implements GraphDataInterface
 
     public function rrdDefinition(): array
     {
-        return (new MultiLineGraphBuilder($this))
+        return MultiLineGraphBuilder::data($this)
             ->scaleMin(0)
             ->noTotal()
-            ->colours('mixed')
+            ->colors('mixed')
             ->build($this->params);
     }
 

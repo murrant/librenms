@@ -7,7 +7,7 @@ use App\TimeSeries\MetricIdentity;
 
 interface MetricValidator
 {
-    public function validate(?MetricIdentity $metric = null, array $extra = []);
+    public function validate(?MetricIdentity $metric = null, array $extra = []): ?string;
 
     public function hasValidFiles(): bool;
 

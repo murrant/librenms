@@ -80,10 +80,10 @@ class ProcessorGraph extends AbstractGraph implements GraphDataInterface
         $series_count = count($series);
 
         if (LibrenmsConfig::getOsSetting($this->device->os, 'processor_stacked')) {
-            return (new MultiSimplexSeparatedGraphBuilder($this))
+            return MultiSimplexSeparatedGraphBuilder::data($this)
                 ->unitText('Load %')
                 ->totalUnits('%')
-                ->colours('oranges')
+                ->colors('oranges')
                 ->scaleMin(0)
                 ->scaleMax(100)
                 ->divider((float) max(1, $series_count))
@@ -92,10 +92,10 @@ class ProcessorGraph extends AbstractGraph implements GraphDataInterface
                 ->build($this->params);
         }
 
-        return (new MultiLineGraphBuilder($this))
+        return MultiLineGraphBuilder::data($this)
             ->unitText('Load %')
             ->units('')
-            ->colours('mixed')
+            ->colors('mixed')
             ->scaleMin(0)
             ->scaleMax(100)
             ->noTotal()
