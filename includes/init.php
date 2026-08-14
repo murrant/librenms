@@ -43,8 +43,8 @@ chdir($install_dir);
 
 // composer autoload
 if (! is_file($install_dir . '/vendor/autoload.php')) {
-    require_once $install_dir . '/includes/common.php';
-    c_echo("%RError: Missing dependencies%n, run: %B./scripts/composer_wrapper.php install --no-dev%n\n\n");
+    echo "Error: Missing dependencies, run: ./scripts/composer_wrapper.php install --no-dev\n\n";
+    exit(1);
 }
 require_once $install_dir . '/vendor/autoload.php';
 
@@ -107,7 +107,7 @@ try {
 } catch (Exception $exception) {
     print_error('ERROR: no valid auth_mechanism defined!');
     echo $exception->getMessage() . PHP_EOL;
-    exit;
+    exit(1);
 }
 
 if (module_selected('web', $init_modules)) {
