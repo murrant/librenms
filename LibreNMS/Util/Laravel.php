@@ -32,19 +32,25 @@ use Symfony\Component\HttpFoundation\HeaderBag;
 
 class Laravel
 {
-    public static function bootCli()
+    public static function bootCli(): void
     {
-        // make sure Laravel isn't already booted
-        if (self::isBooted()) {
-            return;
-        }
+        try {
+            // make sure Laravel isn't already booted
+            if (self::isBooted()) {
+                return;
+            }
 
-        define('LARAVEL_START', microtime(true));
-        $install_dir = realpath(__DIR__ . '/../..');
-        $app = require_once $install_dir . '/bootstrap/app.php';
-        $kernel = $app->make(\Illuminate\Contracts\Console\Kernel::class);
-        $kernel->bootstrap();
-        Log::setDefaultDriver('console');
+            define('LARAVEL_START', microtime(true));
+            $install_dir = realpath(__DIR__ . '/../..');
+            $app = require_once $install_dir . '/bootstrap/app.php';
+            $kernel = $app->make(\Illuminate\Contracts\Console\Kernel::class);
+
+            $kernel->bootstrap();
+            Log::setDefaultDriver('console');
+        } catch (\Throwable $e) {
+            fwrite(STDERR, 'LibreNMS failed to boot: ' . $e->getMessage() . PHP_EOL);
+            exit(1);
+        }
     }
 
     /**
