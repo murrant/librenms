@@ -29,7 +29,6 @@ namespace App\Http\Controllers\Device\Tabs;
 use App\Models\Device;
 use Illuminate\Http\Request;
 use LibreNMS\Interfaces\UI\DeviceTab;
-use LibreNMS\Util\Url;
 
 class SlasController implements DeviceTab
 {
@@ -55,10 +54,16 @@ class SlasController implements DeviceTab
 
     public function data(Device $device, Request $request): array
     {
-        $slaId = Url::parseOptions('id');
+        $validated = $request->validate([
+            'id' => 'nullable|integer',
+            'view' => 'nullable|string',
+            'opstatus' => 'nullable|in:all,up,down',
+        ]);
+
+        $slaId = $validated['id'] ?? null;
         if ($slaId) {
             $sla = $device->slas()->where('deleted', 0)->findOrFail($slaId);
-            $typeName = trans("modules.slas.{$sla->rtt_type}") ?: ucfirst((string) $sla->rtt_type);
+            $typeName = $this->translateType($sla->rtt_type);
             $slaName = 'SLA #' . $sla->sla_nr . ' - ' . $typeName;
             if ($sla->tag) {
                 $slaName .= ': ' . $sla->tag;
@@ -67,7 +72,7 @@ class SlasController implements DeviceTab
                 $slaName .= ' (Owner: ' . $sla->owner . ')';
             }
 
-            $detailGraphs = match ($sla->rtt_type) {
+            $detailGraphs = match (strtolower((string) $sla->rtt_type)) {
                 'jitter', 'icmpjitter' => [
                     ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
                     ['title' => __('Average Latency One Way'), 'type' => 'device_sla_jitter-latency'],
@@ -78,15 +83,15 @@ class SlasController implements DeviceTab
                     ['title' => __('Mean Opinion Score'), 'type' => 'device_sla_jitter-mos'],
                     ['title' => __('Impairment / Calculated Planning Impairment Factor'), 'type' => 'device_sla_jitter-icpif'],
                 ],
-                'IcmpEcho' => [
+                'icmpecho' => [
                     ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
                     ['title' => __('Packet Loss'), 'type' => 'device_sla_IcmpEcho'],
                 ],
-                'IcmpTimeStamp' => [
+                'icmptimestamp' => [
                     ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
                     ['title' => __('Packet Loss'), 'type' => 'device_sla_IcmpTimeStamp'],
                 ],
-                'icmpAppl' => [
+                'icmpappl' => [
                     ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
                     ['title' => __('Packet Loss'), 'type' => 'device_sla_icmpAppl'],
                 ],
@@ -108,33 +113,33 @@ class SlasController implements DeviceTab
 
         $types = ['all' => __('All')];
         foreach ($slas as $sla) {
-            $types[$sla->rtt_type] = trans("modules.slas.{$sla->rtt_type}") ?: ucfirst((string) $sla->rtt_type);
+            $types[$sla->rtt_type] = $this->translateType($sla->rtt_type);
         }
         asort($types);
 
-        $view = Url::parseOptions('view', 'all');
-        $opstatus = Url::parseOptions('opstatus', 'all');
+        $view = $validated['view'] ?? 'all';
+        $opstatus = $validated['opstatus'] ?? 'all';
 
         $typeOptions = [];
         foreach ($types as $typeKey => $typeText) {
             $typeOptions[$typeKey] = [
                 'text' => $typeText,
-                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'vars' => 'view=' . $typeKey . '/opstatus=' . $opstatus]),
+                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $typeKey, 'opstatus' => $opstatus]),
             ];
         }
 
         $statusOptions = [
             'all' => [
                 'text' => __('All'),
-                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'vars' => 'view=' . $view . '/opstatus=all']),
+                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $view, 'opstatus' => 'all']),
             ],
             'up' => [
                 'text' => __('Up'),
-                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'vars' => 'view=' . $view . '/opstatus=up']),
+                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $view, 'opstatus' => 'up']),
             ],
             'down' => [
                 'text' => __('Down'),
-                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'vars' => 'view=' . $view . '/opstatus=down']),
+                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $view, 'opstatus' => 'down']),
             ],
         ];
 
@@ -158,13 +163,13 @@ class SlasController implements DeviceTab
                 $name .= ' (Owner: ' . $sla->owner . ')';
             }
 
-            $hasDetail = in_array($sla->rtt_type, ['jitter', 'icmpjitter', 'IcmpEcho', 'IcmpTimeStamp', 'icmpAppl'], true);
+            $hasDetail = $this->hasDetail($sla->rtt_type);
 
             return [
                 'id' => $sla->sla_id,
                 'name' => $name,
                 'has_detail' => $hasDetail,
-                'detail_link' => $hasDetail ? route('device', ['device' => $device, 'tab' => 'slas', 'vars' => 'id=' . $sla->sla_id]) : null,
+                'detail_link' => $hasDetail ? route('device', ['device' => $device, 'tab' => 'slas', 'id' => $sla->sla_id]) : null,
                 'is_danger' => $sla->opstatus == 2,
             ];
         });
@@ -177,5 +182,30 @@ class SlasController implements DeviceTab
             'status_options' => $statusOptions,
             'slas' => $filteredSlas,
         ];
+    }
+
+    private function translateType(?string $rttType): string
+    {
+        if (empty($rttType)) {
+            return '';
+        }
+
+        if (trans()->has("modules.slas.types.{$rttType}")) {
+            return trans("modules.slas.types.{$rttType}");
+        }
+
+        $types = (array) trans('modules.slas.types');
+        foreach ($types as $key => $translation) {
+            if (strcasecmp($key, $rttType) === 0) {
+                return (string) $translation;
+            }
+        }
+
+        return ucfirst($rttType);
+    }
+
+    private function hasDetail(?string $rttType): bool
+    {
+        return in_array(strtolower((string) $rttType), ['jitter', 'icmpjitter', 'icmpecho', 'icmptimestamp', 'icmpappl'], true);
     }
 }

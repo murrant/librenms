@@ -16,6 +16,7 @@ return [
             'HttpGet' => 'HTTP Get',
             'HttpGetMetadata' => 'HTTP Get Metadata',
             'IcmpEcho' => 'ICMP Echo',
+            'icmpEcho' => 'ICMP Echo',
             'icmpjitter' => 'ICMP Jitter',
             'IcmpTimeStamp' => 'ICMP TimeStamp',
             'jitter' => 'Jitter',
