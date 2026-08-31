@@ -27,6 +27,7 @@
 namespace App\Http\Controllers\Device\Tabs;
 
 use App\Models\Device;
+use App\Models\Sla;
 use Illuminate\Http\Request;
 use LibreNMS\Interfaces\UI\DeviceTab;
 
@@ -60,119 +61,58 @@ class SlasController implements DeviceTab
             'opstatus' => 'nullable|in:all,up,down',
         ]);
 
-        $slaId = $validated['id'] ?? null;
-        if ($slaId) {
-            $sla = $device->slas()->where('deleted', 0)->findOrFail($slaId);
-            $typeName = $this->translateType($sla->rtt_type);
-            $slaName = 'SLA #' . $sla->sla_nr . ' - ' . $typeName;
-            if ($sla->tag) {
-                $slaName .= ': ' . $sla->tag;
-            }
-            if ($sla->owner) {
-                $slaName .= ' (Owner: ' . $sla->owner . ')';
-            }
+        if (! empty($validated['id'])) {
+            $sla = $device->slas()->where('deleted', 0)->findOrFail($validated['id']);
 
-            $detailGraphs = match (strtolower((string) $sla->rtt_type)) {
-                'jitter', 'icmpjitter' => [
-                    ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
-                    ['title' => __('Average Latency One Way'), 'type' => 'device_sla_jitter-latency'],
-                    ['title' => __('Average Jitter'), 'type' => 'device_sla_jitter'],
-                    ['title' => __('Packet Loss (Percent)'), 'type' => 'device_sla_jitter-loss-percent'],
-                    ['title' => __('Packet Loss (Count)'), 'type' => 'device_sla_jitter-loss'],
-                    ['title' => __('Lost Packets (Out Of Sequence, Tail Drop, Late Arrival)'), 'type' => 'device_sla_jitter-lost'],
-                    ['title' => __('Mean Opinion Score'), 'type' => 'device_sla_jitter-mos'],
-                    ['title' => __('Impairment / Calculated Planning Impairment Factor'), 'type' => 'device_sla_jitter-icpif'],
-                ],
-                'icmpecho' => [
-                    ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
-                    ['title' => __('Packet Loss'), 'type' => 'device_sla_IcmpEcho'],
-                ],
-                'icmptimestamp' => [
-                    ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
-                    ['title' => __('Packet Loss'), 'type' => 'device_sla_IcmpTimeStamp'],
-                ],
-                'icmpappl' => [
-                    ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
-                    ['title' => __('Packet Loss'), 'type' => 'device_sla_icmpAppl'],
-                ],
-                default => [
-                    ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
-                ],
-            };
-
-            return [
-                'mode' => 'detail',
-                'sla' => $sla,
-                'sla_name' => $slaName,
-                'is_danger' => $sla->opstatus == 2,
-                'detail_graphs' => $detailGraphs,
-            ];
+            return $this->detailData($sla);
         }
 
+        return $this->listData($device, $validated['view'] ?? 'all', $validated['opstatus'] ?? 'all');
+    }
+
+    private function detailData(Sla $sla): array
+    {
+        return [
+            'mode' => 'detail',
+            'sla' => $sla,
+            'sla_name' => $this->formatSlaName($sla),
+            'is_danger' => $sla->opstatus == 2,
+            'detail_graphs' => $this->detailGraphs($sla->rtt_type),
+        ];
+    }
+
+    private function listData(Device $device, string $view, string $opstatus): array
+    {
         $slas = $device->slas()->where('deleted', 0)->orderBy('sla_nr')->get();
 
-        $types = ['all' => __('All')];
-        foreach ($slas as $sla) {
-            $types[$sla->rtt_type] = $this->translateType($sla->rtt_type);
-        }
-        asort($types);
+        $types = ['all' => __('All')] + $slas->pluck('rtt_type', 'rtt_type')
+            ->map(fn ($type) => $this->translateType($type))
+            ->sort()
+            ->all();
 
-        $view = $validated['view'] ?? 'all';
-        $opstatus = $validated['opstatus'] ?? 'all';
+        $filteredSlas = $slas
+            ->when($view !== 'all', fn ($query) => $query->where('rtt_type', $view))
+            ->when($opstatus !== 'all', fn ($query) => $query->filter(
+                fn (Sla $sla) => (($sla->opstatus === 0) ? 'up' : 'down') === $opstatus
+            ))
+            ->map(fn (Sla $sla) => [
+                'id' => $sla->sla_id,
+                'name' => $this->formatSlaName($sla),
+                'has_detail' => $this->hasDetail($sla->rtt_type),
+                'detail_link' => $this->hasDetail($sla->rtt_type) ? route('device', ['device' => $device, 'tab' => 'slas', 'id' => $sla->sla_id]) : null,
+                'is_danger' => $sla->opstatus == 2,
+            ]);
 
-        $typeOptions = [];
-        foreach ($types as $typeKey => $typeText) {
-            $typeOptions[$typeKey] = [
-                'text' => $typeText,
-                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $typeKey, 'opstatus' => $opstatus]),
-            ];
-        }
+        $typeOptions = collect($types)->map(fn ($text, $typeKey) => [
+            'text' => $text,
+            'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $typeKey, 'opstatus' => $opstatus]),
+        ])->all();
 
         $statusOptions = [
-            'all' => [
-                'text' => __('All'),
-                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $view, 'opstatus' => 'all']),
-            ],
-            'up' => [
-                'text' => __('Up'),
-                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $view, 'opstatus' => 'up']),
-            ],
-            'down' => [
-                'text' => __('Down'),
-                'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $view, 'opstatus' => 'down']),
-            ],
+            'all' => ['text' => __('All'), 'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $view, 'opstatus' => 'all'])],
+            'up' => ['text' => __('Up'), 'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $view, 'opstatus' => 'up'])],
+            'down' => ['text' => __('Down'), 'link' => route('device', ['device' => $device, 'tab' => 'slas', 'view' => $view, 'opstatus' => 'down'])],
         ];
-
-        $filteredSlas = $slas->filter(function ($sla) use ($view, $opstatus) {
-            if ($view !== 'all' && $sla->rtt_type !== $view) {
-                return false;
-            }
-            $status = ($sla->opstatus === 0) ? 'up' : 'down';
-            if ($opstatus !== 'all' && $status !== $opstatus) {
-                return false;
-            }
-
-            return true;
-        })->map(function ($sla) use ($device, $types) {
-            $typeName = $types[$sla->rtt_type] ?? ucfirst((string) $sla->rtt_type);
-            $name = 'SLA #' . $sla->sla_nr . ' - ' . $typeName;
-            if ($sla->tag) {
-                $name .= ': ' . $sla->tag;
-            }
-            if ($sla->owner) {
-                $name .= ' (Owner: ' . $sla->owner . ')';
-            }
-
-            $hasDetail = $this->hasDetail($sla->rtt_type);
-
-            return [
-                'id' => $sla->sla_id,
-                'name' => $name,
-                'has_detail' => $hasDetail,
-                'detail_link' => $hasDetail ? route('device', ['device' => $device, 'tab' => 'slas', 'id' => $sla->sla_id]) : null,
-                'is_danger' => $sla->opstatus == 2,
-            ];
-        });
 
         return [
             'mode' => 'list',
@@ -184,24 +124,55 @@ class SlasController implements DeviceTab
         ];
     }
 
+    private function formatSlaName(Sla $sla): string
+    {
+        $name = 'SLA #' . $sla->sla_nr . ' - ' . $this->translateType($sla->rtt_type);
+        if ($sla->tag) {
+            $name .= ': ' . $sla->tag;
+        }
+        if ($sla->owner) {
+            $name .= ' (Owner: ' . $sla->owner . ')';
+        }
+
+        return $name;
+    }
+
+    private function detailGraphs(?string $rttType): array
+    {
+        return match ($rttType) {
+            'jitter', 'icmpjitter' => [
+                ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
+                ['title' => __('Average Latency One Way'), 'type' => 'device_sla_jitter-latency'],
+                ['title' => __('Average Jitter'), 'type' => 'device_sla_jitter'],
+                ['title' => __('Packet Loss (Percent)'), 'type' => 'device_sla_jitter-loss-percent'],
+                ['title' => __('Packet Loss (Count)'), 'type' => 'device_sla_jitter-loss'],
+                ['title' => __('Lost Packets (Out Of Sequence, Tail Drop, Late Arrival)'), 'type' => 'device_sla_jitter-lost'],
+                ['title' => __('Mean Opinion Score'), 'type' => 'device_sla_jitter-mos'],
+                ['title' => __('Impairment / Calculated Planning Impairment Factor'), 'type' => 'device_sla_jitter-icpif'],
+            ],
+            'IcmpEcho' => [
+                ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
+                ['title' => __('Packet Loss'), 'type' => 'device_sla_IcmpEcho'],
+            ],
+            'IcmpTimeStamp' => [
+                ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
+                ['title' => __('Packet Loss'), 'type' => 'device_sla_IcmpTimeStamp'],
+            ],
+            'icmpAppl' => [
+                ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
+                ['title' => __('Packet Loss'), 'type' => 'device_sla_icmpAppl'],
+            ],
+            default => [
+                ['title' => __('Round Trip Time'), 'type' => 'device_sla'],
+            ],
+        };
+    }
+
     private function translateType(?string $rttType): string
     {
-        if (empty($rttType)) {
-            return '';
-        }
-
-        if (trans()->has("modules.slas.types.{$rttType}")) {
-            return trans("modules.slas.types.{$rttType}");
-        }
-
-        $types = (array) trans('modules.slas.types');
-        foreach ($types as $key => $translation) {
-            if (strcasecmp($key, $rttType) === 0) {
-                return (string) $translation;
-            }
-        }
-
-        return ucfirst($rttType);
+        return trans()->has("modules.slas.types.$rttType")
+            ? trans("modules.slas.types.$rttType")
+            : (string) $rttType;
     }
 
     private function hasDetail(?string $rttType): bool
