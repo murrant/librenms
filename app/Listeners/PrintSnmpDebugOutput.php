@@ -41,19 +41,22 @@ class PrintSnmpDebugOutput
             return;
         }
 
-        $commandStr = implode(' ', array_map(escapeshellarg(...), $event->cliCommand));
+        $cliCommand = $event->debugInfo?->getCommand() ?? [];
+        $commandStr = implode(' ', array_map(escapeshellarg(...), $cliCommand));
+        $rawOutput = $event->debugInfo?->getOutput() ?? '';
 
         if (! Debug::isVerbose()) {
             $debugCommand = preg_replace($this->commandCleanupPatterns, $this->commandReplacementPatterns, $commandStr);
             Log::debug('SNMP[%c' . $debugCommand . '%n]', ['color' => true]);
-            Log::debug(preg_replace($this->output_regex, $this->output_replacement, $event->response->raw));
+            Log::debug(preg_replace($this->output_regex, $this->output_replacement, $rawOutput));
         } else {
             Log::debug('SNMP[%c' . $commandStr . '%n]', ['color' => true]);
-            Log::debug($event->response->raw);
+            Log::debug($rawOutput);
         }
 
-        if (! empty($event->response->stderr)) {
-            Log::debug($event->response->stderr);
+        $stderr = $event->debugInfo?->getStderr() ?? '';
+        if (! empty($stderr)) {
+            Log::debug($stderr);
         }
     }
 }

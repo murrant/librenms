@@ -20,7 +20,6 @@ use App\Events\SnmpQueryExecuted;
 use App\Facades\LibrenmsConfig;
 use App\Polling\Measure\Measurement;
 use Illuminate\Support\Str;
-use LibreNMS\Data\Source\Snmp\SnmpResponse;
 use LibreNMS\Util\Rewrite;
 use LibreNMS\Util\StringHelpers;
 
@@ -210,11 +209,12 @@ function snmp_exec(array $cmd, array $oids, string $method, ?array $device = nul
     $proc->run();
     $output = $proc->getOutput();
 
+    $response = app(\LibreNMS\Data\Source\Snmp\NetSnmp::class)->parseResponse($output, $proc->getErrorOutput(), $proc->getExitCode(), $cmd);
+
     event(new SnmpQueryExecuted(
         method: $method,
         oids: $oids,
-        cliCommand: $cmd,
-        response: new SnmpResponse($output, $proc->getErrorOutput(), $proc->getExitCode()),
+        debugInfo: $response->debugInfo,
         device: DeviceCache::get($device['device_id'] ?? DeviceCache::getPrimary()->device_id),
         context: $device['context_name'] ?? '',
         mibs: is_array($mibs) ? $mibs : ($mibs ? explode(':', (string) $mibs) : []),

@@ -31,6 +31,7 @@ use DeviceCache;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use LibreNMS\Data\Source\Snmp\NetSnmp;
 use LibreNMS\Data\Source\Snmp\SnmpQuery;
 use LibreNMS\Data\Source\Snmp\SnmpQueryInterface;
 use LibreNMS\Data\Source\Snmp\SnmpResponse;
@@ -173,7 +174,7 @@ class SnmpQueryMock implements SnmpQueryInterface
 
         Log::debug("[SNMP] snmpget $community $num_oid: ");
 
-        return new SnmpResponse($this->outputLine($oid, $num_oid, $num_oid, $data[0], $data[1]));
+        return (new NetSnmp)->parseResponse($this->outputLine($oid, $num_oid, $num_oid, $data[0], $data[1]));
     }
 
     /**
@@ -186,7 +187,7 @@ class SnmpQueryMock implements SnmpQueryInterface
     {
         $community = $this->community();
         $dev = $this->getSnmprec($community);
-        $response = new SnmpResponse('');
+        $response = new SnmpResponse();
 
         foreach (Arr::wrap($oids) as $oid) {
             $num_oid = $this->translateNumber($oid);
@@ -198,7 +199,7 @@ class SnmpQueryMock implements SnmpQueryInterface
                 }
             }
 
-            $response = $response->append(new SnmpResponse($output));
+            $response = $response->append((new NetSnmp)->parseResponse($output));
 
             if ($this->abort && ! $response->isValid()) {
                 return $response;
@@ -220,14 +221,14 @@ class SnmpQueryMock implements SnmpQueryInterface
         while (Str::contains($num_oid, '.')) {
             foreach ($dev as $key => $data) {
                 if ($key === $num_oid || Str::startsWith($key, $num_oid . '.')) {
-                    return new SnmpResponse($this->outputLine($oid, $num_oid, $key, $data[0], $data[1]));
+                    return (new NetSnmp)->parseResponse($this->outputLine($oid, $num_oid, $key, $data[0], $data[1]));
                 }
             }
 
             $num_oid = substr($num_oid, 0, strrpos($num_oid, '.'));
         }
 
-        return new SnmpResponse('');
+        return new SnmpResponse();
     }
 
     private function cacheSnmprec(string $file): void

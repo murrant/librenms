@@ -3,7 +3,7 @@
 /**
  * SnmpResponse.php
  *
- * Responsible for parsing net-snmp output into usable PHP data structures.
+ * Represents the response data from an SNMP query.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,71 +26,97 @@
 
 namespace LibreNMS\Data\Source\Snmp;
 
-use App\Facades\LibrenmsConfig;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use LibreNMS\Enum\SnmpError;
 use LibreNMS\Util\Oid;
-use LibreNMS\Util\StringHelpers;
-use Log;
 
 class SnmpResponse implements \Stringable
 {
-    protected const KEY_VALUE_DELIMITER = ' = ';
-
-    public readonly string $raw;
-
-    private ?string $errorMessage = null;
-    private ?array $values = null;
-    private ?bool $inferValueEncoding = null;
-
     /**
-     * Create a new response object filling with output from the net-snmp command.
-     *
-     * @param  string  $output
-     * @param  string  $stderr
-     * @param  int  $exitCode
-     * @param  array<int, string>  $command
+     * @param  array<string, string>  $values
      */
     public function __construct(
-        string $output,
-        public readonly string $stderr = '',
-        public readonly int $exitCode = 0,
-        public readonly array $command = [],
+        public readonly array $values = [],
+        public readonly ?SnmpDebugInfoInterface $debugInfo = null,
+        public readonly string $raw = '',
     ) {
-        $this->raw = (string) preg_replace('/Wrong Type \(should be .*\): /', '', $output);
     }
 
     public function isValid(bool $ignore_partial = false): bool
     {
-        $this->errorMessage = '';
-        $raw = $ignore_partial ? $this->getRawWithoutBadLines() : $this->raw;
-
-        // not checking exitCode because I think it may lead to false negatives
-        $invalid = preg_match('/(Timeout: No Response from .*|Unknown user name|Authentication failure|Error: OID not increasing: .*)/', $this->stderr, $errors)
-            || empty($raw)
-            || preg_match('/(No Such Instance|No Such Object|No more variables left).*/', $raw, $errors);
-
-        if ($invalid) {
-            $this->errorMessage = $errors[0] ?? 'Empty Output';
-            Log::debug(sprintf('SNMP query failed. Exit Code: %s Empty: %s Bad String: %s', $this->exitCode, var_export(empty($raw), true), $errors[0] ?? 'not found'));
-
-            return false;
+        if (! $this->hasErrors()) {
+            return ! empty($this->values) || ! empty($this->raw);
         }
 
-        return true;
+        if ($ignore_partial && ! empty($this->values)) {
+            $fatalErrors = array_filter(
+                $this->getErrors(),
+                fn (SnmpError $error) => $error !== SnmpError::EndOfMib
+            );
+
+            return empty($fatalErrors);
+        }
+
+        return false;
     }
 
     /**
-     * Get the error message if any
+     * @return array<int, SnmpError>
+     */
+    public function getErrors(): array
+    {
+        return $this->debugInfo?->getErrors() ?? [];
+    }
+
+    public function getError(): ?SnmpError
+    {
+        return $this->debugInfo?->getError();
+    }
+
+    public function hasErrors(): bool
+    {
+        return $this->debugInfo?->hasErrors() ?? false;
+    }
+
+    public function hasError(SnmpError $error): bool
+    {
+        return $this->debugInfo?->hasError($error) ?? false;
+    }
+
+    /**
+     * Get the primary error message if any.
      */
     public function getErrorMessage(): string
     {
-        if (empty($this->errorMessage)) {
-            $this->isValid(); // if no error message, double check.
-        }
+        return $this->debugInfo?->getErrorMessage() ?? '';
+    }
 
-        return $this->errorMessage;
+    /**
+     * @return array<int, string>
+     */
+    public function getErrorMessages(): array
+    {
+        return $this->debugInfo?->getErrorMessages() ?? [];
+    }
+
+    public function getDebugInfo(): ?SnmpDebugInfoInterface
+    {
+        return $this->debugInfo;
+    }
+
+    public function getExitCode(): ?int
+    {
+        return $this->debugInfo?->getExitCode();
+    }
+
+    /**
+     * Filter bad lines from the raw output.
+     */
+    public function getRawWithoutBadLines(): string
+    {
+        return NetSnmp::stripBadLines($this->raw);
     }
 
     /**
@@ -145,51 +171,11 @@ class SnmpResponse implements \Stringable
         return '';
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function values(): array
     {
-        if (isset($this->values)) {
-            return $this->values;
-        }
-
-        $this->inferValueEncoding ??= ! StringHelpers::isValidUtf8($this->raw);
-        $this->values = [];
-        $line = strtok($this->raw, PHP_EOL);
-        while ($line !== false) {
-            if (Str::contains($line, ['at this OID', 'this MIB View', 'End of MIB']) || str_ends_with($line, ' = NULL')) {
-                // these occur when we seek past the end of data, usually the end of the response, but grab the next line and continue
-                $line = strtok(PHP_EOL);
-                continue;
-            }
-
-            $parts = explode(self::KEY_VALUE_DELIMITER, $line, 2);
-            if (count($parts) == 1) {
-                array_unshift($parts, '');
-            }
-            [$oid, $value] = $parts;
-
-            $line = strtok(PHP_EOL); // get the next line and concatenate multi-line values
-            while ($line !== false && ! Str::contains($line, self::KEY_VALUE_DELIMITER)) {
-                $value .= PHP_EOL . $line;
-                $line = strtok(PHP_EOL);
-            }
-
-            // remove extra escapes
-            if (LibrenmsConfig::get('snmp.unescape')) {
-                $value = stripslashes($value);
-            }
-
-            if (Str::startsWith($value, '"') && Str::endsWith($value, '"')) {
-                // unformatted string from net-snmp, remove extra escapes
-                $value = trim(stripslashes($value), "\" \n\r");
-            } else {
-                $value = trim($value);
-            }
-
-            $this->values[$oid] = $this->inferValueEncoding
-                ? StringHelpers::inferEncoding($value)
-                : $value;
-        }
-
         return $this->values;
     }
 
@@ -293,41 +279,25 @@ class SnmpResponse implements \Stringable
         return $return;
     }
 
-    /**
-     * @return int
-     */
-    public function getExitCode(): int
-    {
-        return $this->exitCode;
-    }
-
-    /**
-     * Filter bad lines from the raw output, examples:
-     * "No Such Instance currently exists at this OID"
-     * "No more variables left in this MIB View (It is past the end of the MIB tree)"
-     * oidName = NULL
-     */
-    public function getRawWithoutBadLines(): string
-    {
-        return (string) preg_replace([
-            '/^.*No Such (Instance currently exists|Object available on this agent at this OID).*$/m',
-            '/(\n[^\r\n]+No more variables left[^\r\n]+)+$/m',
-            '/^.* = NULL[\r\n]*$/',
-        ], '', $this->raw);
-    }
-
     public function append(SnmpResponse $response): SnmpResponse
     {
-        $newResponse = new static(
-            $this->raw . $response->raw,
-            $this->stderr . $response->stderr,
-            $this->exitCode ?: $response->exitCode,
-            $response->command ?: $this->command,
+        if (empty($this->values) && $this->raw === '' && $this->debugInfo === null) {
+            return $response;
+        }
+
+        $newValues = array_merge($this->values, $response->values);
+        $newRaw = $this->raw . $response->raw;
+        $debugInfo = match (true) {
+            $this->debugInfo !== null && $response->debugInfo !== null => $this->debugInfo->append($response->debugInfo),
+            $this->debugInfo !== null => $this->debugInfo,
+            default => $response->debugInfo,
+        };
+
+        return new static(
+            values: $newValues,
+            debugInfo: $debugInfo,
+            raw: $newRaw,
         );
-
-        $newResponse->errorMessage = $this->errorMessage ?: $response->errorMessage;
-
-        return $newResponse;
     }
 
     public function __toString(): string
@@ -350,6 +320,6 @@ class SnmpResponse implements \Stringable
 
     public function __sleep()
     {
-        return ['raw', 'exitCode', 'stderr', 'command'];
+        return ['values', 'raw', 'debugInfo'];
     }
 }

@@ -13,6 +13,8 @@ use App\Models\Device;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
+use LibreNMS\Data\Source\Snmp\NetSnmp;
+use LibreNMS\Data\Source\Snmp\SnmpDebugInfoInterface;
 use LibreNMS\Data\Source\Snmp\SnmpResponse;
 use LibreNMS\Exceptions\InvalidModuleException;
 use LibreNMS\Util\Debug;
@@ -184,7 +186,7 @@ class DevCollectSnmprec extends LnmsCommand
         }
 
         $listener = function (SnmpQueryExecuted $event) use (&$snmprecDataByContext, $device): void {
-            if ($this->isRequerying || $event->response->getExitCode() !== 0) {
+            if ($this->isRequerying || $event->debugInfo?->getExitCode() !== 0) {
                 return;
             }
 
@@ -194,7 +196,7 @@ class DevCollectSnmprec extends LnmsCommand
                 }
             }
 
-            $parsed = $this->convertSnmpToSnmprec($event->response);
+            $parsed = $this->convertSnmpToSnmprec($event->debugInfo);
 
             // Re-query if bulk response couldn't be parsed into numeric snmprec lines
             if (empty($parsed) && ! empty($event->oids)) {
@@ -283,11 +285,12 @@ class DevCollectSnmprec extends LnmsCommand
     /**
      * @return array<int, string>
      */
-    private function convertSnmpToSnmprec(SnmpResponse $snmpData): array
+    private function convertSnmpToSnmprec(SnmpResponse|SnmpDebugInfoInterface $snmpData): array
     {
         $result = [];
+        $raw = $snmpData instanceof SnmpResponse ? $snmpData->getRawWithoutBadLines() : NetSnmp::stripBadLines($snmpData->getOutput());
 
-        foreach (explode(PHP_EOL, $snmpData->getRawWithoutBadLines()) as $line) {
+        foreach (explode(PHP_EOL, $raw) as $line) {
             if ($line === '') {
                 continue;
             }

@@ -3,7 +3,7 @@
 /**
  * SnmpResponseTest.php
  *
- * -Description-
+ * Tests for SnmpResponse and NetSnmp output parsing and error handling.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,14 +27,39 @@
 namespace LibreNMS\Tests\Unit;
 
 use App\Facades\LibrenmsConfig;
+use LibreNMS\Data\Source\Snmp\NetSnmp;
+use LibreNMS\Data\Source\Snmp\SnmpDebugInfo;
 use LibreNMS\Data\Source\Snmp\SnmpResponse;
+use LibreNMS\Enum\SnmpError;
 use LibreNMS\Tests\TestCase;
 
 final class SnmpResponseTest extends TestCase
 {
+    private function parse(string $output, string $stderr = '', int $exitCode = 0, array $command = []): SnmpResponse
+    {
+        return (new NetSnmp())->parseResponse($output, $stderr, $exitCode, $command);
+    }
+
+    public function testPureBackendResponseConstruction(): void
+    {
+        // Demonstrates clean creation by alternative backends (such as php-snmp)
+        $values = [
+            'IF-MIB::ifDescr[1]' => 'lo',
+            'IF-MIB::ifDescr[2]' => 'eth0',
+        ];
+        $response = new SnmpResponse($values);
+
+        $this->assertTrue($response->isValid());
+        $this->assertFalse($response->hasErrors());
+        $this->assertSame([], $response->getErrors());
+        $this->assertSame('lo', $response->value());
+        $this->assertSame('eth0', $response->value('IF-MIB::ifDescr[2]'));
+        $this->assertSame($values, $response->values());
+    }
+
     public function testInfersOutputEncoding(): void
     {
-        $response = new SnmpResponse("IF-MIB::ifDescr[1] = \xD8verbyvegen\n");
+        $response = $this->parse("IF-MIB::ifDescr[1] = \xD8verbyvegen\n");
 
         $this->assertSame('Øverbyvegen', $response->value());
         $this->assertSame("IF-MIB::ifDescr[1] = \xD8verbyvegen\n", $response->raw);
@@ -42,7 +67,7 @@ final class SnmpResponseTest extends TestCase
 
     public function testSimple(): void
     {
-        $response = new SnmpResponse("IF-MIB::ifDescr[1] = lo\nIF-MIB::ifDescr[2] = enp4s0\n");
+        $response = $this->parse("IF-MIB::ifDescr[1] = lo\nIF-MIB::ifDescr[2] = enp4s0\n");
 
         $this->assertTrue($response->isValid());
         $this->assertEquals(['IF-MIB::ifDescr[1]' => 'lo', 'IF-MIB::ifDescr[2]' => 'enp4s0'], $response->values());
@@ -51,7 +76,7 @@ final class SnmpResponseTest extends TestCase
         $this->assertEquals([1 => ['IF-MIB::ifDescr' => 'lo'], 2 => ['IF-MIB::ifDescr' => 'enp4s0']], $response->table(1));
 
         // snmptranslate type response
-        $response = new SnmpResponse("IF-MIB::ifDescr\n");
+        $response = $this->parse("IF-MIB::ifDescr\n");
 
         $this->assertTrue($response->isValid());
         $this->assertEquals(['' => 'IF-MIB::ifDescr'], $response->values());
@@ -59,7 +84,7 @@ final class SnmpResponseTest extends TestCase
         $this->assertEquals(['' => 'IF-MIB::ifDescr'], $response->table());
 
         // unescaped strings
-        $response = new SnmpResponse("Q-BRIDGE-MIB::dot1qVlanStaticName[1] = \"\\default\\\"\nQ-BRIDGE-MIB::dot1qVlanStaticName[6] = \\single\\\nQ-BRIDGE-MIB::dot1qVlanStaticName[9] = \\\\double\\\\\n");
+        $response = $this->parse("Q-BRIDGE-MIB::dot1qVlanStaticName[1] = \"\\default\\\"\nQ-BRIDGE-MIB::dot1qVlanStaticName[6] = \\single\\\nQ-BRIDGE-MIB::dot1qVlanStaticName[9] = \\\\double\\\\\n");
         $this->assertTrue($response->isValid());
         $this->assertEquals('default', $response->value());
         LibrenmsConfig::set('snmp.unescape', false);
@@ -75,7 +100,7 @@ final class SnmpResponseTest extends TestCase
         ]], $response->table());
 
         LibrenmsConfig::set('snmp.unescape', true); // for buggy versions of net-snmp
-        $response = new SnmpResponse("Q-BRIDGE-MIB::dot1qVlanStaticName[1] = \"\\default\\\"\nQ-BRIDGE-MIB::dot1qVlanStaticName[6] = \\single\\\nQ-BRIDGE-MIB::dot1qVlanStaticName[9] = \\\\double\\\\\n");
+        $response = $this->parse("Q-BRIDGE-MIB::dot1qVlanStaticName[1] = \"\\default\\\"\nQ-BRIDGE-MIB::dot1qVlanStaticName[6] = \\single\\\nQ-BRIDGE-MIB::dot1qVlanStaticName[9] = \\\\double\\\\\n");
         $this->assertEquals([
             'Q-BRIDGE-MIB::dot1qVlanStaticName[1]' => 'default',
             'Q-BRIDGE-MIB::dot1qVlanStaticName[6]' => 'single',
@@ -90,7 +115,7 @@ final class SnmpResponseTest extends TestCase
 
     public function testValueFetching(): void
     {
-        $response = new SnmpResponse("IF-MIB::ifDescr[1] = lo\nIF-MIB::ifDescr[2] = enp4s0\nIF-MIB::ifAlias[1] = alias one\nIF-MIB::ifAlias[2] = alias two\n\n");
+        $response = $this->parse("IF-MIB::ifDescr[1] = lo\nIF-MIB::ifDescr[2] = enp4s0\nIF-MIB::ifAlias[1] = alias one\nIF-MIB::ifAlias[2] = alias two\n\n");
 
         $this->assertEquals('lo', $response->value());
         $this->assertEquals('lo', $response->value('IF-MIB::ifDescr[1]'));
@@ -106,7 +131,7 @@ final class SnmpResponseTest extends TestCase
         $this->assertEquals('', $response->value('IF-MIB:'));
         $this->assertEquals('', $response->value('IF-MIB::ifA'));
 
-        $response = new SnmpResponse("ifName.1 = lo\nifAlias.3 = cust42\nifAlias.4 = cust51\n\n");
+        $response = $this->parse("ifName.1 = lo\nifAlias.3 = cust42\nifAlias.4 = cust51\n\n");
         $this->assertEquals('lo', $response->value('ifName'));
         $this->assertEquals('lo', $response->value('ifName'));
         $this->assertEquals('cust42', $response->value('ifAlias'));
@@ -117,7 +142,7 @@ final class SnmpResponseTest extends TestCase
     public function testEmptyValues(): void
     {
         // empty values
-        $response = new SnmpResponse("IF-MIB::ifAlias[1] = \nIF-MIB::ifAlias[2] = 0\nIF-MIB::ifAlias[3] = \"\"\n\n");
+        $response = $this->parse("IF-MIB::ifAlias[1] = \nIF-MIB::ifAlias[2] = 0\nIF-MIB::ifAlias[3] = \"\"\n\n");
         $this->assertTrue($response->isValid());
         $this->assertEquals('', $response->value());
         $this->assertEquals('', $response->value('IF-MIB::ifAlias[1]'));
@@ -128,7 +153,7 @@ final class SnmpResponseTest extends TestCase
 
     public function testValuesByIndex(): void
     {
-        $response = new SnmpResponse("IF-MIB::ifIndex[1] = 1\nIF-MIB::ifIndex[2] = 2\nIF-MIB::ifDescr[1] = lo\nIF-MIB::ifDescr[2] = enp4s0\n\n");
+        $response = $this->parse("IF-MIB::ifIndex[1] = 1\nIF-MIB::ifIndex[2] = 2\nIF-MIB::ifDescr[1] = lo\nIF-MIB::ifDescr[2] = enp4s0\n\n");
 
         $this->assertTrue($response->isValid());
         $this->assertEquals([
@@ -159,18 +184,18 @@ final class SnmpResponseTest extends TestCase
 
     public function testGroupByIndex(): void
     {
-        $response = new SnmpResponse(".1.3.6.1.2.1.2.2.1.10.1 = 495813425\n.1.3.6.1.2.1.2.2.1.10.2 = 3495809228\n");
+        $response = $this->parse(".1.3.6.1.2.1.2.2.1.10.1 = 495813425\n.1.3.6.1.2.1.2.2.1.10.2 = 3495809228\n");
         $this->assertTrue($response->isValid());
         $this->assertEquals([1 => ['.1.3.6.1.2.1.2.2.1.10.1' => 495813425], 2 => ['.1.3.6.1.2.1.2.2.1.10.2' => 3495809228]], $response->groupByIndex());
         $this->assertEquals(['1.10.1' => ['.1.3.6.1.2.1.2.2.1.10.1' => 495813425], '1.10.2' => ['.1.3.6.1.2.1.2.2.1.10.2' => 3495809228]], $response->groupByIndex(3));
         $this->assertEquals(['6.1.2.1.2.2.1.10.1' => ['.1.3.6.1.2.1.2.2.1.10.1' => 495813425], '6.1.2.1.2.2.1.10.2' => ['.1.3.6.1.2.1.2.2.1.10.2' => 3495809228]], $response->groupByIndex(-2));
 
-        $response = new SnmpResponse(".1.3.6.1.2.1.2.2.1.10.1 = 495813425\n.1.3.6.1.2.1.2.2.1.11.1 = 3495809228\n");
+        $response = $this->parse(".1.3.6.1.2.1.2.2.1.10.1 = 495813425\n.1.3.6.1.2.1.2.2.1.11.1 = 3495809228\n");
         $this->assertEquals([1 => ['.1.3.6.1.2.1.2.2.1.10.1' => 495813425, '.1.3.6.1.2.1.2.2.1.11.1' => 3495809228]], $response->groupByIndex());
         $this->assertEquals(['10.1' => ['.1.3.6.1.2.1.2.2.1.10.1' => 495813425], '11.1' => ['.1.3.6.1.2.1.2.2.1.11.1' => 3495809228]], $response->groupByIndex(2));
         $this->assertEquals(['1.2.2.1.10.1' => ['.1.3.6.1.2.1.2.2.1.10.1' => 495813425], '1.2.2.1.11.1' => ['.1.3.6.1.2.1.2.2.1.11.1' => 3495809228]], $response->groupByIndex(-5));
 
-        $response = new SnmpResponse("SOME-MIB::oid.1.1.0 = 14\nSOME-MIB::oid.1.2.0 = 42\n");
+        $response = $this->parse("SOME-MIB::oid.1.1.0 = 14\nSOME-MIB::oid.1.2.0 = 42\n");
         $this->assertTrue($response->isValid());
         $this->assertEquals([0 => ['SOME-MIB::oid.1.1.0' => '14', 'SOME-MIB::oid.1.2.0' => '42']], $response->groupByIndex());
         $this->assertEquals(['1.0' => ['SOME-MIB::oid.1.1.0' => '14'], '2.0' => ['SOME-MIB::oid.1.2.0' => '42']], $response->groupByIndex(2));
@@ -179,7 +204,7 @@ final class SnmpResponseTest extends TestCase
 
     public function testMultiLine(): void
     {
-        $response = new SnmpResponse("SNMPv2-MIB::sysDescr.1 = \"something\n on two lines\"\n");
+        $response = $this->parse("SNMPv2-MIB::sysDescr.1 = \"something\n on two lines\"\n");
 
         $this->assertTrue($response->isValid());
         $this->assertEquals("something\n on two lines", $response->value());
@@ -189,7 +214,7 @@ final class SnmpResponseTest extends TestCase
 
     public function numericTest(): void
     {
-        $response = new SnmpResponse(".1.3.6.1.2.1.2.2.1.10.1 = 495813425\n.1.3.6.1.2.1.2.2.1.10.2 = 3495809228\n");
+        $response = $this->parse(".1.3.6.1.2.1.2.2.1.10.1 = 495813425\n.1.3.6.1.2.1.2.2.1.10.2 = 3495809228\n");
 
         $this->assertTrue($response->isValid());
         $this->assertEquals('496255256', $response->value());
@@ -200,7 +225,7 @@ final class SnmpResponseTest extends TestCase
 
     public function tableTest(): void
     {
-        $response = new SnmpResponse('HOST-RESOURCES-MIB::hrStorageIndex.1 = 1
+        $response = $this->parse('HOST-RESOURCES-MIB::hrStorageIndex.1 = 1
 HOST-RESOURCES-MIB::hrStorageIndex.34 = 34
 HOST-RESOURCES-MIB::hrStorageIndex.36 = 36
 HOST-RESOURCES-MIB::hrStorageType.1 = HOST-RESOURCES-TYPES::hrStorageRam
@@ -304,12 +329,12 @@ HOST-RESOURCES-MIB::hrStorageUsed.36 = 127044934
 
     public function trimTest(): void
     {
-        $response = new SnmpResponse(".1.3.6.1.2.1.2.2.1.10.1 = \\\"4958\\\"\n.1.3.6.1.2.1.2.2.1.10.2 = \"\" 349\r\n\n");
+        $response = $this->parse(".1.3.6.1.2.1.2.2.1.10.1 = \\\"4958\\\"\n.1.3.6.1.2.1.2.2.1.10.2 = \"\" 349\r\n\n");
         $this->assertTrue($response->isValid());
         $this->assertEquals('4958', $response->value());
         $this->assertEquals(['.1.3.6.1.2.1.2.2.1.10.1' => '4958', '.1.3.6.1.2.1.2.2.1.10.2' => '349'], $response->values());
 
-        $response = new SnmpResponse(".1.3.6.1.2.1.31.1.1.1.18.1 = \"internal\\\\backslash\"\n");
+        $response = $this->parse(".1.3.6.1.2.1.31.1.1.1.18.1 = \"internal\\\\backslash\"\n");
         $this->assertTrue($response->isValid());
         $this->assertEquals('internal\\backslash', $response->value());
     }
@@ -317,8 +342,11 @@ HOST-RESOURCES-MIB::hrStorageUsed.36 = 127044934
     public function testErrorHandling(): void
     {
         // no response
-        $response = new SnmpResponse('', "Timeout: No Response from udp:127.1.6.1:1161.\n", 1);
+        $response = $this->parse('', "Timeout: No Response from udp:127.1.6.1:1161.\n", 1);
         $this->assertFalse($response->isValid());
+        $this->assertTrue($response->hasErrors());
+        $this->assertTrue($response->hasError(SnmpError::Timeout));
+        $this->assertSame(SnmpError::Timeout, $response->getError());
         $this->assertEquals('Timeout: No Response from udp:127.1.6.1:1161.', $response->getErrorMessage());
 
         // correct handling of empty output
@@ -327,42 +355,118 @@ HOST-RESOURCES-MIB::hrStorageUsed.36 = 127044934
         $this->assertEmpty($response->table());
 
         // invalid type (should ignore)
-        $response = new SnmpResponse("SNMPv2-MIB::sysObjectID.0 = Wrong Type (should be OBJECT IDENTIFIER): wrong thing\n");
+        $response = $this->parse("SNMPv2-MIB::sysObjectID.0 = Wrong Type (should be OBJECT IDENTIFIER): wrong thing\n");
         $this->assertTrue($response->isValid());
+        $this->assertFalse($response->hasErrors());
         $this->assertEquals('', $response->getErrorMessage());
         $this->assertEquals(['SNMPv2-MIB::sysObjectID.0' => 'wrong thing'], $response->values());
 
         // No more variables left in this MIB View
-        $response = new SnmpResponse("iso.9 = No more variables left in this MIB View (It is past the end of the MIB tree)\n");
+        $response = $this->parse("iso.9 = No more variables left in this MIB View (It is past the end of the MIB tree)\n");
         $this->assertFalse($response->isValid());
+        $this->assertTrue($response->hasError(SnmpError::EndOfMib));
         $this->assertEquals('No more variables left in this MIB View (It is past the end of the MIB tree)', $response->getErrorMessage());
 
         // No Such Instance currently exists at this OID.
-        $response = new SnmpResponse("SNMPv2-SMI::enterprises.9.9.661.1.3.2.1.1 = No Such Instance currently exists at this OID.\n");
+        $response = $this->parse("SNMPv2-SMI::enterprises.9.9.661.1.3.2.1.1 = No Such Instance currently exists at this OID.\n");
         $this->assertFalse($response->isValid());
+        $this->assertTrue($response->hasError(SnmpError::NoSuchInstance));
         $this->assertEquals('No Such Instance currently exists at this OID.', $response->getErrorMessage());
 
         // Unknown user name
-        $response = new SnmpResponse('', "snmpget: Unknown user name (Sub-id not found: (top) -> sysDescr)\n", 1);
+        $response = $this->parse('', "snmpget: Unknown user name (Sub-id not found: (top) -> sysDescr)\n", 1);
         $this->assertFalse($response->isValid());
+        $this->assertTrue($response->hasError(SnmpError::AuthenticationFailure));
         $this->assertEquals('Unknown user name', $response->getErrorMessage());
 
         // Authentication failure
-        $response = new SnmpResponse('', "snmpget: Authentication failure (incorrect password, community or key) (Sub-id not found: (top) -> sysDescr)\n", 1);
+        $response = $this->parse('', "snmpget: Authentication failure (incorrect password, community or key) (Sub-id not found: (top) -> sysDescr)\n", 1);
         $this->assertFalse($response->isValid());
+        $this->assertTrue($response->hasError(SnmpError::AuthenticationFailure));
         $this->assertEquals('Authentication failure', $response->getErrorMessage());
 
         // OID not increasing
-        $response = new SnmpResponse(".1.3.6.1.2.1.2.2.1.1.1 = INTEGER: 1\n", "Error: OID not increasing: .1.3.6.1.2.100.2.2.1.1\n >= .1.3.6.1.2.1.2.2.1.1.1\n", 1);
+        $response = $this->parse(".1.3.6.1.2.1.2.2.1.1.1 = INTEGER: 1\n", "Error: OID not increasing: .1.3.6.1.2.100.2.2.1.1\n >= .1.3.6.1.2.1.2.2.1.1.1\n", 1);
         $this->assertFalse($response->isValid());
+        $this->assertTrue($response->hasError(SnmpError::OidNotIncreasing));
         $this->assertEquals('Error: OID not increasing: .1.3.6.1.2.100.2.2.1.1', $response->getErrorMessage());
 
         // NULL return
-        $response = new SnmpResponse("hrDeviceTable = NULL\n", '', 0);
+        $response = $this->parse("hrDeviceTable = NULL\n", '', 0);
         $this->assertTrue($response->isValid());
         $this->assertEquals('', $response->getRawWithoutBadLines());
         $response->mapTable(function (): void {
             $this->fail('There should be no data in the array.');
         });
+    }
+
+    public function testMultipleErrors(): void
+    {
+        $debugInfo = new SnmpDebugInfo(
+            command: ['/usr/bin/snmpwalk', '1.3.6.1'],
+            exitCode: 1,
+            stderr: "Invalid authentication protocol specified\nTimeout: No Response from host\n",
+            output: '',
+            errors: [SnmpError::UnsupportedProtocol, SnmpError::Timeout],
+            errorMessages: ['Invalid authentication protocol specified', 'Timeout: No Response from host']
+        );
+
+        $response = new SnmpResponse([], $debugInfo);
+
+        $this->assertFalse($response->isValid());
+        $this->assertTrue($response->hasErrors());
+        $this->assertTrue($response->hasError(SnmpError::UnsupportedProtocol));
+        $this->assertTrue($response->hasError(SnmpError::Timeout));
+        $this->assertFalse($response->hasError(SnmpError::NoSuchInstance));
+        $this->assertSame([SnmpError::UnsupportedProtocol, SnmpError::Timeout], $response->getErrors());
+        $this->assertSame(SnmpError::UnsupportedProtocol, $response->getError());
+        $this->assertSame('Invalid authentication protocol specified', $response->getErrorMessage());
+        $this->assertSame(['Invalid authentication protocol specified', 'Timeout: No Response from host'], $response->getErrorMessages());
+        $this->assertSame(1, $response->getExitCode());
+        $this->assertSame(['/usr/bin/snmpwalk', '1.3.6.1'], $response->debugInfo->getCommand());
+    }
+
+    public function testAppendMergesDebugInfoAndErrors(): void
+    {
+        $debug1 = new SnmpDebugInfo(
+            command: ['snmpget', 'oid1'],
+            exitCode: 0,
+            output: "oid1 = val1\n",
+        );
+        $res1 = new SnmpResponse(['oid1' => 'val1'], $debug1, "oid1 = val1\n");
+
+        $debug2 = new SnmpDebugInfo(
+            command: ['snmpget', 'oid2'],
+            exitCode: 1,
+            stderr: "Timeout: No Response from host\n",
+            errors: [SnmpError::Timeout],
+            errorMessages: ['Timeout: No Response from host']
+        );
+        $res2 = new SnmpResponse([], $debug2);
+
+        $combined = $res1->append($res2);
+
+        $this->assertSame(['oid1' => 'val1'], $combined->values());
+        $this->assertTrue($combined->hasErrors());
+        $this->assertTrue($combined->hasError(SnmpError::Timeout));
+        $this->assertSame(1, $combined->getExitCode());
+        $this->assertSame(['snmpget', 'oid2'], $combined->debugInfo->getCommand());
+        $this->assertStringContainsString('Timeout', $combined->debugInfo->getStderr());
+    }
+
+    public function testSnmpErrorHelpers(): void
+    {
+        $this->assertTrue(SnmpError::Timeout->isFatal());
+        $this->assertTrue(SnmpError::AuthenticationFailure->isFatal());
+        $this->assertTrue(SnmpError::UnsupportedProtocol->isFatal());
+        $this->assertTrue(SnmpError::GeneralError->isFatal());
+        $this->assertFalse(SnmpError::NoSuchInstance->isFatal());
+        $this->assertFalse(SnmpError::EndOfMib->isFatal());
+
+        $this->assertTrue(SnmpError::NoSuchInstance->isNotFound());
+        $this->assertTrue(SnmpError::NoSuchObject->isNotFound());
+        $this->assertTrue(SnmpError::NoSuchName->isNotFound());
+        $this->assertTrue(SnmpError::EndOfMib->isNotFound());
+        $this->assertFalse(SnmpError::Timeout->isNotFound());
     }
 }

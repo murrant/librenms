@@ -5,10 +5,12 @@ namespace LibreNMS\Tests\Unit;
 use App\Models\Device;
 use Illuminate\Support\Facades\Cache;
 use LibreNMS\Data\Source\Snmp\SnmpBackendInterface;
+use LibreNMS\Data\Source\Snmp\SnmpDebugInfo;
 use LibreNMS\Data\Source\Snmp\SnmpQuery;
 use LibreNMS\Data\Source\Snmp\SnmpQueryOptions;
 use LibreNMS\Data\Source\Snmp\SnmpResponse;
 use LibreNMS\Data\Source\Snmp\SnmpTranslatorInterface;
+use LibreNMS\Enum\SnmpError;
 use LibreNMS\Enum\SnmpOidOutput;
 use LibreNMS\Polling\Method\Config\SnmpConfig;
 use LibreNMS\Tests\TestCase;
@@ -47,7 +49,7 @@ class SnmpQueryTest extends TestCase
                 && $oids === ['sysDescr.0']
                 && $options->oidFormat === SnmpOidOutput::Numeric
                 && $options->context === '')
-            ->andReturn(new SnmpResponse("sysDescr.0 = Linux 6.0\n"));
+            ->andReturn(new SnmpResponse(['sysDescr.0' => 'Linux 6.0'], raw: "sysDescr.0 = Linux 6.0\n"));
 
         $query = (new SnmpQuery($mockBackend))
             ->device($this->device)
@@ -64,12 +66,12 @@ class SnmpQueryTest extends TestCase
         $mockBackend->shouldReceive('walk')
             ->once()
             ->withArgs(fn (SnmpConfig $config, string $oid) => $oid === 'ifDescr')
-            ->andReturn(new SnmpResponse("ifDescr.1 = eth0\n"));
+            ->andReturn(new SnmpResponse(['ifDescr.1' => 'eth0'], raw: "ifDescr.1 = eth0\n"));
 
         $mockBackend->shouldReceive('walk')
             ->once()
             ->withArgs(fn (SnmpConfig $config, string $oid) => $oid === 'ifType')
-            ->andReturn(new SnmpResponse("ifType.1 = ethernetCsmacd\n"));
+            ->andReturn(new SnmpResponse(['ifType.1' => 'ethernetCsmacd'], raw: "ifType.1 = ethernetCsmacd\n"));
 
         $query = (new SnmpQuery($mockBackend))->device($this->device);
         $response = $query->walk(['ifDescr', 'ifType']);
@@ -83,7 +85,7 @@ class SnmpQueryTest extends TestCase
         $mockBackend->shouldReceive('next')
             ->once()
             ->withArgs(fn (SnmpConfig $config, array $oids) => $oids === ['sysDescr.0'])
-            ->andReturn(new SnmpResponse("sysObjectID.0 = .1.3.6.1.4.1\n"));
+            ->andReturn(new SnmpResponse(['sysObjectID.0' => '.1.3.6.1.4.1'], raw: "sysObjectID.0 = .1.3.6.1.4.1\n"));
 
         $query = (new SnmpQuery($mockBackend))->device($this->device);
         $response = $query->next('sysDescr.0');
@@ -107,12 +109,12 @@ class SnmpQueryTest extends TestCase
         $mockBackend->shouldReceive('get')
             ->once()
             ->withArgs(fn (SnmpConfig $config, array $oids) => $oids === ['oid1', 'oid2'])
-            ->andReturn(new SnmpResponse("oid1 = 1\noid2 = 2\n"));
+            ->andReturn(new SnmpResponse(['oid1' => '1', 'oid2' => '2'], raw: "oid1 = 1\noid2 = 2\n"));
 
         $mockBackend->shouldReceive('get')
             ->once()
             ->withArgs(fn (SnmpConfig $config, array $oids) => $oids === ['oid3'])
-            ->andReturn(new SnmpResponse("oid3 = 3\n"));
+            ->andReturn(new SnmpResponse(['oid3' => '3'], raw: "oid3 = 3\n"));
 
         $query = (new SnmpQuery($mockBackend))->device($device);
         $response = $query->get(['oid1', 'oid2', 'oid3']);
@@ -127,7 +129,15 @@ class SnmpQueryTest extends TestCase
         $mockBackend->shouldReceive('walk')
             ->once()
             ->withArgs(fn (SnmpConfig $config, string $oid) => $oid === 'unsupportedOid')
-            ->andReturn(new SnmpResponse('', 'Timeout: No Response', 1));
+            ->andReturn(new SnmpResponse(
+                [],
+                new SnmpDebugInfo(
+                    exitCode: 1,
+                    stderr: 'Timeout: No Response',
+                    errors: [SnmpError::Timeout],
+                    errorMessages: ['Timeout: No Response']
+                )
+            ));
 
         // Second OID should never be queried because of abortOnFailure
         $mockBackend->shouldNotReceive('walk')
@@ -150,7 +160,7 @@ class SnmpQueryTest extends TestCase
         $mockBackend->shouldReceive('get')
             ->once()
             ->withArgs(fn (SnmpConfig $config, array $oids) => $oids === ['sysDescr.0'])
-            ->andReturn(new SnmpResponse("sysDescr.0 = CachedLinux\n"));
+            ->andReturn(new SnmpResponse(['sysDescr.0' => 'CachedLinux'], raw: "sysDescr.0 = CachedLinux\n"));
 
         $query = (new SnmpQuery($mockBackend))
             ->device($this->device)
@@ -193,7 +203,7 @@ class SnmpQueryTest extends TestCase
         $mockBackend->shouldReceive('get')
             ->once()
             ->withArgs(fn (SnmpConfig $config, array $oids, SnmpQueryOptions $options) => $options->context === 'vlan-100')
-            ->andReturn(new SnmpResponse("val = 1\n"));
+            ->andReturn(new SnmpResponse(['val' => '1'], raw: "val = 1\n"));
 
         $query = (new SnmpQuery($mockBackend))
             ->device($v3Device)
@@ -211,7 +221,7 @@ class SnmpQueryTest extends TestCase
                 && $options->oidFormat === SnmpOidOutput::Suffix
                 && $options->numericEnums === false
                 && $options->tolerateUnorderedIndexes === true)
-            ->andReturn(new SnmpResponse("test = 1\n"));
+            ->andReturn(new SnmpResponse(['test' => '1'], raw: "test = 1\n"));
 
         $query = (new SnmpQuery($mockBackend))
             ->device($this->device)
@@ -228,16 +238,24 @@ class SnmpQueryTest extends TestCase
         $mockBackend = Mockery::mock(SnmpBackendInterface::class);
         $mockBackend->shouldReceive('get')
             ->once()
-            ->andReturn(new SnmpResponse("sysDescr.0 = Linux 6.0\n", command: ['/usr/bin/snmpget', 'sysDescr.0']));
+            ->andReturn(new SnmpResponse(
+                ['sysDescr.0' => 'Linux 6.0'],
+                new SnmpDebugInfo(
+                    command: ['/usr/bin/snmpget', 'sysDescr.0'],
+                    output: "sysDescr.0 = Linux 6.0\n",
+                ),
+                "sysDescr.0 = Linux 6.0\n"
+            ));
 
         $query = (new SnmpQuery($mockBackend))->device($this->device);
         $query->get('sysDescr.0');
 
         \Illuminate\Support\Facades\Event::assertDispatched(\App\Events\SnmpQueryExecuted::class, fn (\App\Events\SnmpQueryExecuted $event) => $event->method === 'snmpget'
             && $event->oids === ['sysDescr.0']
-            && $event->cliCommand === ['/usr/bin/snmpget', 'sysDescr.0']
+            && $event->debugInfo instanceof \LibreNMS\Data\Source\Snmp\SnmpDebugInfoInterface
+            && $event->debugInfo->getCommand() === ['/usr/bin/snmpget', 'sysDescr.0']
             && $event->device === $this->device
-            && $event->response->raw === "sysDescr.0 = Linux 6.0\n");
+            && $event->debugInfo->getOutput() === "sysDescr.0 = Linux 6.0\n");
     }
 
     public function testSnmpQueryDefaultsToQuickPrintOptions(): void
@@ -250,7 +268,7 @@ class SnmpQueryTest extends TestCase
                     && $options->printUnits === false
                     && $options->numericEnums === true
                     && $options->numericTimeticks === true)
-            ->andReturn(new SnmpResponse("sysDescr.0 = Linux\n"));
+            ->andReturn(new SnmpResponse(['sysDescr.0' => 'Linux'], raw: "sysDescr.0 = Linux\n"));
 
         $query = (new SnmpQuery($mockBackend))->device($this->device);
         $query->get('sysDescr.0');
@@ -262,7 +280,7 @@ class SnmpQueryTest extends TestCase
         $mockBackend->shouldReceive('get')
             ->once()
             ->withArgs(fn (SnmpConfig $config, array $oids, SnmpQueryOptions $options) => $options->oidFormat === SnmpOidOutput::Suffix)
-            ->andReturn(new SnmpResponse("sysDescr.0 = Linux\n"));
+            ->andReturn(new SnmpResponse(['sysDescr.0' => 'Linux'], raw: "sysDescr.0 = Linux\n"));
 
         $query = (new SnmpQuery($mockBackend))->device($this->device)->hideMib();
         $query->get('sysDescr.0');
@@ -277,7 +295,7 @@ class SnmpQueryTest extends TestCase
         $mockBackend->shouldReceive('walk')
             ->once()
             ->withArgs(fn (SnmpConfig $config, string $oid, SnmpQueryOptions $options) => $options->allowBulk === false)
-            ->andReturn(new SnmpResponse("laLoadInt = 1\n"));
+            ->andReturn(new SnmpResponse(['laLoadInt' => '1'], raw: "laLoadInt = 1\n"));
 
         $query = (new SnmpQuery($mockBackend))->device($this->device);
         $query->walk('UCD-SNMP-MIB::laLoadInt');

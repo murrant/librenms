@@ -5,7 +5,7 @@ namespace LibreNMS\Tests\Unit;
 use App\Models\Device;
 use LibreNMS\Data\Source\Snmp\NetSnmp;
 use LibreNMS\Data\Source\Snmp\SnmpQueryOptions;
-use LibreNMS\Data\Source\Snmp\SnmpResponse;
+use LibreNMS\Enum\SnmpError;
 use LibreNMS\Enum\SnmpOidOutput;
 use LibreNMS\Enum\SnmpStringOutput;
 use LibreNMS\Polling\Method\Config\SnmpConfig;
@@ -422,11 +422,11 @@ class NetSnmpTest extends TestCase
 
     public function testSnmpResponseStoresCommand(): void
     {
-        $response = new SnmpResponse("test = 1\n", '', 0, ['/usr/bin/snmpget', 'test']);
-        $this->assertSame(['/usr/bin/snmpget', 'test'], $response->command);
+        $response = $this->backend->parseResponse("test = 1\n", '', 0, ['/usr/bin/snmpget', 'test']);
+        $this->assertSame(['/usr/bin/snmpget', 'test'], $response->debugInfo->getCommand());
 
-        $appended = $response->append(new SnmpResponse("test2 = 2\n"));
-        $this->assertSame(['/usr/bin/snmpget', 'test'], $appended->command);
+        $appended = $response->append($this->backend->parseResponse("test2 = 2\n"));
+        $this->assertSame(['/usr/bin/snmpget', 'test'], $appended->debugInfo->getCommand());
     }
 
     public function testMibDirectoriesResolvesOsAndGroup(): void
@@ -493,5 +493,48 @@ class NetSnmpTest extends TestCase
 
         $resultWithoutDot = $this->backend->translate('1.3.6.1.2.1.1.1.0', $options);
         $this->assertSame('.1.3.6.1.2.1.1.1.0', $resultWithoutDot);
+    }
+
+    public function testDetectErrorsMultiple(): void
+    {
+        $raw = "No Such Instance currently exists at this OID.\n";
+        $stderr = "Invalid authentication protocol specified\nTimeout: No Response from udp:10.0.0.1:161.\n";
+
+        $result = $this->backend->detectErrors($raw, $stderr, 1);
+
+        $this->assertContains(SnmpError::UnsupportedProtocol, $result['errors']);
+        $this->assertContains(SnmpError::Timeout, $result['errors']);
+        $this->assertContains(SnmpError::NoSuchInstance, $result['errors']);
+        $this->assertCount(3, $result['errors']);
+    }
+
+    public function testParseResponseBuildsDebugInfo(): void
+    {
+        $command = ['/usr/bin/snmpget', '-v2c', '-c', 'public', '192.168.1.1', 'sysDescr.0'];
+        $output = "SNMPv2-MIB::sysDescr.0 = Linux\n";
+        $stderr = '';
+        $exitCode = 0;
+
+        $response = $this->backend->parseResponse($output, $stderr, $exitCode, $command);
+
+        $this->assertTrue($response->isValid());
+        $this->assertSame(['SNMPv2-MIB::sysDescr.0' => 'Linux'], $response->values());
+        $this->assertNotNull($response->debugInfo);
+        $this->assertSame($command, $response->debugInfo->getCommand());
+        $this->assertSame(0, $response->debugInfo->getExitCode());
+        $this->assertSame('', $response->debugInfo->getStderr());
+        $this->assertSame($output, $response->debugInfo->getOutput());
+        $this->assertFalse($response->debugInfo->hasErrors());
+    }
+
+    public function testStripBadLines(): void
+    {
+        $raw = "sysDescr.0 = Linux\nSNMPv2-SMI::enterprises.9 = No Such Instance currently exists at this OID.\niso.9 = No more variables left in this MIB View (It is past the end of the MIB tree)\noid = NULL\n";
+        $cleaned = NetSnmp::stripBadLines($raw);
+
+        $this->assertStringContainsString('sysDescr.0 = Linux', $cleaned);
+        $this->assertStringNotContainsString('No Such Instance', $cleaned);
+        $this->assertStringNotContainsString('No more variables left', $cleaned);
+        $this->assertStringNotContainsString('NULL', $cleaned);
     }
 }

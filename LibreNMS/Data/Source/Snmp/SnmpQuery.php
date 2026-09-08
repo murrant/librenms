@@ -236,7 +236,7 @@ class SnmpQuery implements SnmpQueryInterface
     {
         $config = $this->device->toSnmpConfig();
         $chunks = $this->limitOids($this->parseOid($oid), $config);
-        $response = new SnmpResponse('');
+        $response = new SnmpResponse();
 
         foreach ($chunks as $chunk) {
             $options = $this->prepareOptions($chunk);
@@ -266,7 +266,7 @@ class SnmpQuery implements SnmpQueryInterface
     {
         $target = $this->device->toSnmpConfig();
         $oids = $this->parseOid($oid);
-        $response = new SnmpResponse('');
+        $response = new SnmpResponse();
 
         foreach ($oids as $singleOid) {
             $options = $this->prepareOptions([$singleOid], walk: true);
@@ -296,7 +296,7 @@ class SnmpQuery implements SnmpQueryInterface
     {
         $config = $this->device->toSnmpConfig();
         $chunks = $this->limitOids($this->parseOid($oid), $config);
-        $response = new SnmpResponse('');
+        $response = new SnmpResponse();
 
         foreach ($chunks as $chunk) {
             $options = $this->prepareOptions($chunk);
@@ -374,8 +374,7 @@ class SnmpQuery implements SnmpQueryInterface
             event(new SnmpQueryExecuted(
                 method: $command,
                 oids: $oids,
-                response: $response,
-                cliCommand: $response->command,
+                debugInfo: $response->debugInfo,
                 device: $this->device,
                 context: $options->context,
                 mibs: $options->mibs,
