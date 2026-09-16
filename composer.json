@@ -158,7 +158,7 @@
         ],
         "test:unit": "phpunit",
         "test:types": "phpstan",
-        "test:types-new": "run_check() { set -- $(git diff --name-only --diff-filter=A master... -- '*.php'); if [ $# -gt 0 ]; then vendor/bin/phpstan analyse -l 6 \"$@\"; return $?; else echo 'No new PHP files found to analyze.'; return 0; fi; }; run_check",
+        "test:types-new": "run_check() { set --; for file in $(git diff --name-only --diff-filter=A master... -- '*.php'); do [ -f \"$file\" ] && set -- \"$@\" \"$file\"; done; if [ $# -gt 0 ]; then vendor/bin/phpstan analyse -l 6 \"$@\"; return $?; else echo 'No new PHP files found to analyze.'; return 0; fi; }; run_check",
         "test": [
             "@test:unit",
             "@test:lint",
