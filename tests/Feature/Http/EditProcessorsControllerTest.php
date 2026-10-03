@@ -59,7 +59,8 @@ final class EditProcessorsControllerTest extends TestCase
     public function testNullWarnThresholdRendersEmpty(): void
     {
         $device = Device::factory()->create();
-        Processor::factory()->for($device)->create(['processor_perc_warn' => null]);
+        // created quietly, the observer would replace a null threshold with the default
+        Processor::factory()->for($device)->createQuietly(['processor_perc_warn' => null]);
 
         $this->actingAs($this->admin())
             ->get(route('device.edit.processors', $device))
@@ -87,6 +88,21 @@ final class EditProcessorsControllerTest extends TestCase
             ->assertJson(['status' => 'ok']);
 
         $this->assertSame(90, $processor->fresh()->processor_perc_warn);
+    }
+
+    public function testRediscoveryDoesNotOverwriteWarnThreshold(): void
+    {
+        $device = Device::factory()->create();
+        $processor = Processor::factory()->for($device)->create(['processor_perc_warn' => 90, 'processor_usage' => 10]);
+
+        // discovery merges freshly discovered attributes, including a null or default threshold
+        $processor->processor_perc_warn = null;
+        $processor->processor_usage = 20;
+        $processor->save();
+
+        $processor = $processor->fresh();
+        $this->assertSame(90, $processor->processor_perc_warn);
+        $this->assertEquals(20, $processor->processor_usage);
     }
 
     /**
