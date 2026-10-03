@@ -26,11 +26,9 @@
 
 namespace LibreNMS\OS;
 
-use App\Models\Processor;
-use LibreNMS\Interfaces\Discovery\ProcessorDiscovery;
 use LibreNMS\OS;
 
-class Pbn extends OS implements ProcessorDiscovery
+class Pbn extends OS
 {
     public function __construct(&$device)
     {
@@ -41,23 +39,5 @@ class Pbn extends OS implements ProcessorDiscovery
                 $this->stpTimeFactor = 1;
             }
         }
-    }
-
-    /**
-     * Discover processors.
-     * Returns an array of LibreNMS\Device\Processor objects that have been discovered
-     *
-     * @return Collection<Processor>
-     */
-    public function discoverProcessors(): \Illuminate\Support\Collection: array
-    {
-        return [
-            Processor::discoverModel(
-                'pbn-cpu',
-                $this->getDeviceId(),
-                '.1.3.6.1.4.1.11606.10.9.109.1.1.1.1.5.1', // NMS-PROCESS-MIB::nmspmCPUTotal5min
-                0
-            ),
-        ];
     }
 }
