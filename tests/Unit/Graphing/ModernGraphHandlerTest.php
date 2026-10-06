@@ -6,6 +6,7 @@ use App\Graphing\BaseGraph;
 use App\Graphing\Definition\GraphDefinition;
 use App\Graphing\Definition\Series;
 use App\Graphing\GraphAccess;
+use App\Graphing\GraphTrust;
 use App\Graphing\GraphQuery;
 use App\Graphing\GraphSubject;
 use App\Graphing\Modern\ModernGraphHandler;
@@ -24,7 +25,7 @@ class ModernGraphHandlerTest extends TestCase
     {
         Gate::shouldReceive('forUser')->never();
 
-        $this->assertTrue($this->handler()->authorize(new GraphSubject(new Device), GraphAccess::trusted(GraphAccess::SIGNED_URL)));
+        $this->assertTrue($this->handler()->authorize(new GraphSubject(new Device), GraphAccess::trusted(GraphTrust::SignedUrl)));
     }
 
     public function testUserAccessChecksTheGraphAbility(): void

@@ -105,6 +105,34 @@ class RrdtoolCompilerTest extends TestCase
         $this->assertNull($compiled->fileInMessage("opening '/rrd/host/other.rrd': No such file or directory"));
     }
 
+    public function testFindsFilesWithUnusualCharacters(): void
+    {
+        $compiler = new RrdtoolCompiler(new class implements RrdPathResolver
+        {
+            public function resolve(MetricIdentity $identity): RrdPath
+            {
+                return RrdPath::make((string) $identity->labels['host'], $identity->name . '.rrd');
+            }
+        });
+        $definition = new GraphDefinition([
+            new Series('v6', new MetricIdentity('app-my_app-1-stat.x', ['host' => '[2001:db8::1]']), 'value', 'A'),
+            new Series('short', new MetricIdentity('a', ['host' => 'host']), 'value', 'B'),
+            new Series('long', new MetricIdentity('a', ['host' => 'xhost']), 'value', 'C'),
+        ]);
+
+        $compiled = $compiler->compile($definition, $this->query());
+
+        // ipv6 hostnames are escaped
+        $this->assertSame('2001_db8__1/app-my_app-1-stat.x.rrd', $compiled->fileInMessage("opening '/rrd/2001_db8__1/app-my_app-1-stat.x.rrd': No such file or directory")?->relativePath());
+        // xhost/a.rrd contains host/a.rrd, the longest match must win
+        $this->assertSame('xhost/a.rrd', $compiled->fileInMessage("opening '/rrd/xhost/a.rrd': No such file or directory")?->relativePath());
+        $this->assertSame('host/a.rrd', $compiled->fileInMessage("opening '/rrd/host/a.rrd': No such file or directory")?->relativePath());
+
+        // a file outside the graph that merely ends with a graph file's path does not match
+        $onlyShort = $compiler->compile(new GraphDefinition([$definition->series[1]]), $this->query());
+        $this->assertNull($onlyShort->fileInMessage("opening '/rrd/xhost/a.rrd': No such file or directory"));
+    }
+
     private function descr(string $label, int $length = 14): string
     {
         return Rrd::fixedSafeDescr($label, $length);

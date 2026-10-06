@@ -108,6 +108,85 @@ class RrdtoolRendererMissingDataTest extends TestCase
         $this->renderer()->renderDefinition($this->definition(optional: true), $this->query());
     }
 
+    public function testMissingSecondFile(): void
+    {
+        Rrd::shouldReceive('graph')->once()->ordered()->andThrow($this->notFound('/rrd/host/b.rrd'));
+        Rrd::shouldReceive('missingFiles')->once()->andReturn([RrdPath::make('host', 'b.rrd')]);
+        Rrd::shouldReceive('graph')->once()->ordered()
+            ->with(Mockery::on(fn ($options) => ! str_contains(implode(' ', $options), 'b.rrd')))
+            ->andReturn('partial');
+
+        $image = $this->renderer()->renderDefinition($this->definition(optional: true), $this->query());
+
+        $this->assertSame(['b.rrd'], $image->missing);
+    }
+
+    public function testRequiredAndOptionalMissingIsNoData(): void
+    {
+        $definition = new GraphDefinition([
+            new Series('a', new MetricIdentity('a'), 'value', 'A', optional: true),
+            new Series('b', new MetricIdentity('b'), 'value', 'B'),
+            new Series('c', new MetricIdentity('c'), 'value', 'C', optional: true),
+        ]);
+        Rrd::shouldReceive('graph')->once()->andThrow($this->notFound('/rrd/host/a.rrd'));
+        Rrd::shouldReceive('missingFiles')->once()->andReturn([RrdPath::make('host', 'a.rrd'), RrdPath::make('host', 'b.rrd')]);
+
+        try {
+            $this->renderer()->renderDefinition($definition, $this->query());
+            $this->fail('Expected GraphNoData');
+        } catch (GraphNoData $e) {
+            $this->assertSame(['a.rrd', 'b.rrd'], $e->missing);
+        }
+    }
+
+    public function testOnlyOptionalMissingWhileRequiredPresentRedraws(): void
+    {
+        $definition = new GraphDefinition([
+            new Series('a', new MetricIdentity('a'), 'value', 'A', optional: true),
+            new Series('b', new MetricIdentity('b'), 'value', 'B'),
+        ]);
+        Rrd::shouldReceive('graph')->once()->ordered()->andThrow($this->notFound('/rrd/host/a.rrd'));
+        Rrd::shouldReceive('missingFiles')->once()->andReturn([RrdPath::make('host', 'a.rrd')]);
+        Rrd::shouldReceive('graph')->once()->ordered()->andReturn('partial');
+
+        $image = $this->renderer()->renderDefinition($definition, $this->query());
+
+        $this->assertSame(['a.rrd'], $image->missing);
+    }
+
+    public function testAllRequiredMissingIsNoData(): void
+    {
+        Rrd::shouldReceive('graph')->once()->andThrow($this->notFound('/rrd/host/a.rrd'));
+        Rrd::shouldReceive('missingFiles')->once()->andReturn([RrdPath::make('host', 'a.rrd'), RrdPath::make('host', 'b.rrd'), RrdPath::make('host', 'c.rrd')]);
+        Rrd::shouldReceive('graph')->never()->with(Mockery::any());
+
+        $this->expectException(GraphNoData::class);
+
+        $this->renderer()->renderDefinition($this->definition(optional: false), $this->query());
+    }
+
+    public function testRrdcachedPrefixedPath(): void
+    {
+        Rrd::shouldReceive('graph')->once()->ordered()->andThrow(new RrdNotFoundException(
+            "rrdcached@unix:/run/rrdcached.sock: rrd_fetch_r failed: opening '/var/lib/rrdcached/db/host/c.rrd': No such file or directory"));
+        Rrd::shouldReceive('missingFiles')->once()->andReturn([]);
+        Rrd::shouldReceive('graph')->once()->ordered()->andReturn('partial');
+
+        $image = $this->renderer()->renderDefinition($this->definition(optional: true), $this->query());
+
+        $this->assertSame(['c.rrd'], $image->missing);
+    }
+
+    public function testNotFoundWithoutPathIsRenderFailure(): void
+    {
+        Rrd::shouldReceive('graph')->once()->andThrow(new RrdNotFoundException('No such file or directory'));
+        Rrd::shouldReceive('missingFiles')->never();
+
+        $this->expectException(GraphRenderFailed::class);
+
+        $this->renderer()->renderDefinition($this->definition(optional: true), $this->query());
+    }
+
     public function testUnknownMissingFileIsRenderFailure(): void
     {
         Rrd::shouldReceive('graph')->once()->andThrow($this->notFound('/rrd/host/unrelated.rrd'));

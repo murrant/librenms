@@ -7,6 +7,7 @@ use App\Graphing\GraphAccess;
 use App\Graphing\GraphQuery;
 use App\Graphing\GraphRegistry;
 use App\Graphing\GraphService;
+use App\Graphing\GraphTrust;
 use App\Graphing\Modern\ModernGraphHandler;
 use App\Models\Device;
 use App\Models\Processor;
@@ -71,7 +72,7 @@ class ModernGraphTest extends TestCase
         // rrdtool draws svg text as paths, check what was drawn through the service
         $image = app(GraphService::class)->render(
             GraphQuery::fromVars(['type' => 'device_processor', 'device' => $device->device_id]),
-            GraphAccess::trusted('test'),
+            GraphAccess::trusted(GraphTrust::Alert),
         );
         $this->assertSame(['processor-hr-2.rrd'], $image->missing);
         $this->assertSame($device->displayName(), $image->title);

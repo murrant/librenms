@@ -41,7 +41,8 @@ final readonly class CompiledGraph implements RenderPlan
         usort($relativePaths, fn ($a, $b) => strlen((string) $b) <=> strlen((string) $a));
 
         foreach ($relativePaths as $relativePath) {
-            if (str_contains($message, (string) $relativePath)) {
+            // rrdtool reports absolute paths, require a directory boundary so host/a.rrd does not match xhost/a.rrd
+            if (str_contains($message, '/' . $relativePath)) {
                 return $this->files[$relativePath]['path'];
             }
         }
