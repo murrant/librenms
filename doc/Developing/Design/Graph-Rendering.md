@@ -316,7 +316,7 @@ sequenceDiagram
         T-->>R: image
     else RrdNotFoundException
         T-->>R: "opening '<path>': No such file or directory"
-        R->>R: match path to a compiled file (relative path, longest match)
+        R->>R: match path to a compiled file ("/" + relative path, longest match)
         R->>S: missingFiles(all compiled paths)  [one listing per directory]
         S-->>R: missing paths (+ the reported one)
         alt any missing series is required
@@ -329,7 +329,8 @@ sequenceDiagram
 ```
 
 - The reported file is matched against the compiled files by **relative path**, never parsed into a path to
-  use. rrdcached reports the path under its own base directory
+  use. The match requires a directory boundary (`/` + relative path), so `host/a.rrd` never matches an error about
+  `xhost/a.rrd`, and the longest match wins. rrdcached reports the path under its own base directory
   (e.g. `rrdcached@unix:...: rrd_fetch_r failed: opening '/var/lib/rrdcached/db/<host>/<file>.rrd'`), so the
   relative path is the stable part. Paths never contain spaces: every component goes through `Rrd::safeName()`.
 - Parsing rrdtool error output is inherently brittle; the matching boundary is heavily tested (section 7).
@@ -488,13 +489,14 @@ Keep to these across branches:
 
 | Test | Covers |
 |---|---|
-| `tests/Feature/Graphing/GraphRouteTest.php` | `/graph` route: rendering, No Data, No Auth, guests, signed URLs, unauth graphs, unknown graph, invalid input, validation before resolution, legacy paths, jpgraph |
+| `tests/Feature/Graphing/GraphRouteTest.php` | `/graph` route: rendering, No Data, No Auth, guests, signed URLs, unauth graphs, unknown graph, invalid input, legacy paths, jpgraph |
+| `tests/Feature/Graphing/GraphValidationOrderTest.php` | Input is validated before `subject()` runs or access is checked, on the image route and the graphs page |
 | `tests/Feature/Graphing/GraphAccessTest.php` | Access from requests, trust enum, alert trust, default access, legacy user guard |
 | `tests/Feature/Http/GraphsPageControllerTest.php` | Graphs page, subtitles, showcommand |
 | `tests/Unit/Graphing/GraphRegistryTest.php` | Registry, legacy fallback, traversal, registration validation |
 | `tests/Unit/Graphing/GraphQueryTest.php` | Input parsing and structural guarantees |
 | `tests/Unit/Graphing/RrdtoolRendererTest.php` | Legacy plan rendering and error mapping |
-| `tests/Unit/Graphing/Rrd/RrdtoolCompilerTest.php` | Layout output, stable colors, skipping, file matching (local, rrdcached, unusual characters) |
+| `tests/Unit/Graphing/Rrd/RrdtoolCompilerTest.php` | Layout output, stable colors, skipping, file matching (local, rrdcached, IPv6 hostnames, path boundaries) |
 | `tests/Unit/Graphing/Rrd/RrdtoolRendererMissingDataTest.php` | Every row of the missing data table (section 4.8) |
 | `tests/Unit/Graphing/ModernGraphHandlerTest.php` | Authorization, definition invariants |
 | `tests/Feature/Graphing/RrdMissingFilesTest.php` | `Rrd::missingFiles()` locally and against a live rrdcached |
