@@ -4,6 +4,7 @@ namespace App\Graphing;
 
 use App\Graphing\Contracts\GraphHandler;
 use App\Graphing\Contracts\RenderPlan;
+use App\Graphing\Definition\GraphDefinition;
 use App\Graphing\Exceptions\GraphException;
 use App\Graphing\Plans\PrebuiltImage;
 use App\Graphing\Plans\RrdCommand;
@@ -41,6 +42,7 @@ final class ResolvedGraph
         return match (true) {
             $plan instanceof PrebuiltImage => $plan->image,
             $plan instanceof RrdCommand => $this->rrdtool->render($plan, $this->query),
+            $plan instanceof GraphDefinition => $this->rrdtool->renderDefinition($plan, $this->query),
             default => throw new LogicException('Unsupported render plan ' . $plan::class),
         };
     }
@@ -54,7 +56,7 @@ final class ResolvedGraph
     {
         $plan = $this->plan();
 
-        return $plan instanceof RrdCommand ? $this->rrdtool->command($plan) : null;
+        return $plan instanceof RrdCommand || $plan instanceof GraphDefinition ? $this->rrdtool->command($plan, $this->query) : null;
     }
 
     /**

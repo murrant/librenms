@@ -30,8 +30,15 @@ use LibreNMS\Enum\ImageFormat;
 
 class GraphImage implements \Stringable
 {
-    public function __construct(public readonly ImageFormat $format, public readonly string $title, public readonly string $data)
-    {
+    /**
+     * @param  list<string>  $missing  data that was not available, the graph was drawn without it
+     */
+    public function __construct(
+        public readonly ImageFormat $format,
+        public readonly string $title,
+        public readonly string $data,
+        public readonly array $missing = [],
+    ) {
     }
 
     public function base64(): string

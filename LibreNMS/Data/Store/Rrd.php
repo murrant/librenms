@@ -430,6 +430,53 @@ class Rrd extends BaseDatastore
     }
 
     /**
+     * Find which of the given rrd files do not exist.
+     * Uses one directory listing per directory instead of checking each file.
+     *
+     * @param  list<RrdPath>  $paths
+     * @return list<RrdPath>
+     */
+    public function missingFiles(array $paths): array
+    {
+        $byDirectory = [];
+        foreach ($paths as $path) {
+            $byDirectory[dirname($path->relativePath())][] = $path;
+        }
+
+        $missing = [];
+        foreach ($byDirectory as $directory => $directoryPaths) {
+            $existing = array_flip($this->listDirectory((string) $directory));
+            foreach ($directoryPaths as $path) {
+                if (! isset($existing[basename($path->relativePath())])) {
+                    $missing[] = $path;
+                }
+            }
+        }
+
+        return $missing;
+    }
+
+    /**
+     * @return list<string> file names in the given directory, relative to the rrd dir
+     */
+    private function listDirectory(string $directory): array
+    {
+        if ($this->rrdcached && version_compare($this->version, '1.5', '>=')) {
+            try {
+                $output = $this->command('list', '/' . $directory);
+            } catch (RrdNotFoundException) {
+                return []; // directory does not exist
+            }
+
+            return array_values(array_map(basename(...), array_filter(explode("\n", trim($output)))));
+        }
+
+        $files = @scandir(LibrenmsConfig::get('rrd_dir') . DIRECTORY_SEPARATOR . $directory);
+
+        return $files === false ? [] : $files;
+    }
+
+    /**
      * Make sure the rrd directory exists locally.
      * rrdcached does not create directories, so this is attempted even when rrdcached is in use.
      * With a remote rrdcached, failure is not an error.

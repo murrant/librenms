@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Graphing\Contracts\Graph;
 use App\Graphing\Contracts\GraphHandler;
 use App\Graphing\GraphRegistry;
 use App\Graphing\GraphService;
@@ -14,9 +15,11 @@ class GraphServiceProvider extends ServiceProvider
      * Graphs not listed here are rendered by their legacy includes/html/graphs template.
      * Removing an entry reverts that graph to its legacy template.
      *
-     * @var array<string, class-string<GraphHandler>>
+     * @var array<string, class-string<Graph|GraphHandler>>
      */
     public const GRAPHS = [
+        'device_netstat_ip' => \App\Graphs\Device\NetstatIpGraph::class,
+        'device_processor' => \App\Graphs\Device\ProcessorGraph::class,
     ];
 
     public function register(): void

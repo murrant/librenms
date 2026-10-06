@@ -19,7 +19,7 @@ class RrdtoolRendererTest extends TestCase
     {
         Rrd::shouldReceive('graph')->with(['--start', 1])->once()->andReturn('image-data');
 
-        $image = (new RrdtoolRenderer)->render(new RrdCommand(['--start', 1], 'My Graph'), $this->query());
+        $image = app(RrdtoolRenderer::class)->render(new RrdCommand(['--start', 1], 'My Graph'), $this->query());
 
         $this->assertSame('image-data', $image->data);
         $this->assertSame('My Graph', $image->title);
@@ -31,7 +31,7 @@ class RrdtoolRendererTest extends TestCase
         Rrd::shouldReceive('graph')->andThrow(new RrdNotFoundException("opening '/opt/librenms/rrd/host/poller-perf.rrd': No such file or directory"));
 
         try {
-            (new RrdtoolRenderer)->render(new RrdCommand([], ''), $this->query());
+            app(RrdtoolRenderer::class)->render(new RrdCommand([], ''), $this->query());
             $this->fail('Expected GraphNoData');
         } catch (GraphNoData $e) {
             $this->assertSame(['poller-perf.rrd'], $e->missing);
@@ -46,7 +46,7 @@ class RrdtoolRendererTest extends TestCase
         $this->expectException(GraphNoData::class);
         $this->expectExceptionMessage('No Data file poller-perf.rrd');
 
-        (new RrdtoolRenderer)->render(new RrdCommand([], ''), $this->query());
+        app(RrdtoolRenderer::class)->render(new RrdCommand([], ''), $this->query());
     }
 
     public function testRrdtoolErrorIsRenderFailure(): void
@@ -56,7 +56,7 @@ class RrdtoolRendererTest extends TestCase
         $this->expectException(GraphRenderFailed::class);
         $this->expectExceptionMessage('Error: invalid DEF');
 
-        (new RrdtoolRenderer)->render(new RrdCommand([], ''), $this->query());
+        app(RrdtoolRenderer::class)->render(new RrdCommand([], ''), $this->query());
     }
 
     private function query(): GraphQuery

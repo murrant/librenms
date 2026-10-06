@@ -27,19 +27,21 @@
 namespace App\Graphing;
 
 use App\Facades\LibrenmsConfig;
+use App\Graphing\Contracts\Graph;
 use App\Graphing\Contracts\GraphHandler;
 use App\Graphing\Exceptions\UnknownGraph;
 use App\Graphing\Legacy\LegacyGraphHandler;
+use App\Graphing\Modern\ModernGraphHandler;
 use App\Models\Device;
 use InvalidArgumentException;
 
 class GraphRegistry
 {
-    /** @var array<string, class-string<GraphHandler>> */
+    /** @var array<string, class-string<Graph|GraphHandler>> */
     private array $graphs = [];
 
     /**
-     * @param  array<string, class-string<GraphHandler>>  $graphs  graph name (type_subtype) => handler class
+     * @param  array<string, class-string<Graph|GraphHandler>>  $graphs  graph name (type_subtype) => graph or handler class
      */
     public function __construct(array $graphs = [])
     {
@@ -49,7 +51,7 @@ class GraphRegistry
     }
 
     /**
-     * @param  class-string<GraphHandler>  $class
+     * @param  class-string<Graph|GraphHandler>  $class
      */
     public function register(string $name, string $class): void
     {
@@ -57,8 +59,8 @@ class GraphRegistry
             throw new InvalidArgumentException("Invalid graph name: $name");
         }
 
-        if (! is_subclass_of($class, GraphHandler::class)) {
-            throw new InvalidArgumentException("$class must implement " . GraphHandler::class);
+        if (! is_subclass_of($class, Graph::class) && ! is_subclass_of($class, GraphHandler::class)) {
+            throw new InvalidArgumentException("$class must implement " . Graph::class);
         }
 
         $this->graphs[$name] = $class;
@@ -72,7 +74,11 @@ class GraphRegistry
         $name = "{$type}_$subtype";
 
         if (isset($this->graphs[$name])) {
-            return app($this->graphs[$name]);
+            $class = $this->graphs[$name];
+
+            return is_subclass_of($class, Graph::class)
+                ? new ModernGraphHandler(app($class))
+                : app($class);
         }
 
         if (LegacyGraphHandler::exists($type, $subtype)) {
