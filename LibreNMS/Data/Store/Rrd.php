@@ -112,7 +112,7 @@ class Rrd extends BaseDatastore
         $device_model = $this->getDevice($meta);
 
         $rrd_name = $meta['rrd_name'] ?? $measurement;
-        // a metric identity names the file the same way graphs find it
+        // an explicit metric names the file the same way graphs find it, it never falls back to rrd_name
         $metric_path = isset($meta['rrd_metric']) ? $this->metricPath($meta['rrd_metric'], $device_model) : null;
         if ($metric_path !== null) {
             $rrd_name = basename($metric_path->relativePath(), '.rrd');
@@ -440,25 +440,22 @@ class Rrd extends BaseDatastore
 
     /**
      * Resolve the file for a metric written for the given device.
-     * Invalid metrics are reported and the caller falls back to rrd_name so data is not lost.
+     * An invalid explicit metric fails the write: falling back to rrd_name would write
+     * to a file graphs do not read.
+     *
+     * @throws InvalidMetric
      */
-    private function metricPath(mixed $metric, Device $device): ?RrdPath
+    private function metricPath(mixed $metric, Device $device): RrdPath
     {
-        try {
-            if (! $metric instanceof Metric) {
-                throw new InvalidMetric('rrd_metric must be a ' . Metric::class);
-            }
-
-            if ($metric->deviceId() != $device->device_id) {
-                throw new InvalidMetric("Metric {$metric->name()} is not for device $device->device_id");
-            }
-
-            return app(RrdPathResolver::class)->resolve($metric);
-        } catch (InvalidMetric $e) {
-            report($e);
-
-            return null;
+        if (! $metric instanceof Metric) {
+            throw new InvalidMetric('rrd_metric must be a ' . Metric::class);
         }
+
+        if ($metric->deviceId() != $device->device_id) {
+            throw new InvalidMetric("Metric {$metric->name()} is for device {$metric->deviceId()}, not device $device->device_id");
+        }
+
+        return app(RrdPathResolver::class)->resolve($metric);
     }
 
     /**

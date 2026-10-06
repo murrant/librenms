@@ -125,9 +125,9 @@ class RrdtoolRendererMissingDataTest extends TestCase
     public function testRequiredAndOptionalMissingIsNoData(): void
     {
         $definition = new GraphDefinition([
-            new Series('a', new MetricIdentity('a'), 'value', 'A', optional: true),
-            new Series('b', new MetricIdentity('b'), 'value', 'B'),
-            new Series('c', new MetricIdentity('c'), 'value', 'C', optional: true),
+            new Series('a', new FakeMetric('a'), 'value', 'A', optional: true),
+            new Series('b', new FakeMetric('b'), 'value', 'B'),
+            new Series('c', new FakeMetric('c'), 'value', 'C', optional: true),
         ]);
         Rrd::shouldReceive('graph')->once()->andThrow($this->notFound('/rrd/host/a.rrd'));
         Rrd::shouldReceive('missingFiles')->once()->andReturn([RrdPath::make('host', 'a.rrd'), RrdPath::make('host', 'b.rrd')]);
@@ -143,8 +143,8 @@ class RrdtoolRendererMissingDataTest extends TestCase
     public function testOnlyOptionalMissingWhileRequiredPresentRedraws(): void
     {
         $definition = new GraphDefinition([
-            new Series('a', new MetricIdentity('a'), 'value', 'A', optional: true),
-            new Series('b', new MetricIdentity('b'), 'value', 'B'),
+            new Series('a', new FakeMetric('a'), 'value', 'A', optional: true),
+            new Series('b', new FakeMetric('b'), 'value', 'B'),
         ]);
         Rrd::shouldReceive('graph')->once()->ordered()->andThrow($this->notFound('/rrd/host/a.rrd'));
         Rrd::shouldReceive('missingFiles')->once()->andReturn([RrdPath::make('host', 'a.rrd')]);

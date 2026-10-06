@@ -9,14 +9,13 @@ use App\TimeSeries\Exceptions\InvalidMetric;
 use App\TimeSeries\Metrics\Netstats;
 use App\TimeSeries\Metrics\ProcessorUsage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Exceptions;
 use LibreNMS\Data\Store\Rrd;
 use LibreNMS\RRD\RrdDefinition;
 use LibreNMS\RRD\RrdPath;
 use LibreNMS\Tests\TestCase;
 
 /**
- * The rrd store writes rrd_metric to the same file graphs resolve.
+ * The rrd store writes rrd_metric to the same file graphs resolve, or fails the write.
  * PollerGraphContractTest checks the pollers pass the metrics the graphs read.
  */
 class RrdMetricWriteTest extends TestCase
@@ -71,29 +70,41 @@ class RrdMetricWriteTest extends TestCase
         $this->assertFileDoesNotExist("$this->rrdDir/$device->hostname/something-else.rrd");
     }
 
-    public function testMetricForAnotherDeviceFallsBackToRrdNameAndIsReported(): void
+    public function testWithoutMetricUsesRrdName(): void
     {
-        Exceptions::fake();
         $device = $this->device();
 
-        $this->write($device, 'processors', [
-            'rrd_name' => ['processor', 'hr', 1],
-            'rrd_metric' => new ProcessorUsage($device->device_id + 1, 'hr', 1),
-        ], 'usage');
+        $this->write($device, 'processors', ['rrd_name' => ['processor', 'hr', 3]], 'usage');
 
-        $this->assertFileExists("$this->rrdDir/$device->hostname/processor-hr-1.rrd");
-        Exceptions::assertReported(InvalidMetric::class);
+        $this->assertFileExists("$this->rrdDir/$device->hostname/processor-hr-3.rrd");
     }
 
-    public function testNonMetricFallsBackToRrdNameAndIsReported(): void
+    public function testMetricForAnotherDeviceFailsTheWrite(): void
     {
-        Exceptions::fake();
         $device = $this->device();
 
-        $this->write($device, 'processors', ['rrd_name' => ['processor', 'hr', 2], 'rrd_metric' => 'processor-hr-2'], 'usage');
+        try {
+            $this->write($device, 'processors', [
+                'rrd_name' => ['processor', 'hr', 1],
+                'rrd_metric' => new ProcessorUsage($device->device_id + 1, 'hr', 1),
+            ], 'usage');
+            $this->fail('Expected InvalidMetric');
+        } catch (InvalidMetric) {
+            // never falls back to rrd_name
+            $this->assertFileDoesNotExist("$this->rrdDir/$device->hostname/processor-hr-1.rrd");
+        }
+    }
 
-        $this->assertFileExists("$this->rrdDir/$device->hostname/processor-hr-2.rrd");
-        Exceptions::assertReported(InvalidMetric::class);
+    public function testNonMetricFailsTheWrite(): void
+    {
+        $device = $this->device();
+
+        try {
+            $this->write($device, 'processors', ['rrd_name' => ['processor', 'hr', 2], 'rrd_metric' => 'processor-hr-2'], 'usage');
+            $this->fail('Expected InvalidMetric');
+        } catch (InvalidMetric) {
+            $this->assertFileDoesNotExist("$this->rrdDir/$device->hostname/processor-hr-2.rrd");
+        }
     }
 
     /**

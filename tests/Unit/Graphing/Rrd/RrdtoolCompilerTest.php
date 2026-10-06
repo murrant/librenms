@@ -110,15 +110,15 @@ class RrdtoolCompilerTest extends TestCase
     {
         $compiler = new RrdtoolCompiler(new class implements RrdPathResolver
         {
-            public function resolve(MetricIdentity $identity): RrdPath
+            public function resolve(Metric $metric): RrdPath
             {
-                return RrdPath::make((string) $identity->labels['host'], $identity->name . '.rrd');
+                return RrdPath::make((string) $metric->labels()['host'], $metric->name() . '.rrd');
             }
         });
         $definition = new GraphDefinition([
-            new Series('v6', new MetricIdentity('app-my_app-1-stat.x', ['host' => '[2001:db8::1]']), 'value', 'A'),
-            new Series('short', new MetricIdentity('a', ['host' => 'host']), 'value', 'B'),
-            new Series('long', new MetricIdentity('a', ['host' => 'xhost']), 'value', 'C'),
+            new Series('v6', new FakeMetric('app-my_app-1-stat.x', ['host' => '[2001:db8::1]']), 'value', 'A'),
+            new Series('short', new FakeMetric('a', ['host' => 'host']), 'value', 'B'),
+            new Series('long', new FakeMetric('a', ['host' => 'xhost']), 'value', 'C'),
         ]);
 
         $compiled = $compiler->compile($definition, $this->query());
