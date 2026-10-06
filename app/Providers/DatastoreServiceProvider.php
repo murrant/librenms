@@ -27,7 +27,6 @@
 namespace App\Providers;
 
 use App\TimeSeries\Contracts\RrdPathResolver;
-use App\TimeSeries\MetricSchema;
 use App\TimeSeries\Rrd\LegacyRrdPathResolver;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
@@ -49,7 +48,6 @@ class DatastoreServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->app->singleton(MetricSchema::class);
         $this->app->singleton(RrdPathResolver::class, LegacyRrdPathResolver::class);
 
         // set up bindings

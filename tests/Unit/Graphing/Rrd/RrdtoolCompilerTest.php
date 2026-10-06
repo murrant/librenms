@@ -10,9 +10,10 @@ use App\Graphing\Definition\Series;
 use App\Graphing\GraphQuery;
 use App\Graphing\Rrd\RrdtoolCompiler;
 use App\TimeSeries\Contracts\RrdPathResolver;
-use App\TimeSeries\MetricIdentity;
+use App\TimeSeries\Metric;
 use LibreNMS\Data\Store\Rrd;
 use LibreNMS\RRD\RrdPath;
+use LibreNMS\Tests\Mocks\FakeMetric;
 use LibreNMS\Tests\TestCase;
 
 class RrdtoolCompilerTest extends TestCase
@@ -69,8 +70,8 @@ class RrdtoolCompilerTest extends TestCase
     public function testCompilesStackedAreaWithMultiplier(): void
     {
         $definition = new GraphDefinition([
-            new Series('a', new MetricIdentity('a'), 'usage', 'First', multiplier: 0.5),
-            new Series('b', new MetricIdentity('b'), 'usage', 'Second', multiplier: 0.5),
+            new Series('a', new FakeMetric('a'), 'usage', 'First', multiplier: 0.5),
+            new Series('b', new FakeMetric('b'), 'usage', 'Second', multiplier: 0.5),
         ], Layout::StackedArea, new Axis('Load %'), legendRawValues: true);
 
         $options = $this->compiler()->compile($definition, $this->query(['previous' => 'yes']))->options;
@@ -84,7 +85,7 @@ class RrdtoolCompilerTest extends TestCase
 
     public function testFilesFeedingManySeries(): void
     {
-        $metric = new MetricIdentity('shared');
+        $metric = new FakeMetric('shared');
         $definition = new GraphDefinition([
             new Series('in', $metric, 'in', 'In'),
             new Series('out', $metric, 'out', 'Out'),
@@ -141,8 +142,8 @@ class RrdtoolCompilerTest extends TestCase
     private function definition(): GraphDefinition
     {
         return new GraphDefinition([
-            new Series('a', new MetricIdentity('a'), 'usage', 'First', area: true),
-            new Series('b', new MetricIdentity('b'), 'usage', 'Second', invert: true),
+            new Series('a', new FakeMetric('a'), 'usage', 'First', area: true),
+            new Series('b', new FakeMetric('b'), 'usage', 'Second', invert: true),
         ], axis: new Axis('Load', '%', 0, 100), title: 'My Graph');
     }
 
@@ -158,9 +159,9 @@ class RrdtoolCompilerTest extends TestCase
     {
         return new RrdtoolCompiler(new class implements RrdPathResolver
         {
-            public function resolve(MetricIdentity $identity): RrdPath
+            public function resolve(Metric $metric): RrdPath
             {
-                return RrdPath::make('host', $identity->name . '.rrd');
+                return RrdPath::make('host', $metric->name() . '.rrd');
             }
         });
     }

@@ -8,7 +8,7 @@ use App\Graphing\Definition\GraphDefinition;
 use App\Graphing\Definition\Series;
 use App\Graphing\GraphQuery;
 use App\Graphing\GraphSubject;
-use App\TimeSeries\MetricIdentity;
+use App\TimeSeries\Metrics\Netstats;
 
 class NetstatIpGraph extends BaseGraph
 {
@@ -29,7 +29,7 @@ class NetstatIpGraph extends BaseGraph
 
     public function define(GraphSubject $subject, GraphQuery $query): GraphDefinition
     {
-        $metric = new MetricIdentity('netstats-ip', ['device_id' => $subject->device?->device_id]);
+        $metric = new Netstats((int) $subject->device?->device_id, 'ip');
 
         $series = [];
         foreach (self::FIELDS as $field => $label) {

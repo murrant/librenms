@@ -101,6 +101,7 @@ class Datastore implements WriteInterface, DataStorageInterface
      * RRD Tags:
      *   rrd_def     RrdDefinition
      *   rrd_name    array|string: the rrd filename, will be processed with rrd_name()
+     *   rrd_metric  App\TimeSeries\Metric: names the rrd file the way graphs read it, takes precedence over rrd_name for rrd
      *   rrd_oldname array|string: old rrd filename to rename, will be processed with rrd_name()
      *   rrd_step             int: rrd step, defaults to 300
      *

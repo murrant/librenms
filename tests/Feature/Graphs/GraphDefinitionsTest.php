@@ -9,6 +9,7 @@ use App\Graphs\Device\NetstatIpGraph;
 use App\Graphs\Device\ProcessorGraph;
 use App\Models\Device;
 use App\Models\Processor;
+use App\TimeSeries\Metrics\ProcessorUsage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use LibreNMS\Tests\TestCase;
 
@@ -31,8 +32,8 @@ class GraphDefinitionsTest extends TestCase
         $this->assertTrue($definition->series[0]->optional);
         $this->assertTrue($definition->series[0]->area);
         $this->assertSame(1.0, $definition->series[0]->multiplier);
-        $this->assertSame('processor', $definition->series[0]->metric->name);
-        $this->assertSame(['device_id', 'processor_type', 'processor_index'], array_keys($definition->series[0]->metric->labels));
+        $this->assertInstanceOf(ProcessorUsage::class, $definition->series[0]->metric);
+        $this->assertSame($device->device_id, $definition->series[0]->metric->deviceId());
         $this->assertSame(100.0, $definition->axis->max);
     }
 
@@ -62,7 +63,7 @@ class GraphDefinitionsTest extends TestCase
         $definition = $graph->define($subject, $query);
 
         $this->assertCount(7, $definition->series);
-        $this->assertSame(['netstats-ip'], array_values(array_unique(array_map(fn ($s) => $s->metric->name, $definition->series))));
+        $this->assertSame(['netstats-ip'], array_values(array_unique(array_map(fn ($s) => $s->metric->name(), $definition->series))));
         $inverted = array_values(array_map(fn ($s) => $s->field, array_filter($definition->series, fn ($s) => $s->invert)));
         $this->assertSame(['ipOutRequests', 'ipOutDiscards', 'ipOutNoRoutes'], $inverted);
         $this->assertFalse($definition->series[0]->optional);

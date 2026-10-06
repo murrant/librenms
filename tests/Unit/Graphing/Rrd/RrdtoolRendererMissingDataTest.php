@@ -11,9 +11,10 @@ use App\Graphing\Exceptions\GraphRenderFailed;
 use App\Graphing\GraphQuery;
 use App\Graphing\Rrd\RrdtoolRenderer;
 use App\TimeSeries\Contracts\RrdPathResolver;
-use App\TimeSeries\MetricIdentity;
+use App\TimeSeries\Metric;
 use LibreNMS\Exceptions\RrdNotFoundException;
 use LibreNMS\RRD\RrdPath;
+use LibreNMS\Tests\Mocks\FakeMetric;
 use LibreNMS\Tests\TestCase;
 use Mockery;
 
@@ -27,9 +28,9 @@ class RrdtoolRendererMissingDataTest extends TestCase
 
         $this->app->instance(RrdPathResolver::class, new class implements RrdPathResolver
         {
-            public function resolve(MetricIdentity $identity): RrdPath
+            public function resolve(Metric $metric): RrdPath
             {
-                return RrdPath::make('host', $identity->name . '.rrd');
+                return RrdPath::make('host', $metric->name() . '.rrd');
             }
         });
     }
@@ -200,7 +201,7 @@ class RrdtoolRendererMissingDataTest extends TestCase
     private function definition(bool $optional): GraphDefinition
     {
         return new GraphDefinition(array_map(
-            fn (string $name) => new Series($name, new MetricIdentity($name), 'value', strtoupper($name), optional: $optional),
+            fn (string $name) => new Series($name, new FakeMetric($name), 'value', strtoupper($name), optional: $optional),
             ['a', 'b', 'c'],
         ));
     }

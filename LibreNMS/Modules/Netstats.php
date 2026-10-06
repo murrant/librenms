@@ -27,6 +27,7 @@
 namespace LibreNMS\Modules;
 
 use App\Models\Device;
+use App\TimeSeries\Metrics\Netstats as NetstatsMetric;
 use Illuminate\Support\Facades\Log;
 use LibreNMS\Interfaces\Data\DataStorageInterface;
 use LibreNMS\Interfaces\Module;
@@ -218,7 +219,8 @@ class Netstats implements Module
                         $fields[$stat] = $data[$oid] ?? null;
                     }
 
-                    $datastore->put($os->getDeviceArray(), "netstats-$type", ['rrd_def' => $rrd_def], $fields);
+                    $tags = ['rrd_def' => $rrd_def, 'rrd_metric' => new NetstatsMetric($os->getDeviceId(), $type)];
+                    $datastore->put($os->getDeviceArray(), "netstats-$type", $tags, $fields);
 
                     // enable graphs
                     foreach ($this->graphs[$type] as $graph) {

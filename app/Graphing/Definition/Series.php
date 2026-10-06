@@ -2,7 +2,7 @@
 
 namespace App\Graphing\Definition;
 
-use App\TimeSeries\MetricIdentity;
+use App\TimeSeries\Metric;
 
 /**
  * One plotted value: a field of a metric plus how to present it
@@ -19,7 +19,7 @@ final readonly class Series
      */
     public function __construct(
         public string $key,
-        public MetricIdentity $metric,
+        public Metric $metric,
         public string $field,
         public string $label,
         public bool $optional = false,

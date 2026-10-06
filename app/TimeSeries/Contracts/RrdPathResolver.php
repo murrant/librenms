@@ -2,7 +2,7 @@
 
 namespace App\TimeSeries\Contracts;
 
-use App\TimeSeries\MetricIdentity;
+use App\TimeSeries\Metric;
 use LibreNMS\RRD\RrdPath;
 
 interface RrdPathResolver
@@ -10,5 +10,5 @@ interface RrdPathResolver
     /**
      * Where the rrd file for the given metric is stored
      */
-    public function resolve(MetricIdentity $identity): RrdPath;
+    public function resolve(Metric $metric): RrdPath;
 }

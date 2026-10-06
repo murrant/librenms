@@ -28,6 +28,7 @@ namespace LibreNMS\Device;
 
 use App\Facades\LibrenmsConfig;
 use App\Models\Eventlog;
+use App\TimeSeries\Metrics\ProcessorUsage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use LibreNMS\Enum\Severity;
@@ -189,9 +190,15 @@ class Processor extends Model implements DiscoveryModule, PollerModule, Discover
                 $usage = round($data[$processor_id], 2);
                 Log::info("$processor_descr: $usage%");
 
-                $rrd_name = ['processor', $processor_type, $processor_index];
+                $rrd_name = ['processor', $processor_type, $processor_index]; // still used by graphite
                 $fields = ['usage' => $usage];
-                $tags = ['processor_type' => $processor_type, 'processor_index' => $processor_index, 'rrd_name' => $rrd_name, 'rrd_def' => $rrd_def];
+                $tags = [
+                    'processor_type' => $processor_type,
+                    'processor_index' => $processor_index,
+                    'rrd_name' => $rrd_name,
+                    'rrd_metric' => new ProcessorUsage($os->getDeviceId(), $processor_type, $processor_index),
+                    'rrd_def' => $rrd_def,
+                ];
                 app('Datastore')->put($os->getDeviceArray(), 'processors', $tags, $fields);
 
                 if ($usage != $processor_usage) {

@@ -12,10 +12,10 @@ use App\Graphing\GraphSubject;
 use App\Graphing\Modern\ModernGraphHandler;
 use App\Models\Device;
 use App\Models\User;
-use App\TimeSeries\MetricIdentity;
 use Illuminate\Auth\Access\Gate as AccessGate;
 use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
+use LibreNMS\Tests\Mocks\FakeMetric;
 use LibreNMS\Tests\TestCase;
 use Mockery;
 
@@ -55,13 +55,13 @@ class ModernGraphHandlerTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $metric = new MetricIdentity('a');
+        $metric = new FakeMetric('a');
         new GraphDefinition([new Series('a', $metric, 'x', 'X'), new Series('a', $metric, 'y', 'Y')]);
     }
 
     public function testDefinitionOptionalSeries(): void
     {
-        $metric = new MetricIdentity('a');
+        $metric = new FakeMetric('a');
         $definition = new GraphDefinition([new Series('a', $metric, 'x', 'X', optional: true), new Series('b', $metric, 'y', 'Y')]);
 
         $this->assertTrue($definition->allOptional(['a']));

@@ -30,6 +30,9 @@ use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use App\Models\Eventlog;
 use App\Polling\Measure\Measurement;
+use App\TimeSeries\Contracts\RrdPathResolver;
+use App\TimeSeries\Exceptions\InvalidMetric;
+use App\TimeSeries\Metric;
 use LibreNMS\Enum\Severity;
 use LibreNMS\Exceptions\RrdException;
 use LibreNMS\Exceptions\RrdFileExistsException;
@@ -109,6 +112,12 @@ class Rrd extends BaseDatastore
         $device_model = $this->getDevice($meta);
 
         $rrd_name = $meta['rrd_name'] ?? $measurement;
+        // a metric identity names the file the same way graphs find it
+        $metric_path = isset($meta['rrd_metric']) ? $this->metricPath($meta['rrd_metric'], $device_model) : null;
+        if ($metric_path !== null) {
+            $rrd_name = basename($metric_path->relativePath(), '.rrd');
+        }
+
         $step = $meta['rrd_step'] ?? $this->step;
         if (! empty($meta['rrd_oldname'])) {
             self::renameFile($device_model, $meta['rrd_oldname'], $rrd_name);
@@ -119,7 +128,7 @@ class Rrd extends BaseDatastore
             $rrd = self::proxmoxName($pmxvars['pmxcluster'], $pmxvars['vmid'], $pmxvars['vmport']);
             self::checkDirExists(RrdPath::proxmox($pmxvars['pmxcluster']));
         } else {
-            $rrd = RrdPath::make($device_model->hostname, self::filenameString($rrd_name) . '.rrd');
+            $rrd = $metric_path ?? RrdPath::make($device_model->hostname, self::filenameString($rrd_name) . '.rrd');
         }
 
         if (isset($meta['rrd_def'])) {
@@ -426,6 +435,29 @@ class Rrd extends BaseDatastore
             }
         } else {
             return is_file($rrdpath->fullPath());
+        }
+    }
+
+    /**
+     * Resolve the file for a metric written for the given device.
+     * Invalid metrics are reported and the caller falls back to rrd_name so data is not lost.
+     */
+    private function metricPath(mixed $metric, Device $device): ?RrdPath
+    {
+        try {
+            if (! $metric instanceof Metric) {
+                throw new InvalidMetric('rrd_metric must be a ' . Metric::class);
+            }
+
+            if ($metric->deviceId() != $device->device_id) {
+                throw new InvalidMetric("Metric {$metric->name()} is not for device $device->device_id");
+            }
+
+            return app(RrdPathResolver::class)->resolve($metric);
+        } catch (InvalidMetric $e) {
+            report($e);
+
+            return null;
         }
     }
 

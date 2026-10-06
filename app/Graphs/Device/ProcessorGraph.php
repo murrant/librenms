@@ -12,7 +12,7 @@ use App\Graphing\Exceptions\GraphSubjectNotFound;
 use App\Graphing\GraphQuery;
 use App\Graphing\GraphSubject;
 use App\Models\Processor;
-use App\TimeSeries\MetricIdentity;
+use App\TimeSeries\Metrics\ProcessorUsage;
 
 class ProcessorGraph extends BaseGraph
 {
@@ -34,11 +34,7 @@ class ProcessorGraph extends BaseGraph
 
         $series = $processors->values()->map(fn (Processor $processor) => new Series(
             key: "processor_$processor->processor_id",
-            metric: new MetricIdentity('processor', [
-                'device_id' => $processor->device_id,
-                'processor_type' => $processor->processor_type,
-                'processor_index' => $processor->processor_index,
-            ]),
+            metric: ProcessorUsage::for($processor),
             field: 'usage',
             label: $processor->getFormattedDescription(),
             optional: true, // processors are polled independently, one without data should not hide the others
