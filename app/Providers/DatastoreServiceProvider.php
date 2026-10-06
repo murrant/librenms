@@ -51,7 +51,7 @@ class DatastoreServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(RrdPathResolver::class, LegacyRrdPathResolver::class);
-        $this->app->singleton(MetricValidator::class, RrdFileValidator::class);
+        $this->app->bind(MetricValidator::class, RrdFileValidator::class);
 
         // set up bindings
         foreach ($this->stores as $store) {
