@@ -33,16 +33,34 @@ class GraphRequest extends FormRequest
         $this->mergeIfMissing(Url::parseLegacyPathVars($this->path()));
     }
 
+    /**
+     * Only checks that access is established (a user, or a guest trusted by AuthenticateGraph).
+     * The graph is resolved and authorized after validation, see passedValidation().
+     */
     public function authorize(): bool
     {
         try {
-            $this->graph = app(GraphService::class)->resolve($this->graphQuery(), $this->access());
+            $this->access();
 
             return true;
         } catch (GraphException $e) {
             $this->graphError = $e;
 
             return false;
+        }
+    }
+
+    /**
+     * Resolve the graph once input is known to be valid, so subject resolution and
+     * authorization never see invalid input.
+     */
+    protected function passedValidation(): void
+    {
+        try {
+            $this->graph = app(GraphService::class)->resolve($this->graphQuery(), $this->access());
+        } catch (GraphException $e) {
+            $this->graphError = $e;
+            $this->failedAuthorization();
         }
     }
 

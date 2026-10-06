@@ -27,6 +27,7 @@
 namespace LibreNMS\Alert\Transport;
 
 use App\Graphing\GraphAccess;
+use App\Graphing\GraphTrust;
 use LibreNMS\Alert\Transport;
 use LibreNMS\Exceptions\AlertTransportDeliveryException;
 use LibreNMS\Util\Graph;
@@ -114,7 +115,7 @@ class Telegram extends Transport
         $regex = '#<img class="librenms-graph" src="(.*?)"\s*/>#';
 
         $this->message['text'] = preg_replace_callback($regex, function ($match) {
-            $this->message['images'][] = Graph::getImageData($match[1], GraphAccess::trusted(GraphAccess::ALERT));
+            $this->message['images'][] = Graph::getImageData($match[1], GraphAccess::trusted(GraphTrust::Alert));
 
             return '';
         }, (string) $this->message['text']);

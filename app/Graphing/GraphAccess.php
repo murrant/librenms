@@ -35,16 +35,12 @@ use Illuminate\Support\Facades\Auth;
 
 final readonly class GraphAccess
 {
-    /** Request attribute set by AuthenticateGraph when it lets a guest through */
+    /** Request attribute (a GraphTrust) set by AuthenticateGraph when it lets a guest through */
     public const REQUEST_ATTRIBUTE = 'graph_trust';
-
-    public const SIGNED_URL = 'signed-url';
-    public const UNAUTH_GRAPHS = 'unauth-graphs';
-    public const ALERT = 'alert';
 
     private function __construct(
         public ?User $user,
-        public ?string $trust,
+        public ?GraphTrust $trust,
     ) {
     }
 
@@ -54,11 +50,11 @@ final readonly class GraphAccess
     }
 
     /**
-     * Only use for contexts that have already been authenticated by other means.
+     * Only for contexts already authenticated by the given mechanism, permission checks are skipped.
      */
-    public static function trusted(string $reason): self
+    public static function trusted(GraphTrust $trust): self
     {
-        return new self(null, $reason);
+        return new self(null, $trust);
     }
 
     /**
@@ -88,7 +84,7 @@ final readonly class GraphAccess
         }
 
         $trust = $request->attributes->get(self::REQUEST_ATTRIBUTE);
-        if (is_string($trust) && $trust !== '') {
+        if ($trust instanceof GraphTrust) {
             return self::trusted($trust);
         }
 

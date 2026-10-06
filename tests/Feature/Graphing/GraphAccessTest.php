@@ -5,6 +5,7 @@ namespace LibreNMS\Tests\Feature\Graphing;
 use App\Facades\LibrenmsConfig;
 use App\Graphing\Exceptions\GraphUnauthorized;
 use App\Graphing\GraphAccess;
+use App\Graphing\GraphTrust;
 use App\Graphing\GraphQuery;
 use App\Graphing\GraphService;
 use App\Models\Device;
@@ -54,13 +55,22 @@ class GraphAccessTest extends TestCase
     public function testRequestTrustedByMiddleware(): void
     {
         $request = Request::create('/graph');
-        $request->attributes->set(GraphAccess::REQUEST_ATTRIBUTE, GraphAccess::SIGNED_URL);
+        $request->attributes->set(GraphAccess::REQUEST_ATTRIBUTE, GraphTrust::SignedUrl);
 
         $access = GraphAccess::fromRequest($request);
 
         $this->assertNull($access->user);
         $this->assertTrue($access->isTrusted());
-        $this->assertSame(GraphAccess::SIGNED_URL, $access->trust);
+        $this->assertSame(GraphTrust::SignedUrl, $access->trust);
+    }
+
+    public function testTrustMustBeAGraphTrust(): void
+    {
+        $request = Request::create('/graph');
+        $request->attributes->set(GraphAccess::REQUEST_ATTRIBUTE, 'signed-url');
+
+        $this->expectException(GraphUnauthorized::class);
+        GraphAccess::fromRequest($request);
     }
 
     public function testGuestRequestIsNotTrusted(): void
@@ -79,7 +89,7 @@ class GraphAccessTest extends TestCase
     {
         $device = Device::factory()->create();
 
-        $image = Graph::getImage(['type' => 'device_poller_perf', 'device' => $device->device_id], GraphAccess::trusted(GraphAccess::ALERT));
+        $image = Graph::getImage(['type' => 'device_poller_perf', 'device' => $device->device_id], GraphAccess::trusted(GraphTrust::Alert));
 
         $this->assertSame('Error', $image->title);
         $this->assertStringContainsString('No Data', $image->data);
