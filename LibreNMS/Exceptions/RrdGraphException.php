@@ -48,6 +48,11 @@ class RrdGraphException extends RrdException
         return $this->image_output;
     }
 
+    public function getShortText(): ?string
+    {
+        return $this->short_text;
+    }
+
     public function generateErrorImage(): string
     {
         return Graph::error(

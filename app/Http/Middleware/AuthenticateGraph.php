@@ -27,6 +27,7 @@
 namespace App\Http\Middleware;
 
 use App\Facades\LibrenmsConfig;
+use App\Graphing\GraphAccess;
 use Closure;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -63,11 +64,15 @@ class AuthenticateGraph
 
         // bypass normal auth if signed
         if ($request->hasValidSignature($relative !== 'relative')) {
+            $request->attributes->set(GraphAccess::REQUEST_ATTRIBUTE, GraphAccess::SIGNED_URL);
+
             return $next($request);
         }
 
         // bypass normal auth if ip is allowed (or all IPs)
         if ($this->isAllowed($request)) {
+            $request->attributes->set(GraphAccess::REQUEST_ATTRIBUTE, GraphAccess::UNAUTH_GRAPHS);
+
             return $next($request);
         }
 

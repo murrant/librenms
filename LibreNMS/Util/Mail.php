@@ -27,7 +27,8 @@
 namespace LibreNMS\Util;
 
 use App\Facades\LibrenmsConfig;
-use LibreNMS\Exceptions\RrdGraphException;
+use App\Graphing\Exceptions\GraphException;
+use App\Graphing\GraphAccess;
 use PHPMailer\PHPMailer\PHPMailer;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Exception\ExceptionInterface as MimeException;
@@ -155,7 +156,7 @@ class Mail
                 $cid = 'graph' . ++$count;
 
                 // fetch image data
-                $image = Graph::getImage($url);
+                $image = Graph::getImage($url, GraphAccess::trusted(GraphAccess::ALERT));
 
                 // attach image
                 $fileName = substr(Clean::fileName($image->title ?: $cid), 0, 250);
@@ -173,7 +174,7 @@ class Mail
                 } else {
                     $body = str_replace($tag, "[$fileName]", $body);
                 }
-            } catch (RrdGraphException|\PHPMailer\PHPMailer\Exception $e) {
+            } catch (GraphException|\PHPMailer\PHPMailer\Exception $e) {
                 report($e);
             }
         }

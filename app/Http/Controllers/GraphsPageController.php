@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Data\Graphing\GraphFactory;
 use App\Facades\LibrenmsConfig;
-use App\Facades\Rrd;
+use App\Graphing\GraphDescription;
+use App\Graphing\GraphQuery;
+use App\Graphing\GraphService;
 use App\Http\Requests\GraphRequest;
 use App\Models\Device;
 use App\Models\Port;
@@ -18,15 +19,17 @@ class GraphsPageController extends Controller
 {
     public function __invoke(GraphRequest $request): View
     {
-        $fullType = "{$request->type}_$request->subtype";
+        $query = $request->graphQuery();
+        $description = $request->graph()->description();
+        $fullType = $query->name();
         $showCommand = $request->input('showcommand') === 'yes';
         $isDynamicGraph = LibrenmsConfig::get('webui.dynamic_graphs', false) === true;
 
         $this->handleWidescreenPreference($request);
 
-        $subtitle = $this->buildSubtitle($request->type, $request->subtype, $request);
+        $subtitle = $this->buildSubtitle($query, $description, $request);
 
-        [$subtypeOptions, $subtypeSelected] = $this->subtypeNavigationOptions($request);
+        [$subtypeOptions, $subtypeSelected] = $this->subtypeNavigationOptions($request, $query, $description->device);
 
         ['width' => $graphWidth, 'height' => $graphHeight, 'thumbWidth' => $thumbWidth] = $this->graphDimensions($request);
         $width = $graphWidth;
@@ -34,10 +37,10 @@ class GraphsPageController extends Controller
         $mainGraphVars = $request->toVars(['height' => $height, 'width' => $width]);
 
         return view('graphs.show', [
-            'device' => $request->device,
-            'port' => $request->port,
+            'device' => $description->device,
+            'port' => $description->port,
             'subtitle' => $subtitle,
-            'pageTitle' => $this->entityTitle($request->device, $request->port) . $subtitle,
+            'pageTitle' => $this->entityTitle($description->device, $description->port) . $subtitle,
             'subtypeOptions' => $subtypeOptions,
             'subtypeSelected' => $subtypeSelected,
             'periodThumbs' => $this->periodThumbnails($request, $request->from, $request->to, $thumbWidth),
@@ -48,7 +51,7 @@ class GraphsPageController extends Controller
             'mainGraphVars' => $mainGraphVars,
             'graphDescr' => LibrenmsConfig::get("graph_descr.$fullType"),
             'showCommand' => $showCommand,
-            'rrdCommand' => $showCommand ? $this->renderRrdCommand($mainGraphVars) : null,
+            'rrdCommand' => $showCommand ? $this->renderRrdCommand($request, $mainGraphVars) : null,
             'isDynamicGraph' => $isDynamicGraph,
             'dynamicGraphWidth' => $isDynamicGraph ? $width : 0,
             'dynamicGraphSrcTemplate' => $isDynamicGraph ? $this->dynamicGraphSrcTemplate($mainGraphVars) : null,
@@ -73,9 +76,9 @@ class GraphsPageController extends Controller
      *
      * @return array{0: array<int, array{value: string, text: string}>, 1: ?string}
      */
-    private function subtypeNavigationOptions(GraphRequest $request): array
+    private function subtypeNavigationOptions(GraphRequest $request, GraphQuery $query, ?Device $device): array
     {
-        $graphSubtypes = in_array($request->type, ['sensor', 'wireless'], true) ? [] : Graph::getSubtypes($request->type, $request->device);
+        $graphSubtypes = in_array($query->type, ['sensor', 'wireless'], true) ? [] : Graph::getSubtypes($query->type, $device);
 
         if (count($graphSubtypes) <= 1) {
             return [[], null];
@@ -83,10 +86,10 @@ class GraphsPageController extends Controller
 
         return [
             array_map(fn ($availType) => [
-                'value' => $this->graphUrl($request, ['type' => "{$request->type}_{$availType}"]),
+                'value' => $this->graphUrl($request, ['type' => "{$query->type}_{$availType}"]),
                 'text' => StringHelpers::niceCase($availType),
             ], $graphSubtypes),
-            $this->graphUrl($request, ['type' => "{$request->type}_{$request->subtype}"]),
+            $this->graphUrl($request, ['type' => $query->name()]),
         ];
     }
 
@@ -172,10 +175,13 @@ class GraphsPageController extends Controller
     /**
      * Build the plain-text subtitle (" :: ...") describing the graph subtype.
      */
-    private function buildSubtitle(string $type, string $subtype, GraphRequest $request): string
+    private function buildSubtitle(GraphQuery $query, GraphDescription $description, GraphRequest $request): string
     {
-        if ($request->subtitle) {
-            return $request->subtitle;
+        $type = $query->type;
+        $subtype = $query->subtype;
+
+        if ($description->subtitle) {
+            return $description->subtitle;
         }
 
         if (LibrenmsConfig::has("graph_types.$type.$subtype.descr")) {
@@ -247,16 +253,12 @@ class GraphsPageController extends Controller
     /**
      * @param  array<string, mixed>  $graphVars
      */
-    private function renderRrdCommand(array $graphVars): ?string
+    private function renderRrdCommand(GraphRequest $request, array $graphVars): ?string
     {
         try {
-            $graph = app(GraphFactory::class)->graphFor($graphVars['type'] ?? '', $graphVars);
-            $rrd_options = $graph->getRrdCommandOptions();
-
-            return implode(' ', array_map(escapeshellarg(...), [
-                'rrdtool',
-                ...Rrd::buildCommand('graph', '-', $rrd_options),
-            ]));
+            return app(GraphService::class)
+                ->resolve(GraphQuery::fromVars($graphVars), $request->access())
+                ->command();
         } catch (\Throwable $e) {
             Log::error('RRDTool Command Error: ' . $e->getMessage(), ['exception' => $e]);
 

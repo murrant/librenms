@@ -2,92 +2,67 @@
 
 namespace App\Http\Requests;
 
-use App\Data\Graphing\GraphFactory;
-use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;
-use App\Facades\PortCache;
-use App\Models\Device;
-use App\Models\Port;
+use App\Graphing\Exceptions\GraphException;
+use App\Graphing\Exceptions\InvalidGraphInput;
+use App\Graphing\GraphAccess;
+use App\Graphing\GraphQuery;
+use App\Graphing\GraphRegistry;
+use App\Graphing\GraphService;
+use App\Graphing\ResolvedGraph;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
-use LibreNMS\Interfaces\Data\Graphing\GraphInterface;
 use LibreNMS\Util\Time;
 use LibreNMS\Util\Url;
 
 class GraphRequest extends FormRequest
 {
-    private ?GraphInterface $graph = null;
-    private bool $parsed = false;
-
-    public string $type = '';
-    public string $subtype = '';
-    public ?Device $device = null;
-    public ?Port $port = null;
+    /** Requested start, defaults to one day ago */
     public int $from = 0;
+    /** Requested end, 0 when graphing up to now */
     public int $to = 0;
-    /** @var list<int> */
-    public array $ids = [];
 
-    public ?string $subtitle = null;
+    private bool $rangeParsed = false;
+    private ?GraphQuery $graphQuery = null;
+    private ?ResolvedGraph $graph = null;
+    private ?GraphException $graphError = null;
 
     protected function prepareForValidation(): void
     {
         $this->mergeIfMissing(Url::parseLegacyPathVars($this->path()));
     }
 
-    private function parseInput(): void
-    {
-        if ($this->parsed) {
-            return;
-        }
-
-        $typeInput = $this->string('type', '')->toString();
-        if (preg_match('#^[a-zA-Z0-9]+_[^/?&]+$#', $typeInput)) {
-            [$this->type, $this->subtype] = explode('_', $typeInput, 2);
-        }
-
-        $this->from = (int) (Time::parseAt($this->input('from', '')) ?: LibrenmsConfig::get('time.day'));
-        $this->to = Time::parseAt($this->input('to', ''));
-
-        $this->ids = $this->string('id')->explode(',')->filter()->map(intval(...))->values()->all();
-
-        if ($deviceId = $this->input('device')) {
-            $this->device = DeviceCache::get($deviceId);
-        } elseif (count($this->ids) === 1) {
-            if ($this->type == 'port') {
-                $this->port = PortCache::get($this->ids[0]);
-                $this->device = $this->port->device;
-            } elseif ($this->type == 'device') {
-                $this->device = DeviceCache::get($this->ids[0]);
-            }
-        }
-
-        $this->parsed = true;
-    }
-
     public function authorize(): bool
     {
-        $this->parseInput();
-
-        if (empty($this->type) || empty($this->subtype)) {
-            return false;
-        }
-
         try {
-            $graph = $this->getGraph();
-
-            if (! $graph->authorize()) {
-                return false;
-            }
-
-            $this->device ??= $graph->getDevice();
-            $this->port ??= $graph->getPort();
-            $this->subtitle ??= $graph->getSubtitle();
+            $this->graph = app(GraphService::class)->resolve($this->graphQuery(), $this->access());
 
             return true;
-        } catch (\Throwable) {
+        } catch (GraphException $e) {
+            $this->graphError = $e;
+
             return false;
         }
+    }
+
+    protected function failedAuthorization(): void
+    {
+        // graph images respond with an error image instead of an error page
+        if ($this->expectsImage() && $this->graphError !== null) {
+            throw $this->graphError;
+        }
+
+        parent::failedAuthorization();
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        if ($this->expectsImage()) {
+            throw InvalidGraphInput::fromValidation(new ValidationException($validator));
+        }
+
+        parent::failedValidation($validator);
     }
 
     public function rules(): array
@@ -97,7 +72,7 @@ class GraphRequest extends FormRequest
             'from' => ['nullable', 'string', 'regex:/^[-a-zA-Z0-9_ :]+$/'],
             'to' => ['nullable', 'string', 'regex:/^[-a-zA-Z0-9_ :]+$/'],
             'widescreen' => ['nullable', 'string', 'in:yes,no'],
-            'legend' => ['nullable', 'string', 'in:yes,no'],
+            'legend' => ['nullable', 'string', 'in:yes,no,true,false,1,0'],
             'previous' => ['nullable', 'string', 'in:yes,no'],
             'showcommand' => ['nullable', 'string', 'in:yes,no'],
             'port_speed_zoom' => ['nullable', 'in:0,1'],
@@ -125,18 +100,16 @@ class GraphRequest extends FormRequest
             'aggregate' => ['nullable', 'string', 'in:true,false,1,0,yes,no'],
         ];
 
-        try {
-            $graphRules = $this->getGraph()->validation();
-
-            return array_merge($baseRules, $graphRules);
-        } catch (\Throwable) {
-            return $baseRules;
+        if (preg_match('/^([a-zA-Z0-9]+)_(.+)$/', $this->string('type')->toString(), $matches)) {
+            return array_merge($baseRules, app(GraphRegistry::class)->rules($matches[1], $matches[2]));
         }
+
+        return $baseRules;
     }
 
-    public function withValidator(\Illuminate\Validation\Validator $validator): void
+    public function withValidator(Validator $validator): void
     {
-        $validator->after(function (\Illuminate\Validation\Validator $validator): void {
+        $validator->after(function (Validator $validator): void {
             $validateItem = function (string $key, mixed $value) use ($validator, &$validateItem): void {
                 if (is_array($value)) {
                     foreach ($value as $k => $v) {
@@ -160,20 +133,36 @@ class GraphRequest extends FormRequest
         });
     }
 
-    public function getId(): int
+    public function graphQuery(): GraphQuery
     {
-        $this->parseInput();
-
-        if (count($this->ids) !== 1) {
-            throw ValidationException::withMessages(['id' => 'Invalid id input, input must be a single integer']);
-        }
-
-        return $this->ids[0];
+        return $this->graphQuery ??= GraphQuery::fromVars($this->toVars());
     }
 
+    /**
+     * @throws GraphException
+     */
+    public function access(): GraphAccess
+    {
+        return GraphAccess::fromRequest($this);
+    }
+
+    /**
+     * The graph resolved and authorized for this request
+     *
+     * @throws GraphException
+     */
+    public function graph(): ResolvedGraph
+    {
+        return $this->graph ??= app(GraphService::class)->resolve($this->graphQuery(), $this->access());
+    }
+
+    /**
+     * @param  array<string, mixed>  $overrides
+     * @return array<string, mixed>
+     */
     public function toVars(array $overrides = []): array
     {
-        $this->parseInput();
+        $this->parseRange();
 
         $vars = $this->except(['page', 'username', 'password']);
         $vars['from'] = $this->from;
@@ -182,12 +171,19 @@ class GraphRequest extends FormRequest
         return array_merge($vars, $overrides);
     }
 
-    public function getGraph(): GraphInterface
+    private function parseRange(): void
     {
-        $this->parseInput();
+        if ($this->rangeParsed) {
+            return;
+        }
 
-        $this->graph ??= resolve(GraphFactory::class)->graphFor($this->type ?: $this->string('type', '')->toString(), $this->toVars());
+        $this->from = (int) (Time::parseAt($this->input('from', '')) ?: LibrenmsConfig::get('time.day'));
+        $this->to = Time::parseAt($this->input('to', ''));
+        $this->rangeParsed = true;
+    }
 
-        return $this->graph;
+    private function expectsImage(): bool
+    {
+        return $this->routeIs('graph');
     }
 }

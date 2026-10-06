@@ -2,24 +2,28 @@
 
 namespace LibreNMS\Util;
 
-use App\Data\Graphing\GraphFactory;
-use App\Data\Graphing\GraphImage;
-use App\Data\Graphing\GraphParameters;
 use App\Facades\LibrenmsConfig;
+use App\Graphing\Exceptions\GraphException;
+use App\Graphing\GraphAccess;
+use App\Graphing\GraphErrorImage;
+use App\Graphing\GraphImage;
+use App\Graphing\GraphQuery;
+use App\Graphing\GraphRegistry;
+use App\Graphing\GraphService;
 use App\Models\Device;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
 use LibreNMS\Enum\GraphOutput;
 use LibreNMS\Enum\ImageFormat;
-use LibreNMS\Exceptions\InvalidGraph;
-use LibreNMS\Exceptions\RrdGraphException;
 
 class Graph
 {
     /**
      * Convenience helper to specify desired image output
+     *
+     * @param  array<string, mixed>|string  $vars  graph vars or a graph url
+     * @param  GraphAccess|null  $access  defaults to the logged in user
      */
-    public static function getImageData(array|string $vars, ?ImageFormat $format = null, ?GraphOutput $output = null): string
+    public static function getImageData(array|string $vars, ?GraphAccess $access = null, ?ImageFormat $format = null, ?GraphOutput $output = null): string
     {
         $vars = is_string($vars) ? Url::parseLegacyPathVars($vars) : $vars;
 
@@ -27,7 +31,7 @@ class Graph
             $vars['graph_type'] = $format->value;
         }
 
-        $image = self::getImage($vars);
+        $image = self::getImage($vars, $access);
 
         return match ($output) {
             GraphOutput::Base64 => $image->base64(),
@@ -39,72 +43,40 @@ class Graph
     /**
      * Fetch a GraphImage based on the given $vars
      * Catches errors generated and always returns GraphImage
+     *
+     * @param  array<string, mixed>|string  $vars  graph vars or a graph url
+     * @param  GraphAccess|null  $access  defaults to the logged in user
      */
-    public static function getImage(array|string $vars): GraphImage
+    public static function getImage(array|string $vars, ?GraphAccess $access = null): GraphImage
     {
-        $vars = is_string($vars) ? Url::parseLegacyPathVars($vars) : $vars;
+        $query = GraphQuery::fromVars($vars);
 
         try {
-            return app(GraphFactory::class)->graphFor($vars['type'] ?? '', $vars)->render();
-        } catch (RrdGraphException|InvalidGraph|ValidationException $e) {
+            return app(GraphService::class)->render($query, $access ?? GraphAccess::current());
+        } catch (GraphException $e) {
             if (Debug::isEnabled()) {
                 throw $e;
             }
 
-            if (! $e instanceof RrdGraphException) {
-                $params = new GraphParameters($vars);
-                $short = $e instanceof ValidationException ? 'Invalid Input' : 'Invalid Graph';
-                $e = new RrdGraphException($e->getMessage(), $short, $params->width, $params->height);
-            }
+            report($e); // only unexpected errors are logged
 
-            return new GraphImage(ImageFormat::forGraph($vars['graph_type'] ?? null), 'Error', $e->generateErrorImage());
+            return GraphErrorImage::forQuery($e, $query);
         }
     }
 
     public static function getTypes(): array
     {
-        return ['device', 'port', 'application', 'munin', 'service'];
+        return app(GraphRegistry::class)->types();
     }
 
     /**
      * Get an array of all graph subtypes for the given type
      *
-     * @param  string  $type
-     * @param  ?Device  $device
-     * @return array
+     * @return string[]
      */
     public static function getSubtypes(string $type, ?Device $device = null): array
     {
-        $dir = base_path('includes/html/graphs/' . basename($type));
-        $types = [];
-
-        if (is_dir($dir)) {
-            foreach (new \DirectoryIterator($dir) as $file) {
-                if ($file->isFile() && str_ends_with($file->getFilename(), '.inc.php')) {
-                    $name = $file->getBasename('.inc.php');
-                    if ($name !== 'auth') {
-                        $types[] = $name;
-                    }
-                }
-            }
-        }
-
-        if ($device?->graphs) {
-            $graphs = $device->graphs->pluck('graph');
-
-            foreach (LibrenmsConfig::get('graph_types') as $type_data) {
-                foreach (array_keys($type_data) as $subtype) {
-                    if ($graphs->contains($subtype)) {
-                        $types[] = $subtype;
-                    }
-                }
-            }
-        }
-
-        $types = array_unique($types);
-        sort($types);
-
-        return $types;
+        return app(GraphRegistry::class)->subtypes($type, $device);
     }
 
     public static function getOverviewGraphsForDevice(Device $device): array

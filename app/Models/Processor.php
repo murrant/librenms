@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use App\Data\TimeSeries\Contracts\MetricIdentifiable;
-use App\Data\TimeSeries\MetricIdentity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Processor extends DeviceRelatedModel implements MetricIdentifiable
+class Processor extends DeviceRelatedModel
 {
     use HasFactory;
 
@@ -20,7 +18,7 @@ class Processor extends DeviceRelatedModel implements MetricIdentifiable
      *
      * @return string
      */
-    public function getFormattedDescription(): string
+    public function getFormattedDescription()
     {
         $bad_descr = [
             'GenuineIntel:',
@@ -34,15 +32,8 @@ class Processor extends DeviceRelatedModel implements MetricIdentifiable
         $descr = str_replace($bad_descr, '', $this->processor_descr);
 
         // reduce extra spaces
-        return str_replace('  ', ' ', $descr);
-    }
+        $descr = str_replace('  ', ' ', $descr);
 
-    public function toMetricIdentity(string $metricName): MetricIdentity
-    {
-        return new MetricIdentity($metricName, [
-            'device_id' => $this->device_id,
-            'processor_type' => $this->processor_type,
-            'processor_index' => $this->processor_index,
-        ]);
+        return $descr;
     }
 }

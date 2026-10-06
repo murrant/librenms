@@ -13,9 +13,12 @@
  */
 
 use App\Actions\Device\ValidateDeviceAndCreate;
-use App\Data\Graphing\GraphFactory;
 use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;
+use App\Graphing\Exceptions\GraphException;
+use App\Graphing\GraphAccess;
+use App\Graphing\GraphQuery;
+use App\Graphing\GraphService;
 use App\Http\Resources\Device as DeviceResource;
 use App\Models\AlertFault;
 use App\Models\AlertTemplate;
@@ -151,16 +154,15 @@ function api_get_graph(Request $request, array $additional = [])
             'height' => $request->input('height', 300),
         ], $additional, $vars);
 
-        $graph = app(GraphFactory::class)->graphFor($graphVars['type'] ?? '', $graphVars);
-        $image = $graph->render();
+        $image = app(GraphService::class)->render(GraphQuery::fromVars($graphVars), GraphAccess::fromRequest($request));
 
         if ($request->input('output') === 'base64') {
             return api_success(['image' => $image->base64(), 'content-type' => $image->contentType()], 'image');
         }
 
         return response($image->data, 200, ['Content-Type' => $image->contentType()]);
-    } catch (\LibreNMS\Exceptions\RrdGraphException $e) {
-        return api_error(500, $e->getMessage());
+    } catch (GraphException $e) {
+        return api_error($e->httpStatus(), $e->getMessage());
     }
 }
 

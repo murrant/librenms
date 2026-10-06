@@ -484,6 +484,7 @@ class Rrd extends BaseDatastore
      * @param  array  $options
      * @return string
      *
+     * @throws RrdNotFoundException when an rrd file used by the graph does not exist
      * @throws RrdGraphException
      */
     public function graph(array $options): string
@@ -496,6 +497,8 @@ class Rrd extends BaseDatastore
             $this->rrd->stop();
 
             return $image;
+        } catch (RrdNotFoundException $e) {
+            throw $e;
         } catch (RrdException $e) {
             throw new RrdGraphException($e->getMessage(), 'Error');
         }
