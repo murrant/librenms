@@ -88,12 +88,11 @@ class EditTabs extends Component
             'link' => url('/device/device=' . $this->device->device_id . '/tab=edit/section=alert-rules/'),
         ];
 
-        if ($snmpEnabled) {
-            $this->tabs['modules'] = [
-                'text' => __('Modules'),
-                'link' => route('device.edit.modules', $this->device->device_id),
-            ];
-        }
+        // modules can use polling methods other than snmp
+        $this->tabs['modules'] = [
+            'text' => __('Modules'),
+            'link' => route('device.edit.modules', $this->device->device_id),
+        ];
 
         if (LibrenmsConfig::get('show_services')) {
             $this->tabs['services'] = [

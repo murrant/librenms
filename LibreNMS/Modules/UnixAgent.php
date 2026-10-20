@@ -81,7 +81,6 @@ class UnixAgent implements Module
         'php-fpm',
         'powerdns',
         'powerdns-recursor',
-        'proxmox',
         'redis',
         'rrdcached',
         'tinydns',
