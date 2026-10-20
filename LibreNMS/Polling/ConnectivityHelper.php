@@ -83,6 +83,16 @@ readonly class ConnectivityHelper
         return $this->methodResults->isAvailable(PollingMethodType::Icmp);
     }
 
+    public function proxmoxIsEnabled(): bool
+    {
+        return $this->device->polling()->isEnabled(PollingMethodType::Proxmox);
+    }
+
+    public function proxmoxIsAvailable(): bool
+    {
+        return $this->methodResults->isAvailable(PollingMethodType::Proxmox);
+    }
+
     public function unixAgentIsEnabled(): bool
     {
         return $this->device->polling()->isEnabled(PollingMethodType::UnixAgent);

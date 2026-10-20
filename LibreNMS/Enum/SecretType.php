@@ -27,6 +27,7 @@
 namespace LibreNMS\Enum;
 
 use LibreNMS\Polling\Secrets\Definitions\IpmiSecretDefinition;
+use LibreNMS\Polling\Secrets\Definitions\ProxmoxSecretDefinition;
 use LibreNMS\Polling\Secrets\Definitions\SecretDefinition;
 use LibreNMS\Polling\Secrets\Definitions\SnmpSecretDefinition;
 
@@ -34,6 +35,7 @@ enum SecretType: string
 {
     case Snmp = 'snmp';
     case Ipmi = 'ipmi';
+    case Proxmox = 'proxmox';
 
     /**
      * The fields (form, validation rules) of this secret type.
@@ -43,6 +45,7 @@ enum SecretType: string
         return match ($this) {
             self::Snmp => new SnmpSecretDefinition,
             self::Ipmi => new IpmiSecretDefinition,
+            self::Proxmox => new ProxmoxSecretDefinition,
         };
     }
 }

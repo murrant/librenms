@@ -37,6 +37,7 @@ use LibreNMS\Interfaces\Data\WriteInterface;
 use LibreNMS\Interfaces\Discovery\VminfoDiscovery;
 use LibreNMS\Interfaces\Polling\VminfoPolling;
 use LibreNMS\OS;
+use LibreNMS\OS\Proxmox;
 use LibreNMS\Polling\ConnectivityHelper;
 use LibreNMS\Polling\ModuleStatus;
 use LibreNMS\RRD\RrdDefinition;
@@ -55,10 +56,16 @@ class Vminfo implements \LibreNMS\Interfaces\Module
 
     public function shouldDiscover(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
+        if (! $status->isEnabled() || ! $os instanceof VminfoDiscovery) {
+            return false;
+        }
+
+        if ($os instanceof Proxmox) {
+            return $connectivity->proxmoxIsAvailable();
+        }
+
         // libvirt does not use snmp, only ssh tunnels
-        return $status->isEnabled()
-            && (LibrenmsConfig::get('enable_libvirt') || $connectivity->snmpIsAvailable())
-            && $os instanceof VminfoDiscovery;
+        return LibrenmsConfig::get('enable_libvirt') || $connectivity->snmpIsAvailable();
     }
 
     /**
@@ -76,7 +83,18 @@ class Vminfo implements \LibreNMS\Interfaces\Module
 
     public function shouldPoll(OS $os, ModuleStatus $status, ConnectivityHelper $connectivity): bool
     {
-        return $status->isEnabled() && $connectivity->snmpIsAvailable() && $os instanceof VminfoPolling;
+        if (! $status->isEnabled() || ! $os instanceof VminfoPolling) {
+            return false;
+        }
+
+        // without discovered VMs there is nothing to poll, don't check the API
+        if ($os instanceof Proxmox) {
+            return $connectivity->proxmoxIsEnabled()
+                && $this->dataExists($os->getDevice())
+                && $connectivity->proxmoxIsAvailable();
+        }
+
+        return $connectivity->snmpIsAvailable();
     }
 
     /**

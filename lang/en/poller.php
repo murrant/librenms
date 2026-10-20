@@ -6,6 +6,7 @@ return [
         'snmp' => 'SNMP',
         'icmp' => 'ICMP',
         'ipmi' => 'IPMI',
+        'proxmox' => 'Proxmox API',
         'unix-agent' => 'Unix Agent',
     ],
     'method_settings' => [
@@ -18,6 +19,12 @@ return [
             'ciphersuite' => 'Cipher Suite',
             'timeout' => 'Timeout',
             'type' => 'Interface',
+        ],
+        'proxmox' => [
+            'hostname' => 'Hostname',
+            'port' => 'Port',
+            'timeout' => 'Timeout',
+            'verify_ssl' => 'Verify TLS Certificate',
         ],
         'snmp' => [
             'transport' => 'SNMP transport',
