@@ -20,6 +20,10 @@
   </groups>
   <php>
     <env name="APP_ENV" value="testing"/>
+    <!-- never load caches made by artisan optimize, a cached config would point the tests at the real database -->
+    <env name="APP_CONFIG_CACHE" value="bootstrap/cache/phpunit-config.php" force="true"/>
+    <env name="APP_ROUTES_CACHE" value="bootstrap/cache/phpunit-routes.php" force="true"/>
+    <env name="APP_EVENTS_CACHE" value="bootstrap/cache/phpunit-events.php" force="true"/>
     <env name="BCRYPT_ROUNDS" value="4"/>
     <env name="CACHE_STORE" value="array"/>
     <env name="MAIL_MAILER" value="array"/>
