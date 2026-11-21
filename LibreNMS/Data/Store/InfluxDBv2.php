@@ -44,41 +44,9 @@ class InfluxDBv2 extends BaseDatastore
         parent::__construct();
 
         try {
-            $host = LibrenmsConfig::get('influxdbv2.host', 'localhost');
-            $transport = LibrenmsConfig::get('influxdbv2.transport', 'http');
-            $port = LibrenmsConfig::get('influxdbv2.port', 8086);
-            $bucket = LibrenmsConfig::get('influxdbv2.bucket', 'librenms');
-            $organization = LibrenmsConfig::get('influxdbv2.organization', '');
-            $allow_redirects = LibrenmsConfig::get('influxdbv2.allow_redirects', true);
-            $token = LibrenmsConfig::get('influxdbv2.token', '');
-            $debug = LibrenmsConfig::get('influxdbv2.debug', false);
-            $log_file = LibrenmsConfig::get('influxdbv2.log_file', LibrenmsConfig::get('log_file'));
-            $timeout = LibrenmsConfig::get('influxdbv2.timeout', 1);
-            $verify = LibrenmsConfig::get('influxdbv2.verify', false);
+            $client = self::createClient();
             $batch_size = LibrenmsConfig::get('influxdbv2.batch_size', 1000);
             $max_retry = LibrenmsConfig::get('influxdbv2.max_retry', 3);
-
-            // The "connection: close" is to avoid a high quantity of TIME_WAIT
-            $guzzleOptions = [
-                'timeout' => $timeout,
-                'verify' => $verify,
-                'headers' => [
-                    'Connection' => 'close',
-                ],
-            ];
-            $guzzleClient = new \GuzzleHttp\Client($guzzleOptions);
-
-            $client = new Client([
-                'url' => $transport . '://' . $host . ':' . $port,
-                'token' => $token,
-                'bucket' => $bucket,
-                'org' => $organization,
-                'precision' => WritePrecision::S,
-                'allow_redirects' => $allow_redirects,
-                'debug' => $debug,
-                'logFile' => $log_file,
-                'httpClient' => $guzzleClient,
-            ]);
 
             $this->client = $client->createWriteApi([
                 'writeType' => WriteType::BATCHING,
@@ -88,6 +56,37 @@ class InfluxDBv2 extends BaseDatastore
         } catch (\InfluxDB2\ApiException $e) {
             Log::error('InfluxDBv2 (__construct) API Exception: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * A client for the configured server, the graphs read through it too
+     */
+    public static function createClient(): Client
+    {
+        $host = LibrenmsConfig::get('influxdbv2.host', 'localhost');
+        $transport = LibrenmsConfig::get('influxdbv2.transport', 'http');
+        $port = LibrenmsConfig::get('influxdbv2.port', 8086);
+
+        // The "connection: close" is to avoid a high quantity of TIME_WAIT
+        $guzzleClient = new \GuzzleHttp\Client([
+            'timeout' => LibrenmsConfig::get('influxdbv2.timeout', 1),
+            'verify' => LibrenmsConfig::get('influxdbv2.verify', false),
+            'headers' => [
+                'Connection' => 'close',
+            ],
+        ]);
+
+        return new Client([
+            'url' => $transport . '://' . $host . ':' . $port,
+            'token' => LibrenmsConfig::get('influxdbv2.token', ''),
+            'bucket' => LibrenmsConfig::get('influxdbv2.bucket', 'librenms'),
+            'org' => LibrenmsConfig::get('influxdbv2.organization', ''),
+            'precision' => WritePrecision::S,
+            'allow_redirects' => LibrenmsConfig::get('influxdbv2.allow_redirects', true),
+            'debug' => LibrenmsConfig::get('influxdbv2.debug', false),
+            'logFile' => LibrenmsConfig::get('influxdbv2.log_file', LibrenmsConfig::get('log_file')),
+            'httpClient' => $guzzleClient,
+        ]);
     }
 
     public function terminate(): void

@@ -6,6 +6,7 @@ use App\Data\Graphing\DataSeries;
 use App\Data\Graphing\Formula;
 use App\Data\Graphing\SeriesSum;
 use App\Data\TimeSeries\SeriesData;
+use App\Graphs\SeriesReader;
 use Illuminate\Support\Arr;
 use LibreNMS\Exceptions\RrdException;
 use LibreNMS\RRD\Backend\RrdBackendInterface;
@@ -13,7 +14,7 @@ use LibreNMS\RRD\Backend\RrdBackendInterface;
 /**
  * One rrdtool xport reads all series, which gives them the same points.
  */
-class RrdSeriesReader
+class RrdSeriesReader implements SeriesReader
 {
     // rrdtool does not export fewer rows
     private const int MIN_POINTS = 10;

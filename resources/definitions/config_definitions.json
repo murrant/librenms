@@ -4566,6 +4566,17 @@
             },
             "type": "array"
         },
+        "graphs.data_source": {
+            "default": "rrd",
+            "group": "webui",
+            "section": "graph",
+            "order": 9,
+            "type": "select",
+            "options": {
+                "rrd": "RRDTool",
+                "influxdbv2": "InfluxDBv2"
+            }
+        },
         "graphs.port_speed_zoom": {
             "default": false,
             "type": "boolean",

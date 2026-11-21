@@ -8,6 +8,10 @@ use App\ApiClients\MapquestApi;
 use App\ApiClients\NominatimApi;
 use App\Discovery\Sensor as DiscoverySensor;
 use App\Facades\LibrenmsConfig;
+use App\Graphs\InfluxDB\InfluxSeriesLocator;
+use App\Graphs\InfluxDB\InfluxSeriesReader;
+use App\Graphs\Rrd\RrdSeriesReader;
+use App\Graphs\SeriesReader;
 use App\Horizon\Supervisors;
 use App\Models\Device;
 use App\Models\DeviceGroup;
@@ -42,6 +46,7 @@ use LibreNMS\Data\Source\Snmp\SnmpBackendInterface;
 use LibreNMS\Data\Source\Snmp\SnmpQueryBuilder;
 use LibreNMS\Data\Source\Snmp\SnmpQueryInterface;
 use LibreNMS\Data\Source\Snmp\SnmpTranslatorInterface;
+use LibreNMS\Data\Store\InfluxDBv2;
 use LibreNMS\Enum\SensorType;
 use LibreNMS\Interfaces\Geocoder;
 use LibreNMS\RRD\Backend\PhpRrd;
@@ -100,6 +105,19 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->bind(SnmpTranslatorInterface::class, NetSnmp::class);
         $this->app->bind(SnmpQueryInterface::class, SnmpQueryBuilder::class);
+
+        $this->app->bind(SeriesReader::class, function (Application $app) {
+            if (LibrenmsConfig::get('graphs.data_source') === 'influxdbv2') {
+                return new InfluxSeriesReader(
+                    InfluxDBv2::createClient()->createQueryApi(),
+                    $app->make(InfluxSeriesLocator::class),
+                    (string) LibrenmsConfig::get('influxdbv2.bucket', 'librenms'),
+                    (int) LibrenmsConfig::get('rrd.step', 300),
+                );
+            }
+
+            return $app->make(RrdSeriesReader::class);
+        });
 
         $this->app->singleton(RrdBackendInterface::class, function (Application $app) {
             $rrdcached = LibrenmsConfig::get('rrdcached') ?: null;

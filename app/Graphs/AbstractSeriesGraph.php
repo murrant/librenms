@@ -12,7 +12,6 @@ use App\Data\Graphing\Threshold;
 use App\Facades\LibrenmsConfig;
 use App\Graphs\Rrd\GraphTheme;
 use App\Graphs\Rrd\RrdGraphRenderer;
-use App\Graphs\Rrd\RrdSeriesReader;
 use LibreNMS\Exceptions\GraphException;
 use LibreNMS\Exceptions\NoGraphData;
 
@@ -63,7 +62,7 @@ abstract class AbstractSeriesGraph extends AbstractGraph
     {
         return $this->attempt(function (): GraphData {
             $series = $this->series();
-            $data = app(RrdSeriesReader::class)->read($series, $this->params->from, $this->params->to, $this->params->width);
+            $data = app(SeriesReader::class)->read($series, $this->params->from, $this->params->to, $this->params->width);
 
             if ($data->series === []) {
                 throw new NoGraphData(__('graph.errors.no_data_files'));

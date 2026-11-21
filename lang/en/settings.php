@@ -1121,6 +1121,14 @@ return [
                     ],
                 ],
             ],
+            'data_source' => [
+                'description' => 'Interactive graph data source',
+                'help' => 'Where interactive graphs read their data. InfluxDBv2 reads the data the poller sends to InfluxDBv2, other graphs always use RRDTool.',
+                'options' => [
+                    'rrd' => 'RRDTool',
+                    'influxdbv2' => 'InfluxDBv2',
+                ],
+            ],
             'port_speed_zoom' => [
                 'description' => 'Zoom port graphs to port speed',
                 'help' => 'Zoom port graphs so that the maximum is always the port speed. When disabled, port graphs zoom to traffic.',
