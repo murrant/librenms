@@ -4,8 +4,9 @@ namespace LibreNMS\OS;
 
 class Cmm extends Generic
 {
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         $rows = $this->portTable(['CMM3-MIB::cmmSwitchTable', 'CMM3-MIB::cmmPortTable']);
         // The controller advertises HC columns that stay at zero while the 32-bit counters advance.
         foreach ($ports as &$controllerPort) {
@@ -37,5 +38,7 @@ class Cmm extends Generic
                 'ifOperStatus' => ($row['linkStatus'] ?? 0) == 1 ? 'up' : 'down',
             ];
         }
+
+        return $ports;
     }
 }

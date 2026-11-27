@@ -74,8 +74,7 @@ class Ports extends LegacyModule
         }
 
         $device = $os->getDevice();
-        $ports = $device->ports()->isValid()
-            ->get(['port_id', 'ifIndex', 'ifName', 'ifDescr', 'ifAlias', 'ifType', 'ifConnectorPresent', 'ifAdminStatus', 'ifOperStatus', 'poll_time'])->keyBy('ifIndex');
+        $ports = $device->ports()->isValid()->with('statistics')->get()->keyBy('ifIndex');
         if ($ports->isEmpty()) {
             return;
         }
@@ -95,15 +94,11 @@ class Ports extends LegacyModule
     /** @param Collection<int, Port> $ports */
     private function recordSamples(Device $device, Collection $ports, array $rows, int $time): array
     {
-        // Re-read the last committed sample. Discovery or another poll may have finished during collection.
         return DB::transaction(function () use ($device, $ports, $rows, $time) {
-            Device::whereKey($device->device_id)->lockForUpdate()->firstOrFail(['device_id']);
-            $current = $device->ports()->with('statistics')->isValid()->get();
             $base = $extended = $samples = [];
-            foreach ($current as $port) {
-                $index = $port->ifIndex;
+            foreach ($ports as $index => $port) {
                 $row = $rows[$index] ?? null;
-                if (! $row || $ports->get($index)?->port_id !== $port->port_id || $port->poll_time >= $time) {
+                if (! $row || $port->poll_time >= $time) {
                     continue;
                 }
                 $tune = PortMeasurement::updateLink($device, $port, $row);

@@ -2,20 +2,18 @@
 
 namespace LibreNMS\OS\Traits;
 
+use App\Facades\LibrenmsConfig;
+use LibreNMS\Ports\PortMeasurement;
+
 trait CiscoIosPorts
 {
     private const CIE_FIELDS = ['InRuntsErrs', 'InGiantsErrs', 'InFramingErrs', 'InOverrunErrs', 'InIgnored', 'InAbortErrs', 'InputQueueDrops', 'OutputQueueDrops'];
 
-    protected function portLinkOids(bool $selected): array
+    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
         $columns = $selected ? array_map(fn ($field) => 'CISCO-IF-EXTENSION-MIB::cieIf' . $field, self::CIE_FIELDS)
             : ['CISCO-IF-EXTENSION-MIB::cieIfPacketStatsTable'];
-
-        return [...parent::portLinkOids($selected), ...$columns];
-    }
-
-    protected function pollPortMetrics(array &$ports): void
-    {
+        $ports = parent::pollIfMibRows($knownPorts, $selected, [...$extraOids, ...$columns]);
         foreach ($ports as &$port) {
             if (isset($port['cieIfInRuntsErrs'])) {
                 foreach (self::CIE_FIELDS as $field) {
@@ -23,13 +21,15 @@ trait CiscoIosPorts
                 }
             }
         }
+
+        return $ports && LibrenmsConfig::get('enable_ports_poe') ? $this->withPortPower($ports) : $ports;
     }
 
-    protected function collectPortPower(array $ports): array
+    private function withPortPower(array $ports): array
     {
         $supplies = $this->portTable('CISCO-POWER-ETHERNET-EXT-MIB::cpeExtPsePortTable');
         if (! $supplies) {
-            return [];
+            return $ports;
         }
         $indexes = \SnmpQuery::walk('CISCO-STACK-MIB::portIfIndex')->throwIfConnectionError()->pluck();
         if (! $indexes) {
@@ -39,14 +39,13 @@ trait CiscoIosPorts
                 }
             }
         }
-        $result = [];
         foreach ($supplies as $key => $row) {
-            if (isset($indexes[$key], $row['cpeExtPsePortPwrAllocated'])) {
-                $result[$indexes[$key]] = $this->portPowerFields($row['cpeExtPsePortPwrAllocated'], $row['cpeExtPsePortPwrAvailable'] ?? null,
+            if (isset($indexes[$key], $ports[$indexes[$key]], $row['cpeExtPsePortPwrAllocated'])) {
+                $ports[$indexes[$key]]['poe'] = PortMeasurement::powerFields($row['cpeExtPsePortPwrAllocated'], $row['cpeExtPsePortPwrAvailable'] ?? null,
                     $row['cpeExtPsePortPwrConsumption'] ?? null, $row['cpeExtPsePortMaxPwrDrawn'] ?? null);
             }
         }
 
-        return $result;
+        return $ports;
     }
 }

@@ -97,11 +97,12 @@ class F5 extends OS implements OSPolling
         }
     }
 
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         $version = $this->getDevice()->version ?? '';
         if (version_compare($version, '11.2.0', '<') || version_compare($version, '11.7', '>=')) {
-            return;
+            return $ports;
         }
         $interfaces = $this->portTable('F5-BIGIP-SYSTEM-MIB::sysIfxStat', true);
         foreach ($ports as &$port) {
@@ -121,5 +122,7 @@ class F5 extends OS implements OSPolling
                 'ifAlias' => 'sysIfxStatAlias',
             ]) + $port;
         }
+
+        return $ports;
     }
 }

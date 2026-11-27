@@ -26,6 +26,7 @@
 
 namespace LibreNMS\OS;
 
+use App\Facades\LibrenmsConfig;
 use App\Facades\PortCache;
 use App\Models\Ipv6Address;
 use App\Models\PortVlan;
@@ -43,6 +44,7 @@ use LibreNMS\Interfaces\Discovery\RouteDiscovery;
 use LibreNMS\Interfaces\Discovery\VlanDiscovery;
 use LibreNMS\Interfaces\Discovery\VlanPortDiscovery;
 use LibreNMS\OS;
+use LibreNMS\Ports\PortMeasurement;
 use LibreNMS\Util\IPv6;
 use SnmpQuery;
 
@@ -282,18 +284,22 @@ class Jetstream extends OS implements Ipv6AddressDiscovery, RouteDiscovery, Vlan
         return ($this->portFinder->byDescr('gigabitEthernet 1/0/' . $bridgePort) ?? $this->portFinder->byName('gigabitEthernet1/0/' . $bridgePort))->port_id ?? 0;
     }
 
-    protected function collectPortPower(array $ports): array
+    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
+        $ports = parent::pollIfMibRows($knownPorts, $selected, $extraOids);
+        if (! $ports || ! LibrenmsConfig::get('enable_ports_poe')) {
+            return $ports;
+        }
+
         $power = $this->portTable('TPLINK-POWER-OVER-ETHERNET-MIB::tpPoePortConfigTable');
-        $result = [];
         foreach ($ports as $index => $row) {
             if (preg_match('#ethernet \d+/\d+/(\d+)$#i', $row['ifDescr'] ?? '', $match) && isset($power[$match[1]]['tpPoePower'])) {
                 $supply = $power[$match[1]];
                 $limit = isset($supply['tpPoePowerLimit']) ? $supply['tpPoePowerLimit'] * 100 : null;
-                $result[$index] = $this->portPowerFields($limit, $limit, $supply['tpPoePower'] * 100, $limit);
+                $ports[$index]['poe'] = PortMeasurement::powerFields($limit, $limit, $supply['tpPoePower'] * 100, $limit);
             }
         }
 
-        return $result;
+        return $ports;
     }
 }

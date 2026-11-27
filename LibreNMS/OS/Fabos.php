@@ -193,13 +193,20 @@ class Fabos extends OS implements OSDiscovery, TransceiverDiscovery
         })->filter();  // Filter out null values
     }
 
-    protected function discoverPortMetadata(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
+        if ($knownPorts !== null && $this->portAssociationMode() !== 'ifAlias') {
+            return $ports;
+        }
+
         foreach ($this->portTable('SW-MIB::swFCPortName') as $index => $values) {
             $index = (int) $index + 1073741823;
             if (isset($ports[$index])) {
                 $ports[$index] = $this->mapPortFields($values, ['ifAlias' => 'swFCPortName']) + $ports[$index];
             }
         }
+
+        return $ports;
     }
 }

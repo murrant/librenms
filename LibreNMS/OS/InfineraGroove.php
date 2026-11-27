@@ -57,8 +57,9 @@ class InfineraGroove extends \LibreNMS\OS
      * @author     Nick Hilliard <nick@foobar.org>
      * @copyright  2019 Nick Hilliard
      */
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         foreach (['eth100g' => 100, 'eth40g' => 40, 'eth10g' => 10, 'fc16g' => 16, 'fc8g' => 8] as $type => $speed) {
             $columns = ['ifAlias' => 'AliasName', 'ifAdminStatus' => 'AdminStatus', 'ifOperStatus' => 'OperStatus'];
             foreach (['In', 'Out'] as $direction) {
@@ -67,7 +68,11 @@ class InfineraGroove extends \LibreNMS\OS
                 }
             }
             $map = array_map(fn ($column) => $type . $column, $columns);
-            foreach ($this->portTable(["CORIANT-GROOVE-MIB::{$type}Entry", "CORIANT-GROOVE-MIB::{$type}Statistics"], true) as $key => $row) {
+            $oids = ["CORIANT-GROOVE-MIB::{$type}Entry"];
+            if ($knownPorts !== null) {
+                $oids[] = "CORIANT-GROOVE-MIB::{$type}Statistics";
+            }
+            foreach ($this->portTable($oids, true) as $key => $row) {
                 $parts = explode('.', $key);
                 if (count($parts) !== 5 || ! isset($row[$type . 'AdminStatus'])) {
                     continue;
@@ -79,5 +84,7 @@ class InfineraGroove extends \LibreNMS\OS
                     + $this->mapPortFields($row, $map);
             }
         }
+
+        return $ports;
     }
 }

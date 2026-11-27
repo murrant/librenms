@@ -4,14 +4,13 @@ namespace LibreNMS\OS;
 
 class LoopTelecom extends Generic
 {
-    protected const bool USE_IF_MIB = false;
-
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $traffic = [];
-        foreach ($this->portTable('L-AM3440-A-Private::ethernetCountTable') as $row) {
-            $traffic[$row['ethernetCountName'] ?? ''] = $row;
+        if ($knownPorts !== null) {
+            $traffic = array_column($this->portTable('L-AM3440-A-Private::ethernetCountTable'), null, 'ethernetCountName');
         }
+        $ports = [];
         foreach ($this->portTable('L-AM3440-A-Private::ethernetStatusTable') as $row) {
             if (! isset($row['ethernetStatusName'])) {
                 continue;
@@ -42,5 +41,7 @@ class LoopTelecom extends Generic
                 'ifInErrors' => 'ethernetRxBadCount',
             ]));
         }
+
+        return $ports;
     }
 }

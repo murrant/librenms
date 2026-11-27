@@ -28,6 +28,7 @@
 
 namespace LibreNMS\OS;
 
+use App\Facades\LibrenmsConfig;
 use App\Facades\PortCache;
 use App\Models\AccessPoint;
 use App\Models\BgpPeer;
@@ -65,6 +66,7 @@ use LibreNMS\Interfaces\Polling\OSPolling;
 use LibreNMS\Interfaces\Polling\SlaPolling;
 use LibreNMS\OS;
 use LibreNMS\OS\Traits\EntityMib;
+use LibreNMS\Ports\PortMeasurement;
 use LibreNMS\RRD\RrdDefinition;
 use LibreNMS\Util\Bgp;
 use LibreNMS\Util\IP;
@@ -878,17 +880,21 @@ class Vrp extends OS implements
         return empty($fdb) ? parent::discoverFdbTable() : new Collection($fdb);
     }
 
-    protected function collectPortPower(array $ports): array
+    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
-        $result = [];
+        $ports = parent::pollIfMibRows($knownPorts, $selected, $extraOids);
+        if (! $ports || ! LibrenmsConfig::get('enable_ports_poe')) {
+            return $ports;
+        }
+
         foreach ($this->portTable(['HUAWEI-POE-MIB::hwPoePortReferencePower', 'HUAWEI-POE-MIB::hwPoePortMaximumPower',
             'HUAWEI-POE-MIB::hwPoePortConsumingPower', 'HUAWEI-POE-MIB::hwPoePortPeakPower']) as $index => $row) {
             if (isset($ports[$index], $row['hwPoePortConsumingPower'])) {
-                $result[$index] = $this->portPowerFields($row['hwPoePortReferencePower'] ?? null, $row['hwPoePortMaximumPower'] ?? null,
+                $ports[$index]['poe'] = PortMeasurement::powerFields($row['hwPoePortReferencePower'] ?? null, $row['hwPoePortMaximumPower'] ?? null,
                     $row['hwPoePortConsumingPower'], $row['hwPoePortPeakPower'] ?? null);
             }
         }
 
-        return $result;
+        return $ports;
     }
 }

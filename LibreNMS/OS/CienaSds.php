@@ -208,10 +208,11 @@ class CienaSds extends OS
     /**
      * @copyright  2020 Dan Baker, Lancaster-Lebanon IU13
      */
-    protected function pollPortMetrics(array &$ports): void
+    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
+        $ports = parent::pollIfMibRows($knownPorts, $selected, $extraOids);
         if (! in_array($this->getDevice()->hardware, ['170-5170-905', '154-8700-930'], true)) {
-            return;
+            return $ports;
         }
         foreach ($this->portTable('CIENA-CES-PM::cienaCesPmExtendedTxRxStatisticsBinEntry') as $index => $row) {
             if (ctype_digit((string) $index) && isset($ports[$index - 900000])) {
@@ -230,5 +231,7 @@ class CienaSds extends OS
                 ]) + $ports[$index - 900000];
             }
         }
+
+        return $ports;
     }
 }

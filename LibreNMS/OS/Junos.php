@@ -608,8 +608,9 @@ class Junos extends \LibreNMS\OS implements BgpAddressFamilyDiscovery, SlaDiscov
      * @author     Ruslan Magomedov <rmagomedov.iam@yahoo.com>
      * @copyright  2019 Ruslan Magomedov
      */
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         foreach ($this->portTable('JUNIPER-VIRTUALCHASSIS-MIB::jnxVirtualChassisPortTable', true) as $key => $row) {
             $key = str_replace('"', '', $key);
             if (preg_match('#^(\d{1,2})\.vcp-255/(\d)/(\d{1,2})$#', $key, $match)) {
@@ -628,5 +629,7 @@ class Junos extends \LibreNMS\OS implements BgpAddressFamilyDiscovery, SlaDiscov
                     ]);
             }
         }
+
+        return $ports;
     }
 }

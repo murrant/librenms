@@ -9,17 +9,30 @@ use SnmpQuery;
 
 trait IfMib
 {
-    protected const bool USE_IF_MIB = true;
-    protected bool $portInventoryComplete = true;
-
     public function discoverPorts(): PortInventory
     {
-        $this->portInventoryComplete = true;
-        $rows = static::USE_IF_MIB ? $this->portTable([
+        return new PortInventory($this->collectPortRows(null, false), association: $this->portAssociationMode());
+    }
+
+    /**
+     * Collect rows for discovery ($knownPorts is null) or for a poll of the supplied interfaces.
+     *
+     * @param  array<int, \App\Models\Port>|null  $knownPorts
+     */
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
+    {
+        return $knownPorts === null
+            ? $this->discoverIfMibRows(['Q-BRIDGE-MIB::dot1qPvid'])
+            : $this->pollIfMibRows($knownPorts, $selected, $this->etherLikeOids($selected));
+    }
+
+    protected function discoverIfMibRows(array $extraOids): array
+    {
+        $rows = $this->portTable([
             ...$this->ifMibOids(['ifDescr', 'ifName', 'ifAlias', 'ifType', 'ifMtu', 'ifPhysAddress',
                 'ifConnectorPresent', 'ifOperStatus', 'ifAdminStatus']),
-            ...$this->portInventoryOids(),
-        ], true) : [];
+            ...$extraOids,
+        ], true);
         $bridgeIndexes = null;
         foreach ($rows as $bridgePort => $row) {
             if (isset($row['dot1qPvid'])) {
@@ -30,10 +43,8 @@ trait IfMib
                 }
             }
         }
-        $this->addVendorPorts($rows);
-        $this->discoverPortMetadata($rows);
 
-        return new PortInventory($rows, $this->portInventoryComplete, $this->getDevice()->polling()->snmp()->portAssociationMode);
+        return $rows;
     }
 
     public function pollPorts(array $ports, bool $selected): array
@@ -41,48 +52,47 @@ trait IfMib
         if ($ports === []) {
             return [];
         }
-        $association = $this->getDevice()->polling()->snmp()->portAssociationMode;
-        $rows = [];
-        if (static::USE_IF_MIB) {
-            $identity = $association === 'ifIndex' ? [] : ['ifName', 'ifDescr', 'ifAlias'];
-            $rows = $selected ? $this->selectedPortData($ports, $identity) : $this->walkPortMetrics($identity);
-        }
+        $rows = array_intersect_key($this->collectPortRows($ports, $selected), $ports);
+        $association = $this->portAssociationMode();
         if ($association === 'ifIndex') {
-            foreach (array_intersect_key($rows, $ports) as $index => $row) {
-                $rows[$index] += $ports[$index]->only(['ifDescr', 'ifName', 'ifType', 'ifConnectorPresent']);
-            }
+            return $rows;
         }
-        $this->addVendorPorts($rows);
-        if ($association !== 'ifIndex') {
-            $this->discoverPortMetadata($rows);
-        }
-        $this->pollPortMetrics($rows);
-        $rows = array_intersect_key($rows, $ports);
+
         // An ifIndex can be reused between discoveries. Wait for discovery to associate the new interface.
-        if ($association !== 'ifIndex') {
-            foreach ($rows as $index => $row) {
-                $identity = $row[$association] ?? null;
-                if ($association === 'ifAlias') {
-                    $override = $this->getDevice()->getAttrib('ifName:' . ($row['ifName'] ?? ''));
-                    $identity = $override === '1' ? $ports[$index]->ifAlias : ($override ?? $identity);
-                }
-                if (($identity ?? '') === '') {
-                    $identity = $row[$association === 'ifDescr' ? 'ifName' : 'ifDescr'] ?? '';
-                }
-                if (trim((string) $identity) !== (string) $ports[$index]->getRawOriginal($association)) {
-                    unset($rows[$index]);
-                }
+        foreach ($rows as $index => $row) {
+            $identity = $row[$association] ?? null;
+            if ($association === 'ifAlias') {
+                $override = $this->getDevice()->getAttrib('ifName:' . ($row['ifName'] ?? ''));
+                $identity = $override === '1' ? $ports[$index]->ifAlias : ($override ?? $identity);
             }
-        }
-        if ($rows && LibrenmsConfig::get('enable_ports_poe')) {
-            foreach ($this->collectPortPower($rows) as $index => $supply) {
-                if (isset($rows[$index])) {
-                    $rows[$index]['poe'] = $supply;
-                }
+            if (($identity ?? '') === '') {
+                $identity = $row[$association === 'ifDescr' ? 'ifName' : 'ifDescr'] ?? '';
+            }
+            if (trim((string) $identity) !== (string) $ports[$index]->getRawOriginal($association)) {
+                unset($rows[$index]);
             }
         }
 
         return $rows;
+    }
+
+    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
+    {
+        $byIndex = $this->portAssociationMode() === 'ifIndex';
+        $identity = $byIndex ? [] : ['ifName', 'ifDescr', 'ifAlias'];
+        $rows = $selected ? $this->selectedPortData($knownPorts, $identity, $extraOids) : $this->walkPortMetrics($identity, $extraOids);
+        $rows = array_intersect_key($rows, $knownPorts);
+        $metadata = $byIndex ? ['ifName', 'ifDescr', 'ifType', 'ifConnectorPresent'] : ['ifType', 'ifConnectorPresent'];
+        foreach ($rows as $index => &$row) {
+            $row += $knownPorts[$index]->only($metadata);
+        }
+
+        return $rows;
+    }
+
+    protected function portAssociationMode(): string
+    {
+        return $this->getDevice()->polling()->snmp()->portAssociationMode;
     }
 
     private function hasBrokenIfXEntry(): bool
@@ -97,7 +107,7 @@ trait IfMib
         return array_map(fn ($field) => "IF-MIB::$field", $columns);
     }
 
-    private function walkPortMetrics(array $identity): array
+    private function walkPortMetrics(array $identity, array $extraOids): array
     {
         // A walk of ifTable can stop early on a malformed physical address. Walk live columns individually.
         $columns = [...$identity, 'ifOperStatus', 'ifAdminStatus', 'ifLastChange', 'ifSpeed',
@@ -107,10 +117,10 @@ trait IfMib
             $oids[] = 'IF-MIB::ifXTable';
         }
 
-        return $this->portTable([...$oids, ...$this->portLinkOids(false)], true);
+        return $this->portTable([...$oids, ...$extraOids], true);
     }
 
-    private function selectedPortData(array $selected, array $identity): array
+    private function selectedPortData(array $selected, array $identity, array $extraOids): array
     {
         $rows = $this->getPortColumns(array_keys($selected), $this->ifMibOids(['ifOperStatus', 'ifAdminStatus', ...$identity]));
         $active = [];
@@ -137,7 +147,7 @@ trait IfMib
                 }
             }
         }
-        $details = $this->getPortColumns($active, [...$this->ifMibOids($fields), ...$this->portLinkOids(true)]);
+        $details = $this->getPortColumns($active, [...$this->ifMibOids($fields), ...$extraOids]);
 
         return array_replace_recursive($rows, $details);
     }
@@ -160,7 +170,7 @@ trait IfMib
         return $rows;
     }
 
-    protected function portLinkOids(bool $selected): array
+    private function etherLikeOids(bool $selected): array
     {
         if (! LibrenmsConfig::get('enable_ports_etherlike')) {
             return ['EtherLike-MIB::dot3StatsDuplexStatus'];
@@ -170,24 +180,6 @@ trait IfMib
         }
 
         return array_map(fn ($field) => 'EtherLike-MIB::dot3Stats' . $field, ['Index', 'DuplexStatus', ...PortMeasurement::ETHERLIKE]);
-    }
-
-    protected function portInventoryOids(): array
-    {
-        return ['Q-BRIDGE-MIB::dot1qPvid'];
-    }
-
-    /** Ports exposed through vendor tables during both discovery and polling. */
-    protected function addVendorPorts(array &$ports): void
-    {
-    }
-
-    protected function discoverPortMetadata(array &$ports): void
-    {
-    }
-
-    protected function pollPortMetrics(array &$ports): void
-    {
     }
 
     protected function portTable(string|array $oids, bool $enumStrings = false): array
@@ -216,17 +208,5 @@ trait IfMib
         }
 
         return $fields;
-    }
-
-    /** Per-port PoE measurements in milliwatts, keyed by IF-MIB ifIndex. */
-    protected function collectPortPower(array $ports): array
-    {
-        return [];
-    }
-
-    protected function portPowerFields(mixed $allocated, mixed $available, mixed $consumption, mixed $peak): array
-    {
-        return ['PortPwrAllocated' => $allocated, 'PortPwrAvailable' => $available,
-            'PortConsumption' => $consumption, 'PortMaxPwrDrawn' => $peak];
     }
 }

@@ -128,8 +128,9 @@ class AirosAfLtu extends OS implements
         return $sensors;
     }
 
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         $ethernet = $this->portTable('UBNT-AFLTU-MIB::afLTUethStats', true)[0] ?? [];
         foreach ($ports as $index => &$port) {
             if (($port['ifDescr'] ?? '') !== 'eth0') {
@@ -147,5 +148,7 @@ class AirosAfLtu extends OS implements
             $port['ifHighSpeed'] = 1000;
             break;
         }
+
+        return $ports;
     }
 }

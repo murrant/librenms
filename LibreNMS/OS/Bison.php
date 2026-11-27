@@ -4,10 +4,9 @@ namespace LibreNMS\OS;
 
 class Bison extends Generic
 {
-    protected const bool USE_IF_MIB = false;
-
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = [];
         foreach ($this->portTable('BISON-ROUTER-MIB::vifTable') as $index => $row) {
             $ports[1000 + $index] = $this->mapPortFields($row, [
                 'ifDescr' => 'vifName',
@@ -19,5 +18,7 @@ class Bison extends Generic
                 'ifVlan' => 'vifCvid',
             ]) + ['ifAdminStatus' => 'up', 'ifOperStatus' => 'up'];
         }
+
+        return $ports;
     }
 }

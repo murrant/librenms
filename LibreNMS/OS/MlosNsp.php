@@ -4,8 +4,9 @@ namespace LibreNMS\OS;
 
 class MlosNsp extends Generic
 {
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         $rows = $this->portTable(['TRELLIX-SENSOR-CONF-MIB::intfPortTable', 'TRELLIX-SENSOR-PERF-MIB::intfPortIf64Table']);
         $speeds = [1 => 10000000, 100000000, 1000000000, 10000000000, 40000000000];
         foreach (array_values($rows) as $index => $row) {
@@ -29,5 +30,7 @@ class MlosNsp extends Generic
                 'ifAdminStatus' => ($row['intfPortIfAdminStatus'] ?? 0) == 1 ? 'up' : 'down',
             ];
         }
+
+        return $ports;
     }
 }

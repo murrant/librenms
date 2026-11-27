@@ -5,11 +5,11 @@ namespace LibreNMS\Ports;
 use App\Facades\LibrenmsConfig;
 use App\Facades\Rrd;
 use App\Models\Device;
-use App\Models\Port;
 use App\Models\Eventlog;
-use LibreNMS\Enum\Severity;
-use Illuminate\Support\Arr;
+use App\Models\Port;
 use Brick\Math\BigInteger;
+use Illuminate\Support\Arr;
+use LibreNMS\Enum\Severity;
 use LibreNMS\Interfaces\Data\DataStorageInterface;
 use LibreNMS\RRD\PortRrd;
 use LibreNMS\RRD\RrdDefinition;
@@ -32,6 +32,12 @@ final readonly class PortMeasurement
         foreach (self::COUNTERS as $field) {
             $this->definition->addDataset(strtoupper(substr($field, 2)), 'DERIVE', 0, 12500000000);
         }
+    }
+
+    public static function powerFields(mixed $allocated, mixed $available, mixed $consumption, mixed $peak): array
+    {
+        return ['PortPwrAllocated' => $allocated, 'PortPwrAvailable' => $available,
+            'PortConsumption' => $consumption, 'PortMaxPwrDrawn' => $peak];
     }
 
     /** Update live link state and return whether a speed increase requires RRD tuning. */

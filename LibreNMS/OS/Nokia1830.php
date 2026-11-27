@@ -619,12 +619,19 @@ class Nokia1830 extends OS implements EntityPhysicalDiscovery, TransceiverDiscov
     /**
      * @copyright  2026 LibreNMS Contributors
      */
-    protected function discoverPortMetadata(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
+        if ($knownPorts !== null && $this->portAssociationMode() === 'ifIndex') {
+            return $ports;
+        }
+
         foreach ($ports as &$port) {
             if (empty($port['ifDescr'])) {
                 $port['ifDescr'] = $port['ifName'] ?? '';
             }
         }
+
+        return $ports;
     }
 }

@@ -61,8 +61,13 @@ class MoxaEtherdevice extends OS implements ProcessorDiscovery
     /**
      * @author     rhinoau
      */
-    protected function discoverPortMetadata(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
+        if ($knownPorts !== null && $this->portAssociationMode() !== 'ifAlias') {
+            return $ports;
+        }
+
         $aliases = \SnmpQuery::numeric()->walk($this->getDevice()->sysObjectID . '.1.9.1.1.7')->throwIfConnectionError()->values();
         foreach ($aliases as $oid => $alias) {
             $index = substr(strrchr($oid, '.'), 1);
@@ -70,5 +75,7 @@ class MoxaEtherdevice extends OS implements ProcessorDiscovery
                 $ports[$index]['ifAlias'] = $alias;
             }
         }
+
+        return $ports;
     }
 }

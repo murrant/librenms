@@ -59,13 +59,10 @@ class Asa extends Shared\Cisco
         return [];
     }
 
-    protected function portInventoryOids(): array
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
-        return [];
-    }
-
-    protected function portLinkOids(bool $selected): array
-    {
-        return [];
+        return $knownPorts === null
+            ? $this->discoverIfMibRows([])
+            : $this->pollIfMibRows($knownPorts, $selected, []);
     }
 }

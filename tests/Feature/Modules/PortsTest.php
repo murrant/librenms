@@ -7,16 +7,17 @@ use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use App\Models\DevicePollingMethod;
 use App\Models\Secret;
-use LibreNMS\Enum\SecretType;
-use LibreNMS\Enum\PollingMethodType;
-use LibreNMS\Interfaces\Polling\PortDataSource;
-use LibreNMS\Polling\Method\PollingMethodRegistry;
-use LibreNMS\Ports\PortInventory;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use LibreNMS\Enum\PollingMethodType;
+use LibreNMS\Enum\SecretType;
 use LibreNMS\Interfaces\Data\DataStorageInterface;
+use LibreNMS\Interfaces\Polling\PortDataSource;
 use LibreNMS\Modules\Ports;
 use LibreNMS\OS;
+use LibreNMS\OS\Bison;
+use LibreNMS\Polling\Method\PollingMethodRegistry;
+use LibreNMS\Ports\PortInventory;
 use LibreNMS\Tests\InMemoryDbTestCase;
 use LibreNMS\Util\Module;
 use Mockery;
@@ -122,6 +123,10 @@ final class PortsTest extends InMemoryDbTestCase
         DB::connection()->disableQueryLog();
         $writes = array_filter($queries, fn ($sql) => preg_match('/^(insert|update|delete)/i', $sql));
         $this->assertCount(2, $writes, implode("\n", $writes));
+        foreach (['ports', 'ports_statistics'] as $table) {
+            $reads = array_filter($queries, fn ($sql) => preg_match('/^select .* from ["`]' . $table . '["`]/i', $sql));
+            $this->assertCount(1, $reads, implode("\n", $reads));
+        }
         $this->assertDatabaseCount('ports_statistics', 20);
         $this->assertDatabaseCount('ports', 20);
     }
@@ -180,6 +185,30 @@ final class PortsTest extends InMemoryDbTestCase
         } finally {
             File::deleteDirectory($root);
         }
+    }
+
+    public function testVendorOnlyPortsUseTheSameIdentityInDiscoveryAndPolling(): void
+    {
+        $device = Device::factory()->create(['os' => 'bison']);
+        $device->setRelation('pollingMethods', collect([new DevicePollingMethod([
+            'method_type' => PollingMethodType::Snmp, 'enabled' => true, 'settings' => ['port_association_mode' => 'ifName'],
+        ])]));
+        $os = Mockery::mock(Bison::class)->makePartial()->shouldAllowMockingProtectedMethods();
+        $os->allows('getDevice')->andReturn($device);
+        $rows = [
+            1 => ['vifPort' => 'wan', 'vifName' => 'WAN uplink', 'vifRxOctets' => 42],
+            2 => ['vifPort' => 'lan', 'vifName' => 'LAN interface', 'vifRxOctets' => 15],
+        ];
+        $os->expects('portTable')->with('BISON-ROUTER-MIB::vifTable')->times(3)->andReturn(
+            $rows, $rows, [1 => ['vifPort' => 'replacement']] + $rows,
+        );
+        $os->discoverPorts()->sync($device);
+        $this->assertCount(2, $device->ports);
+        $known = $device->ports->where('ifName', 'wan')->keyBy('ifIndex')->all();
+        $sample = $os->pollPorts($known, false);
+        $this->assertSame([1001], array_keys($sample));
+        $this->assertSame(42, $sample[1001]['ifInOctets']);
+        $this->assertSame([], $os->pollPorts($known, true));
     }
 
     public function testAlternativeMethodCanSupplyTheInventoryAndCounters(): void

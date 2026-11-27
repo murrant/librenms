@@ -621,8 +621,9 @@ class Epmp extends OS implements
         return $this->isAp;
     }
 
-    protected function pollPortMetrics(array &$ports): void
+    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
+        $ports = parent::pollIfMibRows($knownPorts, $selected, $extraOids);
         $link = \SnmpQuery::get(['CAMBIUM-PMP80211-MIB::cambiumLANModeStatus.0', 'CAMBIUM-PMP80211-MIB::cambiumLANSpeedStatus.0',
             'CAMBIUM-PMP80211-MIB::cambiumLAN2ModeStatus.0', 'CAMBIUM-PMP80211-MIB::cambiumLAN2SpeedStatus.0'])->throwIfConnectionError();
         foreach ($ports as &$port) {
@@ -640,5 +641,7 @@ class Epmp extends OS implements
                 $port['ifHighSpeed'] = $down ? 0 : round($port['ifHighSpeed'] / 1000000);
             }
         }
+
+        return $ports;
     }
 }

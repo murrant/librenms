@@ -26,12 +26,14 @@
 
 namespace LibreNMS\OS;
 
+use App\Facades\LibrenmsConfig;
 use App\Facades\PortCache;
 use App\Models\Device;
 use Illuminate\Support\Collection;
 use LibreNMS\Discovery\Neighbors\Neighbor;
 use LibreNMS\Discovery\Neighbors\NeighborParser;
 use LibreNMS\OS\Shared\Foundry;
+use LibreNMS\Ports\PortMeasurement;
 use LibreNMS\Util\IP;
 use SnmpQuery;
 
@@ -684,16 +686,20 @@ class Ironware extends Foundry
         $this->getDevice()->hardware = str_replace(array_keys($rewrite_ironware_hardware), array_values($rewrite_ironware_hardware), $this->getDevice()->hardware);
     }
 
-    protected function collectPortPower(array $ports): array
+    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
-        $result = [];
+        $ports = parent::pollIfMibRows($knownPorts, $selected, $extraOids);
+        if (! $ports || ! LibrenmsConfig::get('enable_ports_poe')) {
+            return $ports;
+        }
+
         foreach ($this->portTable('FOUNDRY-POE-MIB::snAgentPoePortTable') as $index => $row) {
             if (isset($ports[$index], $row['snAgentPoePortWattage'])) {
                 $limit = $row['snAgentPoePortWattage'];
-                $result[$index] = $this->portPowerFields($limit, $limit, $row['snAgentPoePortConsumed'] ?? null, $limit);
+                $ports[$index]['poe'] = PortMeasurement::powerFields($limit, $limit, $row['snAgentPoePortConsumed'] ?? null, $limit);
             }
         }
 
-        return $result;
+        return $ports;
     }
 }

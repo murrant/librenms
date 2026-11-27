@@ -262,8 +262,9 @@ class Tachyon extends OS implements
         return $sensors;
     }
 
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         foreach ($this->portTable('TACHYON-MIB::wirelessPeersTable') as $index => $row) {
             $status = ($row['wirelessPeerLinkUptime'] ?? 0) > 0 ? 'up' : 'down';
             $ports[1000 + (int) filter_var($index, FILTER_SANITIZE_NUMBER_INT)] = $this->mapPortFields($row, [
@@ -278,5 +279,7 @@ class Tachyon extends OS implements
                 'ifOperStatus' => $status,
                 'ifAdminStatus' => $status];
         }
+
+        return $ports;
     }
 }

@@ -8,8 +8,9 @@ class Procera extends Shared\Unix
      * @author     Paul Heinrichs <pdheinrichs@gmail.com>
      * @copyright  2017 Paul Heinrichs
      */
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         foreach ($this->portTable(['PACKETLOGIC-CHANNEL-MIB::netDeviceTable', 'PACKETLOGIC-CHANNEL-MIB::channelInfoTable']) as $key => $row) {
             if (! isset($row['channelName'])) {
                 continue;
@@ -38,5 +39,7 @@ class Procera extends Shared\Unix
                 'ifOutErrors' => 'channelInternalTxErrors',
             ]);
         }
+
+        return $ports;
     }
 }

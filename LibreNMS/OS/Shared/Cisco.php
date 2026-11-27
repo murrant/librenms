@@ -1704,17 +1704,17 @@ class Cisco extends OS implements
         };
     }
 
-    protected function portInventoryOids(): array
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
-        $pagp = ['pagpProtocolConfigTable', 'pagpEtherChannelTable'];
+        if ($knownPorts !== null) {
+            return parent::collectPortRows($knownPorts, $selected);
+        }
 
-        return [...parent::portInventoryOids(), 'CISCO-VLAN-MEMBERSHIP-MIB::vmVlan',
+        $ports = $this->discoverIfMibRows([
+            'Q-BRIDGE-MIB::dot1qPvid', 'CISCO-VLAN-MEMBERSHIP-MIB::vmVlan',
             'CISCO-VTP-MIB::vlanTrunkPortEncapsulationOperType', 'CISCO-VTP-MIB::vlanTrunkPortNativeVlan',
-            ...array_map(fn ($oid) => "CISCO-PAGP-MIB::$oid", $pagp)];
-    }
-
-    protected function discoverPortMetadata(array &$ports): void
-    {
+            'CISCO-PAGP-MIB::pagpProtocolConfigTable', 'CISCO-PAGP-MIB::pagpEtherChannelTable',
+        ]);
         foreach ($ports as &$port) {
             if (isset($port['vlanTrunkPortEncapsulationOperType']) && $port['vlanTrunkPortEncapsulationOperType'] !== 'notApplicable') {
                 $port['ifTrunk'] = $port['vlanTrunkPortEncapsulationOperType'];
@@ -1724,5 +1724,7 @@ class Cisco extends OS implements
                 $port['ifVlan'] = $port['vmVlan'];
             }
         }
+
+        return $ports;
     }
 }

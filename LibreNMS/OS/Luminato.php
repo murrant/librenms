@@ -4,8 +4,9 @@ namespace LibreNMS\OS;
 
 class Luminato extends Generic
 {
-    protected function pollPortMetrics(array &$ports): void
+    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
+        $ports = parent::pollIfMibRows($knownPorts, $selected, $extraOids);
         foreach ($ports as &$port) {
             if (empty($port['ifOperStatus']) && isset($port['ifConnectorPresent'])) {
                 $port['ifOperStatus'] = $port['ifConnectorPresent'] === 'true' ? 'up' : 'down';
@@ -18,5 +19,7 @@ class Luminato extends Generic
                 }
             }
         }
+
+        return $ports;
     }
 }

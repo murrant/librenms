@@ -153,8 +153,9 @@ class HorizonQuantum extends OS implements
         return $sensors;
     }
 
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         $rows = $this->portTable(['DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortConfigTable',
             'DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortStatsTable', 'DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortStatusTable']);
         foreach ($rows as $row) {
@@ -183,5 +184,7 @@ class HorizonQuantum extends OS implements
                 'ifHighSpeed' => [1 => 10, 100, 1000, 1000][$row['hzQtmEnetPortSpeed'] ?? 0] ?? null,
             ] + ($ports[$index] ?? []);
         }
+
+        return $ports;
     }
 }

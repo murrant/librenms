@@ -4,12 +4,19 @@ namespace LibreNMS\OS;
 
 class Cnmatrix extends Generic
 {
-    protected function discoverPortMetadata(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
+        if ($knownPorts !== null && $this->portAssociationMode() !== 'ifAlias') {
+            return $ports;
+        }
+
         foreach ($this->portTable('ARICENT-CFA-MIB::ifMainDesc') as $index => $values) {
             if (isset($ports[$index])) {
                 $ports[$index] = $this->mapPortFields($values, ['ifAlias' => 'ifMainDesc']) + $ports[$index];
             }
         }
+
+        return $ports;
     }
 }

@@ -70,8 +70,13 @@ class Ekinops extends OS implements OSDiscovery
      * @author     Heath Barnhart <hbarnhart@kanren.net>
      * @copyright  2020 KanREN, Inc
      */
-    protected function discoverPortMetadata(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
+        if ($knownPorts !== null && $this->portAssociationMode() === 'ifIndex') {
+            return $ports;
+        }
+
         foreach ($ports as &$port) {
             $parts = preg_split('/[\/,()]/', $port['ifName'] ?? '');
             if (isset($parts[4])) {
@@ -79,5 +84,7 @@ class Ekinops extends OS implements OSDiscovery
                 $port['ifAlias'] = $parts[5] ?? '';
             }
         }
+
+        return $ports;
     }
 }

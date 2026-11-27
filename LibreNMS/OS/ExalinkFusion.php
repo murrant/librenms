@@ -4,10 +4,9 @@ namespace LibreNMS\OS;
 
 class ExalinkFusion extends Generic
 {
-    protected const bool USE_IF_MIB = false;
-
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = [];
         foreach ($this->portTable('EXALINK-FUSION-MIB::fusionPortTable', true) as $key => $row) {
             $parts = explode('.', trim($key, '"'));
             if (count($parts) !== 2 || ! isset($row['fusionPortName'])) {
@@ -28,5 +27,7 @@ class ExalinkFusion extends Generic
                 'ifConnectorPresent' => 'fusionPortPresent',
             ]);
         }
+
+        return $ports;
     }
 }

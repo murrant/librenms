@@ -8,8 +8,9 @@ class CxrTs extends Generic
      * @author     PipoCanaja <PipoCanaja@gmail.com>
      * @copyright  PipoCanaja 2018
      */
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         foreach ($this->portTable(['CXR-TS-MIB::portTable', 'CXR-TS-MIB::portStatsTable'], true) as $index => $row) {
             $alias = "Port $index, " . implode(', ', [$row['terminalType'] ?? '', $row['mode'] ?? '', trim(($row['baudRate'] ?? '') . ' ' . ($row['nbParStop'] ?? ''))]);
             foreach (['Alias' => ['aliasIpAddress', 'tcpPort'], 'Remote' => ['remoteIpAddress', 'remoteTcpPort']] as $label => [$ip, $tcp]) {
@@ -27,5 +28,7 @@ class CxrTs extends Generic
                 'ifSpeed' => preg_replace('/[^0-9.]/', '', $row['baudRate'] ?? '')]
                 + $this->mapPortFields($row, ['ifInOctets' => 'bytesReceiveFromV24', 'ifOutOctets' => 'bytesSendToV24']);
         }
+
+        return $ports;
     }
 }

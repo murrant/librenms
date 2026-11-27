@@ -158,12 +158,15 @@ class Fortigate extends OS implements
         return $values;
     }
 
-    protected function pollPortMetrics(array &$ports): void
+    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
+        $ports = parent::pollIfMibRows($knownPorts, $selected, $extraOids);
         foreach ($ports as &$port) {
             if (($port['ifHighSpeed'] ?? 0) > 2147483647) {
                 unset($port['ifHighSpeed']);
             }
         }
+
+        return $ports;
     }
 }

@@ -1410,8 +1410,9 @@ class Timos extends OS implements BgpAddressFamilyDiscovery, MplsDiscovery, Mpls
      * @author     Vitali Kari <vitali.kari@gmail.com>
      * @copyright  2018 Vitali Kari
      */
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         $map = [
             'ifName' => 'vRtrIfName',
             'ifAlias' => 'vRtrIfAlias',
@@ -1433,5 +1434,7 @@ class Timos extends OS implements BgpAddressFamilyDiscovery, MplsDiscovery, Mpls
             }
             $ports[$index] = ($ports[$index] ?? []) + $vrf;
         }
+
+        return $ports;
     }
 }

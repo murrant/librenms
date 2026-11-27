@@ -124,8 +124,9 @@ class AirosAf extends OS implements
         ];
     }
 
-    protected function addVendorPorts(array &$ports): void
+    protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
+        $ports = parent::collectPortRows($knownPorts, $selected);
         $radio = $this->portTable('UBNT-AirFIBER-MIB::airFiberStatisticsEntry')[1] ?? [];
         if (isset($radio['rxOctetsOK'])) {
             foreach ($ports as &$port) {
@@ -145,5 +146,7 @@ class AirosAf extends OS implements
                 }
             }
         }
+
+        return $ports;
     }
 }

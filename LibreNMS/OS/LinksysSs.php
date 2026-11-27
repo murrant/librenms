@@ -2,19 +2,26 @@
 
 namespace LibreNMS\OS;
 
+use App\Facades\LibrenmsConfig;
+use LibreNMS\Ports\PortMeasurement;
+
 class LinksysSs extends Generic
 {
-    protected function collectPortPower(array $ports): array
+    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
-        $result = [];
+        $ports = parent::pollIfMibRows($knownPorts, $selected, $extraOids);
+        if (! $ports || ! LibrenmsConfig::get('enable_ports_poe')) {
+            return $ports;
+        }
+
         foreach ($this->portTable(['LINKSYS-POE-MIB::rlPethPsePortPowerLimit', 'LINKSYS-POE-MIB::rlPethPsePortOutputPower']) as $key => $row) {
             $index = substr(strrchr($key, '.'), 1);
             if (isset($ports[$index], $row['rlPethPsePortOutputPower'])) {
                 $limit = $row['rlPethPsePortPowerLimit'] ?? null;
-                $result[$index] = $this->portPowerFields($limit, $limit, $row['rlPethPsePortOutputPower'], $limit);
+                $ports[$index]['poe'] = PortMeasurement::powerFields($limit, $limit, $row['rlPethPsePortOutputPower'], $limit);
             }
         }
 
-        return $result;
+        return $ports;
     }
 }

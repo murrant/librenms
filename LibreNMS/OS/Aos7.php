@@ -30,6 +30,7 @@
 
 namespace LibreNMS\OS;
 
+use App\Facades\LibrenmsConfig;
 use App\Facades\PortCache;
 use App\Models\BgpPeer;
 use App\Models\BgpPeerCbgp;
@@ -49,6 +50,7 @@ use LibreNMS\Interfaces\Discovery\VlanPortDiscovery;
 use LibreNMS\Interfaces\Polling\NacPolling;
 use LibreNMS\OS;
 use LibreNMS\OS\Traits\AlcatelMacAddressMib;
+use LibreNMS\Ports\PortMeasurement;
 use LibreNMS\Util\Bgp;
 use LibreNMS\Util\IP;
 use LibreNMS\Util\Mac;
@@ -449,11 +451,15 @@ class Aos7 extends OS implements BgpAddressFamilyDiscovery, ProcessorDiscovery, 
         return $fdb->isNotEmpty() ? $fdb : parent::discoverFdbTable();
     }
 
-    protected function collectPortPower(array $ports): array
+    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
+        $ports = parent::pollIfMibRows($knownPorts, $selected, $extraOids);
+        if (! $ports || ! LibrenmsConfig::get('enable_ports_poe')) {
+            return $ports;
+        }
+
         $power = $this->portTable(['ALCATEL-IND1-INLINE-POWER-MIB::alaPethPsePortPowerMaximum',
             'ALCATEL-IND1-INLINE-POWER-MIB::alaPethPsePortPowerActual']);
-        $result = [];
         foreach ($ports as $index => $row) {
             if (preg_match('#^(\d+)/(\d+)/(\d+)$#', $row['ifName'] ?? '', $match)) {
                 $slot = ($match[1] - 1) * 1000 + $match[2];
@@ -461,11 +467,11 @@ class Aos7 extends OS implements BgpAddressFamilyDiscovery, ProcessorDiscovery, 
                 $max = $supply['alaPethPsePortPowerMaximum'] ?? null;
                 $used = $supply['alaPethPsePortPowerActual'] ?? null;
                 if (is_numeric($max) && $max > 0 && is_numeric($used) && $used >= 0) {
-                    $result[$index] = $this->portPowerFields(null, $max, $used, null);
+                    $ports[$index]['poe'] = PortMeasurement::powerFields(null, $max, $used, null);
                 }
             }
         }
 
-        return $result;
+        return $ports;
     }
 }
