@@ -149,7 +149,23 @@ final class PortsTest extends InMemoryDbTestCase
         $os = OS::make($attributes);
         $module = new Ports;
         $store = Mockery::mock(DataStorageInterface::class)->shouldIgnoreMissing();
+        $walked = [];
+        \Event::listen(\App\Events\SnmpQueryExecuted::class, function ($event) use (&$walked): void {
+            if ($event->method === 'snmpwalk') {
+                array_push($walked, ...$event->oids);
+            }
+        });
         $module->discover($os);
+        $this->assertNotContains('IF-MIB::ifAdminStatus', $walked);
+        $this->assertNotContains('IF-MIB::ifHCInOctets', $walked);
+        $this->assertContains('ifHCInOctets', explode(',', $device->getAttrib('ports_if_mib_columns')));
+        $walked = [];
+        $module->poll($os, $store);
+        $this->assertContains('IF-MIB::ifHCInOctets', $walked);
+        foreach (['ifXTable', 'ifName', 'ifDescr', 'ifAlias', 'ifConnectorPresent'] as $field) {
+            $this->assertNotContains("IF-MIB::$field", $walked);
+        }
+        $this->travel(300)->seconds();
         $device->ports()->where('ifIndex', '!=', 10115)->update(['disabled' => true]);
         $port = $device->ports()->isValid()->sole();
         $module->poll($os, $store);
@@ -163,6 +179,30 @@ final class PortsTest extends InMemoryDbTestCase
         $this->assertEquals($port->ifInOctets, $port->fresh()->ifInOctets);
         $this->assertEquals(55615, $port->fresh()->ifInErrors);
         $this->assertEquals(300, $port->fresh()->poll_period);
+    }
+
+    public function testSparseHighCapacityColumnUsesThe32BitCounterForMissingInterfaces(): void
+    {
+        LibrenmsConfig::set('enable_ports_etherlike', false);
+        $device = Device::factory()->create(['os' => 'generic']);
+        $device->setRelation('pollingMethods', collect([new DevicePollingMethod([
+            'method_type' => PollingMethodType::Snmp, 'enabled' => true, 'settings' => ['port_association_mode' => 'ifIndex'],
+        ])]));
+        $device->setAttrib('ports_if_mib_columns', 'ifOperStatus,ifInOctets,ifHCInOctets');
+        foreach ([1, 2] as $index) {
+            $device->ports()->create(['ifIndex' => $index, 'ifName' => "eth$index"]);
+        }
+        $os = Mockery::mock(OS::class)->makePartial()->shouldAllowMockingProtectedMethods();
+        $os->allows('getDevice')->andReturn($device);
+        $os->allows('getName')->andReturn('generic');
+        $os->expects('portTable')->with(['IF-MIB::ifOperStatus', 'IF-MIB::ifHCInOctets', 'EtherLike-MIB::dot3StatsDuplexStatus'], true)
+            ->andReturn([1 => ['ifOperStatus' => 'up', 'ifHCInOctets' => '0'], 2 => ['ifOperStatus' => 'up']]);
+        $os->expects('portTable')->with(['IF-MIB::ifInOctets'], true)->andReturn([1 => ['ifInOctets' => '10'], 2 => ['ifInOctets' => '42']]);
+        $ports = $device->ports->keyBy('ifIndex')->all();
+        $rows = $os->pollPorts($ports, false);
+        $this->assertSame('0', $rows[1]['ifHCInOctets']);
+        $this->assertSame('42', $rows[2]['ifInOctets']);
+        $this->assertArrayNotHasKey('ifHCInOctets', $rows[2]);
     }
 
     public function testCustomDescriptionParsersRunDuringDiscovery(): void
@@ -199,9 +239,9 @@ final class PortsTest extends InMemoryDbTestCase
             1 => ['vifPort' => 'wan', 'vifName' => 'WAN uplink', 'vifRxOctets' => 42],
             2 => ['vifPort' => 'lan', 'vifName' => 'LAN interface', 'vifRxOctets' => 15],
         ];
-        $os->expects('portTable')->with('BISON-ROUTER-MIB::vifTable')->times(3)->andReturn(
-            $rows, $rows, [1 => ['vifPort' => 'replacement']] + $rows,
-        );
+        $os->expects('portTable')->with(['BISON-ROUTER-MIB::vifCvid', 'BISON-ROUTER-MIB::vifName', 'BISON-ROUTER-MIB::vifPort'])->andReturn($rows);
+        $os->expects('portTable')->with(['BISON-ROUTER-MIB::vifRxOctets', 'BISON-ROUTER-MIB::vifTxOctets', 'BISON-ROUTER-MIB::vifRxPkts',
+            'BISON-ROUTER-MIB::vifTxPkts', 'BISON-ROUTER-MIB::vifName', 'BISON-ROUTER-MIB::vifPort'])->twice()->andReturn($rows, [1 => ['vifPort' => 'replacement']] + $rows);
         $os->discoverPorts()->sync($device);
         $this->assertCount(2, $device->ports);
         $known = $device->ports->where('ifName', 'wan')->keyBy('ifIndex')->all();

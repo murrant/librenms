@@ -156,8 +156,11 @@ class HorizonQuantum extends OS implements
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = parent::collectPortRows($knownPorts, $selected);
-        $rows = $this->portTable(['DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortConfigTable',
-            'DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortStatsTable', 'DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortStatusTable']);
+        $oids = ['DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortConfigTable', 'DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortStatusTable'];
+        if ($knownPorts !== null) {
+            $oids[] = 'DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortStatsTable';
+        }
+        $rows = $this->portTable($oids);
         foreach ($rows as $row) {
             if (! isset($row['hzQtmEnetPortIndex'])) {
                 continue;

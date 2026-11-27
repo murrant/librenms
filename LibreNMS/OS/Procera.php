@@ -11,7 +11,11 @@ class Procera extends Shared\Unix
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = parent::collectPortRows($knownPorts, $selected);
-        foreach ($this->portTable(['PACKETLOGIC-CHANNEL-MIB::netDeviceTable', 'PACKETLOGIC-CHANNEL-MIB::channelInfoTable']) as $key => $row) {
+        $oids = ['PACKETLOGIC-CHANNEL-MIB::channelName', 'PACKETLOGIC-CHANNEL-MIB::channelActive', 'PACKETLOGIC-CHANNEL-MIB::channelInternalNegotiatedMedia'];
+        if ($knownPorts !== null) {
+            $oids[] = 'PACKETLOGIC-CHANNEL-MIB::netDeviceTable';
+        }
+        foreach ($this->portTable($oids) as $key => $row) {
             if (! isset($row['channelName'])) {
                 continue;
             }

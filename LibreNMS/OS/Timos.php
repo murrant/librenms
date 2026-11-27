@@ -1425,6 +1425,12 @@ class Timos extends OS implements BgpAddressFamilyDiscovery, MplsDiscovery, Mpls
             'ifHCInUcastPkts' => 'vRtrIfRxPkts',
             'ifHCOutUcastPkts' => 'vRtrIfTxPkts',
         ];
+        $inventory = ['ifName', 'ifDescr', 'ifAlias', 'ifType', 'ifMtu'];
+        if ($knownPorts === null) {
+            $map = array_intersect_key($map, array_flip($inventory));
+        } elseif ($this->portAssociationMode() === 'ifIndex') {
+            $map = array_diff_key($map, array_flip($inventory));
+        }
         $columns = array_map(fn ($field) => "TIMETRA-VRTR-MIB::$field", $map);
         foreach ($this->portTable($columns, true) as $key => $row) {
             $index = substr(strrchr($key, '.'), 1);

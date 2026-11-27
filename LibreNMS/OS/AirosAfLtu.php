@@ -131,7 +131,7 @@ class AirosAfLtu extends OS implements
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = parent::collectPortRows($knownPorts, $selected);
-        $ethernet = $this->portTable('UBNT-AFLTU-MIB::afLTUethStats', true)[0] ?? [];
+        $ethernet = $this->portTable($knownPorts === null ? ['UBNT-AFLTU-MIB::afLTUethConnected'] : 'UBNT-AFLTU-MIB::afLTUethStats', true)[0] ?? [];
         foreach ($ports as $index => &$port) {
             if (($port['ifDescr'] ?? '') !== 'eth0') {
                 continue;

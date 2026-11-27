@@ -127,7 +127,7 @@ class AirosAf extends OS implements
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = parent::collectPortRows($knownPorts, $selected);
-        $radio = $this->portTable('UBNT-AirFIBER-MIB::airFiberStatisticsEntry')[1] ?? [];
+        $radio = $this->portTable($knownPorts === null ? ['UBNT-AirFIBER-MIB::rxOctetsOK'] : 'UBNT-AirFIBER-MIB::airFiberStatisticsEntry')[1] ?? [];
         if (isset($radio['rxOctetsOK'])) {
             foreach ($ports as &$port) {
                 if (($port['ifDescr'] ?? '') === 'eth0') {

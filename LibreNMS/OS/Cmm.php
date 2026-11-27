@@ -4,15 +4,16 @@ namespace LibreNMS\OS;
 
 class Cmm extends Generic
 {
+    // The controller reports zero for HC counters while its 32-bit counters advance.
+    protected function portMetricColumns(): array
+    {
+        return array_filter(parent::portMetricColumns(), fn ($field) => ! str_starts_with($field, 'ifHC'));
+    }
+
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = parent::collectPortRows($knownPorts, $selected);
-        $rows = $this->portTable(['CMM3-MIB::cmmSwitchTable', 'CMM3-MIB::cmmPortTable']);
-        // The controller advertises HC columns that stay at zero while the 32-bit counters advance.
-        foreach ($ports as &$controllerPort) {
-            $controllerPort = array_filter($controllerPort, fn ($key) => ! str_starts_with($key, 'ifHC'), ARRAY_FILTER_USE_KEY);
-        }
-        unset($controllerPort);
+        $rows = $this->portTable([$knownPorts === null ? 'CMM3-MIB::portNumber' : 'CMM3-MIB::cmmSwitchTable', 'CMM3-MIB::cmmPortTable']);
         foreach (array_values($rows) as $index => $row) {
             if (! isset($row['portNumber'])) {
                 continue;

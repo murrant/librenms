@@ -7,7 +7,14 @@ class MxNos extends Generic
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = parent::collectPortRows($knownPorts, $selected);
-        foreach ($this->portTable(['MOXA-TCST-MIB::tcstStatGroupTable', 'MOXA-PORT-MIB::portConfigDescription']) as $index => $row) {
+        $oids = [];
+        if ($knownPorts !== null) {
+            $oids[] = 'MOXA-TCST-MIB::tcstStatGroupTable';
+        }
+        if ($knownPorts === null || $this->portAssociationMode() === 'ifAlias') {
+            $oids[] = 'MOXA-PORT-MIB::portConfigDescription';
+        }
+        foreach ($this->portTable($oids) as $index => $row) {
             $ports[$index] = $this->mapPortFields($row, [
                 'ifInOctets' => 'tcstStatRxTotalOctets',
                 'ifInUcastPkts' => 'tcstStatRxUnicastPackets',

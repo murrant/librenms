@@ -28,11 +28,26 @@ trait IfMib
 
     protected function discoverIfMibRows(array $extraOids): array
     {
-        $rows = $this->portTable([
-            ...$this->ifMibOids(['ifDescr', 'ifName', 'ifAlias', 'ifType', 'ifMtu', 'ifPhysAddress',
-                'ifConnectorPresent', 'ifOperStatus', 'ifAdminStatus']),
-            ...$extraOids,
-        ], true);
+        $identity = ['ifDescr', 'ifName', 'ifAlias', 'ifType', 'ifMtu', 'ifPhysAddress', 'ifConnectorPresent'];
+        if (LibrenmsConfig::getCombined($this->getName(), 'bad_ifoperstatus')) {
+            $identity[] = 'ifOperStatus';
+        }
+        $rows = $this->portTable([...$this->ifMibOids($identity), ...$extraOids], true);
+        if ($rows) {
+            // GETNEXT at each column root finds sparse columns even when the first interface lacks them.
+            $columns = $this->portMetricColumns();
+            $probe = SnmpQuery::device($this->getDevice())->hideMib()->next($this->ifMibOids($columns))->throwIfConnectionError();
+            if ($probe->exitCode === 0 && $probe->values()) {
+                $available = [];
+                foreach ($probe->valuesByIndex() as $row) {
+                    $available += $row;
+                }
+                $supported = implode(',', array_intersect($columns, array_keys($available)));
+                if ($supported !== '' && $supported !== $this->getDevice()->getAttrib('ports_if_mib_columns')) {
+                    $this->getDevice()->setAttrib('ports_if_mib_columns', $supported);
+                }
+            }
+        }
         $bridgeIndexes = null;
         foreach ($rows as $bridgePort => $row) {
             if (isset($row['dot1qPvid'])) {
@@ -78,16 +93,24 @@ trait IfMib
 
     protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
-        $byIndex = $this->portAssociationMode() === 'ifIndex';
-        $identity = $byIndex ? [] : ['ifName', 'ifDescr', 'ifAlias'];
-        $rows = $selected ? $this->selectedPortData($knownPorts, $identity, $extraOids) : $this->walkPortMetrics($identity, $extraOids);
+        $identity = $this->portIdentityColumns();
+        $rows = $selected ? $this->selectedPortData($knownPorts, $identity, $extraOids) : $this->walkPortMetrics($knownPorts, $identity, $extraOids);
         $rows = array_intersect_key($rows, $knownPorts);
-        $metadata = $byIndex ? ['ifName', 'ifDescr', 'ifType', 'ifConnectorPresent'] : ['ifType', 'ifConnectorPresent'];
+        $metadata = ! $identity ? ['ifName', 'ifDescr', 'ifType', 'ifConnectorPresent'] : ['ifType', 'ifConnectorPresent'];
         foreach ($rows as $index => &$row) {
             $row += $knownPorts[$index]->only($metadata);
         }
 
         return $rows;
+    }
+
+    protected function portIdentityColumns(): array
+    {
+        return match ($this->portAssociationMode()) {
+            'ifIndex' => [],
+            'ifAlias' => ['ifName', 'ifDescr', 'ifAlias'],
+            default => ['ifName', 'ifDescr'],
+        };
     }
 
     protected function portAssociationMode(): string
@@ -102,22 +125,67 @@ trait IfMib
         return in_array($hardware, array_map(strtolower(...), (array) LibrenmsConfig::getOsSetting($this->getName(), 'bad_ifXEntry', [])), true);
     }
 
-    private function ifMibOids(array $columns): array
+    protected function ifMibOids(array $columns): array
     {
         return array_map(fn ($field) => "IF-MIB::$field", $columns);
     }
 
-    private function walkPortMetrics(array $identity, array $extraOids): array
+    protected function portMetricColumns(): array
     {
-        // A walk of ifTable can stop early on a malformed physical address. Walk live columns individually.
-        $columns = [...$identity, 'ifOperStatus', 'ifAdminStatus', 'ifLastChange', 'ifSpeed',
-            ...PortMeasurement::BASE, 'ifInNUcastPkts', 'ifOutNUcastPkts', 'ifInUnknownProtos', 'ifInDiscards', 'ifOutDiscards'];
-        $oids = $this->ifMibOids($columns);
+        $columns = ['ifOperStatus', 'ifAdminStatus', 'ifLastChange', 'ifSpeed', ...PortMeasurement::COUNTERS];
         if (! $this->hasBrokenIfXEntry()) {
-            $oids[] = 'IF-MIB::ifXTable';
+            $columns[] = 'ifHighSpeed';
+            if ($this->getDevice()->polling()->snmp()->version !== 'v1') {
+                foreach (['In', 'Out'] as $direction) {
+                    foreach (['Octets', 'UcastPkts', 'MulticastPkts', 'BroadcastPkts'] as $counter) {
+                        $columns[] = "ifHC$direction$counter";
+                    }
+                }
+            }
         }
 
-        return $this->portTable([...$oids, ...$extraOids], true);
+        return $columns;
+    }
+
+    private function supportedPortColumns(?string $stored): array
+    {
+        $columns = $this->portMetricColumns();
+
+        return $stored ? array_intersect($columns, explode(',', $stored)) : $columns;
+    }
+
+    private function walkPortMetrics(array $ports, array $identity, array $extraOids): array
+    {
+        $stored = $this->getDevice()->getAttrib('ports_if_mib_columns');
+        $columns = $this->supportedPortColumns($stored);
+        $config = $this->getDevice()->polling()->snmp();
+        if ($stored && (count($ports) === 1 || ($config->version === 'v1' && count($ports) <= $config->maxOid))) {
+            $rows = $this->getPortColumns(array_keys($ports), $this->ifMibOids([...$identity, ...$columns]));
+
+            return $extraOids ? array_replace_recursive($rows, $this->portTable($extraOids, true)) : $rows;
+        }
+
+        // A device may implement 64-bit counters on only some of its interfaces.
+        $fallbacks = [];
+        foreach ($columns as $field) {
+            if (str_starts_with($field, 'ifHC')) {
+                $fallbacks['if' . substr($field, 4)] = $field;
+            }
+        }
+        $fallbacks = array_intersect_key($fallbacks, array_flip($columns));
+        $primary = array_diff($columns, array_keys($fallbacks));
+        $rows = $this->portTable([...$this->ifMibOids([...$identity, ...$primary]), ...$extraOids], true);
+        $fallback = [];
+        foreach ($fallbacks as $field => $hc) {
+            foreach ($ports as $index => $port) {
+                if (! ctype_digit((string) ($rows[$index][$hc] ?? ''))) {
+                    $fallback[] = $field;
+                    break;
+                }
+            }
+        }
+
+        return $fallback ? array_replace_recursive($rows, $this->portTable($this->ifMibOids($fallback), true)) : $rows;
     }
 
     private function selectedPortData(array $selected, array $identity, array $extraOids): array
@@ -138,15 +206,7 @@ trait IfMib
         if (! $active) {
             return $rows;
         }
-        $fields = ['ifLastChange', 'ifSpeed', ...PortMeasurement::COUNTERS];
-        if (! $this->hasBrokenIfXEntry()) {
-            $fields[] = 'ifHighSpeed';
-            foreach (['In', 'Out'] as $direction) {
-                foreach (['Octets', 'UcastPkts', 'MulticastPkts', 'BroadcastPkts'] as $counter) {
-                    $fields[] = "ifHC$direction$counter";
-                }
-            }
-        }
+        $fields = array_diff($this->supportedPortColumns($this->getDevice()->getAttrib('ports_if_mib_columns')), ['ifOperStatus', 'ifAdminStatus']);
         $details = $this->getPortColumns($active, [...$this->ifMibOids($fields), ...$extraOids]);
 
         return array_replace_recursive($rows, $details);

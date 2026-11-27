@@ -7,7 +7,7 @@ class ExalinkFusion extends Generic
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = [];
-        foreach ($this->portTable('EXALINK-FUSION-MIB::fusionPortTable', true) as $key => $row) {
+        foreach ($this->portTable($knownPorts === null ? ['EXALINK-FUSION-MIB::fusionPortName', 'EXALINK-FUSION-MIB::fusionPortAlias', 'EXALINK-FUSION-MIB::fusionPortPresent', 'EXALINK-FUSION-MIB::fusionPortHasSignal'] : 'EXALINK-FUSION-MIB::fusionPortTable', true) as $key => $row) {
             $parts = explode('.', trim($key, '"'));
             if (count($parts) !== 2 || ! isset($row['fusionPortName'])) {
                 continue;

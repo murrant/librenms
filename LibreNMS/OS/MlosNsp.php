@@ -7,7 +7,7 @@ class MlosNsp extends Generic
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = parent::collectPortRows($knownPorts, $selected);
-        $rows = $this->portTable(['TRELLIX-SENSOR-CONF-MIB::intfPortTable', 'TRELLIX-SENSOR-PERF-MIB::intfPortIf64Table']);
+        $rows = $this->portTable($knownPorts === null ? 'TRELLIX-SENSOR-CONF-MIB::intfPortTable' : ['TRELLIX-SENSOR-CONF-MIB::intfPortTable', 'TRELLIX-SENSOR-PERF-MIB::intfPortIf64Table']);
         $speeds = [1 => 10000000, 100000000, 1000000000, 10000000000, 40000000000];
         foreach (array_values($rows) as $index => $row) {
             if (! isset($row['intfPortIfDescr'])) {

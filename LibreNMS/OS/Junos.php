@@ -611,7 +611,7 @@ class Junos extends \LibreNMS\OS implements BgpAddressFamilyDiscovery, SlaDiscov
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = parent::collectPortRows($knownPorts, $selected);
-        foreach ($this->portTable('JUNIPER-VIRTUALCHASSIS-MIB::jnxVirtualChassisPortTable', true) as $key => $row) {
+        foreach ($this->portTable($knownPorts === null ? ['JUNIPER-VIRTUALCHASSIS-MIB::jnxVirtualChassisPortOperStatus'] : 'JUNIPER-VIRTUALCHASSIS-MIB::jnxVirtualChassisPortTable', true) as $key => $row) {
             $key = str_replace('"', '', $key);
             if (preg_match('#^(\d{1,2})\.vcp-255/(\d)/(\d{1,2})$#', $key, $match)) {
                 $index = sprintf('100%02d%d%02d', $match[1], $match[2], $match[3]);

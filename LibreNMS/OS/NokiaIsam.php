@@ -9,7 +9,7 @@ class NokiaIsam extends Generic
     public function discoverPorts(): PortInventory
     {
         $ports = parent::collectPortRows(null, false);
-        $complete = $this->addIhubPorts($ports, ['IF-MIB::ifDescr', 'IF-MIB::ifName', 'IF-MIB::ifAlias', 'IF-MIB::ifType', 'IF-MIB::ifOperStatus', 'IF-MIB::ifAdminStatus']);
+        $complete = $this->addIhubPorts($ports, ['IF-MIB::ifDescr', 'IF-MIB::ifName', 'IF-MIB::ifAlias', 'IF-MIB::ifType', 'IF-MIB::ifOperStatus']);
 
         return new PortInventory($this->withCustomerAliases($ports), $complete, $this->portAssociationMode());
     }
@@ -40,7 +40,7 @@ class NokiaIsam extends Generic
     protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
         $ports = parent::pollIfMibRows($knownPorts, $selected, $extraOids);
-        $this->addIhubPorts($ports, ['IF-MIB::ifTable', 'IF-MIB::ifXTable']);
+        $this->addIhubPorts($ports, $this->ifMibOids([...$this->portIdentityColumns(), ...$this->portMetricColumns()]));
         if ($this->portAssociationMode() === 'ifAlias') {
             $ports = $this->withCustomerAliases($ports);
         }

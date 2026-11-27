@@ -46,7 +46,11 @@ class Edgeosolt extends \LibreNMS\OS
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = [];
-        foreach ($this->portTable('UBNT-UFIBER-MIB::ubntSfpsTable') as $index => $row) {
+        $columns = $knownPorts === null ? ['ubntSfpUp'] : ['ubntSfpUp', 'ubntSfpRxBytes', 'ubntSfpTxBytes'];
+        if ($knownPorts === null || $this->portAssociationMode() !== 'ifIndex') {
+            $columns[] = 'ubntSfpName';
+        }
+        foreach ($this->portTable(array_map(fn ($column) => "UBNT-UFIBER-MIB::$column", $columns)) as $index => $row) {
             $ports[1000 + $index] = $this->mapPortFields($row, [
                 'ifName' => 'ubntSfpName',
                 'ifDescr' => 'ubntSfpName',
