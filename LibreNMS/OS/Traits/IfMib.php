@@ -89,7 +89,7 @@ trait IfMib
     {
         $hardware = strtolower($this->getDevice()->hardware ?? '');
 
-        return in_array($hardware, array_map('strtolower', (array) LibrenmsConfig::getOsSetting($this->getName(), 'bad_ifXEntry', [])), true);
+        return in_array($hardware, array_map(strtolower(...), (array) LibrenmsConfig::getOsSetting($this->getName(), 'bad_ifXEntry', [])), true);
     }
 
     private function ifMibOids(array $columns): array

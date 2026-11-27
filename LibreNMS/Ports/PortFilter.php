@@ -5,12 +5,12 @@ namespace LibreNMS\Ports;
 use App\Facades\LibrenmsConfig;
 use Illuminate\Support\Str;
 
-final class PortFilter
+final readonly class PortFilter
 {
-    private readonly bool $allowEmptyDescription;
-    private readonly array $allowed;
-    private readonly array $excluded;
-    private readonly array $patterns;
+    private bool $allowEmptyDescription;
+    private array $allowed;
+    private array $excluded;
+    private array $patterns;
 
     public function __construct(?string $os)
     {

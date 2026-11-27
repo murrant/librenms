@@ -36,7 +36,7 @@ class LoopTelecom extends Generic
                     3, 5, 7 => 'halfDuplex',
                     default => null,
                 },
-            ] + array_map('abs', $this->mapPortFields($traffic[$row['ethernetStatusName']] ?? [], [
+            ] + array_map(abs(...), $this->mapPortFields($traffic[$row['ethernetStatusName']] ?? [], [
                 'ifInOctets' => 'ethernetRxGoodPkt',
                 'ifOutOctets' => 'ethernetTxGoodPkt',
                 'ifInErrors' => 'ethernetRxBadCount',

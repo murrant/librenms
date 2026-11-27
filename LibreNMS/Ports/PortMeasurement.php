@@ -14,17 +14,17 @@ use LibreNMS\Interfaces\Data\DataStorageInterface;
 use LibreNMS\RRD\PortRrd;
 use LibreNMS\RRD\RrdDefinition;
 
-final class PortMeasurement
+final readonly class PortMeasurement
 {
     // The first six counters live on ports, the rest on ports_statistics.
-    public const BASE = ['ifInOctets', 'ifOutOctets', 'ifInErrors', 'ifOutErrors', 'ifInUcastPkts', 'ifOutUcastPkts'];
-    public const COUNTERS = [...self::BASE, 'ifInNUcastPkts', 'ifOutNUcastPkts', 'ifInDiscards', 'ifOutDiscards',
+    public const array BASE = ['ifInOctets', 'ifOutOctets', 'ifInErrors', 'ifOutErrors', 'ifInUcastPkts', 'ifOutUcastPkts'];
+    public const array COUNTERS = [...self::BASE, 'ifInNUcastPkts', 'ifOutNUcastPkts', 'ifInDiscards', 'ifOutDiscards',
         'ifInUnknownProtos', 'ifInBroadcastPkts', 'ifOutBroadcastPkts', 'ifInMulticastPkts', 'ifOutMulticastPkts'];
-    public const ETHERLIKE = ['AlignmentErrors', 'FCSErrors', 'SingleCollisionFrames', 'MultipleCollisionFrames',
+    public const array ETHERLIKE = ['AlignmentErrors', 'FCSErrors', 'SingleCollisionFrames', 'MultipleCollisionFrames',
         'SQETestErrors', 'DeferredTransmissions', 'LateCollisions', 'ExcessiveCollisions', 'InternalMacTransmitErrors',
         'CarrierSenseErrors', 'FrameTooLongs', 'InternalMacReceiveErrors', 'SymbolErrors'];
 
-    private readonly RrdDefinition $definition;
+    private RrdDefinition $definition;
 
     public function __construct()
     {

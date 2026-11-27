@@ -24,7 +24,7 @@ final readonly class PortInventory
         if ($this->rows === []) {
             return;
         }
-        DB::transaction(function () use ($device) {
+        DB::transaction(function () use ($device): void {
             Device::whereKey($device->device_id)->lockForUpdate()->firstOrFail(['device_id']);
             $ports = $device->ports()->orderByDesc('deleted')->orderBy('port_id')->get();
             $byIndex = $ports->keyBy('ifIndex');

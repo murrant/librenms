@@ -73,7 +73,7 @@ final class PortsTest extends InMemoryDbTestCase
         );
         $values = [];
         $store = Mockery::mock(DataStorageInterface::class);
-        $store->expects('put')->times(4)->andReturnUsing(function ($device, $name, $tags, $fields) use (&$values, $port) {
+        $store->expects('put')->times(4)->andReturnUsing(function ($device, $name, $tags, $fields) use (&$values, $port): void {
             $this->assertSame('ports', $name);
             $this->assertSame('port-id' . $port->port_id, $tags['rrd_name']);
             $values[] = $fields['INOCTETS'];
