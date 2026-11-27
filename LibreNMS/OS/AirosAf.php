@@ -123,4 +123,27 @@ class AirosAf extends OS implements
             new WirelessSensor(WirelessSensorType::Rate, $this->getDeviceId(), $rx_oid, 'airos-rx', 1, 'Rx Capacity'),
         ];
     }
+
+    protected function addVendorPorts(array &$ports): void
+    {
+        $radio = $this->portTable('UBNT-AirFIBER-MIB::airFiberStatisticsEntry')[1] ?? [];
+        if (isset($radio['rxOctetsOK'])) {
+            foreach ($ports as &$port) {
+                if (($port['ifDescr'] ?? '') === 'eth0') {
+                    $port = ['ifOperStatus' => 'up'] + $this->mapPortFields($radio, [
+                        'ifHCInOctets' => 'rxOctetsOK',
+                        'ifHCOutOctets' => 'txOctetsOK',
+                        'ifInErrors' => 'rxErroredFrames',
+                        'ifOutErrors' => 'txErroredFrames',
+                        'ifInBroadcastPkts' => 'rxValidBroadcastFrames',
+                        'ifOutBroadcastPkts' => 'txValidBroadcastFrames',
+                        'ifInMulticastPkts' => 'rxValidMulticastFrames',
+                        'ifOutMulticastPkts' => 'txValidMulticastFrames',
+                        'ifInUcastPkts' => 'rxValidUnicastFrames',
+                        'ifOutUcastPkts' => 'txValidUnicastFrames',
+                    ]) + $port;
+                }
+            }
+        }
+    }
 }

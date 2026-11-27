@@ -683,4 +683,17 @@ class Ironware extends Foundry
 
         $this->getDevice()->hardware = str_replace(array_keys($rewrite_ironware_hardware), array_values($rewrite_ironware_hardware), $this->getDevice()->hardware);
     }
+
+    protected function collectPortPower(array $ports): array
+    {
+        $result = [];
+        foreach ($this->portTable('FOUNDRY-POE-MIB::snAgentPoePortTable') as $index => $row) {
+            if (isset($ports[$index], $row['snAgentPoePortWattage'])) {
+                $limit = $row['snAgentPoePortWattage'];
+                $result[$index] = $this->portPowerFields($limit, $limit, $row['snAgentPoePortConsumed'] ?? null, $limit);
+            }
+        }
+
+        return $result;
+    }
 }

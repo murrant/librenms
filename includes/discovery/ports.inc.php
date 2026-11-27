@@ -1,11 +1,5 @@
 <?php
 
-if (\LibreNMS\Config::get('modules.ports.version') == 2) {
-    (new \LibreNMS\Modules\Ports())->discover($os);
-
-    return;
-}
-
 // Build SNMP Cache Array
 use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;

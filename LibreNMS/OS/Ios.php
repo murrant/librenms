@@ -51,6 +51,7 @@ class Ios extends Cisco implements
     WirelessSnrDiscovery,
     PortSecurityPolling
 {
+    use \LibreNMS\OS\Traits\CiscoIosPorts;
     use CiscoCellular;
     use CiscoPortSecurity;
 

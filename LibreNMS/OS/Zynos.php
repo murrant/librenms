@@ -57,4 +57,14 @@ class Zynos extends Zyxel implements OSDiscovery
             }
         }
     }
+
+    protected function discoverPortMetadata(array &$ports): void
+    {
+        foreach ($ports as &$port) {
+            if (preg_match('/^swp(\d+)$/', $port['ifName'] ?? '', $match)) {
+                $number = (int) $match[1];
+                $port['ifName'] = sprintf('%d/%02d', intdiv($number, 64) + 1, $number % 64 + 1);
+            }
+        }
+    }
 }

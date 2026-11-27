@@ -1914,6 +1914,15 @@ return [
                 'description' => 'Transceivers',
             ],
         ],
+        'modules' => [
+            'ports' => [
+                'version' => [
+                    'description' => 'Ports module version',
+                    'help' => 'Choose the implementation used for port discovery and polling.',
+                    'options' => ['1' => 'Original (default)', '2' => 'Version 2 (experimental)'],
+                ],
+            ],
+        ],
         'polling' => [
             'selected_ports' => [
                 'description' => 'Selected Port Polling',

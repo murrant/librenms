@@ -57,4 +57,18 @@ class MoxaEtherdevice extends OS implements ProcessorDiscovery
             ]),
         ]);
     }
+
+    /**
+     * @author     rhinoau
+     */
+    protected function discoverPortMetadata(array &$ports): void
+    {
+        $aliases = \SnmpQuery::numeric()->walk($this->getDevice()->sysObjectID . '.1.9.1.1.7')->throwIfConnectionError()->values();
+        foreach ($aliases as $oid => $alias) {
+            $index = substr(strrchr($oid, '.'), 1);
+            if (isset($ports[$index])) {
+                $ports[$index]['ifAlias'] = $alias;
+            }
+        }
+    }
 }

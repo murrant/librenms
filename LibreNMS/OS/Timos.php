@@ -1405,4 +1405,33 @@ class Timos extends OS implements BgpAddressFamilyDiscovery, MplsDiscovery, Mpls
 
         return $fdb->isNotEmpty() ? $fdb : parent::discoverFdbTable();
     }
+
+    /**
+     * @author     Vitali Kari <vitali.kari@gmail.com>
+     * @copyright  2018 Vitali Kari
+     */
+    protected function addVendorPorts(array &$ports): void
+    {
+        $map = [
+            'ifName' => 'vRtrIfName',
+            'ifAlias' => 'vRtrIfAlias',
+            'ifDescr' => 'vRtrIfDescription',
+            'ifSpeed' => 'vRtrIfSpeed',
+            'ifType' => 'vRtrIfType',
+            'ifMtu' => 'vRtrIfMtu',
+            'ifHCInOctets' => 'vRtrIfRxBytes',
+            'ifHCOutOctets' => 'vRtrIfTxBytes',
+            'ifHCInUcastPkts' => 'vRtrIfRxPkts',
+            'ifHCOutUcastPkts' => 'vRtrIfTxPkts',
+        ];
+        $columns = array_map(fn ($field) => "TIMETRA-VRTR-MIB::$field", $map);
+        foreach ($this->portTable($columns, true) as $key => $row) {
+            $index = substr(strrchr($key, '.'), 1);
+            $vrf = $this->mapPortFields($row, $map);
+            if (empty($vrf['ifDescr'])) {
+                $vrf['ifDescr'] = $vrf['ifName'] ?? '';
+            }
+            $ports[$index] = ($ports[$index] ?? []) + $vrf;
+        }
+    }
 }

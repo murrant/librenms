@@ -52,4 +52,32 @@ class InfineraGroove extends \LibreNMS\OS
         $device->hardware = $data[0]['neType'] ?? null;
         $device->serial = $data['shelf.1.0.0.0']['inventoryManufacturerNumber'] ?? null;
     }
+
+    /**
+     * @author     Nick Hilliard <nick@foobar.org>
+     * @copyright  2019 Nick Hilliard
+     */
+    protected function addVendorPorts(array &$ports): void
+    {
+        foreach (['eth100g' => 100, 'eth40g' => 40, 'eth10g' => 10, 'fc16g' => 16, 'fc8g' => 8] as $type => $speed) {
+            $columns = ['ifAlias' => 'AliasName', 'ifAdminStatus' => 'AdminStatus', 'ifOperStatus' => 'OperStatus'];
+            foreach (['In', 'Out'] as $direction) {
+                foreach (['Octets' => 'Octets', 'UcastPkts' => 'Packets', 'MulticastPkts' => 'MulticastPackets', 'BroadcastPkts' => 'BroadcastPackets'] as $field => $suffix) {
+                    $columns['ifHC' . $direction . $field] = 'StatisticsEntry' . $direction . $suffix;
+                }
+            }
+            $map = array_map(fn ($column) => $type . $column, $columns);
+            foreach ($this->portTable(["CORIANT-GROOVE-MIB::{$type}Entry", "CORIANT-GROOVE-MIB::{$type}Statistics"], true) as $key => $row) {
+                $parts = explode('.', $key);
+                if (count($parts) !== 5 || ! isset($row[$type . 'AdminStatus'])) {
+                    continue;
+                }
+                $index = (int) vsprintf('%03d%03d%03d%03d%03d', $parts);
+                $name = (str_starts_with($type, 'eth') ? $speed . 'gbe' : $type) . "-$parts[0]/$parts[1]/$parts[3]";
+                $name .= $speed < 40 ? '.' . $parts[4] : '';
+                $ports[$index] = ['ifName' => $name, 'ifDescr' => $name, 'ifHighSpeed' => $speed * 1000, 'ifType' => 'Ethernet']
+                    + $this->mapPortFields($row, $map);
+            }
+        }
+    }
 }

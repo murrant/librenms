@@ -16,3 +16,8 @@ oids:
         - IP-MIB::ipNetToMediaPhysAddress
         - IF-MIB::ifTable
         - IF-MIB::ifXTable
+        - IF-MIB::ifDescr
+        - IF-MIB::ifType
+        - IF-MIB::ifOperStatus
+        - EtherLike-MIB::dot3StatsDuplexStatus
+        - EtherLike-MIB::dot3StatsTable

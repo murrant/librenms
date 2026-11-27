@@ -620,4 +620,25 @@ class Epmp extends OS implements
 
         return $this->isAp;
     }
+
+    protected function pollPortMetrics(array &$ports): void
+    {
+        $link = \SnmpQuery::get(['CAMBIUM-PMP80211-MIB::cambiumLANModeStatus.0', 'CAMBIUM-PMP80211-MIB::cambiumLANSpeedStatus.0',
+            'CAMBIUM-PMP80211-MIB::cambiumLAN2ModeStatus.0', 'CAMBIUM-PMP80211-MIB::cambiumLAN2SpeedStatus.0'])->throwIfConnectionError();
+        foreach ($ports as &$port) {
+            if (preg_match('/^LAN interface ([12])$/', $port['ifDescr'] ?? '', $match)) {
+                $prefix = 'CAMBIUM-PMP80211-MIB::cambiumLAN' . ($match[1] === '2' ? '2' : '');
+                $speed = $link->value($prefix . 'SpeedStatus.0');
+                if (is_numeric($speed)) {
+                    $port['ifHighSpeed'] = max(0, (int) $speed);
+                }
+                $port['ifDuplex'] = match ($link->value($prefix . 'ModeStatus.0')) {
+                    '0' => 'halfDuplex', '1' => 'fullDuplex', default => null,
+                };
+            } elseif (($port['ifHighSpeed'] ?? 0) > 1000000) {
+                $down = $port['ifHighSpeed'] >= 4290000000 && ($port['ifOperStatus'] ?? '') !== 'up';
+                $port['ifHighSpeed'] = $down ? 0 : round($port['ifHighSpeed'] / 1000000);
+            }
+        }
+    }
 }

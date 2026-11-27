@@ -96,4 +96,30 @@ class F5 extends OS implements OSPolling
             $this->enableGraph('bigip_system_tps');
         }
     }
+
+    protected function addVendorPorts(array &$ports): void
+    {
+        $version = $this->getDevice()->version ?? '';
+        if (version_compare($version, '11.2.0', '<') || version_compare($version, '11.7', '>=')) {
+            return;
+        }
+        $interfaces = $this->portTable('F5-BIGIP-SYSTEM-MIB::sysIfxStat', true);
+        foreach ($ports as &$port) {
+            $name = $port['ifDescr'] ?? '';
+            $port = $this->mapPortFields($interfaces[$name] ?? $interfaces['"' . $name . '"'] ?? [], [
+                'ifName' => 'sysIfxStatName',
+                'ifHighSpeed' => 'sysIfxStatHighSpeed',
+                'ifHCInOctets' => 'sysIfxStatHcInOctets',
+                'ifHCOutOctets' => 'sysIfxStatHcOutOctets',
+                'ifHCInUcastPkts' => 'sysIfxStatHcInUcastPkts',
+                'ifHCOutUcastPkts' => 'sysIfxStatHcOutUcastPkts',
+                'ifHCInMulticastPkts' => 'sysIfxStatHcInMulticastPkts',
+                'ifHCOutMulticastPkts' => 'sysIfxStatHcOutMulticastPkts',
+                'ifHCInBroadcastPkts' => 'sysIfxStatHcInBroadcastPkts',
+                'ifHCOutBroadcastPkts' => 'sysIfxStatHcOutBroadcastPkts',
+                'ifConnectorPresent' => 'sysIfxStatConnectorPresent',
+                'ifAlias' => 'sysIfxStatAlias',
+            ]) + $port;
+        }
+    }
 }

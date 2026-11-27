@@ -65,4 +65,19 @@ class Ekinops extends OS implements OSDiscovery
 
         return $inv;
     }
+
+    /**
+     * @author     Heath Barnhart <hbarnhart@kanren.net>
+     * @copyright  2020 KanREN, Inc
+     */
+    protected function discoverPortMetadata(array &$ports): void
+    {
+        foreach ($ports as &$port) {
+            $parts = preg_split('/[\/,()]/', $port['ifName'] ?? '');
+            if (isset($parts[4])) {
+                $port['ifDescr'] = implode('/', array_slice($parts, 2, 3));
+                $port['ifAlias'] = $parts[5] ?? '';
+            }
+        }
+    }
 }

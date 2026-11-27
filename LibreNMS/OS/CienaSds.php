@@ -204,4 +204,31 @@ class CienaSds extends OS
 
         return $inventory;
     }
+
+    /**
+     * @copyright  2020 Dan Baker, Lancaster-Lebanon IU13
+     */
+    protected function pollPortMetrics(array &$ports): void
+    {
+        if (! in_array($this->getDevice()->hardware, ['170-5170-905', '154-8700-930'], true)) {
+            return;
+        }
+        foreach ($this->portTable('CIENA-CES-PM::cienaCesPmExtendedTxRxStatisticsBinEntry') as $index => $row) {
+            if (ctype_digit((string) $index) && isset($ports[$index - 900000])) {
+                $ports[$index - 900000] = $this->mapPortFields($row, [
+                    'ifHCInOctets' => 'cienaCesPmExtendedTxRxStatsBinRxBytes',
+                    'ifHCInUcastPkts' => 'cienaCesPmExtendedTxRxStatsBinRxPkts',
+                    'ifHCInMulticastPkts' => 'cienaCesPmExtendedTxRxStatsBinRxMcastPkts',
+                    'ifHCInBroadcastPkts' => 'cienaCesPmExtendedTxRxStatsBinRxBcastPkts',
+                    'ifHCOutOctets' => 'cienaCesPmExtendedTxRxStatsBinTxBytes',
+                    'ifHCOutUcastPkts' => 'cienaCesPmExtendedTxRxStatsBinTxPkts',
+                    'ifHCOutMulticastPkts' => 'cienaCesPmExtendedTxRxStatsBinTxMcastPkts',
+                    'ifHCOutBroadcastPkts' => 'cienaCesPmExtendedTxRxStatsBinTxBcastPkts',
+                    'ifInErrors' => 'cienaCesPmExtendedTxRxStatsBinRxCrcErrorPkts',
+                    'ifOutErrors' => 'cienaCesPmExtendedTxRxStatsBinTxCrcErrorPkts',
+                    'ifInDiscards' => 'cienaCesPmExtendedTxRxStatsBinInDiscards',
+                ]) + $ports[$index - 900000];
+            }
+        }
+    }
 }

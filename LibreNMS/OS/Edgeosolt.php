@@ -30,6 +30,8 @@ use App\Models\Device;
 
 class Edgeosolt extends \LibreNMS\OS
 {
+    protected const bool USE_IF_MIB = false;
+
     public function discoverOS(Device $device): void
     {
         parent::discoverOS($device); // yaml
@@ -40,6 +42,18 @@ class Edgeosolt extends \LibreNMS\OS
                 $this->getDevice()->hardware = $matches[0];
                 break;
             }
+        }
+    }
+
+    protected function addVendorPorts(array &$ports): void
+    {
+        foreach ($this->portTable('UBNT-UFIBER-MIB::ubntSfpsTable') as $index => $row) {
+            $ports[1000 + $index] = $this->mapPortFields($row, [
+                'ifName' => 'ubntSfpName',
+                'ifDescr' => 'ubntSfpName',
+                'ifInOctets' => 'ubntSfpRxBytes',
+                'ifOutOctets' => 'ubntSfpTxBytes',
+            ]) + ['ifAdminStatus' => 'up', 'ifOperStatus' => ($row['ubntSfpUp'] ?? 0) == 1 ? 'up' : 'down'];
         }
     }
 }

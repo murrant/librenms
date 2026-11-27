@@ -152,4 +152,36 @@ class HorizonQuantum extends OS implements
 
         return $sensors;
     }
+
+    protected function addVendorPorts(array &$ports): void
+    {
+        $rows = $this->portTable(['DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortConfigTable',
+            'DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortStatsTable', 'DRAGONWAVE-HORIZON-QUANTUM-MIB::hzQtmEnetPortStatusTable']);
+        foreach ($rows as $row) {
+            if (! isset($row['hzQtmEnetPortIndex'])) {
+                continue;
+            }
+            $index = $row['hzQtmEnetPortIndex'];
+            $ports[$index] = $this->mapPortFields($row, [
+                'ifName' => 'hzQtmEnetPortName',
+                'ifDescr' => 'hzQtmEnetPortName',
+                'ifMtu' => 'hzQtmEnetPortMaxFrameSize',
+                'ifInOctets' => 'hzQtmEnetPortRxBytes',
+                'ifOutOctets' => 'hzQtmEnetPortTxBytes',
+                'ifInUcastPkts' => 'hzQtmEnetPortRxUcastPkts',
+                'ifOutUcastPkts' => 'hzQtmEnetPortTxUcastPkts',
+                'ifInNUcastPkts' => 'hzQtmEnetPortRxNUcastPkts',
+                'ifOutNUcastPkts' => 'hzQtmEnetPortTxNUcastPkts',
+                'ifInErrors' => 'hzQtmEnetPortRxErrors',
+                'ifOutErrors' => 'hzQtmEnetPortTxErrors',
+                'ifInDiscards' => 'hzQtmEnetPortRxDiscards',
+                'ifOutDiscards' => 'hzQtmEnetPortTxDiscards',
+                'ifInUnknownProtos' => 'hzQtmEnetPortRxUnknownProtos',
+            ]) + [
+                'ifOperStatus' => ($row['hzQtmEnetPortLinkStatus'] ?? 0) == 2 ? 'up' : 'down',
+                'ifAdminStatus' => ($row['hzQtmEnetPortAdminState'] ?? 0) == 1 ? 'up' : 'down',
+                'ifHighSpeed' => [1 => 10, 100, 1000, 1000][$row['hzQtmEnetPortSpeed'] ?? 0] ?? null,
+            ] + ($ports[$index] ?? []);
+        }
+    }
 }

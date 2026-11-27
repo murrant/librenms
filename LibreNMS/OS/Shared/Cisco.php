@@ -1703,4 +1703,26 @@ class Cisco extends OS implements
             ],
         };
     }
+
+    protected function portInventoryOids(): array
+    {
+        $pagp = ['pagpProtocolConfigTable', 'pagpEtherChannelTable'];
+
+        return [...parent::portInventoryOids(), 'CISCO-VLAN-MEMBERSHIP-MIB::vmVlan',
+            'CISCO-VTP-MIB::vlanTrunkPortEncapsulationOperType', 'CISCO-VTP-MIB::vlanTrunkPortNativeVlan',
+            ...array_map(fn ($oid) => "CISCO-PAGP-MIB::$oid", $pagp)];
+    }
+
+    protected function discoverPortMetadata(array &$ports): void
+    {
+        foreach ($ports as &$port) {
+            if (isset($port['vlanTrunkPortEncapsulationOperType']) && $port['vlanTrunkPortEncapsulationOperType'] !== 'notApplicable') {
+                $port['ifTrunk'] = $port['vlanTrunkPortEncapsulationOperType'];
+                $port['ifVlan'] = $port['vlanTrunkPortNativeVlan'] ?? '';
+            }
+            if (isset($port['vmVlan'])) {
+                $port['ifVlan'] = $port['vmVlan'];
+            }
+        }
+    }
 }

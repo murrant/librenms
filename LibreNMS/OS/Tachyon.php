@@ -32,6 +32,7 @@ use LibreNMS\Interfaces\Discovery\Sensors\WirelessRateDiscovery;
 use LibreNMS\Interfaces\Discovery\Sensors\WirelessRssiDiscovery;
 use LibreNMS\Interfaces\Discovery\Sensors\WirelessSnrDiscovery;
 use LibreNMS\OS;
+use LibreNMS\Util\Mac;
 use SnmpQuery;
 
 class Tachyon extends OS implements
@@ -259,5 +260,23 @@ class Tachyon extends OS implements
         }
 
         return $sensors;
+    }
+
+    protected function addVendorPorts(array &$ports): void
+    {
+        foreach ($this->portTable('TACHYON-MIB::wirelessPeersTable') as $index => $row) {
+            $status = ($row['wirelessPeerLinkUptime'] ?? 0) > 0 ? 'up' : 'down';
+            $ports[1000 + (int) filter_var($index, FILTER_SANITIZE_NUMBER_INT)] = $this->mapPortFields($row, [
+                'ifName' => 'wirelessPeerName',
+                'ifDescr' => 'wirelessPeerName',
+                'ifInOctets' => 'wirelessPeerRxBytes',
+                'ifOutOctets' => 'wirelessPeerTxBytes',
+                'ifInUcastPkts' => 'wirelessPeerRxPackets',
+                'ifOutUcastPkts' => 'wirelessPeerTxPackets',
+            ]) + ['ifType' => 'ieee80211', 'ifSpeed' => ($row['wirelessPeerTxRate'] ?? 0) * 1000000,
+                'ifPhysAddress' => Mac::parseSnmp($row['wirelessPeerMac'] ?? '')->hex(),
+                'ifOperStatus' => $status,
+                'ifAdminStatus' => $status];
+        }
     }
 }

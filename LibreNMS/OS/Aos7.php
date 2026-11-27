@@ -448,4 +448,24 @@ class Aos7 extends OS implements BgpAddressFamilyDiscovery, ProcessorDiscovery, 
 
         return $fdb->isNotEmpty() ? $fdb : parent::discoverFdbTable();
     }
+
+    protected function collectPortPower(array $ports): array
+    {
+        $power = $this->portTable(['ALCATEL-IND1-INLINE-POWER-MIB::alaPethPsePortPowerMaximum',
+            'ALCATEL-IND1-INLINE-POWER-MIB::alaPethPsePortPowerActual']);
+        $result = [];
+        foreach ($ports as $index => $row) {
+            if (preg_match('#^(\d+)/(\d+)/(\d+)$#', $row['ifName'] ?? '', $match)) {
+                $slot = ($match[1] - 1) * 1000 + $match[2];
+                $supply = $power["$slot.$match[3]"] ?? [];
+                $max = $supply['alaPethPsePortPowerMaximum'] ?? null;
+                $used = $supply['alaPethPsePortPowerActual'] ?? null;
+                if (is_numeric($max) && $max > 0 && is_numeric($used) && $used >= 0) {
+                    $result[$index] = $this->portPowerFields(null, $max, $used, null);
+                }
+            }
+        }
+
+        return $result;
+    }
 }

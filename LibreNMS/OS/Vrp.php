@@ -877,4 +877,18 @@ class Vrp extends OS implements
 
         return empty($fdb) ? parent::discoverFdbTable() : new Collection($fdb);
     }
+
+    protected function collectPortPower(array $ports): array
+    {
+        $result = [];
+        foreach ($this->portTable(['HUAWEI-POE-MIB::hwPoePortReferencePower', 'HUAWEI-POE-MIB::hwPoePortMaximumPower',
+            'HUAWEI-POE-MIB::hwPoePortConsumingPower', 'HUAWEI-POE-MIB::hwPoePortPeakPower']) as $index => $row) {
+            if (isset($ports[$index], $row['hwPoePortConsumingPower'])) {
+                $result[$index] = $this->portPowerFields($row['hwPoePortReferencePower'] ?? null, $row['hwPoePortMaximumPower'] ?? null,
+                    $row['hwPoePortConsumingPower'], $row['hwPoePortPeakPower'] ?? null);
+            }
+        }
+
+        return $result;
+    }
 }

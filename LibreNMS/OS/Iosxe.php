@@ -60,6 +60,7 @@ class Iosxe extends Ciscowlc implements
     WirelessSnrDiscovery,
     PortSecurityPolling
 {
+    use \LibreNMS\OS\Traits\CiscoIosPorts;
     use SyncsModels;
     use CiscoCellular;
     use CiscoPortSecurity;

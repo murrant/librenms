@@ -438,7 +438,9 @@ class Device extends BaseModel
 
     public function getAttrib($name, $default = null): mixed
     {
-        return $this->attribs->pluck('attrib_value', 'attrib_type')->get($name, $default);
+        $attribute = $this->attribs->last(fn (DeviceAttrib $attrib) => $attrib->attrib_type === $name);
+
+        return $attribute === null ? $default : $attribute->attrib_value;
     }
 
     public function setAttrib($name, $value): bool
@@ -1344,11 +1346,6 @@ class Device extends BaseModel
     /**
      * @return HasMany<MplsLsp, $this>
      */
-    public function moduleConfigs(): HasMany
-    {
-        return $this->hasMany(\App\Models\ModuleConfig::class, 'device_id');
-    }
-
     public function mplsLsps(): HasMany
     {
         return $this->hasMany(MplsLsp::class, 'device_id');

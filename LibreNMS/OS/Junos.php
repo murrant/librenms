@@ -603,4 +603,30 @@ class Junos extends \LibreNMS\OS implements BgpAddressFamilyDiscovery, SlaDiscov
 
         return Bgp::shiftInetAddress($parts, 0, $zone);
     }
+
+    /**
+     * @author     Ruslan Magomedov <rmagomedov.iam@yahoo.com>
+     * @copyright  2019 Ruslan Magomedov
+     */
+    protected function addVendorPorts(array &$ports): void
+    {
+        foreach ($this->portTable('JUNIPER-VIRTUALCHASSIS-MIB::jnxVirtualChassisPortTable', true) as $key => $row) {
+            $key = str_replace('"', '', $key);
+            if (preg_match('#^(\d{1,2})\.vcp-255/(\d)/(\d{1,2})$#', $key, $match)) {
+                $index = sprintf('100%02d%d%02d', $match[1], $match[2], $match[3]);
+                $ports[$index] = ['ifName' => "fpc$key", 'ifDescr' => "fpc$key", 'ifType' => 'vcp']
+                    + $this->mapPortFields($row, [
+                        'ifHCInOctets' => 'jnxVirtualChassisPortInOctets',
+                        'ifHCOutOctets' => 'jnxVirtualChassisPortOutOctets',
+                        'ifHCInUcastPkts' => 'jnxVirtualChassisPortInPkts',
+                        'ifHCOutUcastPkts' => 'jnxVirtualChassisPortOutPkts',
+                        'ifInMulticastPkts' => 'jnxVirtualChassisPortInMcasts',
+                        'ifOutMulticastPkts' => 'jnxVirtualChassisPortOutMcasts',
+                        'ifInErrors' => 'jnxVirtualChassisPortInCRCAlignErrors',
+                        'ifAdminStatus' => 'jnxVirtualChassisPortAdminStatus',
+                        'ifOperStatus' => 'jnxVirtualChassisPortOperStatus',
+                    ]);
+            }
+        }
+    }
 }

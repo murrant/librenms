@@ -163,4 +163,13 @@ class Ciscosb extends OS implements OSDiscovery, TransceiverDiscovery
             }
         }
     }
+
+    protected function discoverPortMetadata(array &$ports): void
+    {
+        foreach ($this->portTable('CISCOSB-vlan-MIB::vlanPortModeState') as $index => $row) {
+            if (($row['vlanPortModeState'] ?? null) == 12 && isset($ports[$index])) {
+                $ports[$index]['ifTrunk'] = 'dot1Q';
+            }
+        }
+    }
 }

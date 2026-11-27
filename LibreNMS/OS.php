@@ -79,6 +79,8 @@ use LibreNMS\OS\Traits\EntitySensorMib;
 use LibreNMS\OS\Traits\HostResources;
 use LibreNMS\OS\Traits\LegacySensorDiscovery;
 use LibreNMS\OS\Traits\LegacySensorPolling;
+use LibreNMS\Interfaces\Polling\PortDataSource;
+use LibreNMS\OS\Traits\IfMib;
 use LibreNMS\OS\Traits\LldpMib;
 use LibreNMS\OS\Traits\MefUniEvcMib;
 use LibreNMS\OS\Traits\MplsVpnMib;
@@ -109,6 +111,7 @@ class OS implements
     FdbTableDiscovery,
     IcmpNetstatsPolling,
     NeighborDiscovery,
+    PortDataSource,
     IpNetstatsPolling,
     IpForwardNetstatsPolling,
     MefDiscovery,
@@ -147,6 +150,7 @@ class OS implements
     use BridgeMib;
     use EntityMib;
     use EntitySensorMib;
+    use IfMib;
     use LldpMib;
     use MefUniEvcMib;
     use MplsVpnMib;

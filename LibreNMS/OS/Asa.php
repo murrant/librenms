@@ -58,4 +58,14 @@ class Asa extends Shared\Cisco
     {
         return [];
     }
+
+    protected function portInventoryOids(): array
+    {
+        return [];
+    }
+
+    protected function portLinkOids(bool $selected): array
+    {
+        return [];
+    }
 }

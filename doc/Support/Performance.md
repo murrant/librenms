@@ -144,6 +144,30 @@ recursive DNS instance on the LibreNMS server. You can use
 pdns-recursor. Then configure `/etc/resolv.conf` to send queries to
 127.0.0.1.
 
+## Evaluating the ports module
+
+Version 1 is the default. To try version 2, set the global version and run
+discovery before the first poll.
+
+```bash
+lnms config:set modules.ports.version 2
+lnms device:discover -m ports <device>
+lnms device:poll -m ports <device>
+```
+
+Discovery adds and associates interfaces, updates descriptions and VLANs, and
+runs the configured port description parser. Polling updates link state, speed,
+and counters for discovered, enabled ports. New interfaces start collecting
+samples after discovery. Both versions use the existing port IDs and RRD files.
+Set `modules.ports.version` back to `1` to resume legacy discovery and polling.
+
+For version 2, use regular polling when monitoring most of a device. Its SNMP
+walks retrieve each counter column across interfaces. Selected polling requests
+status for enabled interfaces and fetches counters for active links and links
+that have just changed state. It can save considerable time when only a few
+interfaces on a large device are monitored. The crossover depends on the agent,
+the SNMP request size, and network latency.
+
 ## Per port polling
 
 By default, the ports polling module walks ifXEntry and some items from

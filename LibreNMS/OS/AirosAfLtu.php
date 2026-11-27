@@ -127,4 +127,25 @@ class AirosAfLtu extends OS implements
 
         return $sensors;
     }
+
+    protected function addVendorPorts(array &$ports): void
+    {
+        $ethernet = $this->portTable('UBNT-AFLTU-MIB::afLTUethStats', true)[0] ?? [];
+        foreach ($ports as $index => &$port) {
+            if (($port['ifDescr'] ?? '') !== 'eth0') {
+                continue;
+            }
+            if (! isset($ethernet['afLTUethConnected'])) {
+                unset($ports[$index]);
+                continue;
+            }
+            $port = $this->mapPortFields($ethernet, [
+                'ifHCInOctets' => 'afLTUethRxBytes', 'ifHCOutOctets' => 'afLTUethTxBytes',
+                'ifHCInUcastPkts' => 'afLTUethRxPps', 'ifHCOutUcastPkts' => 'afLTUethTxPps',
+            ]) + $port;
+            $port['ifOperStatus'] = $ethernet['afLTUethConnected'] === 'connected' ? 'up' : 'down';
+            $port['ifHighSpeed'] = 1000;
+            break;
+        }
+    }
 }

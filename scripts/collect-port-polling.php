@@ -6,7 +6,10 @@ use App\Facades\LibrenmsConfig;
 use App\Models\Device;
 use Illuminate\Support\Str;
 use LibreNMS\Util\Debug;
-use LibreNMS\Util\Number;
+use Illuminate\Support\Facades\DB;
+use LibreNMS\Data\Store\Datastore;
+use LibreNMS\Modules\Ports;
+use LibreNMS\OS;
 
 $install_dir = realpath(__DIR__ . '/..');
 chdir($install_dir);
@@ -15,10 +18,9 @@ require $install_dir . '/includes/init.php';
 $options = getopt('dh:e:', ['help']);
 
 LibrenmsConfig::set('rrd.enable', false);
-LibrenmsConfig::set('influxdb.enable', false);
-LibrenmsConfig::set('influxdbv2.enable', false);
-LibrenmsConfig::set('nographite', true);
-LibrenmsConfig::set('kafka.enable', false);
+// Legacy modules resolve the datastore from the container.
+$datastore = new Datastore([]);
+app()->instance('Datastore', $datastore);
 
 function print_help()
 {
@@ -36,7 +38,7 @@ if (isset($options['help'])) {
     exit(0);
 }
 
-$devices = Device::query()->isActive()->orderBy('hostname', 'ASC');
+$devices = Device::query()->isActive()->orderBy('hostname');
 if (isset($options['h'])) {
     if (is_numeric($options['h'])) {
         $devices->where('device_id', $options['h']);
@@ -64,43 +66,49 @@ if (isset($options['e'])) {
     $enable_sel_value = $options['e'];
 }
 
-echo 'Full Polling: ';
-LibrenmsConfig::set('polling.selected_ports', false);
-foreach ($devices as $index => $device) {
-    echo $device['device_id'] . ' ';
-    if (! Debug::isEnabled()) {
-        ob_start();
+$module = new Ports;
+foreach ($devices as $index => $entry) {
+    DeviceCache::setPrimary($entry['device_id']);
+    $device = DeviceCache::getPrimary();
+    $attributes = $device->attributesToArray();
+    $os = OS::make($attributes);
+    if (! $device->ports()->isValid()->exists() || ! $module->shouldPoll($os)) {
+        unset($devices[$index]);
+        continue;
     }
 
-    $port_test_start = microtime(true);
-    include $install_dir . '/includes/polling/ports.inc.php';
-    $devices[$index]['full_time_sec'] = microtime(true) - $port_test_start;
-    ob_end_clean();
-}
-echo PHP_EOL;
-
-LibrenmsConfig::set('polling.selected_ports', true);
-echo 'Selective Polling: ';
-foreach ($devices as $index => $device) {
-    echo $device['device_id'] . ' ';
-    if (! Debug::isEnabled()) {
-        ob_start();
+    echo "Polling $device->hostname" . PHP_EOL;
+    foreach (['full_time_sec' => false, 'selective_time_sec' => true] as $column => $selected) {
+        $quiet = ! Debug::isEnabled();
+        if ($quiet) {
+            ob_start();
+        }
+        DB::beginTransaction();
+        try {
+            // Both runs see the same stored counters and statuses, including device-level overrides.
+            $device->setAttrib('selected_ports', $selected ? 'true' : 'false');
+            $start = hrtime(true);
+            $module->poll($os, $datastore);
+            $devices[$index][$column] = (hrtime(true) - $start) / 1e9;
+        } finally {
+            DB::rollBack();
+            $device->unsetRelation('attribs');
+            if ($quiet) {
+                ob_end_clean();
+            }
+        }
     }
-
-    $port_test_start = microtime(true);
-    include $install_dir . '/includes/polling/ports.inc.php';
-    $devices[$index]['selective_time_sec'] = microtime(true) - $port_test_start;
-    ob_end_clean();
 }
-echo PHP_EOL;
+if (! $devices) {
+    echo 'No pollable devices with enabled ports.' . PHP_EOL;
+    exit(0);
+}
 
-// collect port counts
-$inactive_sql = "`deleted` = 1 OR `ifAdminStatus` != 'up' OR `disabled` = 1";
 $set_count = 0;
 foreach ($devices as &$device) {
-    $device['inactive_ratio'] = ($device['inactive_count'] == 0 ? 0 : ($device['inactive_count'] / $device['ports_count']));
+    $device['inactive_ratio'] = ($device['inactive_count'] / $device['ports_count']);
     $device['diff_sec'] = $device['selective_time_sec'] - $device['full_time_sec'];
-    $device['diff_perc'] = Number::calculatePercent($device['diff_sec'], $device['full_time_sec']);
+    $device['diff_perc'] = 100 * $device['diff_sec'] / $device['full_time_sec'];
 
     // $enable_sel_value is negative and we want to enable it for all devices with an even lower value.
     // It also has to save more than 1 s, or we might enable it for devices with i.e. 100ms vs 50ms, which isn't needed.
@@ -142,7 +150,7 @@ foreach ($devices as $device) {
         $mask,
         $device['device_id'],
         $device['os'],
-        $device['port_count'],
+        $device['ports_count'],
         $device['inactive_ratio'],
         $device['full_time_sec'],
         $device['selective_time_sec'],
@@ -154,12 +162,12 @@ foreach ($devices as $device) {
     );
 }
 
-$total_ports = array_sum(array_column($devices, 'port_count'));
+$total_ports = array_sum(array_column($devices, 'ports_count'));
 $inactive_ratio = array_sum(array_column($devices, 'inactive_ratio')) / count($devices);
 $total_full_time = array_sum(array_column($devices, 'full_time_sec'));
 $total_selective_time = array_sum(array_column($devices, 'selective_time_sec'));
 $difference = $total_selective_time - $total_full_time;
-$difference_perc = Number::calculatePercent($difference, $total_full_time);
+$difference_perc = 100 * $difference / $total_full_time;
 $total_diff_color = ($difference > 0 ? "\033[0;31m" : "\033[0;32m");
 
 printf(
