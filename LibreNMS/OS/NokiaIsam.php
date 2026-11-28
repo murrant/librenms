@@ -9,7 +9,7 @@ class NokiaIsam extends Generic
     public function discoverPorts(): PortInventory
     {
         $ports = parent::collectPortRows(null, false);
-        $complete = $this->addIhubPorts($ports, ['IF-MIB::ifDescr', 'IF-MIB::ifName', 'IF-MIB::ifAlias', 'IF-MIB::ifType', 'IF-MIB::ifOperStatus']);
+        $complete = $this->addIhubPorts($ports, ['IF-MIB::ifDescr', 'IF-MIB::ifName', 'IF-MIB::ifAlias', 'IF-MIB::ifType', 'IF-MIB::ifOperStatus', 'IF-MIB::ifSpeed', 'IF-MIB::ifHighSpeed']);
 
         return new PortInventory($this->withCustomerAliases($ports), $complete, $this->portAssociationMode());
     }

@@ -1711,7 +1711,7 @@ class Cisco extends OS implements
         }
 
         $ports = $this->discoverIfMibRows([
-            'Q-BRIDGE-MIB::dot1qPvid', 'CISCO-VLAN-MEMBERSHIP-MIB::vmVlan',
+            'Q-BRIDGE-MIB::dot1qPvid', 'EtherLike-MIB::dot3StatsDuplexStatus', 'CISCO-VLAN-MEMBERSHIP-MIB::vmVlan',
             'CISCO-VTP-MIB::vlanTrunkPortEncapsulationOperType', 'CISCO-VTP-MIB::vlanTrunkPortNativeVlan',
             'CISCO-PAGP-MIB::pagpProtocolConfigTable', 'CISCO-PAGP-MIB::pagpEtherChannelTable',
         ]);

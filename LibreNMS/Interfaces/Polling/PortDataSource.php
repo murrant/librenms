@@ -7,6 +7,7 @@ use LibreNMS\Ports\PortInventory;
 
 interface PortDataSource
 {
+    /** Return interface identities and properties, including speed and duplex. */
     public function discoverPorts(): PortInventory;
 
     /**

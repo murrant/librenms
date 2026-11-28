@@ -22,17 +22,20 @@ trait IfMib
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         return $knownPorts === null
-            ? $this->discoverIfMibRows(['Q-BRIDGE-MIB::dot1qPvid'])
+            ? $this->discoverIfMibRows(['Q-BRIDGE-MIB::dot1qPvid', 'EtherLike-MIB::dot3StatsDuplexStatus'])
             : $this->pollIfMibRows($knownPorts, $selected, $this->etherLikeOids($selected));
     }
 
     protected function discoverIfMibRows(array $extraOids): array
     {
-        $identity = ['ifDescr', 'ifName', 'ifAlias', 'ifType', 'ifMtu', 'ifPhysAddress', 'ifConnectorPresent'];
+        $identity = ['ifDescr', 'ifName', 'ifAlias', 'ifType', 'ifMtu', 'ifPhysAddress', 'ifConnectorPresent', 'ifSpeed'];
+        if (! $this->hasBrokenIfXEntry()) {
+            $identity[] = 'ifHighSpeed';
+        }
         if (LibrenmsConfig::getCombined($this->getName(), 'bad_ifoperstatus')) {
             $identity[] = 'ifOperStatus';
         }
-        $rows = $this->portTable([...$this->ifMibOids($identity), ...$extraOids], true);
+        $rows = $this->portTable(array_unique([...$this->ifMibOids($identity), ...$extraOids]), true);
         if ($rows) {
             // GETNEXT at each column root finds sparse columns even when the first interface lacks them.
             $columns = $this->portMetricColumns();
@@ -132,14 +135,11 @@ trait IfMib
 
     protected function portMetricColumns(): array
     {
-        $columns = ['ifOperStatus', 'ifAdminStatus', 'ifLastChange', 'ifSpeed', ...PortMeasurement::COUNTERS];
-        if (! $this->hasBrokenIfXEntry()) {
-            $columns[] = 'ifHighSpeed';
-            if ($this->getDevice()->polling()->snmp()->version !== 'v1') {
-                foreach (['In', 'Out'] as $direction) {
-                    foreach (['Octets', 'UcastPkts', 'MulticastPkts', 'BroadcastPkts'] as $counter) {
-                        $columns[] = "ifHC$direction$counter";
-                    }
+        $columns = ['ifOperStatus', 'ifAdminStatus', 'ifLastChange', ...PortMeasurement::COUNTERS];
+        if (! $this->hasBrokenIfXEntry() && $this->getDevice()->polling()->snmp()->version !== 'v1') {
+            foreach (['In', 'Out'] as $direction) {
+                foreach (['Octets', 'UcastPkts', 'MulticastPkts', 'BroadcastPkts'] as $counter) {
+                    $columns[] = "ifHC$direction$counter";
                 }
             }
         }
@@ -215,6 +215,9 @@ trait IfMib
     private function getPortColumns(array $indexes, array $columns): array
     {
         $rows = [];
+        if (! $columns) {
+            return $rows;
+        }
         $query = SnmpQuery::device($this->getDevice())->hideMib()->enumStrings();
         // Bound response aggregation as well as the number of OIDs in each SNMP packet.
         foreach (array_chunk($indexes, 16) as $chunk) {
@@ -233,13 +236,13 @@ trait IfMib
     private function etherLikeOids(bool $selected): array
     {
         if (! LibrenmsConfig::get('enable_ports_etherlike')) {
-            return ['EtherLike-MIB::dot3StatsDuplexStatus'];
+            return [];
         }
         if (! $selected) {
             return ['EtherLike-MIB::dot3StatsTable'];
         }
 
-        return array_map(fn ($field) => 'EtherLike-MIB::dot3Stats' . $field, ['Index', 'DuplexStatus', ...PortMeasurement::ETHERLIKE]);
+        return array_map(fn ($field) => 'EtherLike-MIB::dot3Stats' . $field, ['Index', ...PortMeasurement::ETHERLIKE]);
     }
 
     protected function portTable(string|array $oids, bool $enumStrings = false): array

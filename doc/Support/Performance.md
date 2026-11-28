@@ -155,10 +155,12 @@ lnms device:discover -m ports <device>
 lnms device:poll -m ports <device>
 ```
 
-Discovery adds and associates interfaces, updates descriptions and VLANs, and
-runs the configured port description parser. Polling updates link state, speed,
-and counters for discovered, enabled ports. New interfaces start collecting
-samples after discovery. Both versions use the existing port IDs and RRD files.
+Discovery adds and associates interfaces, updates descriptions, VLANs, link
+speed and duplex, and runs the configured port description parser. Speed and
+duplex changes appear at the next discovery, normally within six hours.
+Polling updates link state and counters for discovered, enabled ports. New
+interfaces start collecting samples after discovery. Both versions use the
+existing port IDs and RRD files.
 Set `modules.ports.version` back to `1` to resume legacy discovery and polling.
 
 For version 2, use regular polling when monitoring most of a device. Its SNMP

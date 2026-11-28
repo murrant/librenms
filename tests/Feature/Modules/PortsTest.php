@@ -18,6 +18,7 @@ use LibreNMS\OS;
 use LibreNMS\OS\Bison;
 use LibreNMS\Polling\Method\PollingMethodRegistry;
 use LibreNMS\Ports\PortInventory;
+use LibreNMS\Ports\PortMeasurement;
 use LibreNMS\Tests\InMemoryDbTestCase;
 use LibreNMS\Util\Module;
 use Mockery;
@@ -64,10 +65,15 @@ final class PortsTest extends InMemoryDbTestCase
         $device->setAttrib('ifName:eth1', 'Transit: Example [10G]');
         $port = $device->ports()->create(['ifIndex' => 1, 'ifName' => 'eth1']);
         $other = $device->ports()->create(['ifIndex' => 2, 'ifName' => 'eth2', 'disabled' => 1]);
-        $row = ['ifName' => 'eth1', 'ifDescr' => 'uplink', 'ifSpeed' => 4294967295, 'ifHighSpeed' => 10000,
+        $row = ['ifName' => 'eth1', 'ifDescr' => 'uplink', 'ifSpeed' => 4294967295, 'ifHighSpeed' => 10000, 'dot3StatsDuplexStatus' => 'fullDuplex',
             'ifPhysAddress' => '00 01 02 03 04 05', 'ifOperStatus' => 'up', 'ifHCInOctets' => '0', 'ifInOctets' => '9999', 'ifInDiscards' => '0'];
         $os = $this->os($device);
         new PortInventory([1 => $row, 2 => ['ifName' => 'eth2', 'ifDescr' => 'eth2']])->sync($device);
+        $this->assertEquals(10000000000, $port->fresh()->ifSpeed);
+        $this->assertSame('fullDuplex', $port->fresh()->ifDuplex);
+        // A vendor or an alternate transport can return extra columns alongside its counters.
+        $row['ifHighSpeed'] = 100;
+        $row['dot3StatsDuplexStatus'] = 'halfDuplex';
         $os->expects('pollPorts')->with(Mockery::on(fn ($ports) => array_keys($ports) === [1]), true)->times(4)->andReturn(
             [1 => $row], [1 => ['ifHCInOctets' => '900', 'ifInDiscards' => '6'] + $row],
             [1 => ['ifHCInOctets' => '900', 'ifInDiscards' => '6'] + $row], [1 => $row],
@@ -98,6 +104,30 @@ final class PortsTest extends InMemoryDbTestCase
         $this->assertEquals(0, $port->fresh()->ifInOctets_delta);
         $this->assertSame(['0', '900', '900', '0'], $values);
         $this->assertNull($other->fresh()->poll_time);
+        $this->assertSame('fullDuplex', $port->fresh()->ifDuplex);
+        new PortInventory([1 => $row])->sync($device);
+        $this->assertEquals(100000000, $port->fresh()->ifSpeed);
+        $this->assertSame('halfDuplex', $port->fresh()->ifDuplex);
+    }
+
+    public function testDiscoveredSpeedIncreaseTunesOnceAtTheNextCounterSample(): void
+    {
+        $device = Device::factory()->create(['os' => 'generic']);
+        $device->setAttrib('ifName_tune:eth1', 'true');
+        $device->setAttrib('ifSpeed:eth1', 1000000000);
+        $row = ['ifName' => 'eth1', 'ifDescr' => 'Ethernet one', 'ifHighSpeed' => 0, 'ifSpeed' => 100000000];
+        $inventory = new PortInventory([1 => $row]);
+        $inventory->sync($device);
+        $port = $device->ports()->sole();
+        $this->assertEquals(1000000000, $port->ifSpeed);
+        $this->assertFalse(PortMeasurement::updateLink($device, $port, ['skipCounters' => true]));
+
+        $device->forgetAttrib('ifSpeed:eth1');
+        $inventory->sync($device);
+        $port->refresh();
+        $this->assertEquals(100000000, $port->ifSpeed);
+        $this->assertTrue(PortMeasurement::updateLink($device, $port, []));
+        $this->assertFalse(PortMeasurement::updateLink($device, $port->refresh(), []));
     }
 
     public function testUnchangedPortMetadataRequiresOnlyTwoCounterWrites(): void
@@ -149,21 +179,25 @@ final class PortsTest extends InMemoryDbTestCase
         $os = OS::make($attributes);
         $module = new Ports;
         $store = Mockery::mock(DataStorageInterface::class)->shouldIgnoreMissing();
-        $walked = [];
-        \Event::listen(\App\Events\SnmpQueryExecuted::class, function ($event) use (&$walked): void {
-            if ($event->method === 'snmpwalk') {
-                array_push($walked, ...$event->oids);
+        $requested = [];
+        \Event::listen(\App\Events\SnmpQueryExecuted::class, function ($event) use (&$requested): void {
+            if (in_array($event->method, ['snmpwalk', 'snmpget'], true)) {
+                foreach ($event->oids as $oid) {
+                    $requested[] = preg_replace('/\.\d+$/', '', $oid);
+                }
             }
         });
         $module->discover($os);
-        $this->assertNotContains('IF-MIB::ifAdminStatus', $walked);
-        $this->assertNotContains('IF-MIB::ifHCInOctets', $walked);
+        $linkProperties = ['IF-MIB::ifSpeed', 'IF-MIB::ifHighSpeed', 'EtherLike-MIB::dot3StatsDuplexStatus'];
+        $this->assertEmpty(array_diff($linkProperties, $requested));
+        $this->assertNotContains('IF-MIB::ifAdminStatus', $requested);
+        $this->assertNotContains('IF-MIB::ifHCInOctets', $requested);
         $this->assertContains('ifHCInOctets', explode(',', $device->getAttrib('ports_if_mib_columns')));
-        $walked = [];
+        $requested = [];
         $module->poll($os, $store);
-        $this->assertContains('IF-MIB::ifHCInOctets', $walked);
+        $this->assertContains('IF-MIB::ifHCInOctets', $requested);
         foreach (['ifXTable', 'ifName', 'ifDescr', 'ifAlias', 'ifConnectorPresent'] as $field) {
-            $this->assertNotContains("IF-MIB::$field", $walked);
+            $this->assertNotContains("IF-MIB::$field", $requested);
         }
         $this->travel(300)->seconds();
         $device->ports()->where('ifIndex', '!=', 10115)->update(['disabled' => true]);
@@ -179,6 +213,7 @@ final class PortsTest extends InMemoryDbTestCase
         $this->assertEquals($port->ifInOctets, $port->fresh()->ifInOctets);
         $this->assertEquals(55615, $port->fresh()->ifInErrors);
         $this->assertEquals(300, $port->fresh()->poll_period);
+        $this->assertEmpty(array_intersect($linkProperties, $requested));
     }
 
     public function testSparseHighCapacityColumnUsesThe32BitCounterForMissingInterfaces(): void
@@ -195,7 +230,7 @@ final class PortsTest extends InMemoryDbTestCase
         $os = Mockery::mock(OS::class)->makePartial()->shouldAllowMockingProtectedMethods();
         $os->allows('getDevice')->andReturn($device);
         $os->allows('getName')->andReturn('generic');
-        $os->expects('portTable')->with(['IF-MIB::ifOperStatus', 'IF-MIB::ifHCInOctets', 'EtherLike-MIB::dot3StatsDuplexStatus'], true)
+        $os->expects('portTable')->with(['IF-MIB::ifOperStatus', 'IF-MIB::ifHCInOctets'], true)
             ->andReturn([1 => ['ifOperStatus' => 'up', 'ifHCInOctets' => '0'], 2 => ['ifOperStatus' => 'up']]);
         $os->expects('portTable')->with(['IF-MIB::ifInOctets'], true)->andReturn([1 => ['ifInOctets' => '10'], 2 => ['ifInOctets' => '42']]);
         $ports = $device->ports->keyBy('ifIndex')->all();

@@ -4,11 +4,13 @@ namespace LibreNMS\Ports;
 
 use App\Facades\LibrenmsConfig;
 use App\Models\Device;
+use App\Models\Eventlog;
 use App\Models\Port;
 use App\Models\PortGroup;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use LibreNMS\Enum\Severity;
 use LibreNMS\Util\Mac;
 use LibreNMS\Util\StringHelpers;
 
@@ -69,7 +71,24 @@ final readonly class PortInventory
                     continue;
                 }
                 $port ??= new Port(['device_id' => $device->device_id]);
+                $speed = $row['ifSpeed'] ?? null;
+                if (is_numeric($row['ifHighSpeed'] ?? null) && ($row['ifHighSpeed'] > 0 || ! $speed)) {
+                    $speed = (int) $row['ifHighSpeed'] * 1000000;
+                }
+                $speed = $device->getAttrib("ifSpeed:$name", $speed);
+                if (is_numeric($speed)) {
+                    $data['ifSpeed'] = $speed;
+                }
+
                 $port->fill($data);
+                if ($port->isDirty('ifSpeed') && $port->ifSpeed_prev === null) {
+                    $port->ifSpeed_prev = $port->getRawOriginal('ifSpeed') ?? 0;
+                }
+                if ($port->exists) {
+                    foreach (array_intersect_key($port->getDirty(), array_flip(['ifSpeed', 'ifDuplex'])) as $field => $value) {
+                        Eventlog::log("$field: " . ($port->getRawOriginal($field) ?? 'NULL') . " -> $value", $device, 'interface', Severity::Notice, $port->port_id);
+                    }
+                }
                 if ($port->deleted) {
                     $port->deleted = false;
                 }
@@ -109,7 +128,7 @@ final readonly class PortInventory
     {
         $data = [];
         foreach (['ifName', 'ifAlias', 'ifDescr', 'ifType', 'ifMtu', 'ifPhysAddress', 'ifConnectorPresent',
-            'ifTrunk', 'ifVlan', 'pagpOperationMode', 'pagpPortState', 'pagpPartnerDeviceId', 'pagpPartnerLearnMethod',
+            'ifDuplex', 'ifTrunk', 'ifVlan', 'pagpOperationMode', 'pagpPortState', 'pagpPartnerDeviceId', 'pagpPartnerLearnMethod',
             'pagpPartnerIfIndex', 'pagpPartnerGroupIfIndex', 'pagpPartnerDeviceName', 'pagpEthcOperationMode', 'pagpDeviceId', 'pagpGroupIfIndex'] as $field) {
             if (array_key_exists($field, $row)) {
                 $data[$field] = $row[$field];
@@ -117,6 +136,9 @@ final readonly class PortInventory
         }
         foreach (['ifName', 'ifAlias', 'ifDescr'] as $field) {
             $data[$field] = trim(StringHelpers::inferEncoding($data[$field] ?? '') ?? '');
+        }
+        if (isset($row['dot3StatsDuplexStatus'])) {
+            $data['ifDuplex'] = $row['dot3StatsDuplexStatus'];
         }
         if (! is_numeric($data['ifMtu'] ?? null)) {
             unset($data['ifMtu']);

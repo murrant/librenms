@@ -1425,7 +1425,7 @@ class Timos extends OS implements BgpAddressFamilyDiscovery, MplsDiscovery, Mpls
             'ifHCInUcastPkts' => 'vRtrIfRxPkts',
             'ifHCOutUcastPkts' => 'vRtrIfTxPkts',
         ];
-        $inventory = ['ifName', 'ifDescr', 'ifAlias', 'ifType', 'ifMtu'];
+        $inventory = ['ifName', 'ifDescr', 'ifAlias', 'ifType', 'ifMtu', 'ifSpeed'];
         if ($knownPorts === null) {
             $map = array_intersect_key($map, array_flip($inventory));
         } elseif ($this->portAssociationMode() === 'ifIndex') {

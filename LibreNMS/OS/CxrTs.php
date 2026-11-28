@@ -11,7 +11,10 @@ class CxrTs extends Generic
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = parent::collectPortRows($knownPorts, $selected);
-        $oids = [$knownPorts !== null && $this->portAssociationMode() !== 'ifAlias' ? 'CXR-TS-MIB::baudRate' : 'CXR-TS-MIB::portTable'];
+        $oids = [];
+        if ($knownPorts === null || $this->portAssociationMode() === 'ifAlias') {
+            $oids[] = 'CXR-TS-MIB::portTable';
+        }
         if ($knownPorts !== null) {
             $oids[] = 'CXR-TS-MIB::portStatsTable';
         }

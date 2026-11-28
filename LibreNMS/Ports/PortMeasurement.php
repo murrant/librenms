@@ -43,29 +43,22 @@ final readonly class PortMeasurement
     /** Update live link state and return whether a speed increase requires RRD tuning. */
     public static function updateLink(Device $device, Port $port, array $row): bool
     {
-        $data = Arr::only($row, ['ifAdminStatus', 'ifOperStatus', 'ifDuplex']);
-        if (isset($row['dot3StatsDuplexStatus'])) {
-            $data['ifDuplex'] = $row['dot3StatsDuplexStatus'];
-        }
+        $data = Arr::only($row, ['ifAdminStatus', 'ifOperStatus']);
         if (is_numeric($row['ifLastChange'] ?? null)) {
             $data['ifLastChange'] = $row['ifLastChange'];
         }
-        $speed = $row['ifSpeed'] ?? null;
-        if (is_numeric($row['ifHighSpeed'] ?? null) && ($row['ifHighSpeed'] > 0 || ! $speed)) {
-            $speed = (int) $row['ifHighSpeed'] * 1000000;
-        }
-        $speed = $device->getAttrib('ifSpeed:' . $port->ifName, $speed);
-        if (is_numeric($speed)) {
-            $data['ifSpeed'] = $speed;
-        }
         $tune = false;
-        if ($speed > $port->ifSpeed) {
-            $setting = $device->getAttrib('ifName_tune:' . $port->ifName)
-                ?? $device->getAttrib('override_rrdtool_tune') ?? LibrenmsConfig::get('rrdtool_tune');
-            $tune = filter_var($setting, FILTER_VALIDATE_BOOL);
+        if (empty($row['skipCounters']) && $port->ifSpeed != $port->ifSpeed_prev) {
+            // Discovery records speed changes. Tune at the next sample, when the RRD exists or will be created.
+            if ($port->ifSpeed > $port->ifSpeed_prev) {
+                $setting = $device->getAttrib('ifName_tune:' . $port->ifName)
+                    ?? $device->getAttrib('override_rrdtool_tune') ?? LibrenmsConfig::get('rrdtool_tune');
+                $tune = filter_var($setting, FILTER_VALIDATE_BOOL);
+            }
+            $port->ifSpeed_prev = $port->ifSpeed;
         }
         $port->fill($data);
-        foreach (['ifOperStatus', 'ifAdminStatus', 'ifSpeed'] as $field) {
+        foreach (['ifOperStatus', 'ifAdminStatus'] as $field) {
             if (isset($data[$field])) {
                 $port->{$field . '_prev'} = $port->getRawOriginal($field) ?? $data[$field];
             }

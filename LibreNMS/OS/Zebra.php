@@ -4,9 +4,9 @@ namespace LibreNMS\OS;
 
 class Zebra extends Generic
 {
-    protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
+    protected function discoverIfMibRows(array $extraOids): array
     {
-        $ports = parent::pollIfMibRows($knownPorts, $selected, $extraOids);
+        $ports = parent::discoverIfMibRows($extraOids);
         foreach ($ports as &$port) {
             $port['ifSpeed'] = 100000000;
             unset($port['ifHighSpeed']);
