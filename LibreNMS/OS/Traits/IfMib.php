@@ -9,6 +9,17 @@ use SnmpQuery;
 
 trait IfMib
 {
+    private const array HIGH_CAPACITY_COUNTERS = [
+        'ifInOctets' => 'ifHCInOctets',
+        'ifInUcastPkts' => 'ifHCInUcastPkts',
+        'ifInMulticastPkts' => 'ifHCInMulticastPkts',
+        'ifInBroadcastPkts' => 'ifHCInBroadcastPkts',
+        'ifOutOctets' => 'ifHCOutOctets',
+        'ifOutUcastPkts' => 'ifHCOutUcastPkts',
+        'ifOutMulticastPkts' => 'ifHCOutMulticastPkts',
+        'ifOutBroadcastPkts' => 'ifHCOutBroadcastPkts',
+    ];
+
     public function discoverPorts(): PortInventory
     {
         return new PortInventory($this->collectPortRows(null, false), association: $this->portAssociationMode());
@@ -86,7 +97,14 @@ trait IfMib
     protected function pollIfMibRows(array $knownPorts, bool $selected, array $extraOids): array
     {
         $identity = $this->portIdentityColumns();
-        $rows = $selected ? $this->selectedPortData($knownPorts, $identity, $extraOids) : $this->walkPortMetrics($knownPorts, $identity, $extraOids);
+        $stored = $this->getDevice()->getAttrib('ports_if_mib_columns');
+        $columns = $this->portMetricColumns();
+        if ($stored) {
+            $columns = array_intersect($columns, explode(',', $stored));
+        }
+        $rows = $selected
+            ? $this->selectedPortData($knownPorts, $identity, $columns, $extraOids)
+            : $this->regularPortData(array_keys($knownPorts), [...$identity, ...$columns], $extraOids, (bool) $stored);
         $rows = array_intersect_key($rows, $knownPorts);
         $metadata = ! $identity ? ['ifName', 'ifDescr', 'ifType', 'ifConnectorPresent'] : ['ifType', 'ifConnectorPresent'];
         foreach ($rows as $index => &$row) {
@@ -125,59 +143,39 @@ trait IfMib
     protected function portMetricColumns(): array
     {
         $columns = ['ifOperStatus', 'ifAdminStatus', 'ifLastChange', ...PortMeasurement::COUNTERS];
-        if (! $this->hasBrokenIfXEntry() && $this->getDevice()->polling()->snmp()->version !== 'v1') {
-            foreach (['In', 'Out'] as $direction) {
-                foreach (['Octets', 'UcastPkts', 'MulticastPkts', 'BroadcastPkts'] as $counter) {
-                    $columns[] = "ifHC$direction$counter";
-                }
-            }
+        if ($this->hasBrokenIfXEntry() || $this->getDevice()->polling()->snmp()->version === 'v1') {
+            return $columns;
         }
 
-        return $columns;
+        return [...$columns, ...array_values(self::HIGH_CAPACITY_COUNTERS)];
     }
 
-    private function supportedPortColumns(?string $stored): array
+    private function regularPortData(array $indexes, array $columns, array $extraOids, bool $columnsDiscovered): array
     {
-        $columns = $this->portMetricColumns();
-
-        return $stored ? array_intersect($columns, explode(',', $stored)) : $columns;
-    }
-
-    private function walkPortMetrics(array $ports, array $identity, array $extraOids): array
-    {
-        $stored = $this->getDevice()->getAttrib('ports_if_mib_columns');
-        $columns = $this->supportedPortColumns($stored);
-        $config = $this->getDevice()->polling()->snmp();
-        if ($stored && (count($ports) === 1 || ($config->version === 'v1' && count($ports) <= $config->maxOid))) {
-            $rows = $this->getPortColumns(array_keys($ports), $this->ifMibOids([...$identity, ...$columns]));
+        $snmp = $this->getDevice()->polling()->snmp();
+        if ($columnsDiscovered && (count($indexes) === 1 || ($snmp->version === 'v1' && count($indexes) <= $snmp->maxOid))) {
+            $rows = $this->getPortColumns($indexes, $this->ifMibOids($columns));
 
             return $extraOids ? array_replace_recursive($rows, $this->portTable($extraOids, true)) : $rows;
         }
 
-        // A device may implement 64-bit counters on only some of its interfaces.
-        $fallbacks = [];
-        foreach ($columns as $field) {
-            if (str_starts_with($field, 'ifHC')) {
-                $fallbacks['if' . substr($field, 4)] = $field;
-            }
-        }
+        // Prefer the 64-bit column when the device supports both widths.
+        $fallbacks = array_intersect(self::HIGH_CAPACITY_COUNTERS, $columns);
         $fallbacks = array_intersect_key($fallbacks, array_flip($columns));
         $primary = array_diff($columns, array_keys($fallbacks));
-        $rows = $this->portTable([...$this->ifMibOids([...$identity, ...$primary]), ...$extraOids], true);
+        $rows = $this->portTable([...$this->ifMibOids($primary), ...$extraOids], true);
+        // A device may implement 64-bit counters on only some of its interfaces.
         $fallback = [];
         foreach ($fallbacks as $field => $hc) {
-            foreach ($ports as $index => $port) {
-                if (! ctype_digit((string) ($rows[$index][$hc] ?? ''))) {
-                    $fallback[] = $field;
-                    break;
-                }
+            if (array_any($indexes, fn ($index) => ! ctype_digit((string) ($rows[$index][$hc] ?? '')))) {
+                $fallback[] = $field;
             }
         }
 
         return $fallback ? array_replace_recursive($rows, $this->portTable($this->ifMibOids($fallback), true)) : $rows;
     }
 
-    private function selectedPortData(array $selected, array $identity, array $extraOids): array
+    private function selectedPortData(array $selected, array $identity, array $columns, array $extraOids): array
     {
         $rows = $this->getPortColumns(array_keys($selected), $this->ifMibOids(['ifOperStatus', 'ifAdminStatus', ...$identity]));
         $active = [];
@@ -185,8 +183,9 @@ trait IfMib
             $row = $rows[$index] ?? [];
             $admin = $row['ifAdminStatus'] ?? null;
             $oper = $row['ifOperStatus'] ?? null;
-            if ($port->poll_time && (($admin === 'down' && $admin === $port->getRawOriginal('ifAdminStatus'))
-                || (in_array($oper, ['down', 'lowerLayerDown'], true) && $oper === $port->getRawOriginal('ifOperStatus')))) {
+            $adminStillDown = $admin === 'down' && $admin === $port->getRawOriginal('ifAdminStatus');
+            $operStillDown = in_array($oper, ['down', 'lowerLayerDown'], true) && $oper === $port->getRawOriginal('ifOperStatus');
+            if ($port->poll_time && ($adminStillDown || $operStillDown)) {
                 $rows[$index]['skipCounters'] = true;
             } else {
                 $active[] = $index;
@@ -195,7 +194,7 @@ trait IfMib
         if (! $active) {
             return $rows;
         }
-        $fields = array_diff($this->supportedPortColumns($this->getDevice()->getAttrib('ports_if_mib_columns')), ['ifOperStatus', 'ifAdminStatus']);
+        $fields = array_diff($columns, ['ifOperStatus', 'ifAdminStatus']);
         $details = $this->getPortColumns($active, [...$this->ifMibOids($fields), ...$extraOids]);
 
         return array_replace_recursive($rows, $details);

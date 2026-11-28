@@ -4,6 +4,7 @@ namespace LibreNMS\Tests\Feature\Modules;
 
 use App\Facades\DeviceCache;
 use App\Facades\LibrenmsConfig;
+use App\Facades\Rrd;
 use App\Models\Device;
 use App\Models\DevicePollingMethod;
 use App\Models\Secret;
@@ -18,7 +19,7 @@ use LibreNMS\OS;
 use LibreNMS\OS\Bison;
 use LibreNMS\Polling\Method\PollingMethodRegistry;
 use LibreNMS\Ports\PortInventory;
-use LibreNMS\Ports\PortMeasurement;
+use LibreNMS\RRD\PortRrd;
 use LibreNMS\Tests\InMemoryDbTestCase;
 use LibreNMS\Util\Module;
 use Mockery;
@@ -112,6 +113,7 @@ final class PortsTest extends InMemoryDbTestCase
 
     public function testDiscoveredSpeedIncreaseTunesOnceAtTheNextCounterSample(): void
     {
+        LibrenmsConfig::set('modules.ports.version', 2);
         $device = Device::factory()->create(['os' => 'generic']);
         $device->setAttrib('ifName_tune:eth1', 'true');
         $device->setAttrib('ifSpeed:eth1', 1000000000);
@@ -120,14 +122,23 @@ final class PortsTest extends InMemoryDbTestCase
         $inventory->sync($device);
         $port = $device->ports()->sole();
         $this->assertEquals(1000000000, $port->ifSpeed);
-        $this->assertFalse(PortMeasurement::updateLink($device, $port, ['skipCounters' => true]));
+        $os = $this->os($device);
+        $os->expects('pollPorts')->times(3)->andReturn([1 => ['skipCounters' => true]], [1 => ['ifInOctets' => 12]], [1 => ['ifInOctets' => 42]]);
+        $store = Mockery::mock(DataStorageInterface::class);
+        $store->expects('put')->twice();
+        $module = new Ports;
+        $module->poll($os, $store);
+        $this->assertNull($port->fresh()->poll_time);
 
         $device->forgetAttrib('ifSpeed:eth1');
         $inventory->sync($device);
         $port->refresh();
         $this->assertEquals(100000000, $port->ifSpeed);
-        $this->assertTrue(PortMeasurement::updateLink($device, $port, []));
-        $this->assertFalse(PortMeasurement::updateLink($device, $port->refresh(), []));
+        Rrd::partialMock()->expects('tune')->with(Mockery::any(), PortRrd::tuneLimits(100000000))->andReturn(true);
+        $module->poll($os, $store);
+        $this->assertEquals($port->ifSpeed, $port->fresh()->ifSpeed_prev);
+        $this->travel(300)->seconds();
+        $module->poll($os, $store);
     }
 
     public function testUnchangedPortMetadataRequiresOnlyTwoCounterWrites(): void

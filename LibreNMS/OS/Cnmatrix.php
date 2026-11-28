@@ -12,8 +12,8 @@ class Cnmatrix extends Generic
         }
 
         foreach ($this->portTable('ARICENT-CFA-MIB::ifMainDesc') as $index => $values) {
-            if (isset($ports[$index])) {
-                $ports[$index] = $this->mapPortFields($values, ['ifAlias' => 'ifMainDesc']) + $ports[$index];
+            if (isset($ports[$index], $values['ifMainDesc'])) {
+                $ports[$index]['ifAlias'] = $values['ifMainDesc'];
             }
         }
 

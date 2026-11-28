@@ -40,21 +40,13 @@ final readonly class PortMeasurement
             'PortConsumption' => $consumption, 'PortMaxPwrDrawn' => $peak];
     }
 
-    /** Update live link state and return whether a speed increase requires RRD tuning. */
-    public static function updateLink(Device $device, Port $port, array $row): bool
+    public static function updateLink(Device $device, Port $port, array $row): void
     {
         $data = Arr::only($row, ['ifAdminStatus', 'ifOperStatus']);
         if (is_numeric($row['ifLastChange'] ?? null)) {
             $data['ifLastChange'] = $row['ifLastChange'];
         }
-        $tune = false;
         if (empty($row['skipCounters']) && $port->ifSpeed != $port->ifSpeed_prev) {
-            // Discovery records speed changes. Tune at the next sample, when the RRD exists or will be created.
-            if ($port->ifSpeed > $port->ifSpeed_prev) {
-                $setting = $device->getAttrib('ifName_tune:' . $port->ifName)
-                    ?? $device->getAttrib('override_rrdtool_tune') ?? LibrenmsConfig::get('rrdtool_tune');
-                $tune = filter_var($setting, FILTER_VALIDATE_BOOL);
-            }
             $port->ifSpeed_prev = $port->ifSpeed;
         }
         $port->fill($data);
@@ -63,14 +55,14 @@ final readonly class PortMeasurement
                 $port->{$field . '_prev'} = $port->getRawOriginal($field) ?? $data[$field];
             }
         }
-        if ($port->isDirty()) {
-            foreach (array_intersect_key($port->getDirty(), $data) as $field => $value) {
-                Eventlog::log("$field: " . ($port->getRawOriginal($field) ?? 'NULL') . ' -> ' . ($value ?? 'NULL'), $device, 'interface', Severity::Notice, $port->port_id);
-            }
-            $port->save();
+        $changes = $port->getDirty();
+        if (! $changes) {
+            return;
         }
-
-        return $tune;
+        foreach (array_intersect_key($changes, $data) as $field => $value) {
+            Eventlog::log("$field: " . ($port->getRawOriginal($field) ?? 'NULL') . ' -> ' . ($value ?? 'NULL'), $device, 'interface', Severity::Notice, $port->port_id);
+        }
+        $port->save();
     }
 
     /** Build the main and extended counter rows from the last committed sample. */
@@ -107,7 +99,7 @@ final readonly class PortMeasurement
         return [$base, $extended];
     }
 
-    public function store(DataStorageInterface $store, Device $device, Port $port, array $counters, array $row, bool $tune): void
+    public function store(DataStorageInterface $store, Device $device, Port $port, array $counters, array $row): void
     {
         $fields = [];
         foreach (self::COUNTERS as $field) {
@@ -123,15 +115,20 @@ final readonly class PortMeasurement
         }
 
         $name = Rrd::portName($port->port_id);
-        $limits = $tune ? PortRrd::tuneLimits((int) $port->ifSpeed) : [];
-        $path = $tune ? Rrd::name($device->hostname, $name) : '';
-        if ($limits && Rrd::tune($path, $limits)) {
-            $limits = [];
+        $limits = [];
+        if ($port->wasChanged('ifSpeed_prev') && $port->ifSpeed > ($port->getPrevious()['ifSpeed_prev'] ?? 0)) {
+            $setting = $device->getAttrib('ifName_tune:' . $port->ifName)
+                ?? $device->getAttrib('override_rrdtool_tune') ?? LibrenmsConfig::get('rrdtool_tune');
+            $limits = filter_var($setting, FILTER_VALIDATE_BOOL) ? PortRrd::tuneLimits((int) $port->ifSpeed) : [];
+        }
+        $path = $limits ? Rrd::name($device->hostname, $name) : null;
+        if ($path && Rrd::tune($path, $limits)) {
+            $path = null;
         }
         $store->put($device, 'ports', $port->only(['ifName', 'ifAlias', 'ifIndex', 'port_descr_type']) + [
             'rrd_name' => $name, 'rrd_def' => $this->definition,
         ], $fields);
-        if ($limits) {
+        if ($path) { // The first sample may have just created the RRD.
             Rrd::tune($path, $limits);
         }
 

@@ -202,8 +202,8 @@ class Fabos extends OS implements OSDiscovery, TransceiverDiscovery
 
         foreach ($this->portTable('SW-MIB::swFCPortName') as $index => $values) {
             $index = (int) $index + 1073741823;
-            if (isset($ports[$index])) {
-                $ports[$index] = $this->mapPortFields($values, ['ifAlias' => 'swFCPortName']) + $ports[$index];
+            if (isset($ports[$index], $values['swFCPortName'])) {
+                $ports[$index]['ifAlias'] = $values['swFCPortName'];
             }
         }
 

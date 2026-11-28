@@ -85,39 +85,38 @@ class Ports extends LegacyModule
             return;
         }
 
+        $samples = DB::transaction(fn () => $this->recordSamples($device, $ports, $rows, $time));
         $measurement = new PortMeasurement;
-        foreach ($this->recordSamples($device, $ports, $rows, $time) as [$port, $counters, $tune]) {
-            $measurement->store($datastore, $device, $port, $counters, $rows[$port->ifIndex], $tune);
+        foreach ($samples as $index => $counters) {
+            $measurement->store($datastore, $device, $ports[$index], $counters, $rows[$index]);
         }
     }
 
     /** @param Collection<int, Port> $ports */
     private function recordSamples(Device $device, Collection $ports, array $rows, int $time): array
     {
-        return DB::transaction(function () use ($device, $ports, $rows, $time) {
-            $base = $extended = $samples = [];
-            foreach ($ports as $index => $port) {
-                $row = $rows[$index] ?? null;
-                if (! $row || $port->poll_time >= $time) {
-                    continue;
-                }
-                $tune = PortMeasurement::updateLink($device, $port, $row);
-                if (! empty($row['skipCounters'])) {
-                    continue;
-                }
-                [$counters, $statistics] = PortMeasurement::sample($port, $row, $time);
-                $base[] = ['port_id' => $port->port_id] + $counters;
-                $extended[] = ['port_id' => $port->port_id] + $statistics;
-                $samples[] = [$port, $counters + $statistics, $tune];
+        $base = $extended = $samples = [];
+        foreach ($ports as $index => $port) {
+            $row = $rows[$index] ?? null;
+            if (! $row || $port->poll_time >= $time) {
+                continue;
             }
-            foreach (['ports' => $base, 'ports_statistics' => $extended] as $table => $values) {
-                foreach (array_chunk($values, 200) as $chunk) {
-                    DB::table($table)->upsert($chunk, ['port_id']);
-                }
+            PortMeasurement::updateLink($device, $port, $row);
+            if (! empty($row['skipCounters'])) {
+                continue;
             }
+            [$counters, $statistics] = PortMeasurement::sample($port, $row, $time);
+            $base[] = ['port_id' => $port->port_id] + $counters;
+            $extended[] = ['port_id' => $port->port_id] + $statistics;
+            $samples[$index] = $counters + $statistics;
+        }
+        foreach (['ports' => $base, 'ports_statistics' => $extended] as $table => $values) {
+            foreach (array_chunk($values, 200) as $chunk) {
+                DB::table($table)->upsert($chunk, ['port_id']);
+            }
+        }
 
-            return $samples;
-        });
+        return $samples;
     }
 
     private function useNewModule(): bool

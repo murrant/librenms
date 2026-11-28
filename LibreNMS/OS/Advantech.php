@@ -12,8 +12,8 @@ class Advantech extends Generic
         }
 
         foreach ($this->portTable('ADVANTECH-EKI-PRONEER-MIB::description') as $index => $values) {
-            if (isset($ports[$index])) {
-                $ports[$index] = $this->mapPortFields($values, ['ifAlias' => 'description']) + $ports[$index];
+            if (isset($ports[$index], $values['description'])) {
+                $ports[$index]['ifAlias'] = $values['description'];
             }
         }
 

@@ -44,7 +44,7 @@ final readonly class PortInventory
                     continue;
                 }
                 $data = $this->metadata($row);
-                if (! array_filter(Arr::only($data, ['ifName', 'ifDescr', 'ifAlias']), fn ($value) => $value !== null && $value !== '')) {
+                if ($data['ifName'] === '' && $data['ifDescr'] === '' && $data['ifAlias'] === '') {
                     $missing->forget($byIndex->get($index)?->port_id);
                     continue;
                 }
@@ -85,14 +85,13 @@ final readonly class PortInventory
                     $port->ifSpeed_prev = $port->getRawOriginal('ifSpeed') ?? 0;
                 }
                 if ($port->exists) {
-                    foreach (array_intersect_key($port->getDirty(), array_flip(['ifSpeed', 'ifDuplex'])) as $field => $value) {
+                    foreach (Arr::only($port->getDirty(), ['ifSpeed', 'ifDuplex']) as $field => $value) {
                         Eventlog::log("$field: " . ($port->getRawOriginal($field) ?? 'NULL') . " -> $value", $device, 'interface', Severity::Notice, $port->port_id);
                     }
-                }
-                if ($port->deleted) {
-                    $port->deleted = false;
-                }
-                if (! $port->exists) {
+                    if ($port->deleted) {
+                        $port->deleted = false;
+                    }
+                } else {
                     $port->fill(Arr::only($row, ['ifOperStatus', 'ifAdminStatus']));
                     $port->save(); // Custom parsers can request the assigned port ID.
                     $group?->ports()->attach($port->port_id);
@@ -126,14 +125,9 @@ final readonly class PortInventory
     /** @return array<model-property<Port>, mixed> */
     private function metadata(array $row): array
     {
-        $data = [];
-        foreach (['ifName', 'ifAlias', 'ifDescr', 'ifType', 'ifMtu', 'ifPhysAddress', 'ifConnectorPresent',
+        $data = array_intersect_key($row, array_flip(['ifName', 'ifAlias', 'ifDescr', 'ifType', 'ifMtu', 'ifPhysAddress', 'ifConnectorPresent',
             'ifDuplex', 'ifTrunk', 'ifVlan', 'pagpOperationMode', 'pagpPortState', 'pagpPartnerDeviceId', 'pagpPartnerLearnMethod',
-            'pagpPartnerIfIndex', 'pagpPartnerGroupIfIndex', 'pagpPartnerDeviceName', 'pagpEthcOperationMode', 'pagpDeviceId', 'pagpGroupIfIndex'] as $field) {
-            if (array_key_exists($field, $row)) {
-                $data[$field] = $row[$field];
-            }
-        }
+            'pagpPartnerIfIndex', 'pagpPartnerGroupIfIndex', 'pagpPartnerDeviceName', 'pagpEthcOperationMode', 'pagpDeviceId', 'pagpGroupIfIndex']));
         foreach (['ifName', 'ifAlias', 'ifDescr'] as $field) {
             $data[$field] = trim(StringHelpers::inferEncoding($data[$field] ?? '') ?? '');
         }
