@@ -28,31 +28,14 @@ trait IfMib
 
     protected function discoverIfMibRows(array $extraOids): array
     {
-        $identity = ['ifDescr', 'ifName', 'ifAlias', 'ifType', 'ifMtu', 'ifPhysAddress', 'ifConnectorPresent', 'ifSpeed'];
-        if (! $this->hasBrokenIfXEntry()) {
-            $identity[] = 'ifHighSpeed';
-        }
-        if (LibrenmsConfig::getCombined($this->getName(), 'bad_ifoperstatus')) {
-            $identity[] = 'ifOperStatus';
-        }
-        $rows = $this->portTable(array_unique([...$this->ifMibOids($identity), ...$extraOids]), true);
-        if ($rows) {
-            // GETNEXT at each column root finds sparse columns even when the first interface lacks them.
-            $columns = $this->portMetricColumns();
-            $probe = SnmpQuery::device($this->getDevice())->hideMib()->next($this->ifMibOids($columns))->throwIfConnectionError();
-            if ($probe->exitCode === 0 && $probe->values()) {
-                $available = [];
-                foreach ($probe->valuesByIndex() as $row) {
-                    $available += $row;
-                }
-                $supported = implode(',', array_intersect($columns, array_keys($available)));
-                if ($supported !== '' && $supported !== $this->getDevice()->getAttrib('ports_if_mib_columns')) {
-                    $this->getDevice()->setAttrib('ports_if_mib_columns', $supported);
-                }
-            }
-        }
+        $ifX = $this->hasBrokenIfXEntry()
+            ? ['ifName', 'ifAlias', 'ifConnectorPresent', 'ifInMulticastPkts', 'ifOutMulticastPkts', 'ifInBroadcastPkts', 'ifOutBroadcastPkts']
+            : ['ifXTable'];
+        $rows = $this->portTable([...$this->ifMibOids(['ifTable', ...$ifX]), ...$extraOids], true);
+        $available = [];
         $bridgeIndexes = null;
         foreach ($rows as $bridgePort => $row) {
+            $available += $row;
             if (isset($row['dot1qPvid'])) {
                 $bridgeIndexes ??= $this->bridgePortIfIndexes();
                 $index = $bridgeIndexes[$bridgePort] ?? $bridgePort;
@@ -60,6 +43,12 @@ trait IfMib
                     $rows[$index]['ifVlan'] = $row['dot1qPvid'];
                 }
             }
+        }
+        // A counter may only exist on a subset of interfaces.
+        $supported = implode(',', array_intersect($this->portMetricColumns(), array_keys($available)));
+        $device = $this->getDevice();
+        if ($supported !== '' && $supported !== $device->getAttrib('ports_if_mib_columns')) {
+            $device->setAttrib('ports_if_mib_columns', $supported);
         }
 
         return $rows;

@@ -181,22 +181,22 @@ final class PortsTest extends InMemoryDbTestCase
         $store = Mockery::mock(DataStorageInterface::class)->shouldIgnoreMissing();
         $requested = [];
         \Event::listen(\App\Events\SnmpQueryExecuted::class, function ($event) use (&$requested): void {
-            if (in_array($event->method, ['snmpwalk', 'snmpget'], true)) {
-                foreach ($event->oids as $oid) {
-                    $requested[] = preg_replace('/\.\d+$/', '', $oid);
-                }
+            foreach ($event->oids as $oid) {
+                $requested[] = preg_replace('/\.\d+$/', '', $oid);
             }
         });
         $module->discover($os);
         $linkProperties = ['IF-MIB::ifSpeed', 'IF-MIB::ifHighSpeed', 'EtherLike-MIB::dot3StatsDuplexStatus'];
-        $this->assertEmpty(array_diff($linkProperties, $requested));
+        $this->assertContains('IF-MIB::ifTable', $requested);
+        $this->assertContains('IF-MIB::ifXTable', $requested);
+        $this->assertContains('EtherLike-MIB::dot3StatsDuplexStatus', $requested);
         $this->assertNotContains('IF-MIB::ifAdminStatus', $requested);
         $this->assertNotContains('IF-MIB::ifHCInOctets', $requested);
         $this->assertContains('ifHCInOctets', explode(',', $device->getAttrib('ports_if_mib_columns')));
         $requested = [];
         $module->poll($os, $store);
         $this->assertContains('IF-MIB::ifHCInOctets', $requested);
-        foreach (['ifXTable', 'ifName', 'ifDescr', 'ifAlias', 'ifConnectorPresent'] as $field) {
+        foreach (['ifTable', 'ifXTable', 'ifName', 'ifDescr', 'ifAlias', 'ifConnectorPresent'] as $field) {
             $this->assertNotContains("IF-MIB::$field", $requested);
         }
         $this->travel(300)->seconds();
@@ -223,13 +223,16 @@ final class PortsTest extends InMemoryDbTestCase
         $device->setRelation('pollingMethods', collect([new DevicePollingMethod([
             'method_type' => PollingMethodType::Snmp, 'enabled' => true, 'settings' => ['port_association_mode' => 'ifIndex'],
         ])]));
-        $device->setAttrib('ports_if_mib_columns', 'ifOperStatus,ifInOctets,ifHCInOctets');
         foreach ([1, 2] as $index) {
             $device->ports()->create(['ifIndex' => $index, 'ifName' => "eth$index"]);
         }
         $os = Mockery::mock(OS::class)->makePartial()->shouldAllowMockingProtectedMethods();
         $os->allows('getDevice')->andReturn($device);
         $os->allows('getName')->andReturn('generic');
+        $os->expects('portTable')->with(['IF-MIB::ifTable', 'IF-MIB::ifXTable', 'Q-BRIDGE-MIB::dot1qPvid', 'EtherLike-MIB::dot3StatsDuplexStatus'], true)
+            ->andReturn([2 => ['ifOperStatus' => 'up', 'ifInOctets' => '42'], 1 => ['ifHCInOctets' => '0']]);
+        $os->discoverPorts();
+        $this->assertSame('ifOperStatus,ifInOctets,ifHCInOctets', $device->getAttrib('ports_if_mib_columns'));
         $os->expects('portTable')->with(['IF-MIB::ifOperStatus', 'IF-MIB::ifHCInOctets'], true)
             ->andReturn([1 => ['ifOperStatus' => 'up', 'ifHCInOctets' => '0'], 2 => ['ifOperStatus' => 'up']]);
         $os->expects('portTable')->with(['IF-MIB::ifInOctets'], true)->andReturn([1 => ['ifInOctets' => '10'], 2 => ['ifInOctets' => '42']]);

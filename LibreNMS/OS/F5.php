@@ -104,7 +104,7 @@ class F5 extends OS implements OSPolling
         if (version_compare($version, '11.2.0', '<') || version_compare($version, '11.7', '>=')) {
             return $ports;
         }
-        $interfaces = $this->portTable($knownPorts === null ? ['F5-BIGIP-SYSTEM-MIB::sysIfxStatName', 'F5-BIGIP-SYSTEM-MIB::sysIfxStatAlias', 'F5-BIGIP-SYSTEM-MIB::sysIfxStatConnectorPresent', 'F5-BIGIP-SYSTEM-MIB::sysIfxStatHighSpeed'] : 'F5-BIGIP-SYSTEM-MIB::sysIfxStat', true);
+        $interfaces = $this->portTable('F5-BIGIP-SYSTEM-MIB::sysIfxStat', true);
         foreach ($ports as &$port) {
             $name = $port['ifDescr'] ?? '';
             $port = $this->mapPortFields($interfaces[$name] ?? $interfaces['"' . $name . '"'] ?? [], [

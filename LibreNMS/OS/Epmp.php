@@ -623,7 +623,7 @@ class Epmp extends OS implements
 
     protected function discoverIfMibRows(array $extraOids): array
     {
-        $ports = parent::discoverIfMibRows([...$extraOids, 'IF-MIB::ifOperStatus']);
+        $ports = parent::discoverIfMibRows($extraOids);
         $link = \SnmpQuery::get(['CAMBIUM-PMP80211-MIB::cambiumLANModeStatus.0', 'CAMBIUM-PMP80211-MIB::cambiumLANSpeedStatus.0',
             'CAMBIUM-PMP80211-MIB::cambiumLAN2ModeStatus.0', 'CAMBIUM-PMP80211-MIB::cambiumLAN2SpeedStatus.0'])->throwIfConnectionError();
         foreach ($ports as &$port) {

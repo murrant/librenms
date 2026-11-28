@@ -265,7 +265,7 @@ class Tachyon extends OS implements
     protected function collectPortRows(?array $knownPorts, bool $selected): array
     {
         $ports = parent::collectPortRows($knownPorts, $selected);
-        foreach ($this->portTable($knownPorts === null ? ['TACHYON-MIB::wirelessPeerName', 'TACHYON-MIB::wirelessPeerMac', 'TACHYON-MIB::wirelessPeerLinkUptime', 'TACHYON-MIB::wirelessPeerTxRate'] : 'TACHYON-MIB::wirelessPeersTable') as $index => $row) {
+        foreach ($this->portTable('TACHYON-MIB::wirelessPeersTable') as $index => $row) {
             $status = ($row['wirelessPeerLinkUptime'] ?? 0) > 0 ? 'up' : 'down';
             $ports[1000 + (int) filter_var($index, FILTER_SANITIZE_NUMBER_INT)] = $this->mapPortFields($row, [
                 'ifName' => 'wirelessPeerName',
